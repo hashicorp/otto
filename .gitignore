@@ -3,6 +3,7 @@
 bin/
 pkg/
 vendor/
+example.appfile
 website/.vagrant
 website/build
 website/node_modules
