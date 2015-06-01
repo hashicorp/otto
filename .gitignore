@@ -1,0 +1,14 @@
+*.dll
+*.exe
+bin/
+pkg/
+vendor/
+website/.vagrant
+website/build
+website/node_modules
+.vagrant/
+*.backup
+*.log
+*.bak
+*~
+.*.swp
