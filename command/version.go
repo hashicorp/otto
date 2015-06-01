@@ -16,12 +16,12 @@ type VersionCommand struct {
 }
 
 // VersionCheckFunc is the callback called by the Version command to
-// check if there is a new version of Terraform.
+// check if there is a new version of Otto.
 type VersionCheckFunc func() (VersionCheckInfo, error)
 
 // VersionCheckInfo is the return value for the VersionCheckFunc callback
 // and tells the Version command information about the latest version
-// of Terraform.
+// of Otto.
 type VersionCheckInfo struct {
 	Outdated bool
 	Latest   string
@@ -70,5 +70,5 @@ func (c *VersionCommand) Run(args []string) int {
 }
 
 func (c *VersionCommand) Synopsis() string {
-	return "Prints the Terraform version"
+	return "Prints the Otto version"
 }
