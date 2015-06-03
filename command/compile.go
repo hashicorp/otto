@@ -1,7 +1,11 @@
 package command
 
 import (
+	"fmt"
+	"path/filepath"
 	"strings"
+
+	"github.com/hashicorp/otto/appfile"
 )
 
 // CompileCommand is the command that is responsible for "compiling" the
@@ -12,6 +16,45 @@ type CompileCommand struct {
 }
 
 func (c *CompileCommand) Run(args []string) int {
+	fs := c.FlagSet("compile", FlagSetNone)
+	if err := fs.Parse(args); err != nil {
+		return 1
+	}
+
+	args = fs.Args()
+
+	// Get the path to where the Appfile lives
+	path := "."
+	if len(args) >= 1 {
+		path = args[0]
+	}
+
+	// TODO: handle direct paths to appfiles
+	path = filepath.Join(path, DefaultAppfile)
+
+	// Load the appfile
+	app, err := appfile.ParseFile(path)
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error parsing Appfile: %s", err))
+		return 1
+	}
+
+	// Get a core
+	core, err := c.Core(app)
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error loading core: %s", err))
+		return 1
+	}
+
+	// Compile!
+	if err := core.Compile(); err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error compiling: %s", err))
+		return 1
+	}
+
 	return 0
 }
 

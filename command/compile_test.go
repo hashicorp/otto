@@ -10,11 +10,12 @@ func TestCompile(t *testing.T) {
 	ui := new(cli.MockUi)
 	c := &CompileCommand{
 		Meta: Meta{
-			Ui: ui,
+			CoreConfig: testCoreConfig(t),
+			Ui:         ui,
 		},
 	}
 
-	args := []string{}
+	args := []string{fixtureDir("compile-basic")}
 	if code := c.Run(args); code != 0 {
 		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
 	}
