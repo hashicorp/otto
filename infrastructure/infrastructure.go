@@ -10,12 +10,13 @@ type Factory func() (Infrastructure, error)
 // Infrastructure is an interface that must be implemented by each
 // infrastructure type with a method of creating it.
 type Infrastructure interface {
-	Compile(*CompileContext) (*CompileResult, error)
+	Compile(*Context) (*CompileResult, error)
 	Flavors() []string
 }
 
-// CompileContext is the context for compilation.
-type CompileContext struct {
+// Context is the context for operations on infrastructures. Some of
+// the fields in this struct are only available for certain operations.
+type Context struct {
 	// Dir is the directory that the compilation is allowed to write to
 	// for persistant storage of data.
 	Dir string
