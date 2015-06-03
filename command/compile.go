@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -29,8 +30,16 @@ func (c *CompileCommand) Run(args []string) int {
 		path = args[0]
 	}
 
-	// TODO: handle direct paths to appfiles
-	path = filepath.Join(path, DefaultAppfile)
+	// Verify the path is valid
+	fi, err := os.Stat(path)
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error checking Appfile path: %s", err))
+		return 1
+	}
+	if fi.IsDir() {
+		path = filepath.Join(path, DefaultAppfile)
+	}
 
 	// Load the appfile
 	app, err := appfile.ParseFile(path)
