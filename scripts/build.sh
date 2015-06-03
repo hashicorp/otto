@@ -42,8 +42,8 @@ gox \
     -os="!freebsd" \
     -os="!openbsd" \
     -arch="${XC_ARCH}" \
-    -ldflags "-X github.com/hashicorp/vault/cli.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
-    -output "pkg/{{.OS}}_{{.Arch}}/vault" \
+    -ldflags "-X main.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
+    -output "pkg/{{.OS}}_{{.Arch}}/otto" \
     .
 
 # Move all the compiled things to the $GOPATH/bin
