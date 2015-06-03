@@ -33,6 +33,12 @@ func init() {
 	}
 
 	Commands = map[string]cli.CommandFactory{
+		"": func() (cli.Command, error) {
+			return &command.CompileCommand{
+				Meta: meta,
+			}, nil
+		},
+
 		"version": func() (cli.Command, error) {
 			return &command.VersionCommand{
 				Meta:              meta,
