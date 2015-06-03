@@ -6,6 +6,10 @@ import (
 
 // File is the structure of a single Appfile.
 type File struct {
+	// Path is the path to the root file that was loaded. This might be
+	// empty if the appfile was parsed from an io.Reader.
+	Path string
+
 	Application    *Application
 	Project        *Project
 	Infrastructure []*Infrastructure

@@ -63,7 +63,12 @@ func ParseFile(path string) (*File, error) {
 	}
 	defer f.Close()
 
-	return Parse(f)
+	result, err := Parse(f)
+	if result != nil {
+		result.Path = path
+	}
+
+	return result, err
 }
 
 func parseApplication(result *File, obj *hclobj.Object) error {

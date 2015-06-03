@@ -59,10 +59,18 @@ func TestParse(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		actual, err := ParseFile(filepath.Join("./test-fixtures", tc.File))
+		path := filepath.Join("./test-fixtures", tc.File)
+		actual, err := ParseFile(path)
 		if (err != nil) != tc.Err {
 			t.Fatalf("file: %s\n\n%s", tc.File, err)
 			continue
+		}
+
+		if actual != nil {
+			if actual.Path != path {
+				t.Fatalf("file: %s\n\n%s", tc.File, actual.Path)
+			}
+			actual.Path = ""
 		}
 
 		if !reflect.DeepEqual(actual, tc.Result) {
