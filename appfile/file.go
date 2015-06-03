@@ -1,5 +1,9 @@
 package appfile
 
+import (
+	"fmt"
+)
+
 // File is the structure of a single Appfile.
 type File struct {
 	Application    *Application
@@ -16,8 +20,9 @@ type Application struct {
 // Project is the structure of a project that many applications
 // can belong to.
 type Project struct {
-	Name  string
-	Stack *Stack
+	Name           string
+	Infrastructure string
+	Stack          *Stack
 }
 
 // Infrastructure is the structure of defining the infrastructure
@@ -32,4 +37,12 @@ type Infrastructure struct {
 // built on.
 type Stack struct {
 	Name string
+}
+
+//-------------------------------------------------------------------
+// GoStringer
+//-------------------------------------------------------------------
+
+func (v *Project) GoString() string {
+	return fmt.Sprintf("*%#v", *v)
 }

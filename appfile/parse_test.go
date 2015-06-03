@@ -19,7 +19,8 @@ func TestParse(t *testing.T) {
 					Name: "foo",
 				},
 				Project: &Project{
-					Name: "foo",
+					Name:           "foo",
+					Infrastructure: "aws",
 					Stack: &Stack{
 						Name: "bar",
 					},

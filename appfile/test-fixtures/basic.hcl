@@ -4,6 +4,7 @@ application {
 
 project {
     name = "foo"
+    infrastructure = "aws"
 
     stack "bar" {}
 }
