@@ -7,7 +7,7 @@ import (
 
 // These are the environmental variables that determine if we log, and if
 // we log whether or not the log should go to a file.
-const EnvLog = "OTTOLOG"          //Set to True
+const EnvLog = "OTTO_LOG"         //Set to True
 const EnvLogFile = "OTTOLOG_PATH" //Set to a file
 
 // logOutput determines where we should send logs (if anywhere).

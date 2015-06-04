@@ -85,7 +85,7 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 
 	// The output directory for data
 	outputDir := filepath.Join(
-		c.outputDir, "infra-%s", c.appfile.Project.Infrastructure)
+		c.outputDir, fmt.Sprintf("infra-%s", c.appfile.Project.Infrastructure))
 
 	// Build the context
 	return infra, &infrastructure.Context{

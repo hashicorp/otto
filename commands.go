@@ -4,7 +4,11 @@ import (
 	"os"
 	"os/signal"
 
+	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
+
 	"github.com/hashicorp/otto/command"
+	"github.com/hashicorp/otto/infrastructure"
+	"github.com/hashicorp/otto/otto"
 	"github.com/mitchellh/cli"
 )
 
@@ -29,11 +33,16 @@ func init() {
 	}
 
 	meta := command.Meta{
+		CoreConfig: &otto.CoreConfig{
+			Infrastructures: map[string]infrastructure.Factory{
+				"aws": infrastructure.StructFactory(new(infraAws.Infra)),
+			},
+		},
 		Ui: Ui,
 	}
 
 	Commands = map[string]cli.CommandFactory{
-		"": func() (cli.Command, error) {
+		"compile": func() (cli.Command, error) {
 			return &command.CompileCommand{
 				Meta: meta,
 			}, nil

@@ -4,9 +4,6 @@ import (
 	"github.com/hashicorp/otto/appfile"
 )
 
-// Factory is a factory function for creating infrastructures.
-type Factory func() (Infrastructure, error)
-
 // Infrastructure is an interface that must be implemented by each
 // infrastructure type with a method of creating it.
 type Infrastructure interface {
