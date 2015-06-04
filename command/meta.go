@@ -24,13 +24,17 @@ const (
 type FlagSetFlags uint
 
 const (
-	FlagSetNone FlagSetFlags = 0
+	FlagSetNone      FlagSetFlags = 0
+	FlagSetOutputDir FlagSetFlags = iota
 )
 
 // Meta are the meta-options that are available on all or most commands.
 type Meta struct {
 	CoreConfig *otto.CoreConfig
 	Ui         cli.Ui
+
+	// These are fields set by flags
+	flagOutputDir string
 }
 
 // Core returns the core for the given Appfile. The file where the
@@ -38,9 +42,14 @@ type Meta struct {
 // root appfile path will be used as the default output directory
 // for Otto.
 func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
+	outputDir := DefaultOutputDir
+	if m.flagOutputDir != "" {
+		outputDir = m.flagOutputDir
+	}
+
 	config := *m.CoreConfig
 	config.Appfile = f
-	config.OutputDir = filepath.Join(filepath.Dir(f.Path), DefaultOutputDir)
+	config.OutputDir = filepath.Join(filepath.Dir(f.Path), outputDir)
 
 	return otto.NewCore(&config)
 }
@@ -50,6 +59,10 @@ func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
 // using the flags as the second parameter.
 func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	f := flag.NewFlagSet(n, flag.ContinueOnError)
+
+	if fs&FlagSetOutputDir != 0 {
+		f.StringVar(&m.flagOutputDir, "output", "", "")
+	}
 
 	// Create an io.Writer that writes to our Ui properly for errors.
 	// This is kind of a hack, but it does the job. Basically: create
