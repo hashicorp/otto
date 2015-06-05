@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/infrastructure"
+	"github.com/hashicorp/otto/ui"
 )
 
 // Core is the main struct to use to interact with Otto as a library.
@@ -13,6 +14,7 @@ type Core struct {
 	appfile   *appfile.File
 	infras    map[string]infrastructure.Factory
 	outputDir string
+	ui        ui.Ui
 }
 
 // CoreConfig is configuration for creating a new core with NewCore.
@@ -27,6 +29,9 @@ type CoreConfig struct {
 	// Infrastructures is the map of available infrastructures. The
 	// value is a factory that can create the infrastructure impl.
 	Infrastructures map[string]infrastructure.Factory
+
+	// Ui is the Ui that will be used to comunicate with the user.
+	Ui ui.Ui
 }
 
 // NewCore creates a new core.
@@ -38,6 +43,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		appfile:   c.Appfile,
 		infras:    c.Infrastructures,
 		outputDir: c.OutputDir,
+		ui:        c.Ui,
 	}, nil
 }
 
@@ -106,5 +112,6 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 	return infra, &infrastructure.Context{
 		Dir:   outputDir,
 		Infra: config,
+		Ui:    c.ui,
 	}, nil
 }

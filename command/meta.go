@@ -84,6 +84,7 @@ func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
 	config := *m.CoreConfig
 	config.Appfile = f
 	config.OutputDir = filepath.Join(filepath.Dir(f.Path), outputDir)
+	config.Ui = m.OttoUi()
 
 	return otto.NewCore(&config)
 }

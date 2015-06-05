@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/ui"
 )
 
 // Infrastructure is an interface that must be implemented by each
@@ -23,6 +24,9 @@ type Context struct {
 	// The infrastructure configuration itself from the Appfile. This includes
 	// the flavor of the infrastructure we want to launch.
 	Infra *appfile.Infrastructure
+
+	// Ui is the Ui object that can be used to communicate with the user.
+	Ui ui.Ui
 }
 
 // CompileResult is the structure containing compilation result values.
