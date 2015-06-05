@@ -1,4 +1,4 @@
-package otto
+package ui
 
 import (
 	"bufio"
@@ -7,21 +7,21 @@ import (
 	"unicode"
 )
 
-// StyledUi is a wrapper around an existing UI that automatically
+// Styled is a wrapper around an existing UI that automatically
 // adds formatting around the UI text.
-type StyledUi struct {
+type Styled struct {
 	Ui
 }
 
-func (u *StyledUi) Header(msg string) {
+func (u *Styled) Header(msg string) {
 	u.Ui.Header(u.prefix("==> ", msg))
 }
 
-func (u *StyledUi) Message(msg string) {
+func (u *Styled) Message(msg string) {
 	u.Ui.Message(u.prefix("    ", msg))
 }
 
-func (u *StyledUi) prefix(prefix, msg string) string {
+func (u *Styled) prefix(prefix, msg string) string {
 	var buf bytes.Buffer
 
 	scan := bufio.NewScanner(strings.NewReader(msg))

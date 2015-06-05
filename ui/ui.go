@@ -1,4 +1,4 @@
-package otto
+package ui
 
 // Ui is the component of Otto responsible for reading/writing to the
 // console.

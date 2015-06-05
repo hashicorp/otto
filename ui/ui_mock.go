@@ -1,21 +1,21 @@
-package otto
+package ui
 
-// UiMock is an implementation of Ui that stores its data in-memory
+// Mock is an implementation of Ui that stores its data in-memory
 // primarily for testing purposes.
-type UiMock struct {
+type Mock struct {
 	HeaderBuf  []string
 	MessageBuf []string
 	RawBuf     []string
 }
 
-func (u *UiMock) Header(msg string) {
+func (u *Mock) Header(msg string) {
 	u.HeaderBuf = append(u.HeaderBuf, msg)
 }
 
-func (u *UiMock) Message(msg string) {
+func (u *Mock) Message(msg string) {
 	u.MessageBuf = append(u.MessageBuf, msg)
 }
 
-func (u *UiMock) Raw(msg string) {
+func (u *Mock) Raw(msg string) {
 	u.RawBuf = append(u.RawBuf, msg)
 }

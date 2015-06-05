@@ -1,16 +1,16 @@
 package command
 
 import (
-	"github.com/hashicorp/otto/otto"
+	"github.com/hashicorp/otto/ui"
 	"github.com/mitchellh/cli"
 )
 
 // NewUi returns a new otto Ui implementation for use around
 // the given CLI Ui implementation.
-func NewUi(ui cli.Ui) otto.Ui {
-	return &otto.StyledUi{
+func NewUi(raw cli.Ui) ui.Ui {
+	return &ui.Styled{
 		Ui: &cliUi{
-			CliUi: ui,
+			CliUi: raw,
 		},
 	}
 }
