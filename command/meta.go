@@ -3,7 +3,9 @@ package command
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 
 	"github.com/hashicorp/otto/appfile"
@@ -24,8 +26,9 @@ const (
 type FlagSetFlags uint
 
 const (
-	FlagSetNone      FlagSetFlags = 0
-	FlagSetOutputDir FlagSetFlags = iota
+	FlagSetNone    FlagSetFlags = 0
+	FlagSetAppfile FlagSetFlags = iota
+	FlagSetOutputDir
 )
 
 // Meta are the meta-options that are available on all or most commands.
@@ -34,7 +37,37 @@ type Meta struct {
 	Ui         cli.Ui
 
 	// These are fields set by flags
+	flagAppfile   string
 	flagOutputDir string
+}
+
+// Appfile loads the Appfile according to the path given by the
+// -appfile flag.
+func (m *Meta) Appfile() (*appfile.File, error) {
+	// Get the path to where the Appfile lives
+	path := m.flagAppfile
+	if path == "" {
+		path = "."
+	}
+
+	// Verify the path is valid
+	fi, err := os.Stat(path)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"Error checking Appfile path: %s", err)
+	}
+	if fi.IsDir() {
+		path = filepath.Join(path, DefaultAppfile)
+	}
+
+	// Load the appfile
+	app, err := appfile.ParseFile(path)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"Error parsing Appfile: %s", err)
+	}
+
+	return app, nil
 }
 
 // Core returns the core for the given Appfile. The file where the
@@ -59,6 +92,10 @@ func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
 // using the flags as the second parameter.
 func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	f := flag.NewFlagSet(n, flag.ContinueOnError)
+
+	if fs&FlagSetAppfile != 0 {
+		f.StringVar(&m.flagAppfile, "appfile", "", "")
+	}
 
 	if fs&FlagSetOutputDir != 0 {
 		f.StringVar(&m.flagOutputDir, "output", "", "")

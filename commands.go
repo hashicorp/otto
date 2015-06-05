@@ -48,6 +48,12 @@ func init() {
 			}, nil
 		},
 
+		"infra": func() (cli.Command, error) {
+			return &command.InfraCommand{
+				Meta: meta,
+			}, nil
+		},
+
 		"version": func() (cli.Command, error) {
 			return &command.VersionCommand{
 				Meta:              meta,

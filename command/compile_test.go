@@ -18,7 +18,7 @@ func TestCompile(t *testing.T) {
 		},
 	}
 
-	args := []string{fixtureDir("compile-basic")}
+	args := []string{"-appfile", fixtureDir("compile-basic")}
 	if code := c.Run(args); code != 0 {
 		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
 	}
@@ -37,7 +37,7 @@ func TestCompile_pathFile(t *testing.T) {
 		},
 	}
 
-	args := []string{fixtureDir("compile-file/Appfile.other")}
+	args := []string{"-appfile", fixtureDir("compile-file/Appfile.other")}
 	if code := c.Run(args); code != 0 {
 		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
 	}
