@@ -54,6 +54,27 @@ func (c *Core) Compile() error {
 	return err
 }
 
+// Execute executes the given task for this Appfile.
+func (c *Core) Execute(opts *ExecuteOpts) error {
+	switch opts.Task {
+	case ExecuteTaskInfra:
+		return c.executeInfra(opts)
+	default:
+		return fmt.Errorf("unknown task: %s", opts.Task)
+	}
+}
+
+func (c *Core) executeInfra(opts *ExecuteOpts) error {
+	// Get the infra implementation for this
+	infra, infraCtx, err := c.infra()
+	if err != nil {
+		return err
+	}
+
+	// Build the infrastructure compilation context
+	return infra.Execute(infraCtx)
+}
+
 func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, error) {
 	// Get the infrastructure factory
 	f, ok := c.infras[c.appfile.Project.Infrastructure]

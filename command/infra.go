@@ -1,7 +1,10 @@
 package command
 
 import (
+	"fmt"
 	"strings"
+
+	"github.com/hashicorp/otto/otto"
 )
 
 // InfraCommand is the command that sets up the infrastructure for an
@@ -13,6 +16,31 @@ type InfraCommand struct {
 func (c *InfraCommand) Run(args []string) int {
 	fs := c.FlagSet("infra", FlagSetAppfile)
 	if err := fs.Parse(args); err != nil {
+		return 1
+	}
+
+	// Load the appfile
+	app, err := c.Appfile()
+	if err != nil {
+		c.Ui.Error(err.Error())
+		return 1
+	}
+
+	// Get a core
+	core, err := c.Core(app)
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error loading core: %s", err))
+		return 1
+	}
+
+	// Execute the task
+	err = core.Execute(&otto.ExecuteOpts{
+		Task: otto.ExecuteTaskInfra,
+	})
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error occurred: %s", err))
 		return 1
 	}
 

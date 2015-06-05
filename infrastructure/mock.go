@@ -8,6 +8,10 @@ type Mock struct {
 	CompileErr     error
 }
 
+func (m *Mock) Execute(ctx *Context) error {
+	return nil
+}
+
 func (m *Mock) Compile(ctx *Context) (*CompileResult, error) {
 	m.CompileCalled = true
 	m.CompileContext = ctx

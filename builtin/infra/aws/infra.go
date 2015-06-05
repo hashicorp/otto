@@ -15,6 +15,10 @@ import (
 // Infra is an implementation of infrastructure.Infrastructure
 type Infra struct{}
 
+func (i *Infra) Execute(ctx *infrastructure.Context) error {
+	return nil
+}
+
 func (i *Infra) Compile(ctx *infrastructure.Context) (*infrastructure.CompileResult, error) {
 	// Create the output directory
 	if err := os.MkdirAll(ctx.Dir, 0755); err != nil {
