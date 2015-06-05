@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -27,6 +28,11 @@ type Context struct {
 
 	// Ui is the Ui object that can be used to communicate with the user.
 	Ui ui.Ui
+
+	// Directory is the directory service. This is available during
+	// both execution and compilation and can be used to view the
+	// global data prior to doing anything.
+	Directory directory.Backend
 }
 
 // CompileResult is the structure containing compilation result values.

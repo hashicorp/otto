@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"strings"
-	"unicode"
 )
 
 // Styled is a wrapper around an existing UI that automatically
@@ -30,5 +29,7 @@ func (u *Styled) prefix(prefix, msg string) string {
 		buf.WriteString(scan.Text() + "\n")
 	}
 
-	return strings.TrimRightFunc(buf.String(), unicode.IsSpace)
+	str := buf.String()
+	str = str[:len(str)-1]
+	return str
 }
