@@ -13,3 +13,4 @@ website/node_modules
 *.bak
 *~
 .*.swp
+.otto/
