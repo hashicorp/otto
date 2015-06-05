@@ -31,11 +31,15 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 	cmd.Stdout = out_w
 	cmd.Stderr = out_w
 
-	ctx.Ui.Header("Executing Terraform...")
+	ctx.Ui.Header("Executing Terraform to build infrastructure...")
 	ctx.Ui.Message(
 		"Raw Terraform output will begin streaming in below. Otto\n" +
 			"does not create this output. It is mirrored directly from\n" +
-			"Terraform while the infrastructure is being created.\n\n")
+			"Terraform while the infrastructure is being created.\n\n" +
+			"Terraform may ask for input. For infrastructure provider\n" +
+			"credentials, be sure to enter the same credentials\n" +
+			"consistently within the same Otto environment." +
+			"\n\n")
 
 	// Copy output to the UI until we can't
 	go func() {
