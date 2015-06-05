@@ -18,8 +18,8 @@ const (
 	// DefaultAppfile is the default filename for the Appfile
 	DefaultAppfile = "Appfile"
 
-	// DefaultOutputDir is the default directory for data output
-	DefaultOutputDir = "otto"
+	// DefaultOutputDir is the default filename for the output directory
+	DefaultOutputDir = ".otto"
 )
 
 // FlagSetFlags is an enum to define what flags are present in the
@@ -29,7 +29,6 @@ type FlagSetFlags uint
 const (
 	FlagSetNone    FlagSetFlags = 0
 	FlagSetAppfile FlagSetFlags = iota
-	FlagSetOutputDir
 )
 
 // Meta are the meta-options that are available on all or most commands.
@@ -38,8 +37,7 @@ type Meta struct {
 	Ui         cli.Ui
 
 	// These are fields set by flags
-	flagAppfile   string
-	flagOutputDir string
+	flagAppfile string
 }
 
 // Appfile loads the Appfile according to the path given by the
@@ -77,9 +75,6 @@ func (m *Meta) Appfile() (*appfile.File, error) {
 // for Otto.
 func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
 	outputDir := DefaultOutputDir
-	if m.flagOutputDir != "" {
-		outputDir = m.flagOutputDir
-	}
 
 	config := *m.CoreConfig
 	config.Appfile = f
@@ -97,10 +92,6 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 
 	if fs&FlagSetAppfile != 0 {
 		f.StringVar(&m.flagAppfile, "appfile", "", "")
-	}
-
-	if fs&FlagSetOutputDir != 0 {
-		f.StringVar(&m.flagOutputDir, "output", "", "")
 	}
 
 	// Create an io.Writer that writes to our Ui properly for errors.

@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/otto/infrastructure"
-	"github.com/mitchellh/iochan"
 )
 
 //go:generate go-bindata -pkg=aws -nomemcopy ./data/...
@@ -28,6 +27,7 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 		"apply",
 		"-state-out", statePath)
 	cmd.Dir = ctx.Dir
+	cmd.Stdin = os.Stdin
 	cmd.Stdout = out_w
 	cmd.Stderr = out_w
 
@@ -37,15 +37,30 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 			"does not create this output. It is mirrored directly from\n" +
 			"Terraform while the infrastructure is being created.\n\n")
 
-	// Start the Terraform command
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf(
-			"Error starting Terraform: %s", err)
-	}
+	// Copy output to the UI until we can't
+	go func() {
+		defer out_w.Close()
+		var buf [1024]byte
+		for {
+			n, err := out_r.Read(buf[:])
+			if n > 0 {
+				ctx.Ui.Raw(string(buf[:n]))
+			}
 
-	// Execute and copy output
-	for line := range iochan.DelimReader(out_r, '\n') {
-		ctx.Ui.Raw(line)
+			// We just break on any error. io.EOF is not an error and
+			// is our true exit case, but any other error we don't really
+			// handle here. It probably means something went wrong
+			// somewhere else anyways.
+			if err != nil {
+				break
+			}
+		}
+	}()
+
+	// Start the Terraform command
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf(
+			"Error running Terraform: %s", err)
 	}
 
 	return nil

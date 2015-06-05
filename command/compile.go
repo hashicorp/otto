@@ -13,7 +13,7 @@ type CompileCommand struct {
 }
 
 func (c *CompileCommand) Run(args []string) int {
-	fs := c.FlagSet("compile", FlagSetAppfile|FlagSetOutputDir)
+	fs := c.FlagSet("compile", FlagSetAppfile)
 	if err := fs.Parse(args); err != nil {
 		return 1
 	}

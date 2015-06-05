@@ -1,6 +1,8 @@
 package command
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/otto/ui"
 	"github.com/mitchellh/cli"
 )
@@ -31,5 +33,5 @@ func (u *cliUi) Message(msg string) {
 }
 
 func (u *cliUi) Raw(msg string) {
-	u.CliUi.Output(msg)
+	fmt.Print(msg)
 }
