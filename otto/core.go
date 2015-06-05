@@ -85,13 +85,7 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 	}
 
 	// Get the infrastructure configuration
-	var config *appfile.Infrastructure
-	for _, i := range c.appfile.Infrastructure {
-		if i.Name == c.appfile.Project.Infrastructure {
-			config = i
-			break
-		}
-	}
+	config := c.appfile.ActiveInfrastructure()
 	if config == nil {
 		return nil, nil, fmt.Errorf(
 			"infrastructure not found in appfile: %s",
