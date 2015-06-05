@@ -63,6 +63,10 @@ func (f *File) ActiveInfrastructure() *Infrastructure {
 // GoStringer
 //-------------------------------------------------------------------
 
+func (v *Infrastructure) GoString() string {
+	return fmt.Sprintf("*%#v", *v)
+}
+
 func (v *Project) GoString() string {
 	return fmt.Sprintf("*%#v", *v)
 }

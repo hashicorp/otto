@@ -116,3 +116,8 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 
 	return f
 }
+
+// OttoUi returns the otto.Ui object.
+func (m *Meta) OttoUi() otto.Ui {
+	return NewUi(m.Ui)
+}
