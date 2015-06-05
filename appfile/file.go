@@ -44,6 +44,22 @@ type Stack struct {
 }
 
 //-------------------------------------------------------------------
+// Helper Methods
+//-------------------------------------------------------------------
+
+// ActiveInfrastructure returns the Infrastructure that is being
+// used for this Appfile.
+func (f *File) ActiveInfrastructure() *Infrastructure {
+	for _, i := range f.Infrastructure {
+		if i.Name == f.Project.Infrastructure {
+			return i
+		}
+	}
+
+	return nil
+}
+
+//-------------------------------------------------------------------
 // GoStringer
 //-------------------------------------------------------------------
 
