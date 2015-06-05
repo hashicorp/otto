@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/otto/infrastructure"
+	"github.com/hashicorp/otto/ui"
 )
 
 // TestCoreConfig returns a CoreConfig that can be used for testing.
@@ -14,6 +15,7 @@ func TestCoreConfig(t *testing.T) *CoreConfig {
 				return new(infrastructure.Mock), nil
 			},
 		},
+		Ui: new(ui.Mock),
 	}
 }
 
