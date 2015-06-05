@@ -18,7 +18,13 @@ func main() {
 }
 
 func realMain() int {
+	// Set a custom panicwrap cookie key and value. Since we're executing
+	// other panicwrap executables, the default cookie key/value cause
+	// weird errors if we don't change them.
 	var wrapConfig panicwrap.WrapConfig
+	wrapConfig.CookieKey = "OTTO_PANICWRAP_COOKIE"
+	wrapConfig.CookieValue = fmt.Sprintf(
+		"otto-%s-%s-%s", Version, VersionPrerelease, GitCommit)
 
 	if !panicwrap.Wrapped(&wrapConfig) {
 		// Determine where logs should go in general (requested by the user)
