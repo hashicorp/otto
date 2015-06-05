@@ -60,7 +60,7 @@ func (c *CompileCommand) Run(args []string) int {
 			"deploy this application, build the supporting infastructure, and\n" +
 			"more. See the help for more information.\n\n" +
 			"Supporting files to enable Otto to manage your application from\n" +
-			"development to deployment have been placed in the output directory.\n " +
+			"development to deployment have been placed in the output directory.\n" +
 			"These files can be manually inspected to determine what Otto will do."))
 
 	return 0
