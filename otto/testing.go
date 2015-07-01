@@ -3,6 +3,7 @@ package otto
 import (
 	"testing"
 
+	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 )
@@ -28,6 +29,20 @@ func TestInfra(t *testing.T, n string, c *CoreConfig) *infrastructure.Mock {
 
 	result := new(infrastructure.Mock)
 	c.Infrastructures[n] = func() (infrastructure.Infrastructure, error) {
+		return result, nil
+	}
+
+	return result
+}
+
+// TestApp adds a mock app with the given tuple to the core config.
+func TestApp(t *testing.T, tuple app.Tuple, c *CoreConfig) *app.Mock {
+	if c.Apps == nil {
+		c.Apps = make(map[app.Tuple]app.Factory)
+	}
+
+	result := new(app.Mock)
+	c.Apps[tuple] = func() (app.App, error) {
 		return result, nil
 	}
 
