@@ -87,6 +87,42 @@ func (c *Core) executeInfra(opts *ExecuteOpts) error {
 	return infra.Execute(infraCtx)
 }
 
+func (c *Core) app() (app.App, *app.Context, error) {
+	// We need the configuration for the active infrastructure
+	// so that we can build the tuple below
+	config := c.appfile.ActiveInfrastructure()
+	if config == nil {
+		return nil, nil, fmt.Errorf(
+			"infrastructure not found in appfile: %s",
+			c.appfile.Project.Infrastructure)
+	}
+
+	// The tuple we're looking for is the application type, the
+	// infrastructure type, and the infrastructure flavor. Build that
+	// tuple.
+	tuple := app.Tuple{
+		App:         c.appfile.Application.Type,
+		Infra:       c.appfile.Project.Infrastructure,
+		InfraFlavor: config.Flavor,
+	}
+
+	// Look for the app impl. factory
+	f, ok := c.apps[tuple]
+	if !ok {
+		return nil, nil, fmt.Errorf(
+			"app implementation for tuple not found: %s", tuple)
+	}
+
+	// Start the impl.
+	app, err := f()
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"app failed to start properly: %s", err)
+	}
+
+	return app, nil, nil
+}
+
 func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, error) {
 	// Get the infrastructure factory
 	f, ok := c.infras[c.appfile.Project.Infrastructure]
