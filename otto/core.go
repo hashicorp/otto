@@ -114,13 +114,19 @@ func (c *Core) app() (app.App, *app.Context, error) {
 	}
 
 	// Start the impl.
-	app, err := f()
+	result, err := f()
 	if err != nil {
 		return nil, nil, fmt.Errorf(
 			"app failed to start properly: %s", err)
 	}
 
-	return app, nil, nil
+	// The output directory for data
+	outputDir := filepath.Join(c.outputDir, "app")
+
+	return result, &app.Context{
+		Dir:         outputDir,
+		Application: c.appfile.Application,
+	}, nil
 }
 
 func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, error) {
