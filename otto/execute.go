@@ -14,6 +14,11 @@ type ExecuteOpts struct {
 	// Task is the task to execute
 	Task ExecuteTask
 
+	// Action is a sub-action that a task can take. For example:
+	// infrastructures accept "destroy", development environments
+	// accept "reload", etc.
+	Action string
+
 	// Args are additional arguments to the task
 	Args []string
 }
