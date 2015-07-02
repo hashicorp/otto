@@ -21,6 +21,7 @@ func (t Tuple) String() string {
 // sorting tuples. See the tests in tuple_test.go to see the sorting order.
 type TupleSlice []Tuple
 
+// sort.Interface impl.
 func (s TupleSlice) Len() int      { return len(s) }
 func (s TupleSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s TupleSlice) Less(i, j int) bool {
@@ -38,3 +39,18 @@ func (s TupleSlice) Less(i, j int) bool {
 
 	return false
 }
+
+// Map turns a TupleSlice into a map where all the tuples in the slice
+// are mapped to a single factory function.
+func (s TupleSlice) Map(f Factory) TupleMap {
+	m := make(TupleMap, len(s))
+	for _, t := range s {
+		m[t] = f
+	}
+
+	return m
+}
+
+// TupleMap is an alias of map[Tuple]Factory that adds additional helper
+// methods on top to help work with app tuples.
+type TupleMap map[Tuple]Factory

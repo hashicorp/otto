@@ -39,7 +39,10 @@ func (c *CompileCommand) Run(args []string) int {
 	// Before the compilation, output to the user what is going on
 	ui := c.OttoUi()
 	ui.Header("Compiling...")
-	ui.Message(fmt.Sprintf("Application:    %s", app.Application.Name))
+	ui.Message(fmt.Sprintf(
+		"Application:    %s (%s)",
+		app.Application.Name,
+		app.Application.Type))
 	ui.Message(fmt.Sprintf("Project:        %s", app.Project.Name))
 	ui.Message(fmt.Sprintf(
 		"Infrastructure: %s (%s)",
