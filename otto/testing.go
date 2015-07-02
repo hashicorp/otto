@@ -10,14 +10,15 @@ import (
 
 // TestCoreConfig returns a CoreConfig that can be used for testing.
 func TestCoreConfig(t *testing.T) *CoreConfig {
-	return &CoreConfig{
-		Infrastructures: map[string]infrastructure.Factory{
-			"test": func() (infrastructure.Infrastructure, error) {
-				return new(infrastructure.Mock), nil
-			},
-		},
+	config := &CoreConfig{
 		Ui: new(ui.Mock),
 	}
+
+	// Add some default mock implementations. These can be overwritten easily
+	TestInfra(t, "test", config)
+	TestApp(t, app.Tuple{"test", "test", "test"}, config)
+
+	return config
 }
 
 // TestInfra adds a mock infrastructure with the given name to the

@@ -61,9 +61,21 @@ func (c *Core) Compile() error {
 		return err
 	}
 
-	// Build the infrastructure compilation context
-	_, err = infra.Compile(infraCtx)
-	return err
+	// Get the application implementation for this
+	app, appCtx, err := c.app()
+	if err != nil {
+		return err
+	}
+
+	// Compile!
+	if _, err := infra.Compile(infraCtx); err != nil {
+		return err
+	}
+	if _, err := app.Compile(appCtx); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Execute executes the given task for this Appfile.

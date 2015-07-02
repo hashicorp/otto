@@ -1,9 +1,12 @@
 application {
     name = "test"
+    type = "test"
 }
 
 project {
     infrastructure = "test"
 }
 
-infrastructure "test" {}
+infrastructure "test" {
+    flavor = "test"
+}

@@ -3,6 +3,7 @@ package command
 import (
 	"testing"
 
+	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/otto"
 	"github.com/mitchellh/cli"
 )
@@ -10,6 +11,7 @@ import (
 func TestCompile(t *testing.T) {
 	core := otto.TestCoreConfig(t)
 	infra := otto.TestInfra(t, "test", core)
+	appImpl := otto.TestApp(t, app.Tuple{"test", "test", "test"}, core)
 	ui := new(cli.MockUi)
 	c := &CompileCommand{
 		Meta: Meta{
@@ -24,6 +26,9 @@ func TestCompile(t *testing.T) {
 	}
 
 	if !infra.CompileCalled {
+		t.Fatal("Compile should be called")
+	}
+	if !appImpl.CompileCalled {
 		t.Fatal("Compile should be called")
 	}
 }

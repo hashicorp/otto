@@ -1,5 +1,9 @@
 package app
 
+import (
+	"fmt"
+)
+
 // Tuple is the tupled used for looking up the App implementation
 // for an Appfile. This struct is usually used in its non-pointer form, to be
 // a key for maps.
@@ -7,6 +11,10 @@ type Tuple struct {
 	App         string // App is the app type, i.e. "go"
 	Infra       string // Infra is the infra type, i.e. "aws"
 	InfraFlavor string // InfraFlavor is the flavor, i.e. "vpc-public-private"
+}
+
+func (t Tuple) String() string {
+	return fmt.Sprintf("(%q, %q, %q)", t.App, t.Infra, t.InfraFlavor)
 }
 
 // TupleSlice is an alias of []Tuple that implements sort.Interface for
