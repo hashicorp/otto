@@ -137,6 +137,7 @@ func (c *Core) app() (app.App, *app.Context, error) {
 
 	return result, &app.Context{
 		Dir:         outputDir,
+		Tuple:       tuple,
 		Application: c.appfile.Application,
 	}, nil
 }

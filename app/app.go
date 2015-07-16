@@ -34,6 +34,11 @@ type Context struct {
 	// be stored in the directory service.
 	Dir string
 
+	// Tuple is the Tuple that identifies this application. This can be
+	// used so that an implementatin of App can work with multiple tuple
+	// types.
+	Tuple Tuple
+
 	// Application is the application configuration itself from the appfile.
 	Application *appfile.Application
 }
