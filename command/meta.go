@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/otto"
 	"github.com/hashicorp/otto/ui"
 	"github.com/mitchellh/cli"
@@ -20,6 +21,10 @@ const (
 
 	// DefaultOutputDir is the default filename for the output directory
 	DefaultOutputDir = ".otto"
+
+	// DefaultDataDir is the default directory for the directory
+	// data if a directory in the Appfile isn't specified.
+	DefaultDataDir = "otto-data"
 )
 
 // FlagSetFlags is an enum to define what flags are present in the
@@ -75,13 +80,27 @@ func (m *Meta) Appfile() (*appfile.File, error) {
 // for Otto.
 func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
 	outputDir := DefaultOutputDir
+	dir, err := m.Directory(f)
+	if err != nil {
+		return nil, err
+	}
 
 	config := *m.CoreConfig
 	config.Appfile = f
+	config.Directory = dir
 	config.OutputDir = filepath.Join(filepath.Dir(f.Path), outputDir)
 	config.Ui = m.OttoUi()
 
 	return otto.NewCore(&config)
+}
+
+// Directory returns the Otto directory backend for the given
+// Appfile. If no directory backend is specified, a local folder
+// will be used.
+func (m *Meta) Directory(f *appfile.File) (directory.Backend, error) {
+	// TODO: Appfile can't specify directory configuration
+
+	return &directory.FolderBackend{Dir: DefaultDataDir}, nil
 }
 
 // FlagSet returns a FlagSet with the common flags that every

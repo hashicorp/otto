@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 )
@@ -14,6 +15,7 @@ import (
 type Core struct {
 	appfile   *appfile.File
 	apps      map[app.Tuple]app.Factory
+	dir       directory.Backend
 	infras    map[string]infrastructure.Factory
 	outputDir string
 	ui        ui.Ui
@@ -27,6 +29,9 @@ type CoreConfig struct {
 
 	// Appfile is the appfile that this core will be using for configuration.
 	Appfile *appfile.File
+
+	// Directory is the directory where data is stored about this Appfile.
+	Directory directory.Backend
 
 	// Apps is the map of available app implementations.
 	Apps map[app.Tuple]app.Factory
@@ -47,6 +52,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 	return &Core{
 		appfile:   c.Appfile,
 		apps:      c.Apps,
+		dir:       c.Directory,
 		infras:    c.Infrastructures,
 		outputDir: c.OutputDir,
 		ui:        c.Ui,
