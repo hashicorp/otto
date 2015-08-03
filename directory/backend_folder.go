@@ -1,6 +1,7 @@
 package directory
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -55,8 +56,58 @@ func (b *FolderBackend) PutBlob(k string, d *BlobData) error {
 	return err
 }
 
+func (b *FolderBackend) GetInfra(k string) (*Infra, error) {
+	var infra Infra
+	ok, err := b.getData(b.infraPath(k), &infra)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, nil
+	}
+
+	return &infra, nil
+}
+
+func (b *FolderBackend) PutInfra(k string, infra *Infra) error {
+	return b.putData(b.infraPath(k), infra)
+}
+
 func (b *FolderBackend) blobPath(k string) string {
 	return filepath.Join(b.Dir, "blob", k)
+}
+
+func (b *FolderBackend) infraPath(k string) string {
+	return filepath.Join(b.Dir, "infra", k)
+}
+
+func (b *FolderBackend) getData(path string, d interface{}) (bool, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, err
+	}
+	defer f.Close()
+
+	dec := json.NewDecoder(f)
+	return true, dec.Decode(d)
+}
+
+func (b *FolderBackend) putData(path string, d interface{}) error {
+	if err := b.ensurePath(filepath.Dir(path)); err != nil {
+		return err
+	}
+
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return json.NewEncoder(f).Encode(d)
 }
 
 func (b *FolderBackend) ensurePath(path string) error {

@@ -17,6 +17,11 @@ type Backend interface {
 	// ListBlob lists the binary data stored.
 	PutBlob(string, *BlobData) error
 	GetBlob(string) (*BlobData, error)
+
+	// PutInfra and GetInfra are the functions used to store and retrieve
+	// data about infrastructures.
+	PutInfra(string, *Infra) error
+	GetInfra(string) (*Infra, error)
 }
 
 // BlobData is the metadata and data associated with stored binary
