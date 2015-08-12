@@ -1,6 +1,7 @@
 package directory
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"os"
@@ -107,7 +108,16 @@ func (b *FolderBackend) putData(path string, d interface{}) error {
 	}
 	defer f.Close()
 
-	return json.NewEncoder(f).Encode(d)
+	// Because this data is meant to be debuggable, let's output
+	// it in human-readable format.
+	data, err := json.MarshalIndent(d, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	// Copy the data directly into the file
+	_, err = io.Copy(f, bytes.NewReader(data))
+	return err
 }
 
 func (b *FolderBackend) ensurePath(path string) error {
