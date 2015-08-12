@@ -19,7 +19,13 @@ import (
 type Infra struct{}
 
 func (i *Infra) Execute(ctx *infrastructure.Context) error {
-	statePath := filepath.Join(ctx.Dir, "terraform.tfstate.new")
+	statePath, err := filepath.Abs(filepath.Join(ctx.Dir, "terraform.tfstate.new"))
+	if err != nil {
+		return fmt.Errorf(
+			"Error building state output path: %s\n\n"+
+				"This is an internal error that should really never happen.\n"+
+				"No infrastructure was created. Please report this as a bug.", err)
+	}
 
 	// Build the command to execute
 	out_r, out_w := io.Pipe()
@@ -66,7 +72,7 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 	infra.State = directory.InfraStateReady
 
 	// Start the Terraform command
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		err = fmt.Errorf("Error running Terraform: %s", err)
 		infra.State = directory.InfraStatePartial
