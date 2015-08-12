@@ -19,6 +19,18 @@ import (
 type Infra struct{}
 
 func (i *Infra) Execute(ctx *infrastructure.Context) error {
+	dirId := directory.InfraId(ctx.Infra)
+	dirIdState := dirId + "/state"
+
+	// Build the paths for the state files
+	stateOldPath, err := filepath.Abs(filepath.Join(ctx.Dir, "terraform.tfstate"))
+	if err != nil {
+		return fmt.Errorf(
+			"Error building state output path: %s\n\n"+
+				"This is an internal error that should really never happen.\n"+
+				"No infrastructure was created. Please report this as a bug.", err)
+	}
+
 	statePath, err := filepath.Abs(filepath.Join(ctx.Dir, "terraform.tfstate.new"))
 	if err != nil {
 		return fmt.Errorf(
@@ -27,11 +39,36 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 				"No infrastructure was created. Please report this as a bug.", err)
 	}
 
+	// Load the old state if it exists and put it into a file.
+	ctx.Ui.Header("Querying infrastructure data from app directory...")
+	data, err := ctx.Directory.GetBlob(dirIdState)
+	if err != nil {
+		return fmt.Errorf(
+			"Error querying infrastructure state from app directory: %s\n\n"+
+				"Otto will not continue since it can't safely know whether the\n"+
+				"infrastructure exists or not and what state it is in.", err)
+	}
+	if data != nil {
+		f, err := os.Create(stateOldPath)
+		if err != nil {
+			data.Close()
+			return err
+		}
+
+		_, err = io.Copy(f, data.Data)
+		data.Close()
+		f.Close()
+		if err != nil {
+			return err
+		}
+	}
+
 	// Build the command to execute
 	out_r, out_w := io.Pipe()
 	cmd := exec.Command(
 		"terraform",
 		"apply",
+		"-state", stateOldPath,
 		"-state-out", statePath)
 	cmd.Dir = ctx.Dir
 	cmd.Stdin = os.Stdin
@@ -78,6 +115,33 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 		infra.State = directory.InfraStatePartial
 	}
 
+	ctx.Ui.Header("Terraform execution complete. Saving results...")
+
+	// Save the state file contents if we have it
+	if f, ferr := os.Open(statePath); ferr == nil {
+		// Store the state
+		derr := ctx.Directory.PutBlob(dirIdState, &directory.BlobData{
+			Data: f,
+		})
+
+		// Always close the file
+		f.Close()
+
+		// If we couldn't save the state, then note the error. This
+		// is a really bad error since it is currently unrecoverable.
+		if derr != nil {
+			err = fmt.Errorf(
+				"Failed to save Terraform state: %s\n\n"+
+					"This means that Otto was unable to store the state of your infrastructure.\n"+
+					"At this time, Otto doesn't support gracefully recovering from this\n"+
+					"scenario. The state should be in the path below. Please ask the\n"+
+					"community for assistance.\n\n"+
+					"%s",
+				err, statePath)
+			infra.State = directory.InfraStatePartial
+		}
+	}
+
 	// Read the outputs if everything is looking good so far
 	if err == nil {
 		infra.Outputs, err = terraform.Outputs(statePath)
@@ -88,7 +152,6 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 	}
 
 	// Save the infrastructure information
-	ctx.Ui.Header("Terraform execution complete. Saving results...")
 	if err := ctx.Directory.PutInfra("TODO: ID", &infra); err != nil {
 		return fmt.Errorf(
 			"Error storing infrastructure data: %s\n\n"+

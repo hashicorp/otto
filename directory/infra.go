@@ -1,5 +1,9 @@
 package directory
 
+import (
+	"github.com/hashicorp/otto/appfile"
+)
+
 // InfraState is used to track the state of an infrastructure.
 //
 // This is required because the state of an infrastructure isn't binary.
@@ -26,4 +30,13 @@ type Infra struct {
 	// type. Please refer to docs of a specific infra to learn more about
 	// what values are here.
 	Outputs map[string]string `json:"outputs"`
+}
+
+// InfraId generates the ID to use to reference an infrastructure in
+// the directory. This is guaranteed to be a unique and consistent ID
+// for the given inputs and should be used by multiple plugins (infra,
+// apps, etc.) to generate a consistent ID for querying data.
+func InfraId(infra *appfile.Infrastructure) string {
+	// TODO: Make a more unique ID.
+	return infra.Name
 }
