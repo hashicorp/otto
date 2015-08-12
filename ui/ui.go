@@ -2,6 +2,13 @@ package ui
 
 // Ui is the component of Otto responsible for reading/writing to the
 // console.
+//
+// All Ui implementations MUST expect colorstring[1] style inputs. If
+// the output interface doesn't support colors, these must be stripped.
+// The StripColors helper in this package can be used to do this. For
+// terminals, the Colorize helper in this package can be used.
+//
+// [1]: github.com/mitchellh/colorstring
 type Ui interface {
 	// Header, Message, and Raw are all methods for outputting messages
 	// to the Ui, all with different styles. Header and Message should

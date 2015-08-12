@@ -25,11 +25,11 @@ type cliUi struct {
 }
 
 func (u *cliUi) Header(msg string) {
-	u.CliUi.Output(msg)
+	u.CliUi.Output(ui.Colorize(msg))
 }
 
 func (u *cliUi) Message(msg string) {
-	u.CliUi.Output(msg)
+	u.CliUi.Output(ui.Colorize(msg))
 }
 
 func (u *cliUi) Raw(msg string) {

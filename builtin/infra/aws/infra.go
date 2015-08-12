@@ -88,6 +88,7 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 	}
 
 	// Save the infrastructure information
+	ctx.Ui.Header("Terraform execution complete. Saving results...")
 	if err := ctx.Directory.PutInfra("TODO: ID", &infra); err != nil {
 		return fmt.Errorf(
 			"Error storing infrastructure data: %s\n\n"+
@@ -109,6 +110,12 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 			"please see the error message and consult the community for help.",
 			err)
 	}
+
+	// Output something to the user so they know what is going on.
+	ctx.Ui.Header("[green]Infrastructure successfully created!")
+	ctx.Ui.Message(
+		"[green]The infrastructure necessary to deploy this application\n" +
+			"is now available. You can now deploy using `otto deploy`.")
 
 	return nil
 }
