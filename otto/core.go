@@ -177,8 +177,9 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 
 	// Build the context
 	return infra, &infrastructure.Context{
-		Dir:   outputDir,
-		Infra: config,
-		Ui:    c.ui,
+		Dir:       outputDir,
+		Infra:     config,
+		Ui:        c.ui,
+		Directory: c.dir,
 	}, nil
 }
