@@ -7,7 +7,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
+	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/infrastructure"
 )
 
@@ -60,10 +62,46 @@ func (i *Infra) Execute(ctx *infrastructure.Context) error {
 		}
 	}()
 
+	var infra directory.Infra
+	infra.State = directory.InfraStateReady
+
 	// Start the Terraform command
-	if err := cmd.Run(); err != nil {
+	err := cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("Error running Terraform: %s", err)
+		infra.State = directory.InfraStatePartial
+	}
+
+	// Read the outputs if everything is looking good so far
+	if err == nil {
+		infra.Outputs, err = terraform.Outputs(statePath)
+		if err != nil {
+			err = fmt.Errorf("Error reading Terraform outputs: %s", err)
+			infra.State = directory.InfraStatePartial
+		}
+	}
+
+	// Save the infrastructure information
+	if err := ctx.Directory.PutInfra("TODO: ID", &infra); err != nil {
 		return fmt.Errorf(
-			"Error running Terraform: %s", err)
+			"Error storing infrastructure data: %s\n\n"+
+				"This means that Otto won't be able to know that your infrastructure\n"+
+				"was successfully created. Otto tries a few times to save the\n"+
+				"infrastructure. At this point in time, Otto doesn't support gracefully\n"+
+				"recovering from this error. Your infrastructure is now orphaned from\n"+
+				"Otto's management. Please reference the community for help.\n\n"+
+				"A future version of Otto will resolve this.",
+			err)
+	}
+
+	// If there was an error during the process, then return that.
+	if err != nil {
+		return fmt.Errorf("Error reading Terraform outputs: %s\n\n"+
+			"In this case, Otto is unable to consider the infrastructure ready.\n"+
+			"Otto won't lose your infrastructure information. You may just need\n"+
+			"to run `otto infra` again and it may work. If this problem persists,\n"+
+			"please see the error message and consult the community for help.",
+			err)
 	}
 
 	return nil
