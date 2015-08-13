@@ -19,6 +19,13 @@ func (c *InfraCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Get the remaining args to determine if we have an action.
+	var action string
+	args = fs.Args()
+	if len(args) > 0 {
+		action = args[0]
+	}
+
 	// Load the appfile
 	app, err := c.Appfile()
 	if err != nil {
@@ -36,7 +43,8 @@ func (c *InfraCommand) Run(args []string) int {
 
 	// Execute the task
 	err = core.Execute(&otto.ExecuteOpts{
-		Task: otto.ExecuteTaskInfra,
+		Task:   otto.ExecuteTaskInfra,
+		Action: action,
 	})
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf(

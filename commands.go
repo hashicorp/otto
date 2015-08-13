@@ -38,7 +38,7 @@ func init() {
 		CoreConfig: &otto.CoreConfig{
 			Apps: appGo.Tuples.Map(app.StructFactory(new(appGo.App))),
 			Infrastructures: map[string]infrastructure.Factory{
-				"aws": infrastructure.StructFactory(new(infraAws.Infra)),
+				"aws": infraAws.Infra,
 			},
 		},
 		Ui: Ui,

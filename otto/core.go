@@ -101,6 +101,10 @@ func (c *Core) executeInfra(opts *ExecuteOpts) error {
 		return err
 	}
 
+	// Set the action and action args
+	infraCtx.Action = opts.Action
+	infraCtx.ActionArgs = opts.Args
+
 	// Build the infrastructure compilation context
 	return infra.Execute(infraCtx)
 }
