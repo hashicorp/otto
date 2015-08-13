@@ -25,3 +25,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 
 	return nil, nil
 }
+
+func (a *App) Dev(ctx *app.Context) error {
+	return nil
+}

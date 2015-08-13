@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/otto/helper/flag"
 	"github.com/hashicorp/otto/otto"
 )
 
@@ -15,15 +16,16 @@ type InfraCommand struct {
 
 func (c *InfraCommand) Run(args []string) int {
 	fs := c.FlagSet("infra", FlagSetAppfile)
+	args, execArgs, posArgs := flag.FilterArgs(fs, args)
 	if err := fs.Parse(args); err != nil {
 		return 1
 	}
 
 	// Get the remaining args to determine if we have an action.
 	var action string
-	args = fs.Args()
-	if len(args) > 0 {
-		action = args[0]
+	if len(posArgs) > 0 {
+		action = posArgs[0]
+		execArgs = append(execArgs, posArgs[1:]...)
 	}
 
 	// Load the appfile
@@ -45,6 +47,7 @@ func (c *InfraCommand) Run(args []string) int {
 	err = core.Execute(&otto.ExecuteOpts{
 		Task:   otto.ExecuteTaskInfra,
 		Action: action,
+		Args:   execArgs,
 	})
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf(

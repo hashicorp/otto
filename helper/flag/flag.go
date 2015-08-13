@@ -9,7 +9,7 @@ import (
 // included args as well as a slice that has only the excluded args.
 // The final returned slice is the positional arguments.
 func FilterArgs(fs *flag.FlagSet, args []string) ([]string, []string, []string) {
-	// Optimistically make bothy the length of the arguments. There
+	// Optimistically make all the length of the arguments. There
 	// should never be so many arguments that this is too ineffecient.
 	inc := make([]string, 0, len(args))
 	exc := make([]string, 0, len(args))
