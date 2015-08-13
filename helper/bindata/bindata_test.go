@@ -12,14 +12,14 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"reflect"
-	"strings"
-	"unsafe"
-	"os"
-	"time"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
+	"reflect"
+	"strings"
+	"time"
+	"unsafe"
 )
 
 func bindataRead(data, name string) ([]byte, error) {
@@ -56,9 +56,9 @@ type asset struct {
 }
 
 type bindataFileInfo struct {
-	name string
-	size int64
-	mode os.FileMode
+	name    string
+	size    int64
+	mode    os.FileMode
 	modTime time.Time
 }
 
@@ -97,7 +97,7 @@ func testDataCopyDirBasicATxt() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic/a.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1435862930, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -117,7 +117,7 @@ func testDataCopyDirBasicBTxt() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic/b.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1435862933, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -137,7 +137,7 @@ func testDataCopyDirBasicDirCTxt() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic/dir/c.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1435863315, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -160,7 +160,7 @@ func Asset(name string) ([]byte, error) {
 // It simplifies safe initialization of global variables.
 func MustAsset(name string) []byte {
 	a, err := Asset(name)
-	if (err != nil) {
+	if err != nil {
 		panic("asset: Asset(" + name + "): " + err.Error())
 	}
 
@@ -193,8 +193,8 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"test-data/copy-dir-basic/a.txt": testDataCopyDirBasicATxt,
-	"test-data/copy-dir-basic/b.txt": testDataCopyDirBasicBTxt,
+	"test-data/copy-dir-basic/a.txt":     testDataCopyDirBasicATxt,
+	"test-data/copy-dir-basic/b.txt":     testDataCopyDirBasicBTxt,
 	"test-data/copy-dir-basic/dir/c.txt": testDataCopyDirBasicDirCTxt,
 }
 
@@ -234,19 +234,17 @@ func AssetDir(name string) ([]string, error) {
 }
 
 type bintree struct {
-	Func func() (*asset, error)
+	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"test-data": &bintree{nil, map[string]*bintree{
 		"copy-dir-basic": &bintree{nil, map[string]*bintree{
-			"a.txt": &bintree{testDataCopyDirBasicATxt, map[string]*bintree{
-			}},
-			"b.txt": &bintree{testDataCopyDirBasicBTxt, map[string]*bintree{
-			}},
+			"a.txt": &bintree{testDataCopyDirBasicATxt, map[string]*bintree{}},
+			"b.txt": &bintree{testDataCopyDirBasicBTxt, map[string]*bintree{}},
 			"dir": &bintree{nil, map[string]*bintree{
-				"c.txt": &bintree{testDataCopyDirBasicDirCTxt, map[string]*bintree{
-				}},
+				"c.txt": &bintree{testDataCopyDirBasicDirCTxt, map[string]*bintree{}},
 			}},
 		}},
 	}},
@@ -254,48 +252,47 @@ var _bintree = &bintree{nil, map[string]*bintree{
 
 // RestoreAsset restores an asset under the given directory
 func RestoreAsset(dir, name string) error {
-        data, err := Asset(name)
-        if err != nil {
-                return err
-        }
-        info, err := AssetInfo(name)
-        if err != nil {
-                return err
-        }
-        err = os.MkdirAll(_filePath(dir, path.Dir(name)), os.FileMode(0755))
-        if err != nil {
-                return err
-        }
-        err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
-        if err != nil {
-                return err
-        }
-        err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
-        if err != nil {
-                return err
-        }
-        return nil
+	data, err := Asset(name)
+	if err != nil {
+		return err
+	}
+	info, err := AssetInfo(name)
+	if err != nil {
+		return err
+	}
+	err = os.MkdirAll(_filePath(dir, path.Dir(name)), os.FileMode(0755))
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
+	if err != nil {
+		return err
+	}
+	err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // RestoreAssets restores an asset under the given directory recursively
 func RestoreAssets(dir, name string) error {
-        children, err := AssetDir(name)
-        // File
-        if err != nil {
-                return RestoreAsset(dir, name)
-        }
-        // Dir
-        for _, child := range children {
-                err = RestoreAssets(dir, path.Join(name, child))
-                if err != nil {
-                        return err
-                }
-        }
-        return nil
+	children, err := AssetDir(name)
+	// File
+	if err != nil {
+		return RestoreAsset(dir, name)
+	}
+	// Dir
+	for _, child := range children {
+		err = RestoreAssets(dir, path.Join(name, child))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func _filePath(dir, name string) string {
-        cannonicalName := strings.Replace(name, "\\", "/", -1)
-        return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
+	cannonicalName := strings.Replace(name, "\\", "/", -1)
+	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-

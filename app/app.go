@@ -20,7 +20,14 @@ import (
 // App is the interface that must be implemented by each
 // (app type, infra type, infra flavor) 3-tuple.
 type App interface {
+	// Compile is called to compile the files that are used to manage
+	// this application.
 	Compile(*Context) (*CompileResult, error)
+
+	// Dev should manage a development environment for this app
+	// type. This is called for the local, mutable dev environment
+	// where this application is the main thing under development.
+	Dev(*Context) error
 }
 
 // Context is the context for operations on applications. Some of the

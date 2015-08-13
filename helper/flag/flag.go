@@ -8,7 +8,7 @@ import (
 // in the given flagset and returns a new arg slice that has the
 // included args as well as a slice that has only the excluded args.
 //
-// Any positional arguments are added to the excluded slice.
+// Any positional arguments are added to BOTH slices.
 func FilterArgs(fs *flag.FlagSet, args []string) ([]string, []string) {
 	// Optimistically make bothy the length of the arguments. There
 	// should never be so many arguments that this is too ineffecient.
