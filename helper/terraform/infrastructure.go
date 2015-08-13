@@ -30,6 +30,45 @@ type Infrastructure struct {
 }
 
 func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
+	switch ctx.Action {
+	case "destroy":
+		return i.executeDestroy(ctx)
+	case "":
+		return i.executeApply(ctx)
+	default:
+		return nil
+	}
+}
+
+func (i *Infrastructure) executeDestroy(ctx *infrastructure.Context) error {
+	if err := i.execute(ctx, "destroy"); err != nil {
+		return err
+	}
+
+	// Output something to the user so they know what is going on.
+	ctx.Ui.Header("[green]Infrastructure successfully destroyed!")
+	ctx.Ui.Message(
+		"[green]The infrastructure necessary to run this application and\n" +
+			"all other applications in this project has been destroyed.")
+
+	return nil
+}
+
+func (i *Infrastructure) executeApply(ctx *infrastructure.Context) error {
+	if err := i.execute(ctx, "apply"); err != nil {
+		return err
+	}
+
+	// Output something to the user so they know what is going on.
+	ctx.Ui.Header("[green]Infrastructure successfully created!")
+	ctx.Ui.Message(
+		"[green]The infrastructure necessary to deploy this application\n" +
+			"is now available. You can now deploy using `otto deploy`.")
+
+	return nil
+}
+
+func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) error {
 	dirId := directory.InfraId(ctx.Infra)
 	dirIdState := dirId + "/state"
 
@@ -78,7 +117,7 @@ func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
 	out_r, out_w := io.Pipe()
 	cmd := exec.Command(
 		"terraform",
-		"apply",
+		command,
 		"-state", stateOldPath,
 		"-state-out", statePath)
 	cmd.Dir = ctx.Dir
@@ -86,7 +125,7 @@ func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
 	cmd.Stdout = out_w
 	cmd.Stderr = out_w
 
-	ctx.Ui.Header("Executing Terraform to build infrastructure...")
+	ctx.Ui.Header("Executing Terraform to manage infrastructure...")
 	ctx.Ui.Message(
 		"Raw Terraform output will begin streaming in below. Otto\n" +
 			"does not create this output. It is mirrored directly from\n" +
@@ -184,12 +223,6 @@ func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
 			"please see the error message and consult the community for help.",
 			err)
 	}
-
-	// Output something to the user so they know what is going on.
-	ctx.Ui.Header("[green]Infrastructure successfully created!")
-	ctx.Ui.Message(
-		"[green]The infrastructure necessary to deploy this application\n" +
-			"is now available. You can now deploy using `otto deploy`.")
 
 	return nil
 }
