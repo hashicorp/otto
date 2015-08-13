@@ -7,9 +7,8 @@ import (
 // FilterArgs filters the args slice to only include the the flags
 // in the given flagset and returns a new arg slice that has the
 // included args as well as a slice that has only the excluded args.
-//
-// Any positional arguments are added to BOTH slices.
-func FilterArgs(fs *flag.FlagSet, args []string) ([]string, []string) {
+// The final returned slice is the positional arguments.
+func FilterArgs(fs *flag.FlagSet, args []string) ([]string, []string, []string) {
 	// Optimistically make bothy the length of the arguments. There
 	// should never be so many arguments that this is too ineffecient.
 	inc := make([]string, 0, len(args))
@@ -46,11 +45,7 @@ func FilterArgs(fs *flag.FlagSet, args []string) ([]string, []string) {
 		i += n
 	}
 
-	// Copy the positional elements onto both
-	inc = append(inc, pos...)
-	exc = append(exc, pos...)
-
-	return inc, exc
+	return inc, exc, pos
 }
 
 type filterLoc byte

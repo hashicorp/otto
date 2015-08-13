@@ -12,11 +12,13 @@ func TestFilterArgs(t *testing.T) {
 		Args  []string
 		Inc   []string
 		Exc   []string
+		Pos   []string
 	}{
 		{
 			[]string{"foo"},
 			[]string{"-foo=bar"},
 			[]string{"-foo=bar"},
+			[]string{},
 			[]string{},
 		},
 
@@ -25,12 +27,14 @@ func TestFilterArgs(t *testing.T) {
 			[]string{"-foo=bar", "-bar=baz"},
 			[]string{"-foo=bar"},
 			[]string{"-bar=baz"},
+			[]string{},
 		},
 
 		{
 			[]string{"foo"},
 			[]string{"hello"},
-			[]string{"hello"},
+			[]string{},
+			[]string{},
 			[]string{"hello"},
 		},
 	}
@@ -41,7 +45,7 @@ func TestFilterArgs(t *testing.T) {
 			fs.String(a, "", "")
 		}
 
-		inc, exc := FilterArgs(fs, tc.Args)
+		inc, exc, pos := FilterArgs(fs, tc.Args)
 		if !reflect.DeepEqual(inc, tc.Inc) {
 			t.Fatalf(
 				"Flags: %#v\n\nArgs: %#v\n\nInc: %#v\n\nActual: %#v",
@@ -51,6 +55,11 @@ func TestFilterArgs(t *testing.T) {
 			t.Fatalf(
 				"Flags: %#v\n\nArgs: %#v\n\nExc: %#v\n\nActual: %#v",
 				tc.Flags, tc.Args, tc.Exc, exc)
+		}
+		if !reflect.DeepEqual(pos, tc.Pos) {
+			t.Fatalf(
+				"Flags: %#v\n\nArgs: %#v\n\nPos: %#v\n\nActual: %#v",
+				tc.Flags, tc.Args, tc.Pos, pos)
 		}
 	}
 }
