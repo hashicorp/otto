@@ -62,6 +62,9 @@ const (
 func filterOne(flags map[string]struct{}, args []string, i int) (int, filterLoc) {
 	// Get the arg
 	s := args[i]
+	if s == "-h" || s == "--help" {
+		return 1, filterLocInc
+	}
 
 	// If the arg is empty, not a flag, or just a "-" then we have to
 	// add it to BOTH lists.

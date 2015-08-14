@@ -49,8 +49,8 @@ func TestFilterArgs(t *testing.T) {
 		{
 			[]string{"foo"},
 			[]string{"-h"},
-			[]string{},
 			[]string{"-h"},
+			[]string{},
 			[]string{},
 		},
 	}
