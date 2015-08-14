@@ -32,10 +32,26 @@ func TestFilterArgs(t *testing.T) {
 
 		{
 			[]string{"foo"},
+			[]string{"-foo", "bar", "-bar=baz"},
+			[]string{"-foo", "bar"},
+			[]string{"-bar=baz"},
+			[]string{},
+		},
+
+		{
+			[]string{"foo"},
 			[]string{"hello"},
 			[]string{},
 			[]string{},
 			[]string{"hello"},
+		},
+
+		{
+			[]string{"foo"},
+			[]string{"-h"},
+			[]string{},
+			[]string{"-h"},
+			[]string{},
 		},
 	}
 

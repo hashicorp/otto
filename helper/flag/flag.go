@@ -103,7 +103,7 @@ func filterOne(flags map[string]struct{}, args []string, i int) (int, filterLoc)
 	}
 
 	// It must have a value, which might be the next argument.
-	if !has_value && len(args) > i {
+	if !has_value && len(args) > i+1 {
 		return 2, pos
 	}
 
