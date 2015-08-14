@@ -15,6 +15,7 @@ package app
 
 import (
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/ui"
 )
 
 // App is the interface that must be implemented by each
@@ -56,6 +57,9 @@ type Context struct {
 
 	// Application is the application configuration itself from the appfile.
 	Application *appfile.Application
+
+	// Ui is the Ui object that can be used to communicate with the user.
+	Ui ui.Ui
 }
 
 // CompileResult is the structure containing compilation result values.

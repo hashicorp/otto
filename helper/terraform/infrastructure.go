@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
+	execHelper "github.com/hashicorp/otto/helper/exec"
 	"github.com/hashicorp/otto/infrastructure"
 )
 
@@ -114,16 +115,12 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 	}
 
 	// Build the command to execute
-	out_r, out_w := io.Pipe()
 	cmd := exec.Command(
 		"terraform",
 		command,
 		"-state", stateOldPath,
 		"-state-out", statePath)
 	cmd.Dir = ctx.Dir
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = out_w
-	cmd.Stderr = out_w
 
 	ctx.Ui.Header("Executing Terraform to manage infrastructure...")
 	ctx.Ui.Message(
@@ -135,31 +132,11 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 			"consistently within the same Otto environment." +
 			"\n\n")
 
-	// Copy output to the UI until we can't
-	go func() {
-		defer out_w.Close()
-		var buf [1024]byte
-		for {
-			n, err := out_r.Read(buf[:])
-			if n > 0 {
-				ctx.Ui.Raw(string(buf[:n]))
-			}
-
-			// We just break on any error. io.EOF is not an error and
-			// is our true exit case, but any other error we don't really
-			// handle here. It probably means something went wrong
-			// somewhere else anyways.
-			if err != nil {
-				break
-			}
-		}
-	}()
-
 	var infra directory.Infra
 	infra.State = directory.InfraStateReady
 
 	// Start the Terraform command
-	err = cmd.Run()
+	err = execHelper.Run(ctx.Ui, cmd)
 	if err != nil {
 		err = fmt.Errorf("Error running Terraform: %s", err)
 		infra.State = directory.InfraStatePartial

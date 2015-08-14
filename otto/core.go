@@ -171,6 +171,7 @@ func (c *Core) app() (app.App, *app.Context, error) {
 		Dir:         outputDir,
 		Tuple:       tuple,
 		Application: c.appfile.Application,
+		Ui:          c.ui,
 	}, nil
 }
 
