@@ -6,6 +6,7 @@ type ExecuteTask uint
 const (
 	ExecuteTaskInvalid ExecuteTask = 0
 	ExecuteTaskInfra   ExecuteTask = iota
+	ExecuteTaskDev
 )
 
 // ExecuteOpts are the options used for executing generic tasks

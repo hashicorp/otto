@@ -51,6 +51,12 @@ func init() {
 			}, nil
 		},
 
+		"dev": func() (cli.Command, error) {
+			return &command.DevCommand{
+				Meta: meta,
+			}, nil
+		},
+
 		"infra": func() (cli.Command, error) {
 			return &command.InfraCommand{
 				Meta: meta,

@@ -8,14 +8,14 @@ import (
 	"github.com/hashicorp/otto/otto"
 )
 
-// InfraCommand is the command that sets up the infrastructure for an
-// Appfile.
-type InfraCommand struct {
+// DevCommand is the command that manages (starts, stops, etc.) the
+// development environment for an Appfile.
+type DevCommand struct {
 	Meta
 }
 
-func (c *InfraCommand) Run(args []string) int {
-	fs := c.FlagSet("infra", FlagSetAppfile)
+func (c *DevCommand) Run(args []string) int {
+	fs := c.FlagSet("dev", FlagSetAppfile)
 	fs.Usage = func() { c.Ui.Error(c.Help()) }
 	args, execArgs, posArgs := flag.FilterArgs(fs, args)
 	if err := fs.Parse(args); err != nil {
@@ -46,7 +46,7 @@ func (c *InfraCommand) Run(args []string) int {
 
 	// Execute the task
 	err = core.Execute(&otto.ExecuteOpts{
-		Task:   otto.ExecuteTaskInfra,
+		Task:   otto.ExecuteTaskDev,
 		Action: action,
 		Args:   execArgs,
 	})
@@ -59,24 +59,23 @@ func (c *InfraCommand) Run(args []string) int {
 	return 0
 }
 
-func (c *InfraCommand) Synopsis() string {
-	return "Builds the infrastructure for the Appfile"
+func (c *DevCommand) Synopsis() string {
+	return "Start and manage a development environment"
 }
 
-func (c *InfraCommand) Help() string {
+func (c *DevCommand) Help() string {
 	helpText := `
-Usage: otto infra [options]
+Usage: otto dev [options]
 
-  Builds the infrastructure for the Appfile.
+  Start and manage a development environment for your application.
 
-  This will create real infrastructure resources as configured by the
-  Appfile, such as launching real servers. This command is stateful. If
-  the infrastructure has already been created, it won't create it again.
-  If the infrastructure is created but needs to be modified, it will be
-  modified.
+  This will start a development environment for your application.
+  Additional subcommands such as "destroy" can be given to tear down
+  the development environment.
 
-  Note that not all infrastructure changes are non-destructive and this
-  command may cause downtime.
+  The development environment will be local and will automatically include
+  all upstream dependencies within the environment properly configured
+  and started.
 
 `
 
