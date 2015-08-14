@@ -87,10 +87,32 @@ func (c *Core) Compile() error {
 // Execute executes the given task for this Appfile.
 func (c *Core) Execute(opts *ExecuteOpts) error {
 	switch opts.Task {
+	case ExecuteTaskDev:
+		return c.executeApp(opts)
 	case ExecuteTaskInfra:
 		return c.executeInfra(opts)
 	default:
 		return fmt.Errorf("unknown task: %s", opts.Task)
+	}
+}
+
+func (c *Core) executeApp(opts *ExecuteOpts) error {
+	// Get the infra implementation for this
+	app, appCtx, err := c.app()
+	if err != nil {
+		return err
+	}
+
+	// Set the action and action args
+	appCtx.Action = opts.Action
+	appCtx.ActionArgs = opts.Args
+
+	// Build the infrastructure compilation context
+	switch opts.Task {
+	case ExecuteTaskDev:
+		return app.Dev(appCtx)
+	default:
+		panic(fmt.Sprintf("uknown task: %s", opts.Task))
 	}
 }
 

@@ -33,6 +33,14 @@ type App interface {
 // Context is the context for operations on applications. Some of the
 // fields in this struct are only available for certain operations.
 type Context struct {
+	// Action is the sub-action to take when being executed.
+	//
+	// ActionArgs is the list of arguments for this action.
+	//
+	// Both of these fields will only be set for the Execute call.
+	Action     string
+	ActionArgs []string
+
 	// Dir is the directory that the compilation is allowed to write to
 	// for persistant storage of data that is available during task
 	// execution. For tasks, this will be the directory that compilation
