@@ -18,6 +18,12 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		AssetDir: AssetDir,
 	}
 
+	// Copy all the common files
+	if err := data.CopyDir(ctx.Dir, "data/common"); err != nil {
+		return nil, err
+	}
+
+	// Copy the infrastructure specific files
 	prefix := fmt.Sprintf("data/%s-%s", ctx.Tuple.Infra, ctx.Tuple.InfraFlavor)
 	if err := data.CopyDir(ctx.Dir, prefix); err != nil {
 		return nil, err
