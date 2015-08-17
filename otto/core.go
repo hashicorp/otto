@@ -170,6 +170,7 @@ func (c *Core) app() (app.App, *app.Context, error) {
 	return result, &app.Context{
 		Dir:         outputDir,
 		Tuple:       tuple,
+		Appfile:     c.appfile,
 		Application: c.appfile.Application,
 		Ui:          c.ui,
 	}, nil

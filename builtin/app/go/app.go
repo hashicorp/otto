@@ -2,6 +2,7 @@ package goapp
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/otto/app"
@@ -18,6 +19,11 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	data := &bindata.Data{
 		Asset:    Asset,
 		AssetDir: AssetDir,
+		Context: map[string]interface{}{
+			"path": map[string]string{
+				"working": filepath.Dir(ctx.Appfile.Path),
+			},
+		},
 	}
 
 	// Copy all the common files

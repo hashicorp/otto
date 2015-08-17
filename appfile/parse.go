@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/hashicorp/hcl"
 	hclobj "github.com/hashicorp/hcl/hcl"
@@ -57,6 +58,11 @@ func Parse(r io.Reader) (*File, error) {
 
 // ParseFile parses the given path as an Appfile.
 func ParseFile(path string) (*File, error) {
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err

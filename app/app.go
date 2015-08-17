@@ -55,6 +55,9 @@ type Context struct {
 	// types.
 	Tuple Tuple
 
+	// Appfile is the full appfile
+	Appfile *appfile.File
+
 	// Application is the application configuration itself from the appfile.
 	Application *appfile.Application
 

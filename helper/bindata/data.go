@@ -7,6 +7,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"gopkg.in/flosch/pongo2.v3"
 )
 
 //go:generate go-bindata -o=bindata_test.go -pkg=bindata -nomemcopy ./test-data/...
@@ -19,6 +22,9 @@ type Data struct {
 	// can just use method handles for these.
 	Asset    func(string) ([]byte, error)
 	AssetDir func(string) ([]string, error)
+
+	// Context is the template context that is given when rendering
+	Context map[string]interface{}
 }
 
 // CopyDir copies all the assets from the given prefix to the destination
@@ -59,13 +65,35 @@ func (d *Data) CopyDir(dst, prefix string) error {
 			continue
 		}
 
+		// Determine the filename and whether we're dealing with a template
+		var tpl *pongo2.Template = nil
+		filename := asset
+		if strings.HasSuffix(filename, ".tpl") {
+			filename = strings.TrimSuffix(filename, ".tpl")
+			tpl, err = pongo2.FromString(string(data))
+			if err != nil {
+				return err
+			}
+		}
+
 		// Write the file
-		f, err := os.Create(filepath.Join(dst, asset))
+		f, err := os.Create(filepath.Join(dst, filename))
 		if err != nil {
 			return err
 		}
 
-		_, err = io.Copy(f, bytes.NewReader(data))
+		// If it isn't a template, do a direct byte copy
+		if tpl == nil {
+			_, err = io.Copy(f, bytes.NewReader(data))
+			f.Close()
+			if err != nil {
+				return err
+			}
+
+			continue
+		}
+
+		err = tpl.ExecuteWriter(d.Context, f)
 		f.Close()
 		if err != nil {
 			return err
