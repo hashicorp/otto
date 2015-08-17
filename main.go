@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
@@ -138,6 +139,7 @@ func copyOutput(r io.Reader, doneCh chan<- struct{}) {
 	if err != nil {
 		panic(err)
 	}
+	pr.FlushTimeout = 5 * time.Millisecond
 
 	stderrR, err := pr.Prefix(ErrorPrefix)
 	if err != nil {
