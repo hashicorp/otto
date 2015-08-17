@@ -2,12 +2,11 @@ package goapp
 
 import (
 	"fmt"
-	"os/exec"
-	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/helper/bindata"
-	execHelper "github.com/hashicorp/otto/helper/exec"
+	"github.com/hashicorp/otto/helper/vagrant"
 )
 
 //go:generate go-bindata -pkg=goapp -nomemcopy ./data/...
@@ -36,28 +35,19 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
-	// Build the command to execute
-	cmd := exec.Command("vagrant", "up")
-	cmd.Dir = filepath.Join(ctx.Dir, "dev")
-
-	// Output some info the user prior to running
-	ctx.Ui.Header("Executing Vagrant to manage local dev environment...")
-	ctx.Ui.Message(
-		"Raw Vagrant output will begin streaming in below. Otto does\n" +
-			"not create this output. It is mirrored directly from Vagrant\n" +
-			"while the development environment is being created.\n\n")
-
-	// Run it!
-	if err := execHelper.Run(ctx.Ui, cmd); err != nil {
-		return fmt.Errorf(
-			"Error executing Vagrant: %s\n\n" +
-				"The error messages from Vagrant are usually very informative.\n" +
-				"Please read it carefully and fix any issues it mentions. If\n" +
-				"the message isn't clear, please report this to the Otto project.")
-	}
-
-	// Success, let the user know whats up
-	ctx.Ui.Header("[green]Development environment successfully created!")
-
-	return nil
+	return vagrant.Dev(ctx, &vagrant.DevOptions{
+		Instructions: strings.TrimSpace(devInstructions),
+	})
 }
+
+const devInstructions = `
+A development environment has been created for writing a generic Go-based
+application. For this development environment, Go is pre-installed. To
+work on your project, edit files locally on your own machine. The file changes
+will be synced to the development environment.
+
+When you're ready to build your project, run 'otto dev ssh' to enter
+the development environment. You'll be placed directly into the working
+directory where you can run 'go get' and 'go build' as you normally would.
+The GOPATH is already completely setup.
+`
