@@ -10,7 +10,32 @@ Vagrant.configure("2") do |config|
   # Setup a synced folder from our working directory to /vagrant
   config.vm.synced_folder "{{ path.working }}", "/vagrant"
 
+  # Install Go build environment
+  config.vm.provision "shell", inline: $script_golang
+
   # Make it so that `vagrant ssh` goes directly to the correct dir
   config.vm.provision "shell", inline:
     %Q[echo "cd /vagrant" >> /home/vagrant/.bashrc]
 end
+
+$script_golang = <<SCRIPT
+set -e
+
+echo "Downloading Go..."
+wget -O /home/vagrant/go.tar.gz https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz
+
+echo "Untarring Go..."
+sudo tar -C /usr/local -xzf /home/vagrant/go.tar.gz
+
+echo "Making GOPATH..."
+sudo mkdir -p /opt/gopath
+sudo chown `whoami`:`whoami` /opt/gopath
+
+echo "Setting up PATH..."
+echo 'export PATH=/opt/gopath/bin:/usr/local/go/bin:$PATH' >> /home/vagrant/.bashrc
+echo 'export GOPATH=/opt/gopath' >> /home/vagrant/.bashrc
+
+echo "Installing VCSs for go get..."
+sudo apt-get update -y >/dev/null 2>&1
+sudo apt-get install -y git bzr mercurial
+SCRIPT
