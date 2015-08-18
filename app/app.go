@@ -29,6 +29,20 @@ type App interface {
 	// type. This is called for the local, mutable dev environment
 	// where this application is the main thing under development.
 	Dev(*Context) error
+
+	// DevDep is called when this app is an upstream dependency
+	// of another application that is being developed. This app should
+	// build itself for development, and configure the Vagrantfile so
+	// that this dependency starts properly on boot.
+	//
+	// DevDep is given two contexts. The first is the destination
+	// app (the one being developed), and the second is the source
+	// app (this one that is an upstream dep).
+	//
+	// The results of this call are cached to speed up development
+	// of the destination app until there is a change, which is detected
+	// based on VCS.
+	// DevDep(dst *Context, src *Context) error
 }
 
 // Context is the context for operations on applications. Some of the
