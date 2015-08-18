@@ -165,7 +165,7 @@ func compileDependencies(
 	storage module.Storage,
 	graph *dag.AcyclicGraph,
 	opts *CompileOpts,
-	v *CompiledGraphVertex) error {
+	root *CompiledGraphVertex) error {
 	// Make a map to keep track of the dep source to vertex mapping
 	vertexMap := make(map[string]*CompiledGraphVertex)
 
@@ -174,7 +174,7 @@ func compileDependencies(
 	// 30, since that is a ton of dependencies and we don't expect the
 	// average case to have more than this.
 	queue := make([]*CompiledGraphVertex, 1, 30)
-	queue[0] = v
+	queue[0] = root
 
 	// While we still have dependencies to get, continue loading them.
 	// TODO: parallelize
@@ -184,7 +184,7 @@ func compileDependencies(
 
 		log.Printf("[DEBUG] compiling dependencies for: %s", current.Name())
 		for _, dep := range current.File.Application.Dependencies {
-			key, err := module.Detect(dep.Source, filepath.Dir(v.File.Path))
+			key, err := module.Detect(dep.Source, filepath.Dir(root.File.Path))
 			if err != nil {
 				return fmt.Errorf(
 					"Error loading source: %s", err)
