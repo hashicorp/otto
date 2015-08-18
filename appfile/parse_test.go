@@ -21,6 +21,9 @@ func TestParse(t *testing.T) {
 						&Dependency{
 							Source: "foo",
 						},
+						&Dependency{
+							Source: "bar",
+						},
 					},
 				},
 				Project: &Project{

@@ -4,6 +4,10 @@ application {
     dependency {
         source = "foo"
     }
+
+    dependency {
+        source = "bar"
+    }
 }
 
 project {
