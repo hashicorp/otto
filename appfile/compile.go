@@ -41,6 +41,15 @@ type Compiled struct {
 	Graph *dag.AcyclicGraph
 }
 
+func (c *Compiled) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("Compiled Appfile: %s\n\n", c.File.Path))
+	buf.WriteString("Dep Graph:\n")
+	buf.WriteString(c.Graph.String())
+	buf.WriteString("\n")
+	return buf.String()
+}
+
 // CompiledGraphVertex is the type of the vertex within the Graph of Compiled.
 type CompiledGraphVertex struct {
 	// File is the raw Appfile that this represents
@@ -113,7 +122,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	compiled := &Compiled{File: f, Graph: new(dag.AcyclicGraph)}
 
 	// Add our root vertex for this Appfile
-	vertex := &CompiledGraphVertex{File: f, nameValue: "root"}
+	vertex := &CompiledGraphVertex{File: f, nameValue: f.Application.Name}
 	compiled.Graph.Add(vertex)
 
 	// Build the storage we'll use for storing downloaded dependencies,
@@ -156,7 +165,7 @@ func compileDependencies(
 
 		log.Printf("[DEBUG] compiling dependencies for: %s", current.Name())
 		for _, dep := range current.File.Application.Dependencies {
-			key, err := module.Detect(dep.Source, v.File.Path)
+			key, err := module.Detect(dep.Source, filepath.Dir(v.File.Path))
 			if err != nil {
 				return fmt.Errorf(
 					"Error loading source: %s", err)
@@ -190,10 +199,10 @@ func compileDependencies(
 				}
 
 				// Build the vertex for this
-				vertex := &CompiledGraphVertex{
+				vertex = &CompiledGraphVertex{
 					File:      f,
 					Dir:       dir,
-					nameValue: key,
+					nameValue: f.Application.Name,
 				}
 
 				// Add the vertex since it is new, store the mapping, and
