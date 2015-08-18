@@ -40,6 +40,7 @@ func TestCompile_deps(t *testing.T) {
 	}
 
 	testCompileCompare(t, c, testCompileDepsStr)
+	testCompileMarshal(t, c, opts.Dir)
 }
 
 func testCompileCompare(t *testing.T, c *Compiled, expected string) {
