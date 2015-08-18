@@ -2,6 +2,7 @@
 *.exe
 bin/
 pkg/
+scratch/
 vendor/
 example.appfile
 website/.vagrant
