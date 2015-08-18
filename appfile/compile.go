@@ -60,11 +60,12 @@ type CompiledGraphVertex struct {
 	// this value).
 	Dir string
 
-	nameValue string
+	// Don't use this outside of this package.
+	NameValue string
 }
 
 func (v *CompiledGraphVertex) Name() string {
-	return v.nameValue
+	return v.NameValue
 }
 
 // CompileOpts are the options for compilation.
@@ -88,6 +89,24 @@ type CompileEvent interface{}
 // being loaded.
 type CompileEventDep struct {
 	Source string
+}
+
+// LoadCompiled loads and verifies a compiled Appfile (*Compiled) from
+// disk.
+func LoadCompiled(dir string) (*Compiled, error) {
+	f, err := os.Open(filepath.Join(dir, CompileFilename))
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var c Compiled
+	dec := json.NewDecoder(f)
+	if err := dec.Decode(&c); err != nil {
+		return nil, err
+	}
+
+	return &c, nil
 }
 
 // Compile compiles an Appfile.
@@ -122,7 +141,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	compiled := &Compiled{File: f, Graph: new(dag.AcyclicGraph)}
 
 	// Add our root vertex for this Appfile
-	vertex := &CompiledGraphVertex{File: f, nameValue: f.Application.Name}
+	vertex := &CompiledGraphVertex{File: f, NameValue: f.Application.Name}
 	compiled.Graph.Add(vertex)
 
 	// Build the storage we'll use for storing downloaded dependencies,
@@ -202,7 +221,7 @@ func compileDependencies(
 				vertex = &CompiledGraphVertex{
 					File:      f,
 					Dir:       dir,
-					nameValue: f.Application.Name,
+					NameValue: f.Application.Name,
 				}
 
 				// Add the vertex since it is new, store the mapping, and

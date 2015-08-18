@@ -1,6 +1,7 @@
 package appfile
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -8,6 +9,11 @@ import (
 	"strings"
 	"testing"
 )
+
+func TestCompiled_impl(t *testing.T) {
+	var _ json.Marshaler = new(Compiled)
+	var _ json.Unmarshaler = new(Compiled)
+}
 
 func TestCompile_basic(t *testing.T) {
 	opts := testCompileOpts(t)
@@ -20,6 +26,7 @@ func TestCompile_basic(t *testing.T) {
 	}
 
 	testCompileCompare(t, c, testCompileBasicStr)
+	testCompileMarshal(t, c, opts.Dir)
 }
 
 func TestCompile_deps(t *testing.T) {
@@ -40,6 +47,17 @@ func testCompileCompare(t *testing.T, c *Compiled, expected string) {
 	expected = strings.TrimSpace(fmt.Sprintf(expected, c.File.Path))
 	if actual != expected {
 		t.Fatalf("bad:\n\n%s\n\n%s", actual, expected)
+	}
+}
+
+func testCompileMarshal(t *testing.T, original *Compiled, dir string) {
+	c, err := LoadCompiled(dir)
+	if err != nil {
+		t.Fatalf("err loading compiled: %s", err)
+	}
+
+	if c.String() != original.String() {
+		t.Fatalf("bad:\n\n%s\n\n%s", c, original)
 	}
 }
 
