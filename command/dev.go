@@ -15,7 +15,7 @@ type DevCommand struct {
 }
 
 func (c *DevCommand) Run(args []string) int {
-	fs := c.FlagSet("dev", FlagSetAppfile)
+	fs := c.FlagSet("dev", FlagSetNone)
 	fs.Usage = func() { c.Ui.Error(c.Help()) }
 	args, execArgs, posArgs := flag.FilterArgs(fs, args)
 	if err := fs.Parse(args); err != nil {

@@ -15,12 +15,13 @@ import (
 
 // Core is the main struct to use to interact with Otto as a library.
 type Core struct {
-	appfile   *appfile.File
-	apps      map[app.Tuple]app.Factory
-	dir       directory.Backend
-	infras    map[string]infrastructure.Factory
-	outputDir string
-	ui        ui.Ui
+	appfile         *appfile.File
+	appfileCompiled *appfile.Compiled
+	apps            map[app.Tuple]app.Factory
+	dir             directory.Backend
+	infras          map[string]infrastructure.Factory
+	outputDir       string
+	ui              ui.Ui
 }
 
 // CoreConfig is configuration for creating a new core with NewCore.
@@ -30,7 +31,8 @@ type CoreConfig struct {
 	OutputDir string
 
 	// Appfile is the appfile that this core will be using for configuration.
-	Appfile *appfile.File
+	// This must be a compiled Appfile.
+	Appfile *appfile.Compiled
 
 	// Directory is the directory where data is stored about this Appfile.
 	Directory directory.Backend
@@ -52,12 +54,13 @@ type CoreConfig struct {
 // or modified, since the Core may use parts of it without deep copying.
 func NewCore(c *CoreConfig) (*Core, error) {
 	return &Core{
-		appfile:   c.Appfile,
-		apps:      c.Apps,
-		dir:       c.Directory,
-		infras:    c.Infrastructures,
-		outputDir: c.OutputDir,
-		ui:        c.Ui,
+		appfile:         c.Appfile.File,
+		appfileCompiled: c.Appfile,
+		apps:            c.Apps,
+		dir:             c.Directory,
+		infras:          c.Infrastructures,
+		outputDir:       c.OutputDir,
+		ui:              c.Ui,
 	}, nil
 }
 

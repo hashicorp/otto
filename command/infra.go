@@ -15,7 +15,7 @@ type InfraCommand struct {
 }
 
 func (c *InfraCommand) Run(args []string) int {
-	fs := c.FlagSet("infra", FlagSetAppfile)
+	fs := c.FlagSet("infra", FlagSetNone)
 	fs.Usage = func() { c.Ui.Error(c.Help()) }
 	args, execArgs, posArgs := flag.FilterArgs(fs, args)
 	if err := fs.Parse(args); err != nil {

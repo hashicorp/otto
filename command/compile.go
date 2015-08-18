@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -17,7 +18,10 @@ type CompileCommand struct {
 }
 
 func (c *CompileCommand) Run(args []string) int {
-	fs := c.FlagSet("compile", FlagSetAppfile)
+	var flagAppfile string
+	fs := c.FlagSet("compile", FlagSetNone)
+	fs.Usage = func() { c.Ui.Error(c.Help()) }
+	fs.StringVar(&flagAppfile, "appfile", os.Getenv(EnvAppFile), "")
 	if err := fs.Parse(args); err != nil {
 		return 1
 	}
@@ -25,8 +29,21 @@ func (c *CompileCommand) Run(args []string) int {
 	// Load a UI
 	ui := c.OttoUi()
 
-	// Load the appfile
-	app, err := c.Appfile()
+	// Load the appfile. This is the only time we ever load the
+	// raw Appfile. All other commands load the compiled Appfile.
+	if flagAppfile == "" {
+		flagAppfile = "."
+	}
+	fi, err := os.Stat(flagAppfile)
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error checking Appfile path: %s", err))
+		return 1
+	}
+	if fi.IsDir() {
+		flagAppfile = filepath.Join(flagAppfile, DefaultAppfile)
+	}
+	app, err := appfile.ParseFile(flagAppfile)
 	if err != nil {
 		c.Ui.Error(err.Error())
 		return 1
@@ -34,8 +51,9 @@ func (c *CompileCommand) Run(args []string) int {
 
 	// Compile the Appfile
 	ui.Header("Fetching all Appfile dependencies...")
-	_, err = appfile.Compile(app, &appfile.CompileOpts{
-		Dir:      filepath.Join(c.OutputDir(app), DefaultOutputDirCompiledAppfile),
+	capp, err := appfile.Compile(app, &appfile.CompileOpts{
+		Dir: filepath.Join(
+			filepath.Dir(app.Path), DefaultOutputDir, DefaultOutputDirCompiledAppfile),
 		Callback: c.compileCallback(ui),
 	})
 	if err != nil {
@@ -45,7 +63,7 @@ func (c *CompileCommand) Run(args []string) int {
 	}
 
 	// Get a core
-	core, err := c.Core(app)
+	core, err := c.Core(capp)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf(
 			"Error loading core: %s", err))

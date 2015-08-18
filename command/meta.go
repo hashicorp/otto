@@ -22,6 +22,7 @@ const (
 	// DefaultOutputDir is the default filename for the output directory
 	DefaultOutputDir                = ".otto"
 	DefaultOutputDirCompiledAppfile = "appfile"
+	DefaultOutputDirCompiledData    = "compiled"
 
 	// DefaultDataDir is the default directory for the directory
 	// data if a directory in the Appfile isn't specified.
@@ -36,57 +37,39 @@ const (
 type FlagSetFlags uint
 
 const (
-	FlagSetNone    FlagSetFlags = 0
-	FlagSetAppfile FlagSetFlags = iota
+	FlagSetNone FlagSetFlags = 0
 )
 
 // Meta are the meta-options that are available on all or most commands.
 type Meta struct {
 	CoreConfig *otto.CoreConfig
 	Ui         cli.Ui
-
-	// These are fields set by flags
-	flagAppfile string
 }
 
-// Appfile loads the Appfile according to the path given by the
-// -appfile flag.
-func (m *Meta) Appfile() (*appfile.File, error) {
-	// Get the path to where the Appfile lives
-	path := m.flagAppfile
-	if path == "" {
-		path = os.Getenv(EnvAppFile)
-	}
-	if path == "" {
-		path = "."
-	}
-
-	// Verify the path is valid
-	fi, err := os.Stat(path)
+// Appfile loads the compiled Appfile. If the Appfile isn't compiled yet,
+// then an error will be returned.
+func (m *Meta) Appfile() (*appfile.Compiled, error) {
+	// Find the root directory
+	rootDir, err := m.RootDir()
 	if err != nil {
-		return nil, fmt.Errorf(
-			"Error checking Appfile path: %s", err)
-	}
-	if fi.IsDir() {
-		path = filepath.Join(path, DefaultAppfile)
+		return nil, err
 	}
 
-	// Load the appfile
-	app, err := appfile.ParseFile(path)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"Error parsing Appfile: %s", err)
-	}
-
-	return app, nil
+	return appfile.LoadCompiled(filepath.Join(
+		rootDir, DefaultOutputDir, DefaultOutputDirCompiledAppfile))
 }
 
 // Core returns the core for the given Appfile. The file where the
 // Appfile was loaded from should be set in appfile.File.Path. This
 // root appfile path will be used as the default output directory
 // for Otto.
-func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
-	dir, err := m.Directory(f)
+func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
+	dir, err := m.Directory(f.File)
+	if err != nil {
+		return nil, err
+	}
+
+	rootDir, err := m.RootDir()
 	if err != nil {
 		return nil, err
 	}
@@ -94,15 +77,43 @@ func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
 	config := *m.CoreConfig
 	config.Appfile = f
 	config.Directory = dir
-	config.OutputDir = m.OutputDir(f)
+	config.OutputDir = filepath.Join(
+		rootDir, DefaultOutputDir, DefaultOutputDirCompiledData)
 	config.Ui = m.OttoUi()
 
 	return otto.NewCore(&config)
 }
 
-// OutputDir is the directory where we compile stuff to.
-func (m *Meta) OutputDir(f *appfile.File) string {
-	return filepath.Join(filepath.Dir(f.Path), DefaultOutputDir)
+// RootDir finds the "root" directory. This is the working directory of
+// the Appfile and Otto itself. To find the root directory, we traverse
+// upwards until we find the ".otto" directory and assume that is where
+// it is.
+func (m *Meta) RootDir() (string, error) {
+	// First, get our current directory
+	current, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	// Traverse upwards until we find the directory. We also protect this
+	// loop with a basic infinite loop guard.
+	i := 0
+	prev := ""
+	for prev != current && i < 1000 {
+		if _, err := os.Stat(filepath.Join(current, DefaultOutputDir)); err == nil {
+			// Found it
+			return current, nil
+		}
+
+		prev = current
+		current = filepath.Dir(current)
+	}
+
+	return "", fmt.Errorf(
+		"Otto doesn't appear to have compiled!\n\n" +
+			"Run `otto compile` in the directory with the Appfile or\n" +
+			"with the `-appfile` flag in order to compile the files for\n" +
+			"developing, building, and deploying your application.")
 }
 
 // Directory returns the Otto directory backend for the given
@@ -119,10 +130,6 @@ func (m *Meta) Directory(f *appfile.File) (directory.Backend, error) {
 // using the flags as the second parameter.
 func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	f := flag.NewFlagSet(n, flag.ContinueOnError)
-
-	if fs&FlagSetAppfile != 0 {
-		f.StringVar(&m.flagAppfile, "appfile", "", "")
-	}
 
 	// Create an io.Writer that writes to our Ui properly for errors.
 	// This is kind of a hack, but it does the job. Basically: create
