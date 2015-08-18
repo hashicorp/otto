@@ -82,9 +82,11 @@ func (c *Core) Compile() error {
 	}
 
 	// Compile!
+	log.Printf("[INFO] running infra compile...")
 	if _, err := infra.Compile(infraCtx); err != nil {
 		return err
 	}
+	log.Printf("[INFO] running app compile...")
 	if _, err := app.Compile(appCtx); err != nil {
 		return err
 	}
