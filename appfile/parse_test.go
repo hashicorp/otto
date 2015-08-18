@@ -17,6 +17,11 @@ func TestParse(t *testing.T) {
 			&File{
 				Application: &Application{
 					Name: "foo",
+					Dependencies: []*Dependency{
+						&Dependency{
+							Source: "foo",
+						},
+					},
 				},
 				Project: &Project{
 					Name:           "foo",
@@ -59,7 +64,12 @@ func TestParse(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		path := filepath.Join("./test-fixtures", tc.File)
+		path, err := filepath.Abs(filepath.Join("./test-fixtures", tc.File))
+		if err != nil {
+			t.Fatalf("file: %s\n\n%s", tc.File, err)
+			continue
+		}
+
 		actual, err := ParseFile(path)
 		if (err != nil) != tc.Err {
 			t.Fatalf("file: %s\n\n%s", tc.File, err)

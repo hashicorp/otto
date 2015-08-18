@@ -1,5 +1,9 @@
 application {
     name = "foo"
+
+    dependency {
+        source = "foo"
+    }
 }
 
 project {

@@ -17,8 +17,14 @@ type File struct {
 
 // Application is the structure of an application definition.
 type Application struct {
-	Name string
-	Type string
+	Name         string
+	Type         string
+	Dependencies []*Dependency `mapstructure:"dependency"`
+}
+
+// Dependency is another Appfile that an App depends on
+type Dependency struct {
+	Source string
 }
 
 // Project is the structure of a project that many applications
