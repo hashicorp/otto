@@ -107,6 +107,7 @@ func (m *Meta) RootDir() (string, error) {
 
 		prev = current
 		current = filepath.Dir(current)
+		i++
 	}
 
 	return "", fmt.Errorf(
