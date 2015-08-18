@@ -25,6 +25,9 @@ const (
 	// DefaultDataDir is the default directory for the directory
 	// data if a directory in the Appfile isn't specified.
 	DefaultDataDir = "otto-data"
+
+	// EnvAppFile is the environment variable to point to an appfile.
+	EnvAppFile = "OTTO_APPFILE"
 )
 
 // FlagSetFlags is an enum to define what flags are present in the
@@ -50,6 +53,9 @@ type Meta struct {
 func (m *Meta) Appfile() (*appfile.File, error) {
 	// Get the path to where the Appfile lives
 	path := m.flagAppfile
+	if path == "" {
+		path = os.Getenv(EnvAppFile)
+	}
 	if path == "" {
 		path = "."
 	}
