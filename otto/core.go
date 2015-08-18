@@ -2,6 +2,8 @@ package otto
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/hashicorp/otto/app"
@@ -70,6 +72,12 @@ func (c *Core) Compile() error {
 	// Get the application implementation for this
 	app, appCtx, err := c.app()
 	if err != nil {
+		return err
+	}
+
+	// Delete the prior output directory
+	log.Printf("[INFO] deleting prior compilation contents: %s", c.outputDir)
+	if err := os.RemoveAll(c.outputDir); err != nil {
 		return err
 	}
 
