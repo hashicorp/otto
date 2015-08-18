@@ -111,10 +111,12 @@ func (m *Meta) RootDir() (string, error) {
 	}
 
 	return "", fmt.Errorf(
-		"Otto doesn't appear to have compiled!\n\n" +
+		"Otto doesn't appear to have compiled your Appfile yet!\n\n" +
 			"Run `otto compile` in the directory with the Appfile or\n" +
 			"with the `-appfile` flag in order to compile the files for\n" +
-			"developing, building, and deploying your application.")
+			"developing, building, and deploying your application.\n\n" +
+			"Once the Appfile is compiled, you can run `otto` in any\n" +
+			"subdirectory.")
 }
 
 // Directory returns the Otto directory backend for the given
