@@ -20,7 +20,8 @@ const (
 	DefaultAppfile = "Appfile"
 
 	// DefaultOutputDir is the default filename for the output directory
-	DefaultOutputDir = ".otto"
+	DefaultOutputDir                = ".otto"
+	DefaultOutputDirCompiledAppfile = "appfile"
 
 	// DefaultDataDir is the default directory for the directory
 	// data if a directory in the Appfile isn't specified.
@@ -85,7 +86,6 @@ func (m *Meta) Appfile() (*appfile.File, error) {
 // root appfile path will be used as the default output directory
 // for Otto.
 func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
-	outputDir := DefaultOutputDir
 	dir, err := m.Directory(f)
 	if err != nil {
 		return nil, err
@@ -94,10 +94,15 @@ func (m *Meta) Core(f *appfile.File) (*otto.Core, error) {
 	config := *m.CoreConfig
 	config.Appfile = f
 	config.Directory = dir
-	config.OutputDir = filepath.Join(filepath.Dir(f.Path), outputDir)
+	config.OutputDir = m.OutputDir(f)
 	config.Ui = m.OttoUi()
 
 	return otto.NewCore(&config)
+}
+
+// OutputDir is the directory where we compile stuff to.
+func (m *Meta) OutputDir(f *appfile.File) string {
+	return filepath.Join(filepath.Dir(f.Path), DefaultOutputDir)
 }
 
 // Directory returns the Otto directory backend for the given

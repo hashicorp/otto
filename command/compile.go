@@ -2,7 +2,11 @@ package command
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
+
+	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/ui"
 )
 
 // CompileCommand is the command that is responsible for "compiling" the
@@ -18,10 +22,25 @@ func (c *CompileCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Load a UI
+	ui := c.OttoUi()
+
 	// Load the appfile
 	app, err := c.Appfile()
 	if err != nil {
 		c.Ui.Error(err.Error())
+		return 1
+	}
+
+	// Compile the Appfile
+	ui.Header("Fetching all Appfile dependencies...")
+	_, err = appfile.Compile(app, &appfile.CompileOpts{
+		Dir:      filepath.Join(c.OutputDir(app), DefaultOutputDirCompiledAppfile),
+		Callback: c.compileCallback(ui),
+	})
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error compiling Appfile: %s", err))
 		return 1
 	}
 
@@ -37,7 +56,6 @@ func (c *CompileCommand) Run(args []string) int {
 	infra := app.ActiveInfrastructure()
 
 	// Before the compilation, output to the user what is going on
-	ui := c.OttoUi()
 	ui.Header("Compiling...")
 	ui.Message(fmt.Sprintf(
 		"Application:    %s (%s)",
@@ -84,4 +102,14 @@ Usage: otto [options] [path]
 `
 
 	return strings.TrimSpace(helpText)
+}
+
+func (c *CompileCommand) compileCallback(ui ui.Ui) func(appfile.CompileEvent) {
+	return func(raw appfile.CompileEvent) {
+		switch e := raw.(type) {
+		case *appfile.CompileEventDep:
+			ui.Message(fmt.Sprintf(
+				"Fetching dependency: %s", e.Source))
+		}
+	}
 }
