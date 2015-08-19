@@ -32,6 +32,12 @@ func TestCompile(t *testing.T) {
 			testCompileDepsStr,
 			false,
 		},
+
+		{
+			"compile-cycle",
+			"",
+			true,
+		},
 	}
 
 	for _, tc := range cases {
@@ -48,8 +54,10 @@ func TestCompile(t *testing.T) {
 				t.Fatalf("err: %s\n\n%s", tc.Dir, err)
 			}
 
-			testCompileCompare(t, c, tc.String)
-			testCompileMarshal(t, c, opts.Dir)
+			if err == nil {
+				testCompileCompare(t, c, tc.String)
+				testCompileMarshal(t, c, opts.Dir)
+			}
 		}()
 	}
 }

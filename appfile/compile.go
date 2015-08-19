@@ -8,7 +8,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform/config/module"
 	"github.com/hashicorp/terraform/dag"
 )
@@ -39,6 +41,23 @@ type Compiled struct {
 	// Graph is the DAG that has all the dependencies. This is already
 	// verified to have no cycles. Each vertex is a *CompiledGraphVertex.
 	Graph *dag.AcyclicGraph
+}
+
+func (c *Compiled) Validate() error {
+	var result error
+	if cycles := c.Graph.Cycles(); len(cycles) > 0 {
+		for _, cycle := range cycles {
+			vertices := make([]string, len(cycle))
+			for i, v := range cycle {
+				vertices[i] = dag.VertexName(v)
+			}
+
+			result = multierror.Append(result, fmt.Errorf(
+				"Dependency cycle: %s", strings.Join(vertices, ", ")))
+		}
+	}
+
+	return result
 }
 
 func (c *Compiled) String() string {
@@ -153,6 +172,11 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 		return nil, err
 	}
 
+	// Validate the compiled file tree.
+	if err := compiled.Validate(); err != nil {
+		return nil, err
+	}
+
 	// Write the compiled Appfile data
 	if err := compileWrite(opts.Dir, compiled); err != nil {
 		return nil, err
@@ -169,6 +193,13 @@ func compileDependencies(
 	// Make a map to keep track of the dep source to vertex mapping
 	vertexMap := make(map[string]*CompiledGraphVertex)
 
+	// Store ourselves in the map
+	key, err := module.Detect(".", filepath.Dir(root.File.Path))
+	if err != nil {
+		return err
+	}
+	vertexMap[key] = root
+
 	// Make a queue for the other vertices we need to still get
 	// dependencies for. We arbitrarily make the cap for this slice
 	// 30, since that is a ton of dependencies and we don't expect the
@@ -184,7 +215,7 @@ func compileDependencies(
 
 		log.Printf("[DEBUG] compiling dependencies for: %s", current.Name())
 		for _, dep := range current.File.Application.Dependencies {
-			key, err := module.Detect(dep.Source, filepath.Dir(root.File.Path))
+			key, err := module.Detect(dep.Source, filepath.Dir(current.File.Path))
 			if err != nil {
 				return fmt.Errorf(
 					"Error loading source: %s", err)
