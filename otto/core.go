@@ -44,7 +44,7 @@ type CoreConfig struct {
 	// value is a factory that can create the infrastructure impl.
 	Infrastructures map[string]infrastructure.Factory
 
-	// Ui is the Ui that will be used to comunicate with the user.
+	// Ui is the Ui that will be used to communicate with the user.
 	Ui ui.Ui
 }
 
