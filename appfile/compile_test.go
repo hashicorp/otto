@@ -15,32 +15,43 @@ func TestCompiled_impl(t *testing.T) {
 	var _ json.Unmarshaler = new(Compiled)
 }
 
-func TestCompile_basic(t *testing.T) {
-	opts := testCompileOpts(t)
-	defer os.RemoveAll(opts.Dir)
-	f := testFile(t, "compile-basic")
+func TestCompile(t *testing.T) {
+	cases := []struct {
+		Dir    string
+		String string
+		Err    bool
+	}{
+		{
+			"compile-basic",
+			testCompileBasicStr,
+			false,
+		},
 
-	c, err := Compile(f, opts)
-	if err != nil {
-		t.Fatalf("err: %s", err)
+		{
+			"compile-deps",
+			testCompileDepsStr,
+			false,
+		},
 	}
 
-	testCompileCompare(t, c, testCompileBasicStr)
-	testCompileMarshal(t, c, opts.Dir)
-}
+	for _, tc := range cases {
+		t.Logf("Testing: %s", tc.Dir)
 
-func TestCompile_deps(t *testing.T) {
-	opts := testCompileOpts(t)
-	defer os.RemoveAll(opts.Dir)
-	f := testFile(t, "compile-deps")
+		// We wrap this in a function just so we can use defers
+		func() {
+			opts := testCompileOpts(t)
+			defer os.RemoveAll(opts.Dir)
+			f := testFile(t, tc.Dir)
 
-	c, err := Compile(f, opts)
-	if err != nil {
-		t.Fatalf("err: %s", err)
+			c, err := Compile(f, opts)
+			if (err != nil) != tc.Err {
+				t.Fatalf("err: %s\n\n%s", tc.Dir, err)
+			}
+
+			testCompileCompare(t, c, tc.String)
+			testCompileMarshal(t, c, opts.Dir)
+		}()
 	}
-
-	testCompileCompare(t, c, testCompileDepsStr)
-	testCompileMarshal(t, c, opts.Dir)
 }
 
 func testCompileCompare(t *testing.T, c *Compiled, expected string) {
