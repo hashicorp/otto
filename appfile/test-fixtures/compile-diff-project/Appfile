@@ -1,0 +1,11 @@
+application {
+    name = "foo"
+
+    dependency {
+        source = "./child"
+    }
+}
+
+project {
+    name = "foo"
+}

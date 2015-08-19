@@ -38,6 +38,15 @@ func TestCompile(t *testing.T) {
 			"",
 			true,
 		},
+
+		/*
+			TODO: uncomment once we can enforce this
+			{
+				"compile-diff-project",
+				"",
+				true,
+			},
+		*/
 	}
 
 	for _, tc := range cases {

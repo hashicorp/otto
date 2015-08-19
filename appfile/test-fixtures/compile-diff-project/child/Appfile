@@ -1,0 +1,7 @@
+application {
+    name = "bar"
+}
+
+project {
+    name = "bar"
+}
