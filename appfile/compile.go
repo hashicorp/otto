@@ -45,6 +45,8 @@ type Compiled struct {
 
 func (c *Compiled) Validate() error {
 	var result error
+
+	// First validate that there are no cycles in the dependency graph
 	if cycles := c.Graph.Cycles(); len(cycles) > 0 {
 		for _, cycle := range cycles {
 			vertices := make([]string, len(cycle))
