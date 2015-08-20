@@ -44,6 +44,14 @@ func (c *DevCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Build the development environment
+	if err := core.Dev(); err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error building dev environment: %s", err))
+		return 1
+	}
+	return 0
+
 	// Execute the task
 	err = core.Execute(&otto.ExecuteOpts{
 		Task:   otto.ExecuteTaskDev,

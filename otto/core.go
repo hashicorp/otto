@@ -5,12 +5,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
+	"github.com/hashicorp/terraform/dag"
 )
 
 // Core is the main struct to use to interact with Otto as a library.
@@ -73,7 +75,11 @@ func (c *Core) Compile() error {
 	}
 
 	// Get the application implementation for this
-	app, appCtx, err := c.app()
+	appCtx, err := c.appContext(c.appfile)
+	if err != nil {
+		return err
+	}
+	app, err := c.app(appCtx)
 	if err != nil {
 		return err
 	}
@@ -97,6 +103,80 @@ func (c *Core) Compile() error {
 	return nil
 }
 
+// Dev starts a dev environment for the current application. For destroying
+// and other tasks against the dev environment, use the generic `Execute`
+// method.
+func (c *Core) Dev() error {
+	// First get the root app and context, since we need that for
+	// everything else.
+	root, err := c.appfileCompiled.Graph.Root()
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading app: %s", err)
+	}
+	appCtx, err := c.appContext(root.(*appfile.CompiledGraphVertex).File)
+	if err != nil {
+		return fmt.Errorf("Error loading Appfile: %s", err)
+	}
+	app, err := c.app(appCtx)
+	if err != nil {
+		return fmt.Errorf("Error loading App: %s", err)
+	}
+
+	// Go through all the dependencies and build their immutable
+	// dev environment pieces for the final configuration.
+	var stop int32 = 0
+	err = c.appfileCompiled.Graph.Walk(func(raw dag.Vertex) (err error) {
+		// If this is the root, skip it. We do that separately.
+		if raw == root {
+			return nil
+		}
+
+		// If we're told to stop (something else had an error), then stop early
+		if atomic.LoadInt32(&stop) != 0 {
+			return nil
+		}
+
+		// If we exit with an error, then mark the stop atomic
+		defer func() {
+			if err != nil {
+				atomic.StoreInt32(&stop, 1)
+			}
+		}()
+
+		// Convert to the rich vertex type so that we can access data
+		v := raw.(*appfile.CompiledGraphVertex)
+
+		// Get the context and app for this appfile
+		depCtx, err := c.appContext(v.File)
+		if err != nil {
+			return fmt.Errorf(
+				"Error loading Appfile for dependency '%s': %s",
+				dag.VertexName(raw), err)
+		}
+		dep, err := c.app(depCtx)
+		if err != nil {
+			return fmt.Errorf(
+				"Error loading App implementation for dependency '%s': %s",
+				dag.VertexName(raw), err)
+		}
+
+		// The context needs to be modified to save data to a custom
+		// directory.
+		println(dep)
+
+		// Build the development dependency
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	println(app)
+	return nil
+}
+
 // Execute executes the given task for this Appfile.
 func (c *Core) Execute(opts *ExecuteOpts) error {
 	switch opts.Task {
@@ -111,7 +191,11 @@ func (c *Core) Execute(opts *ExecuteOpts) error {
 
 func (c *Core) executeApp(opts *ExecuteOpts) error {
 	// Get the infra implementation for this
-	app, appCtx, err := c.app()
+	appCtx, err := c.appContext(c.appfile)
+	if err != nil {
+		return err
+	}
+	app, err := c.app(appCtx)
 	if err != nil {
 		return err
 	}
@@ -144,49 +228,53 @@ func (c *Core) executeInfra(opts *ExecuteOpts) error {
 	return infra.Execute(infraCtx)
 }
 
-func (c *Core) app() (app.App, *app.Context, error) {
+func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 	// We need the configuration for the active infrastructure
 	// so that we can build the tuple below
-	config := c.appfile.ActiveInfrastructure()
+	config := f.ActiveInfrastructure()
 	if config == nil {
-		return nil, nil, fmt.Errorf(
+		return nil, fmt.Errorf(
 			"infrastructure not found in appfile: %s",
-			c.appfile.Project.Infrastructure)
+			f.Project.Infrastructure)
 	}
 
 	// The tuple we're looking for is the application type, the
 	// infrastructure type, and the infrastructure flavor. Build that
 	// tuple.
 	tuple := app.Tuple{
-		App:         c.appfile.Application.Type,
-		Infra:       c.appfile.Project.Infrastructure,
+		App:         f.Application.Type,
+		Infra:       f.Project.Infrastructure,
 		InfraFlavor: config.Flavor,
-	}
-
-	// Look for the app impl. factory
-	f, ok := c.apps[tuple]
-	if !ok {
-		return nil, nil, fmt.Errorf(
-			"app implementation for tuple not found: %s", tuple)
-	}
-
-	// Start the impl.
-	result, err := f()
-	if err != nil {
-		return nil, nil, fmt.Errorf(
-			"app failed to start properly: %s", err)
 	}
 
 	// The output directory for data
 	outputDir := filepath.Join(c.outputDir, "app")
 
-	return result, &app.Context{
+	return &app.Context{
 		Dir:         outputDir,
 		Tuple:       tuple,
-		Appfile:     c.appfile,
-		Application: c.appfile.Application,
+		Appfile:     f,
+		Application: f.Application,
 		Ui:          c.ui,
 	}, nil
+}
+
+func (c *Core) app(ctx *app.Context) (app.App, error) {
+	// Look for the app impl. factory
+	f, ok := c.apps[ctx.Tuple]
+	if !ok {
+		return nil, fmt.Errorf(
+			"app implementation for tuple not found: %s", ctx.Tuple)
+	}
+
+	// Start the impl.
+	result, err := f()
+	if err != nil {
+		return nil, fmt.Errorf(
+			"app failed to start properly: %s", err)
+	}
+
+	return result, nil
 }
 
 func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, error) {
