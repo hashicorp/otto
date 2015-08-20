@@ -84,6 +84,7 @@ func (c *CompileCommand) Run(args []string) int {
 		"Infrastructure: %s (%s)",
 		infra.Type,
 		infra.Flavor))
+	ui.Message("")
 
 	// Compile!
 	if err := core.Compile(); err != nil {

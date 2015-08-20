@@ -53,6 +53,13 @@ type Stack struct {
 // Helper Methods
 //-------------------------------------------------------------------
 
+// ID is a unique identifier for this Appfile. For now the unique ID
+// is just the name of the application itself. We'd like for this
+// to eventually be globally unique across an organization.
+func (f *File) ID() string {
+	return f.Application.Name
+}
+
 // ActiveInfrastructure returns the Infrastructure that is being
 // used for this Appfile.
 func (f *File) ActiveInfrastructure() *Infrastructure {

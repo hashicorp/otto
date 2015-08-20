@@ -74,33 +74,81 @@ func (c *Core) Compile() error {
 		return err
 	}
 
-	// Get the application implementation for this
-	appCtx, err := c.appContext(c.appfile)
-	if err != nil {
-		return err
-	}
-	app, err := c.app(appCtx)
-	if err != nil {
-		return err
-	}
-
 	// Delete the prior output directory
 	log.Printf("[INFO] deleting prior compilation contents: %s", c.outputDir)
 	if err := os.RemoveAll(c.outputDir); err != nil {
 		return err
 	}
 
-	// Compile!
+	// Compile the infrastructure for our application
 	log.Printf("[INFO] running infra compile...")
 	if _, err := infra.Compile(infraCtx); err != nil {
 		return err
 	}
-	log.Printf("[INFO] running app compile...")
-	if _, err := app.Compile(appCtx); err != nil {
+
+	// Walk through the dependencies and compile all of them.
+	// We have to compile every dependency for dev building.
+	err = c.walk(func(app app.App, ctx *app.Context, root bool) error {
+		if !root {
+			c.ui.Message(fmt.Sprintf(
+				"Compiling dependency '%s'...",
+				ctx.Appfile.Application.Name))
+		} else {
+			c.ui.Message(fmt.Sprintf(
+				"Compiling main application..."))
+		}
+
+		_, err := app.Compile(ctx)
 		return err
-	}
+	})
 
 	return nil
+}
+
+func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
+	root, err := c.appfileCompiled.Graph.Root()
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading app: %s", err)
+	}
+
+	// Walk the appfile graph.
+	var stop int32 = 0
+	return c.appfileCompiled.Graph.Walk(func(raw dag.Vertex) (err error) {
+		// If we're told to stop (something else had an error), then stop early.
+		// Graphs walks by default will complete all disjoint parts of the
+		// graph before failing, but Otto doesn't have to do that.
+		if atomic.LoadInt32(&stop) != 0 {
+			return nil
+		}
+
+		// If we exit with an error, then mark the stop atomic
+		defer func() {
+			if err != nil {
+				atomic.StoreInt32(&stop, 1)
+			}
+		}()
+
+		// Convert to the rich vertex type so that we can access data
+		v := raw.(*appfile.CompiledGraphVertex)
+
+		// Get the context and app for this appfile
+		appCtx, err := c.appContext(v.File)
+		if err != nil {
+			return fmt.Errorf(
+				"Error loading Appfile for '%s': %s",
+				dag.VertexName(raw), err)
+		}
+		app, err := c.app(appCtx)
+		if err != nil {
+			return fmt.Errorf(
+				"Error loading App implementation for '%s': %s",
+				dag.VertexName(raw), err)
+		}
+
+		// Call our callback
+		return f(app, appCtx, raw == root)
+	})
 }
 
 // Dev starts a dev environment for the current application. For destroying
@@ -161,11 +209,8 @@ func (c *Core) Dev() error {
 				dag.VertexName(raw), err)
 		}
 
-		// The context needs to be modified to save data to a custom
-		// directory.
-		println(dep)
-
 		// Build the development dependency
+		println(dep)
 
 		return nil
 	})
@@ -247,8 +292,14 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 		InfraFlavor: config.Flavor,
 	}
 
-	// The output directory for data
+	// The output directory for data. This is either the main app so
+	// it goes directly into "app" or it is a dependency and goes into
+	// a dep folder.
 	outputDir := filepath.Join(c.outputDir, "app")
+	if id := f.ID(); id != c.appfile.ID() {
+		outputDir = filepath.Join(
+			c.outputDir, fmt.Sprintf("dep-%s", id))
+	}
 
 	return &app.Context{
 		Dir:         outputDir,
