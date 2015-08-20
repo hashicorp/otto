@@ -10,6 +10,12 @@ type Mock struct {
 	DevCalled  bool
 	DevContext *Context
 	DevErr     error
+
+	DevDepCalled     bool
+	DevDepContextDst *Context
+	DevDepContextSrc *Context
+	DevDepResult     *DevDep
+	DevDepErr        error
 }
 
 func (m *Mock) Compile(ctx *Context) (*CompileResult, error) {
@@ -22,4 +28,11 @@ func (m *Mock) Dev(ctx *Context) error {
 	m.DevCalled = true
 	m.DevContext = ctx
 	return m.DevErr
+}
+
+func (m *Mock) DevDep(dst, src *Context) (*DevDep, error) {
+	m.DevDepCalled = true
+	m.DevDepContextDst = dst
+	m.DevDepContextSrc = src
+	return m.DevDepResult, m.DevDepErr
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"sync/atomic"
 
 	"github.com/hashicorp/otto/app"
@@ -155,62 +156,51 @@ func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
 // and other tasks against the dev environment, use the generic `Execute`
 // method.
 func (c *Core) Dev() error {
-	// First get the root app and context, since we need that for
-	// everything else.
+	// We need to get the root data separately since we need that for
+	// all the function calls into the dependencies.
 	root, err := c.appfileCompiled.Graph.Root()
 	if err != nil {
+		return err
+	}
+	rootCtx, err := c.appContext(root.(*appfile.CompiledGraphVertex).File)
+	if err != nil {
 		return fmt.Errorf(
-			"Error loading app: %s", err)
+			"Error loading App: %s", err)
 	}
-	appCtx, err := c.appContext(root.(*appfile.CompiledGraphVertex).File)
+	rootApp, err := c.app(rootCtx)
 	if err != nil {
-		return fmt.Errorf("Error loading Appfile: %s", err)
-	}
-	app, err := c.app(appCtx)
-	if err != nil {
-		return fmt.Errorf("Error loading App: %s", err)
+		return fmt.Errorf(
+			"Error loading App: %s", err)
 	}
 
 	// Go through all the dependencies and build their immutable
 	// dev environment pieces for the final configuration.
-	var stop int32 = 0
-	err = c.appfileCompiled.Graph.Walk(func(raw dag.Vertex) (err error) {
-		// If this is the root, skip it. We do that separately.
-		if raw == root {
+	var depLock sync.Mutex
+	deps := make([]*app.DevDep, 0, len(c.appfileCompiled.Graph.Vertices()))
+	err = c.walk(func(app app.App, ctx *app.Context, root bool) error {
+		// If it is the root, we just return and do nothing else since
+		// the root is a special case where we're building the actual
+		// dev environment.
+		if root {
 			return nil
-		}
-
-		// If we're told to stop (something else had an error), then stop early
-		if atomic.LoadInt32(&stop) != 0 {
-			return nil
-		}
-
-		// If we exit with an error, then mark the stop atomic
-		defer func() {
-			if err != nil {
-				atomic.StoreInt32(&stop, 1)
-			}
-		}()
-
-		// Convert to the rich vertex type so that we can access data
-		v := raw.(*appfile.CompiledGraphVertex)
-
-		// Get the context and app for this appfile
-		depCtx, err := c.appContext(v.File)
-		if err != nil {
-			return fmt.Errorf(
-				"Error loading Appfile for dependency '%s': %s",
-				dag.VertexName(raw), err)
-		}
-		dep, err := c.app(depCtx)
-		if err != nil {
-			return fmt.Errorf(
-				"Error loading App implementation for dependency '%s': %s",
-				dag.VertexName(raw), err)
 		}
 
 		// Build the development dependency
-		println(dep)
+		dep, err := app.DevDep(rootCtx, ctx)
+		if err != nil {
+			return fmt.Errorf(
+				"Error building dependency for dev '%s': %s",
+				ctx.Appfile.Application.Name,
+				err)
+		}
+
+		// Store the dependency so we can access it later. We just append
+		// this to the end of the the deps list (w/ a lock since we're
+		// walking in parallel). We can do this since we're walking depth-first
+		// so the order should be good.
+		depLock.Lock()
+		defer depLock.Unlock()
+		deps = append(deps, dep)
 
 		return nil
 	})
@@ -218,8 +208,12 @@ func (c *Core) Dev() error {
 		return err
 	}
 
-	println(app)
-	return nil
+	// Write the deps to the context
+	rootCtx.DevDeps = deps
+
+	// All the development dependencies are built/loaded. We now have
+	// everything we need to build the complete development environment.
+	return rootApp.Dev(rootCtx)
 }
 
 // Execute executes the given task for this Appfile.

@@ -42,7 +42,7 @@ type App interface {
 	// The results of this call are cached to speed up development
 	// of the destination app until there is a change, which is detected
 	// based on VCS.
-	// DevDep(dst *Context, src *Context) error
+	DevDep(dst *Context, src *Context) (*DevDep, error)
 }
 
 // Context is the context for operations on applications. Some of the
@@ -55,6 +55,10 @@ type Context struct {
 	// Both of these fields will only be set for the Execute call.
 	Action     string
 	ActionArgs []string
+
+	// DevDeps will be populated with the list of dev dependencies.
+	// This will only be available in the Dev call.
+	DevDeps []*DevDep
 
 	// Dir is the directory that the compilation is allowed to write to
 	// for persistant storage of data that is available during task
