@@ -30,6 +30,9 @@ func (u *Styled) prefix(prefix, msg string) string {
 	}
 
 	str := buf.String()
-	str = str[:len(str)-1]
+	if msg != "" {
+		str = str[:len(str)-1]
+	}
+
 	return str
 }
