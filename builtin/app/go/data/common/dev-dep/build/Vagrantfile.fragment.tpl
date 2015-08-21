@@ -2,11 +2,13 @@
 
 ${{ name }}_setup = <<COPY
 # Copy our binary
-mv /tmp/dep-{{ name }} /usr/local/bin/{{ name }}
+sudo mv /tmp/dep-{{ name }} /usr/local/bin/{{ name }}
 
 # Copy the upstart file
-mv /tmp/dep-{{ name }}.upstart.conf /etc/init/{{ name }}.conf
+sudo mv /tmp/dep-{{ name }}.upstart.conf /etc/init/{{ name }}.conf
 
+# Start it!
+sudo start {{ name }}
 COPY
 # Copy files into a temp directory. The script will move them.
 config.vm.provision "file",
