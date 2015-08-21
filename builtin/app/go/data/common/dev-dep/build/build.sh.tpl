@@ -5,8 +5,13 @@
 # This is the build script for a Go-based project.
 set -e
 
+# Set this to fake the bashrc on some platforms that we're interactive.
+# Ubuntu in particular by default won't load the bashrc if this isn't
+# set.
+export PS1="> "
+
 # Source our profile so we get our path properly setup
-. ~/.bashrc
+. /home/vagrant/.bashrc
 
 # Go into our working directory
 cd /vagrant

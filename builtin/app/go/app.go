@@ -20,6 +20,8 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		Asset:    Asset,
 		AssetDir: AssetDir,
 		Context: map[string]interface{}{
+			"name": ctx.Appfile.Application.Name,
+			"ctx":  ctx,
 			"path": map[string]string{
 				"compiled": ctx.Dir,
 				"working":  filepath.Dir(ctx.Appfile.Path),
@@ -42,9 +44,8 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
-	// TODO:
-	return nil
 	return vagrant.Dev(ctx, &vagrant.DevOptions{
+		Deps:         ctx.DevDeps,
 		Instructions: strings.TrimSpace(devInstructions),
 	})
 }
@@ -61,12 +62,18 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 			"can do something faster. Future versions of Otto will detect and\n" +
 			"do this. As long as the application doesn't change, Otto will\n" +
 			"cache the results of this build.\n\n")
-	vagrant.Build(src, &vagrant.BuildOptions{
+	err := vagrant.Build(src, &vagrant.BuildOptions{
 		Dir:    filepath.Join(src.Dir, "dev-dep/build"),
 		Script: "/otto/build.sh",
 	})
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	// Return the fragment path we have setup
+	return &app.DevDep{
+		FragmentPath: filepath.Join(src.Dir, "dev-dep/build/Vagrantfile.fragment"),
+	}, nil
 }
 
 const devInstructions = `

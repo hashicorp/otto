@@ -210,7 +210,6 @@ func (c *Core) Dev() error {
 
 	// Write the deps to the context
 	rootCtx.DevDeps = deps
-	return nil
 
 	// All the development dependencies are built/loaded. We now have
 	// everything we need to build the complete development environment.
