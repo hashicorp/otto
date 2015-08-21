@@ -56,10 +56,6 @@ type Context struct {
 	Action     string
 	ActionArgs []string
 
-	// DevDeps will be populated with the list of dev dependencies.
-	// This will only be available in the Dev call.
-	DevDeps []*DevDep
-
 	// Dir is the directory that the compilation is allowed to write to
 	// for persistant storage of data that is available during task
 	// execution. For tasks, this will be the directory that compilation
@@ -81,7 +77,17 @@ type Context struct {
 
 	// Ui is the Ui object that can be used to communicate with the user.
 	Ui ui.Ui
+
+	// DevDepFragments will be populated with the list of dev dep
+	// Vagrantfile fragment paths. This will only be available in the Compile
+	// call.
+	DevDepFragments []string
 }
 
 // CompileResult is the structure containing compilation result values.
-type CompileResult struct{}
+type CompileResult struct {
+	// DevDepFragmentPath is the path to the Vagrantfile fragment that
+	// should be added to other Vagrantfiles when this application is
+	// used as a dependency.
+	DevDepFragmentPath string
+}

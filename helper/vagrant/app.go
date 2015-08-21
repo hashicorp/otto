@@ -20,10 +20,6 @@ type DevOptions struct {
 	// Instructions are help text that is shown after creating the
 	// development environment.
 	Instructions string
-
-	// Deps are the dependencies that we have. This will be used to
-	// automatically modify the Vagrantfile.
-	Deps []*app.DevDep
 }
 
 // Dev can be used as an implementation of app.App.Dev to automatically

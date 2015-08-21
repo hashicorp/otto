@@ -1,9 +1,9 @@
 package exec
 
-import(
+import (
+	"io"
 	"os"
 	"os/exec"
-	"io"
 
 	"github.com/hashicorp/otto/ui"
 )

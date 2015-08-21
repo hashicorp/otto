@@ -10,6 +10,9 @@ import (
 	"strings"
 
 	"gopkg.in/flosch/pongo2.v3"
+
+	// Template helpers
+	_ "github.com/hashicorp/otto/helper/pongo2"
 )
 
 //go:generate go-bindata -o=bindata_test.go -pkg=bindata -nomemcopy ./test-data/...

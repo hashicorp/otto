@@ -89,6 +89,8 @@ func (c *Core) Compile() error {
 
 	// Walk through the dependencies and compile all of them.
 	// We have to compile every dependency for dev building.
+	var resultLock sync.Mutex
+	results := make([]*app.CompileResult, 0, len(c.appfileCompiled.Graph.Vertices()))
 	err = c.walk(func(app app.App, ctx *app.Context, root bool) error {
 		if !root {
 			c.ui.Message(fmt.Sprintf(
@@ -99,8 +101,33 @@ func (c *Core) Compile() error {
 				"Compiling main application..."))
 		}
 
-		_, err := app.Compile(ctx)
-		return err
+		// If this is the root, we set the dev dep fragments.
+		if root {
+			// We grab the lock just in case although if we're the
+			// root this should be serialized.
+			resultLock.Lock()
+			ctx.DevDepFragments = make([]string, 0, len(results))
+			for _, result := range results {
+				if result.DevDepFragmentPath != "" {
+					ctx.DevDepFragments = append(
+						ctx.DevDepFragments, result.DevDepFragmentPath)
+				}
+			}
+			resultLock.Unlock()
+		}
+
+		// Compile!
+		result, err := app.Compile(ctx)
+		if err != nil {
+			return err
+		}
+
+		// Store the compilation result for later
+		resultLock.Lock()
+		defer resultLock.Unlock()
+		results = append(results, result)
+
+		return nil
 	})
 
 	return nil
@@ -175,8 +202,6 @@ func (c *Core) Dev() error {
 
 	// Go through all the dependencies and build their immutable
 	// dev environment pieces for the final configuration.
-	var depLock sync.Mutex
-	deps := make([]*app.DevDep, 0, len(c.appfileCompiled.Graph.Vertices()))
 	err = c.walk(func(app app.App, ctx *app.Context, root bool) error {
 		// If it is the root, we just return and do nothing else since
 		// the root is a special case where we're building the actual
@@ -186,7 +211,7 @@ func (c *Core) Dev() error {
 		}
 
 		// Build the development dependency
-		dep, err := app.DevDep(rootCtx, ctx)
+		_, err := app.DevDep(rootCtx, ctx)
 		if err != nil {
 			return fmt.Errorf(
 				"Error building dependency for dev '%s': %s",
@@ -194,22 +219,11 @@ func (c *Core) Dev() error {
 				err)
 		}
 
-		// Store the dependency so we can access it later. We just append
-		// this to the end of the the deps list (w/ a lock since we're
-		// walking in parallel). We can do this since we're walking depth-first
-		// so the order should be good.
-		depLock.Lock()
-		defer depLock.Unlock()
-		deps = append(deps, dep)
-
 		return nil
 	})
 	if err != nil {
 		return err
 	}
-
-	// Write the deps to the context
-	rootCtx.DevDeps = deps
 
 	// All the development dependencies are built/loaded. We now have
 	// everything we need to build the complete development environment.

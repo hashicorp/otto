@@ -20,8 +20,8 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		Asset:    Asset,
 		AssetDir: AssetDir,
 		Context: map[string]interface{}{
-			"name": ctx.Appfile.Application.Name,
-			"ctx":  ctx,
+			"name":          ctx.Appfile.Application.Name,
+			"dev_fragments": ctx.DevDepFragments,
 			"path": map[string]string{
 				"compiled": ctx.Dir,
 				"working":  filepath.Dir(ctx.Appfile.Path),
@@ -40,12 +40,13 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return &app.CompileResult{
+		DevDepFragmentPath: filepath.Join(ctx.Dir, "dev-dep/build/Vagrantfile.fragment"),
+	}, nil
 }
 
 func (a *App) Dev(ctx *app.Context) error {
 	return vagrant.Dev(ctx, &vagrant.DevOptions{
-		Deps:         ctx.DevDeps,
 		Instructions: strings.TrimSpace(devInstructions),
 	})
 }
@@ -71,9 +72,7 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 	}
 
 	// Return the fragment path we have setup
-	return &app.DevDep{
-		FragmentPath: filepath.Join(src.Dir, "dev-dep/build/Vagrantfile.fragment"),
-	}, nil
+	return nil, nil
 }
 
 const devInstructions = `

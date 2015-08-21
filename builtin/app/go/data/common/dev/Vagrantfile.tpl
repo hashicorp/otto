@@ -10,6 +10,11 @@ Vagrant.configure("2") do |config|
   # Setup a synced folder from our working directory to /vagrant
   config.vm.synced_folder "{{ path.working }}", "/vagrant"
 
+  # Load all our fragments here for any dependencies.
+  {% for fragment in dev_fragments %}
+  {{ fragment|read }}
+  {% endfor %}
+
   # Install Go build environment
   config.vm.provision "shell", inline: $script_golang
 
