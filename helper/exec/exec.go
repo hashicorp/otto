@@ -45,6 +45,9 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 	out_w.Close()
 	<-uiDone
 
+	// Output one extra newline to separate output from Otto
+	uiVal.Message("")
+
 	// Return the output from the command
 	return err
 }
