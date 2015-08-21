@@ -21,7 +21,8 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		AssetDir: AssetDir,
 		Context: map[string]interface{}{
 			"path": map[string]string{
-				"working": filepath.Dir(ctx.Appfile.Path),
+				"compiled": ctx.Dir,
+				"working":  filepath.Dir(ctx.Appfile.Path),
 			},
 		},
 	}
@@ -41,9 +42,31 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
+	// TODO:
+	return nil
 	return vagrant.Dev(ctx, &vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
 	})
+}
+
+func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
+	// For Go, we build a binary using Vagrant, extract that binary,
+	// and setup a Vagrantfile fragment to copy that binary in plus
+	// setup the scripts to start it on boot.
+	src.Ui.Header(fmt.Sprintf(
+		"Building the dev dependency for '%s'", src.Appfile.Application.Name))
+	src.Ui.Message(
+		"To ensure cross-platform compatibility, we'll use Vagrant to\n" +
+			"build this application. This is slow, and in a lot of cases we\n" +
+			"can do something faster. Future versions of Otto will detect and\n" +
+			"do this. As long as the application doesn't change, Otto will\n" +
+			"cache the results of this build.\n\n")
+	vagrant.Build(src, &vagrant.BuildOptions{
+		Dir:    filepath.Join(src.Dir, "dev-dep/build"),
+		Script: "/otto/build.sh",
+	})
+
+	return nil, nil
 }
 
 const devInstructions = `
