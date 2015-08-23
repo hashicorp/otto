@@ -12,7 +12,7 @@ sudo start {{ name }}
 COPY
 # Copy files into a temp directory. The script will move them.
 config.vm.provision "file",
-  source: "{{ path.compiled }}/dev-dep/build/output",
+  source: "{{ path.cache }}/dev-dep-output",
   destination: "/tmp/dep-{{ name }}"
 
 config.vm.provision "file",

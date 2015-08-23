@@ -18,4 +18,4 @@ cd /vagrant
 
 # Build the project and write the output into our shared directory
 # with the compiled directory so that we can easily extract it.
-go build -o "/otto/output"
+go build -o "/otto-cache/dev-dep-output"

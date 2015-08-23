@@ -13,11 +13,16 @@ import (
 	"github.com/hashicorp/otto/otto"
 	"github.com/hashicorp/otto/ui"
 	"github.com/mitchellh/cli"
+	"github.com/mitchellh/go-homedir"
 )
 
 const (
 	// DefaultAppfile is the default filename for the Appfile
 	DefaultAppfile = "Appfile"
+
+	// DefaultLocalDataDir is the default path to the local data
+	// directory.
+	DefaultLocalDataDir = "~/.otto.d"
 
 	// DefaultOutputDir is the default filename for the output directory
 	DefaultOutputDir                = ".otto"
@@ -74,9 +79,15 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 		return nil, err
 	}
 
+	localDir, err := homedir.Expand(DefaultLocalDataDir)
+	if err != nil {
+		return nil, err
+	}
+
 	config := *m.CoreConfig
 	config.Appfile = f
 	config.Directory = dir
+	config.LocalDataDir = localDir
 	config.OutputDir = filepath.Join(
 		rootDir, DefaultOutputDir, DefaultOutputDirCompiledData)
 	config.Ui = m.OttoUi()

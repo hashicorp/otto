@@ -64,6 +64,13 @@ type Context struct {
 	// be stored in the directory service.
 	Dir string
 
+	// CacheDir is the directory where data can be cached. This data
+	// will persist across compiles of the same version of an Appfile.
+	//
+	// The App implementation should function under the assumption that
+	// this cache directory can be cleared at any time between runs.
+	CacheDir string
+
 	// Tuple is the Tuple that identifies this application. This can be
 	// used so that an implementatin of App can work with multiple tuple
 	// types.

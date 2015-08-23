@@ -15,6 +15,9 @@ Vagrant.configure("2") do |config|
   # /otto. We do this to access the build script.
   config.vm.synced_folder "{{ path.compiled }}/dev-dep/build", "/otto"
 
+  # Setup a synced folder from where the cache dir is
+  config.vm.synced_folder "{{ path.cache }}", "/otto-cache"
+
   # Install Go build environment
   config.vm.provision "shell", inline: $script_golang
 end

@@ -23,12 +23,16 @@ type Core struct {
 	apps            map[app.Tuple]app.Factory
 	dir             directory.Backend
 	infras          map[string]infrastructure.Factory
+	localDir        string
 	outputDir       string
 	ui              ui.Ui
 }
 
 // CoreConfig is configuration for creating a new core with NewCore.
 type CoreConfig struct {
+	// LocalDataDir is the directory where local data will be stored.
+	LocalDataDir string
+
 	// OutputDir is the directory where data will be written. Each
 	// compilation will clear this directory prior to writing to it.
 	OutputDir string
@@ -62,6 +66,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		apps:            c.Apps,
 		dir:             c.Directory,
 		infras:          c.Infrastructures,
+		localDir:        c.LocalDataDir,
 		outputDir:       c.OutputDir,
 		ui:              c.Ui,
 	}, nil
@@ -202,7 +207,7 @@ func (c *Core) Dev() error {
 
 	// Go through all the dependencies and build their immutable
 	// dev environment pieces for the final configuration.
-	err = c.walk(func(app app.App, ctx *app.Context, root bool) error {
+	err = c.walk(func(appImpl app.App, ctx *app.Context, root bool) error {
 		// If it is the root, we just return and do nothing else since
 		// the root is a special case where we're building the actual
 		// dev environment.
@@ -210,13 +215,37 @@ func (c *Core) Dev() error {
 			return nil
 		}
 
+		// Get the path to where we'd cache the dependency if we have
+		// cached it...
+		cachePath := filepath.Join(ctx.CacheDir, "dev-dep.json")
+
+		// Check if we've cached this. If so, then use the cache.
+		if _, err := app.ReadDevDep(cachePath); err == nil {
+			ctx.Ui.Header(fmt.Sprintf(
+				"Using cached dev dependency for '%s'",
+				ctx.Appfile.Application.Name))
+			return nil
+		}
+
 		// Build the development dependency
-		_, err := app.DevDep(rootCtx, ctx)
+		dep, err := appImpl.DevDep(rootCtx, ctx)
 		if err != nil {
 			return fmt.Errorf(
 				"Error building dependency for dev '%s': %s",
 				ctx.Appfile.Application.Name,
 				err)
+		}
+
+		// If we have a dependency with files, then verify the files
+		// and store it in our cache directory so we can retrieve it
+		// later.
+		if len(dep.Files) > 0 {
+			if err := app.WriteDevDep(cachePath, dep); err != nil {
+				return fmt.Errorf(
+					"Error caching dependency for dev '%s': %s",
+					ctx.Appfile.Application.Name,
+					err)
+			}
 		}
 
 		return nil
@@ -309,8 +338,17 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 			c.outputDir, fmt.Sprintf("dep-%s", id))
 	}
 
+	// The cache directory for this app
+	cacheDir := filepath.Join(c.localDir, "cache", f.ID())
+	if err := os.MkdirAll(cacheDir, 0755); err != nil {
+		return nil, fmt.Errorf(
+			"error making cache directory '%s': %s",
+			cacheDir, err)
+	}
+
 	return &app.Context{
 		Dir:         outputDir,
+		CacheDir:    cacheDir,
 		Tuple:       tuple,
 		Appfile:     f,
 		Application: f.Application,

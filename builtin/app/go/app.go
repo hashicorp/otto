@@ -23,6 +23,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			"name":          ctx.Appfile.Application.Name,
 			"dev_fragments": ctx.DevDepFragments,
 			"path": map[string]string{
+				"cache":    ctx.CacheDir,
 				"compiled": ctx.Dir,
 				"working":  filepath.Dir(ctx.Appfile.Path),
 			},
@@ -72,7 +73,9 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 	}
 
 	// Return the fragment path we have setup
-	return nil, nil
+	return &app.DevDep{
+		Files: []string{"dev-dep-output"},
+	}, nil
 }
 
 const devInstructions = `
