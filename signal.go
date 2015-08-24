@@ -6,7 +6,7 @@ import (
 	"os/signal"
 )
 
-func init() {
+func initSignalHandlers() {
 	// Setup a listener for interrupts (SIGINT) and just black hole
 	// the signals. We do this because subcommands should setup additional
 	// listeners if they care. And if we don't do this then the subprocesses

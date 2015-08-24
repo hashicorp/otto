@@ -94,6 +94,9 @@ func wrappedMain() int {
 		"[INFO] Otto version: %s %s %s",
 		Version, VersionPrerelease, GitCommit)
 
+	// Setup signal handlers
+	initSignalHandlers()
+
 	// Load the configuration
 	config := BuiltinConfig
 
