@@ -51,6 +51,22 @@ func TestParse(t *testing.T) {
 			true,
 		},
 
+		// Customizations
+		{
+			"basic-custom.hcl",
+			&File{
+				Customization: []*Customization{
+					&Customization{
+						Type: "dev",
+						Config: map[string]interface{}{
+							"go_version": "1.5",
+						},
+					},
+				},
+			},
+			false,
+		},
+
 		// Infrastructures
 		{
 			"infra-dup.hcl",

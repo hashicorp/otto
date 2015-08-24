@@ -13,6 +13,7 @@ type File struct {
 	Application    *Application
 	Project        *Project
 	Infrastructure []*Infrastructure
+	Customization  []*Customization
 }
 
 // Application is the structure of an application definition.
@@ -20,6 +21,13 @@ type Application struct {
 	Name         string
 	Type         string
 	Dependencies []*Dependency `mapstructure:"dependency"`
+}
+
+// Customization is the structure of customization stanzas within
+// the Appfile.
+type Customization struct {
+	Type   string
+	Config map[string]interface{}
 }
 
 // Dependency is another Appfile that an App depends on
@@ -75,6 +83,10 @@ func (f *File) ActiveInfrastructure() *Infrastructure {
 //-------------------------------------------------------------------
 // GoStringer
 //-------------------------------------------------------------------
+
+func (v *Customization) GoString() string {
+	return fmt.Sprintf("*%#v", *v)
+}
 
 func (v *Infrastructure) GoString() string {
 	return fmt.Sprintf("*%#v", *v)
