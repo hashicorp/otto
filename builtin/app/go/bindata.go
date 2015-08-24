@@ -139,7 +139,7 @@ func dataCommonDevDepBuildVagrantfileFragmentTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/common/dev-dep/build/Vagrantfile.fragment.tpl", size: 656, mode: os.FileMode(420), modTime: time.Unix(1440373490, 0)}
+	info := bindataFileInfo{name: "data/common/dev-dep/build/Vagrantfile.fragment.tpl", size: 656, mode: os.FileMode(420), modTime: time.Unix(1440375056, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -159,7 +159,7 @@ func dataCommonDevDepBuildVagrantfileTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/common/dev-dep/build/Vagrantfile.tpl", size: 1458, mode: os.FileMode(420), modTime: time.Unix(1440373424, 0)}
+	info := bindataFileInfo{name: "data/common/dev-dep/build/Vagrantfile.tpl", size: 1458, mode: os.FileMode(420), modTime: time.Unix(1440375056, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -179,7 +179,7 @@ func dataCommonDevDepBuildBuildShTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/common/dev-dep/build/build.sh.tpl", size: 564, mode: os.FileMode(493), modTime: time.Unix(1440373472, 0)}
+	info := bindataFileInfo{name: "data/common/dev-dep/build/build.sh.tpl", size: 564, mode: os.FileMode(493), modTime: time.Unix(1440375056, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
