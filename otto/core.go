@@ -240,6 +240,13 @@ func (c *Core) Dev() error {
 		// and store it in our cache directory so we can retrieve it
 		// later.
 		if len(dep.Files) > 0 {
+			if err := dep.RelFiles(ctx.CacheDir); err != nil {
+				return fmt.Errorf(
+					"Error caching dependency for dev '%s': %s",
+					ctx.Appfile.Application.Name,
+					err)
+			}
+
 			if err := app.WriteDevDep(cachePath, dep); err != nil {
 				return fmt.Errorf(
 					"Error caching dependency for dev '%s': %s",

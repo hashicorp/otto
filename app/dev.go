@@ -3,8 +3,10 @@ package app
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 // DevDep has information about an upstream dependency that should be
@@ -20,6 +22,28 @@ type DevDep struct {
 	// in the CacheDir, no caching will occur. The log will note if this
 	// is happening.
 	Files []string `json:"files"`
+}
+
+// RelFiles makes all the Files values relative to the given directory.
+func (d *DevDep) RelFiles(dir string) error {
+	for i, f := range d.Files {
+		// If the path is already relative, ignore it
+		if !filepath.IsAbs(f) {
+			continue
+		}
+
+		// Make the path relative
+		f, err := filepath.Rel(dir, f)
+		if err != nil {
+			return fmt.Errorf(
+				"couldn't make directory relative: %s\n\n%s",
+				d.Files[i], err)
+		}
+
+		d.Files[i] = f
+	}
+
+	return nil
 }
 
 // ReadDevDep reads a marshalled DevDep from disk.
