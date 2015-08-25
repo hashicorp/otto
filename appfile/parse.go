@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/hcl"
 	hclobj "github.com/hashicorp/hcl/hcl"
@@ -127,13 +128,13 @@ func parseCustomizations(result *File, obj *hclobj.Object) error {
 		}
 
 		var c Customization
-		c.Type = n
+		c.Type = strings.ToLower(n)
 		c.Config = m
 
 		collection = append(collection, &c)
 	}
 
-	result.Customization = collection
+	result.Customization = &CustomizationSet{Raw: collection}
 	return nil
 }
 

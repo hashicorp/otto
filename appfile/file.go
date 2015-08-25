@@ -13,7 +13,7 @@ type File struct {
 	Application    *Application
 	Project        *Project
 	Infrastructure []*Infrastructure
-	Customization  []*Customization
+	Customization  *CustomizationSet
 }
 
 // Application is the structure of an application definition.
