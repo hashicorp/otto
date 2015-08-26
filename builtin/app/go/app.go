@@ -46,6 +46,10 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	}, nil
 }
 
+func (a *App) Build(ctx *app.Context) error {
+	return nil
+}
+
 func (a *App) Dev(ctx *app.Context) error {
 	return vagrant.Dev(ctx, &vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),

@@ -25,6 +25,10 @@ type App interface {
 	// this application.
 	Compile(*Context) (*CompileResult, error)
 
+	// Build is called to build the deployable artifact for this
+	// application.
+	Build(*Context) error
+
 	// Dev should manage a development environment for this app
 	// type. This is called for the local, mutable dev environment
 	// where this application is the main thing under development.

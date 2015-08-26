@@ -184,6 +184,29 @@ func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
 	})
 }
 
+// Build builds the deployable artifact for the currently compiled
+// Appfile.
+func (c *Core) Build() error {
+	// We only use the root application for this task, upstream dependencies
+	// don't have an effect on the build process.
+	root, err := c.appfileCompiled.Graph.Root()
+	if err != nil {
+		return err
+	}
+	rootCtx, err := c.appContext(root.(*appfile.CompiledGraphVertex).File)
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading App: %s", err)
+	}
+	rootApp, err := c.app(rootCtx)
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading App: %s", err)
+	}
+
+	return rootApp.Build(rootCtx)
+}
+
 // Dev starts a dev environment for the current application. For destroying
 // and other tasks against the dev environment, use the generic `Execute`
 // method.
