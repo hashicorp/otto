@@ -56,6 +56,42 @@ func TestPackerUi(t *testing.T) {
 			},
 		},
 
+		"multiple in one": {
+			[]string{"ui"},
+			[]string{
+				"1376289459,,ui,say,foo bar\n1376289459,,ui,say,baz\n1376289459,,ui,say,qux",
+			},
+			[]*Output{
+				&Output{
+					Timestamp: "1376289459",
+					Target:    "",
+					Type:      "ui",
+					Data: []string{
+						"say",
+						"foo bar",
+					},
+				},
+				&Output{
+					Timestamp: "1376289459",
+					Target:    "",
+					Type:      "ui",
+					Data: []string{
+						"say",
+						"baz",
+					},
+				},
+				&Output{
+					Timestamp: "1376289459",
+					Target:    "",
+					Type:      "ui",
+					Data: []string{
+						"say",
+						"qux",
+					},
+				},
+			},
+		},
+
 		"trailing newline": {
 			[]string{"ui"},
 			[]string{

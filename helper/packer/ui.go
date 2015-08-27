@@ -52,65 +52,69 @@ func (u *packerUi) Raw(msg string) {
 
 	u.once.Do(u.init)
 
-	// Get the index for the newline if there is one
-	idx := strings.IndexRune(msg, '\n')
-	if idx == -1 {
-		// The newline isn't there, write it to the circular buffer
-		// and wait longer.
-		u.buf.Write([]byte(msg))
-		return
-	}
-
-	// We got a newline! Grab the contents from the circular buffer and
-	// copy it so we can clear the buffer.
-	bufRaw := u.buf.Bytes()
-	buf := string(bufRaw)
-	bufRaw = nil
-	u.buf.Reset()
-
-	// Write anything past the index to the circular buffer for the
-	// next event.
-	if idx < len(msg) {
-		u.buf.Write([]byte(msg[idx+1:]))
-	}
-
-	// Combine the data from the buffer up to the newline so we
-	// have the full line, and split that by the commas.
-	buf += msg[:idx]
-	parts := strings.Split(buf, ",")
-	if len(parts) < 3 {
-		// Uh, invalid event?
-		log.Printf("[ERROR] Invalid Packer event line: %s", buf)
-		return
-	}
-
-	// Look for the callback
-	cb, ok := u.Callbacks[parts[2]]
-	if !ok {
-		// No callback registered for this type, drop it
-		return
-	}
-
-	// We have a callback, construct the output!
-	var data []string
-	if len(parts) > 3 {
-		data = make([]string, len(parts)-3)
-		for i, raw := range parts[3:] {
-			data[i] = strings.Replace(
-				strings.Replace(
-					strings.Replace(raw, "%!(PACKER_COMMA)", ",", -1),
-					"\\n", "\n", -1),
-				"\\r", "\r", -1)
+	// We loop while we have a newline in the message
+	for {
+		// Get the index for the newline if there is one
+		idx := strings.IndexRune(msg, '\n')
+		if idx == -1 {
+			// The newline isn't there, write it to the circular buffer
+			// and wait longer.
+			u.buf.Write([]byte(msg))
+			break
 		}
-	}
 
-	// Callback
-	cb(&Output{
-		Timestamp: parts[0],
-		Target:    parts[1],
-		Type:      parts[2],
-		Data:      data,
-	})
+		// We got a newline! Grab the contents from the circular buffer and
+		// copy it so we can clear the buffer.
+		bufRaw := u.buf.Bytes()
+		buf := string(bufRaw) + msg[:idx]
+		bufRaw = nil
+		u.buf.Reset()
+
+		// Write anything past the index to the circular buffer for the
+		// next event.
+		if idx < len(msg) {
+			msg = msg[idx+1:]
+		} else {
+			msg = ""
+		}
+
+		// Combine the data from the buffer up to the newline so we
+		// have the full line, and split that by the commas.
+		parts := strings.Split(buf, ",")
+		if len(parts) < 3 {
+			// Uh, invalid event?
+			log.Printf("[ERROR] Invalid Packer event line: %s", buf)
+			return
+		}
+
+		// Look for the callback
+		cb, ok := u.Callbacks[parts[2]]
+		if !ok {
+			// No callback registered for this type, drop it
+			return
+		}
+
+		// We have a callback, construct the output!
+		var data []string
+		if len(parts) > 3 {
+			data = make([]string, len(parts)-3)
+			for i, raw := range parts[3:] {
+				data[i] = strings.Replace(
+					strings.Replace(
+						strings.Replace(raw, "%!(PACKER_COMMA)", ",", -1),
+						"\\n", "\n", -1),
+					"\\r", "\r", -1)
+			}
+		}
+
+		// Callback
+		cb(&Output{
+			Timestamp: parts[0],
+			Target:    parts[1],
+			Type:      parts[2],
+			Data:      data,
+		})
+	}
 }
 
 func (u *packerUi) init() {
