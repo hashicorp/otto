@@ -1,8 +1,10 @@
 package terraform
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,6 +34,9 @@ type Infrastructure struct {
 	// for compilation. The data for the various flavors is expected to
 	// live in "data/#{flavor}"
 	Bindata *bindata.Data
+
+	// Variables are additional variables to pass into Terraform.
+	Variables map[string]string
 }
 
 func (i *Infrastructure) Creds(ctx *infrastructure.Context) (map[string]string, error) {
@@ -122,10 +127,30 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 		}
 	}
 
+	// Write variables into a file
+	varfile, err := ioutil.TempFile("", "otto")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(varfile.Name())
+	vars := make(map[string]string)
+	for k, v := range ctx.InfraCreds {
+		vars[k] = v
+	}
+	for k, v := range i.Variables {
+		vars[k] = v
+	}
+	err = json.NewEncoder(varfile).Encode(vars)
+	varfile.Close()
+	if err != nil {
+		return err
+	}
+
 	// Build the command to execute
 	cmd := exec.Command(
 		"terraform",
 		command,
+		"-var-file", varfile.Name(),
 		"-state", stateOldPath,
 		"-state-out", statePath)
 	cmd.Dir = ctx.Dir

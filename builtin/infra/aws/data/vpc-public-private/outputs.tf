@@ -7,6 +7,10 @@
 # Because of the importance of these values for Otto to function, care
 # should be taken if these are modified.
 
+output "region" {
+    value = "${var.aws_region}"
+}
+
 output "vpc_id" {
     value = "${aws_vpc.main.id}"
 }

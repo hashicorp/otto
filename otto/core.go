@@ -376,8 +376,6 @@ func (c *Core) creds(
 						"again by inputting the empty password as the password.",
 					err)
 			}
-
-			return nil
 		}
 	}
 
@@ -458,6 +456,9 @@ func (c *Core) executeInfra(opts *ExecuteOpts) error {
 	// Get the infra implementation for this
 	infra, infraCtx, err := c.infra()
 	if err != nil {
+		return err
+	}
+	if err := c.creds(infra, infraCtx); err != nil {
 		return err
 	}
 
