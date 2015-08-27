@@ -70,8 +70,9 @@ func (u *packerUi) Raw(msg string) {
 		bufRaw = nil
 		u.buf.Reset()
 
-		// Write anything past the index to the circular buffer for the
-		// next event.
+		// If we have more data, clear msg to that point. If we have
+		// no more data, then just set message to empty and we'll break
+		// on the next loop iteration
 		if idx < len(msg) {
 			msg = msg[idx+1:]
 		} else {
