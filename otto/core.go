@@ -187,6 +187,14 @@ func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
 // Build builds the deployable artifact for the currently compiled
 // Appfile.
 func (c *Core) Build() error {
+	// Get the infra implementation for this
+	infra, infraCtx, err := c.infra()
+	if err != nil {
+		return err
+	}
+
+	infra.Creds(infraCtx)
+
 	// We only use the root application for this task, upstream dependencies
 	// don't have an effect on the build process.
 	root, err := c.appfileCompiled.Graph.Root()

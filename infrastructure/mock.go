@@ -8,6 +8,10 @@ type Mock struct {
 	CompileErr     error
 }
 
+func (m *Mock) Creds(ctx *Context) (map[string]string, error) {
+	return nil, nil
+}
+
 func (m *Mock) Execute(ctx *Context) error {
 	return nil
 }

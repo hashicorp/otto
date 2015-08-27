@@ -9,6 +9,12 @@ import (
 // Infrastructure is an interface that must be implemented by each
 // infrastructure type with a method of creating it.
 type Infrastructure interface {
+	// Creds is called when Otto determines that it needs credentials
+	// for this infrastructure provider. The Infra should query the
+	// user (or environment) for creds and return them. Otto will
+	// handle encrypting, storing, and retrieving the credentials.
+	Creds(*Context) (map[string]string, error)
+
 	Execute(*Context) error
 	Compile(*Context) (*CompileResult, error)
 	Flavors() []string

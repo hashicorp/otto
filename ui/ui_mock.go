@@ -6,6 +6,9 @@ type Mock struct {
 	HeaderBuf  []string
 	MessageBuf []string
 	RawBuf     []string
+
+	InputResult string
+	InputError  error
 }
 
 func (u *Mock) Header(msg string) {
@@ -18,4 +21,8 @@ func (u *Mock) Message(msg string) {
 
 func (u *Mock) Raw(msg string) {
 	u.RawBuf = append(u.RawBuf, msg)
+}
+
+func (u *Mock) Input(opts *InputOpts) (string, error) {
+	return u.InputResult, u.InputError
 }

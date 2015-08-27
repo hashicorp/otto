@@ -26,4 +26,27 @@ type Ui interface {
 	Header(string)
 	Message(string)
 	Raw(string)
+
+	// Input is used to ask the user for input. This should be done
+	// sparingly or very early on since Otto is meant to be an automated
+	// tool.
+	Input(*InputOpts) (string, error)
+}
+
+// InputOpts are options for asking for input.
+type InputOpts struct {
+	// Id is a unique ID for the question being asked that might be
+	// used for logging or to look up a prior answered question.
+	Id string
+
+	// Query is a human-friendly question for inputting this value.
+	Query string
+
+	// Description is a description about what this option is. Be wary
+	// that this will probably be in a terminal so split lines as you see
+	// necessary.
+	Description string
+
+	// Default will be the value returned if no data is entered.
+	Default string
 }

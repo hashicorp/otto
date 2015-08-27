@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/armon/circbuf"
+	"github.com/hashicorp/otto/ui"
 )
 
 // OutputCallback is the type that is called when there is a matching
@@ -40,9 +41,10 @@ func (u *packerUi) Finish() {
 	}
 }
 
-// Ignore Header and Message because we don't use them from helper/exec
-func (u *packerUi) Header(string)  {}
-func (u *packerUi) Message(string) {}
+// Ignore these because we don't use them from helper/exec
+func (u *packerUi) Header(string)                       {}
+func (u *packerUi) Message(string)                      {}
+func (u *packerUi) Input(*ui.InputOpts) (string, error) { return "", nil }
 
 func (u *packerUi) Raw(msg string) {
 	if msg == "" {

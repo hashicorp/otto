@@ -24,10 +24,18 @@ import (
 //   * Handle many edge case scenarios gracefully
 //
 type Infrastructure struct {
+	// Creds is a function that gathers credentials. See helper/creds
+	// for nice helpers for implementing this function.
+	CredsFunc func(*infrastructure.Context) (map[string]string, error)
+
 	// Bindata is the bindata.Data structure where assets can be found
 	// for compilation. The data for the various flavors is expected to
 	// live in "data/#{flavor}"
 	Bindata *bindata.Data
+}
+
+func (i *Infrastructure) Creds(ctx *infrastructure.Context) (map[string]string, error) {
+	return i.CredsFunc(ctx)
 }
 
 func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
