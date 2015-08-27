@@ -15,8 +15,7 @@ package app
 
 import (
 	"github.com/hashicorp/otto/appfile"
-	"github.com/hashicorp/otto/directory"
-	"github.com/hashicorp/otto/ui"
+	"github.com/hashicorp/otto/context"
 )
 
 // App is the interface that must be implemented by each
@@ -53,6 +52,8 @@ type App interface {
 // Context is the context for operations on applications. Some of the
 // fields in this struct are only available for certain operations.
 type Context struct {
+	context.Shared
+
 	// Action is the sub-action to take when being executed.
 	//
 	// ActionArgs is the list of arguments for this action.
@@ -86,14 +87,6 @@ type Context struct {
 
 	// Application is the application configuration itself from the appfile.
 	Application *appfile.Application
-
-	// Directory is the directory service. This is available during
-	// both execution and compilation and can be used to view the
-	// global data prior to doing anything.
-	Directory directory.Backend
-
-	// Ui is the Ui object that can be used to communicate with the user.
-	Ui ui.Ui
 
 	// DevDepFragments will be populated with the list of dev dep
 	// Vagrantfile fragment paths. This will only be available in the Compile

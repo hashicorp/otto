@@ -1,15 +1,18 @@
 package otto
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
@@ -23,19 +26,25 @@ type Core struct {
 	apps            map[app.Tuple]app.Factory
 	dir             directory.Backend
 	infras          map[string]infrastructure.Factory
+	dataDir         string
 	localDir        string
-	outputDir       string
+	compileDir      string
 	ui              ui.Ui
 }
 
 // CoreConfig is configuration for creating a new core with NewCore.
 type CoreConfig struct {
-	// LocalDataDir is the directory where local data will be stored.
-	LocalDataDir string
-
-	// OutputDir is the directory where data will be written. Each
-	// compilation will clear this directory prior to writing to it.
-	OutputDir string
+	// DataDir is the directory where local data will be stored that
+	// is global to all Otto processes.
+	//
+	// LocalDir is the directory where data local to this single Appfile
+	// will be stored. This isn't necessarilly cleared for compilation.
+	//
+	// CompiledDir is the directory where compiled data will be written.
+	// Each compilation will clear this directory.
+	DataDir    string
+	LocalDir   string
+	CompileDir string
 
 	// Appfile is the appfile that this core will be using for configuration.
 	// This must be a compiled Appfile.
@@ -66,8 +75,9 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		apps:            c.Apps,
 		dir:             c.Directory,
 		infras:          c.Infrastructures,
-		localDir:        c.LocalDataDir,
-		outputDir:       c.OutputDir,
+		dataDir:         c.DataDir,
+		localDir:        c.LocalDir,
+		compileDir:      c.CompileDir,
 		ui:              c.Ui,
 	}, nil
 }
@@ -81,8 +91,8 @@ func (c *Core) Compile() error {
 	}
 
 	// Delete the prior output directory
-	log.Printf("[INFO] deleting prior compilation contents: %s", c.outputDir)
-	if err := os.RemoveAll(c.outputDir); err != nil {
+	log.Printf("[INFO] deleting prior compilation contents: %s", c.compileDir)
+	if err := os.RemoveAll(c.compileDir); err != nil {
 		return err
 	}
 
@@ -184,6 +194,113 @@ func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
 	})
 }
 
+// creds reads the credentials if we have them, or queries the user
+// for infrastructure credentials using the infrastructure if we
+// don't have them.
+func (c *Core) creds(
+	infra infrastructure.Infrastructure,
+	infraCtx *infrastructure.Context) error {
+	// Output to the user some information about what is about to
+	// happen here...
+	infraCtx.Ui.Header("Detecting infrastructure credentials...")
+
+	// The path to where we put the encrypted creds
+	path := filepath.Join(c.localDir, "creds")
+
+	// Determine whether we believe the creds exist already or not
+	var exists bool
+	if _, err := os.Stat(path); err == nil {
+		exists = true
+	} else {
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			return err
+		}
+	}
+
+	var creds map[string]string
+	if exists {
+		infraCtx.Ui.Message(
+			"Cached and encrypted infrastructure credentials found.\n" +
+				"Otto will now ask you for the password to decrypt these\n" +
+				"credentials.\n\n")
+
+		// If they exist, ask for the password
+		value, err := infraCtx.Ui.Input(&ui.InputOpts{
+			Id:          "creds_password",
+			Query:       "Encrypted Credentials Password",
+			Description: strings.TrimSpace(credsQueryPassExists),
+		})
+		if err != nil {
+			return err
+		}
+
+		// If the password is not blank, then just read the credentials
+		if value != "" {
+			plaintext, err := cryptRead(path, value)
+			if err == nil {
+				err = json.Unmarshal(plaintext, &creds)
+			}
+			if err != nil {
+				return fmt.Errorf(
+					"error reading encrypted credentials: %s\n\n"+
+						"If this error persists, you can force Otto to ask for credentials\n"+
+						"again by inputting the empty password as the password.",
+					err)
+			}
+
+			return nil
+		}
+	}
+
+	// If we don't have creds, then we need to query the user via
+	// the infrastructure implementation.
+	if creds == nil {
+		infraCtx.Ui.Message(
+			"Existing infrastructure credentials were not found! Otto will\n" +
+				"now ask you for infrastructure credentials. These will be encrypted\n" +
+				"and saved on disk so this doesn't need to be repeated.\n\n" +
+				"IMPORTANT: If you're re-entering new credentials, make sure the\n" +
+				"credentials are for the same account, otherwise you may lose\n" +
+				"access to your existing infrastructure Otto set up.\n\n")
+
+		var err error
+		creds, err = infra.Creds(infraCtx)
+		if err != nil {
+			return err
+		}
+
+		// Now that we have the credentials, we need to ask for the
+		// password to encrypt and store them.
+		var password string
+		for password == "" {
+			password, err = infraCtx.Ui.Input(&ui.InputOpts{
+				Id:          "creds_password",
+				Query:       "Password for Encrypting Credentials",
+				Description: strings.TrimSpace(credsQueryPassNew),
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		// With the password, encrypt and write the data
+		plaintext, err := json.Marshal(creds)
+		if err != nil {
+			// creds is a map[string]string, so this shouldn't ever fail
+			panic(err)
+		}
+
+		if err := cryptWrite(path, password, plaintext); err != nil {
+			return fmt.Errorf(
+				"error writing encrypted credentials: %s", err)
+		}
+	}
+
+	// Set the credentials
+	infraCtx.InfraCreds = creds
+	return nil
+}
+
 // Build builds the deployable artifact for the currently compiled
 // Appfile.
 func (c *Core) Build() error {
@@ -192,8 +309,9 @@ func (c *Core) Build() error {
 	if err != nil {
 		return err
 	}
-
-	infra.Creds(infraCtx)
+	if err := c.creds(infra, infraCtx); err != nil {
+		return err
+	}
 
 	// We only use the root application for this task, upstream dependencies
 	// don't have an effect on the build process.
@@ -370,14 +488,14 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 	// The output directory for data. This is either the main app so
 	// it goes directly into "app" or it is a dependency and goes into
 	// a dep folder.
-	outputDir := filepath.Join(c.outputDir, "app")
+	outputDir := filepath.Join(c.compileDir, "app")
 	if id := f.ID(); id != c.appfile.ID() {
 		outputDir = filepath.Join(
-			c.outputDir, fmt.Sprintf("dep-%s", id))
+			c.compileDir, fmt.Sprintf("dep-%s", id))
 	}
 
 	// The cache directory for this app
-	cacheDir := filepath.Join(c.localDir, "cache", f.ID())
+	cacheDir := filepath.Join(c.dataDir, "cache", f.ID())
 	if err := os.MkdirAll(cacheDir, 0755); err != nil {
 		return nil, fmt.Errorf(
 			"error making cache directory '%s': %s",
@@ -390,8 +508,10 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 		Tuple:       tuple,
 		Appfile:     f,
 		Application: f.Application,
-		Directory:   c.dir,
-		Ui:          c.ui,
+		Shared: context.Shared{
+			Directory: c.dir,
+			Ui:        c.ui,
+		},
 	}, nil
 }
 
@@ -438,13 +558,27 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 
 	// The output directory for data
 	outputDir := filepath.Join(
-		c.outputDir, fmt.Sprintf("infra-%s", c.appfile.Project.Infrastructure))
+		c.compileDir, fmt.Sprintf("infra-%s", c.appfile.Project.Infrastructure))
 
 	// Build the context
 	return infra, &infrastructure.Context{
-		Dir:       outputDir,
-		Infra:     config,
-		Ui:        c.ui,
-		Directory: c.dir,
+		Dir:   outputDir,
+		Infra: config,
+		Shared: context.Shared{
+			Directory: c.dir,
+			Ui:        c.ui,
+		},
 	}, nil
 }
+
+const credsQueryPassExists = `
+Infrastructure credentials are required for this operation. Otto found
+saved credentials that are password protected. Please enter the password
+to decrypt these credentials. You may also just hit <enter> and leave
+the password blank to force Otto to ask for the credentials again.
+`
+
+const credsQueryPassNew = `
+This password will be used to encrypt and save the credentials so they
+don't need to be repeated multiple times.
+`
