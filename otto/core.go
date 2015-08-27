@@ -330,6 +330,9 @@ func (c *Core) Build() error {
 			"Error loading App: %s", err)
 	}
 
+	// Just update our shared data so we get the creds
+	rootCtx.Shared = infraCtx.Shared
+
 	return rootApp.Build(rootCtx)
 }
 
