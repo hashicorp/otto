@@ -45,7 +45,9 @@ func (p *Packer) Execute(commandRaw ...string) error {
 	ui := &packerUi{Callbacks: callbacks}
 
 	// Execute!
-	if err := execHelper.Run(ui, cmd); err != nil {
+	err := execHelper.Run(ui, cmd)
+	ui.Finish()
+	if err != nil {
 		return fmt.Errorf(
 			"Error executing Packer: %s\n\n"+
 				"The error messages from Packer are usually very informative.\n"+
