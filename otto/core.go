@@ -194,113 +194,6 @@ func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
 	})
 }
 
-// creds reads the credentials if we have them, or queries the user
-// for infrastructure credentials using the infrastructure if we
-// don't have them.
-func (c *Core) creds(
-	infra infrastructure.Infrastructure,
-	infraCtx *infrastructure.Context) error {
-	// Output to the user some information about what is about to
-	// happen here...
-	infraCtx.Ui.Header("Detecting infrastructure credentials...")
-
-	// The path to where we put the encrypted creds
-	path := filepath.Join(c.localDir, "creds")
-
-	// Determine whether we believe the creds exist already or not
-	var exists bool
-	if _, err := os.Stat(path); err == nil {
-		exists = true
-	} else {
-		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-			return err
-		}
-	}
-
-	var creds map[string]string
-	if exists {
-		infraCtx.Ui.Message(
-			"Cached and encrypted infrastructure credentials found.\n" +
-				"Otto will now ask you for the password to decrypt these\n" +
-				"credentials.\n\n")
-
-		// If they exist, ask for the password
-		value, err := infraCtx.Ui.Input(&ui.InputOpts{
-			Id:          "creds_password",
-			Query:       "Encrypted Credentials Password",
-			Description: strings.TrimSpace(credsQueryPassExists),
-		})
-		if err != nil {
-			return err
-		}
-
-		// If the password is not blank, then just read the credentials
-		if value != "" {
-			plaintext, err := cryptRead(path, value)
-			if err == nil {
-				err = json.Unmarshal(plaintext, &creds)
-			}
-			if err != nil {
-				return fmt.Errorf(
-					"error reading encrypted credentials: %s\n\n"+
-						"If this error persists, you can force Otto to ask for credentials\n"+
-						"again by inputting the empty password as the password.",
-					err)
-			}
-
-			return nil
-		}
-	}
-
-	// If we don't have creds, then we need to query the user via
-	// the infrastructure implementation.
-	if creds == nil {
-		infraCtx.Ui.Message(
-			"Existing infrastructure credentials were not found! Otto will\n" +
-				"now ask you for infrastructure credentials. These will be encrypted\n" +
-				"and saved on disk so this doesn't need to be repeated.\n\n" +
-				"IMPORTANT: If you're re-entering new credentials, make sure the\n" +
-				"credentials are for the same account, otherwise you may lose\n" +
-				"access to your existing infrastructure Otto set up.\n\n")
-
-		var err error
-		creds, err = infra.Creds(infraCtx)
-		if err != nil {
-			return err
-		}
-
-		// Now that we have the credentials, we need to ask for the
-		// password to encrypt and store them.
-		var password string
-		for password == "" {
-			password, err = infraCtx.Ui.Input(&ui.InputOpts{
-				Id:          "creds_password",
-				Query:       "Password for Encrypting Credentials",
-				Description: strings.TrimSpace(credsQueryPassNew),
-			})
-			if err != nil {
-				return err
-			}
-		}
-
-		// With the password, encrypt and write the data
-		plaintext, err := json.Marshal(creds)
-		if err != nil {
-			// creds is a map[string]string, so this shouldn't ever fail
-			panic(err)
-		}
-
-		if err := cryptWrite(path, password, plaintext); err != nil {
-			return fmt.Errorf(
-				"error writing encrypted credentials: %s", err)
-		}
-	}
-
-	// Set the credentials
-	infraCtx.InfraCreds = creds
-	return nil
-}
-
 // Build builds the deployable artifact for the currently compiled
 // Appfile.
 func (c *Core) Build() error {
@@ -428,6 +321,113 @@ func (c *Core) Execute(opts *ExecuteOpts) error {
 	default:
 		return fmt.Errorf("unknown task: %s", opts.Task)
 	}
+}
+
+// creds reads the credentials if we have them, or queries the user
+// for infrastructure credentials using the infrastructure if we
+// don't have them.
+func (c *Core) creds(
+	infra infrastructure.Infrastructure,
+	infraCtx *infrastructure.Context) error {
+	// Output to the user some information about what is about to
+	// happen here...
+	infraCtx.Ui.Header("Detecting infrastructure credentials...")
+
+	// The path to where we put the encrypted creds
+	path := filepath.Join(c.localDir, "creds")
+
+	// Determine whether we believe the creds exist already or not
+	var exists bool
+	if _, err := os.Stat(path); err == nil {
+		exists = true
+	} else {
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			return err
+		}
+	}
+
+	var creds map[string]string
+	if exists {
+		infraCtx.Ui.Message(
+			"Cached and encrypted infrastructure credentials found.\n" +
+				"Otto will now ask you for the password to decrypt these\n" +
+				"credentials.\n\n")
+
+		// If they exist, ask for the password
+		value, err := infraCtx.Ui.Input(&ui.InputOpts{
+			Id:          "creds_password",
+			Query:       "Encrypted Credentials Password",
+			Description: strings.TrimSpace(credsQueryPassExists),
+		})
+		if err != nil {
+			return err
+		}
+
+		// If the password is not blank, then just read the credentials
+		if value != "" {
+			plaintext, err := cryptRead(path, value)
+			if err == nil {
+				err = json.Unmarshal(plaintext, &creds)
+			}
+			if err != nil {
+				return fmt.Errorf(
+					"error reading encrypted credentials: %s\n\n"+
+						"If this error persists, you can force Otto to ask for credentials\n"+
+						"again by inputting the empty password as the password.",
+					err)
+			}
+
+			return nil
+		}
+	}
+
+	// If we don't have creds, then we need to query the user via
+	// the infrastructure implementation.
+	if creds == nil {
+		infraCtx.Ui.Message(
+			"Existing infrastructure credentials were not found! Otto will\n" +
+				"now ask you for infrastructure credentials. These will be encrypted\n" +
+				"and saved on disk so this doesn't need to be repeated.\n\n" +
+				"IMPORTANT: If you're re-entering new credentials, make sure the\n" +
+				"credentials are for the same account, otherwise you may lose\n" +
+				"access to your existing infrastructure Otto set up.\n\n")
+
+		var err error
+		creds, err = infra.Creds(infraCtx)
+		if err != nil {
+			return err
+		}
+
+		// Now that we have the credentials, we need to ask for the
+		// password to encrypt and store them.
+		var password string
+		for password == "" {
+			password, err = infraCtx.Ui.Input(&ui.InputOpts{
+				Id:          "creds_password",
+				Query:       "Password for Encrypting Credentials",
+				Description: strings.TrimSpace(credsQueryPassNew),
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		// With the password, encrypt and write the data
+		plaintext, err := json.Marshal(creds)
+		if err != nil {
+			// creds is a map[string]string, so this shouldn't ever fail
+			panic(err)
+		}
+
+		if err := cryptWrite(path, password, plaintext); err != nil {
+			return fmt.Errorf(
+				"error writing encrypted credentials: %s", err)
+		}
+	}
+
+	// Set the credentials
+	infraCtx.InfraCreds = creds
+	return nil
 }
 
 func (c *Core) executeApp(opts *ExecuteOpts) error {
