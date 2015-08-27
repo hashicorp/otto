@@ -382,6 +382,7 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 		Tuple:       tuple,
 		Appfile:     f,
 		Application: f.Application,
+		Directory:   c.dir,
 		Ui:          c.ui,
 	}, nil
 }

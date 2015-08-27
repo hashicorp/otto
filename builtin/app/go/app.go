@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
+	"github.com/hashicorp/otto/helper/packer"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
 
@@ -47,7 +49,26 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 }
 
 func (a *App) Build(ctx *app.Context) error {
-	return nil
+	// Get the infrastructure state
+	infra, err := ctx.Directory.GetInfra(directory.InfraId(
+		ctx.Appfile.ActiveInfrastructure()))
+	if err != nil {
+		return err
+	}
+
+	if infra == nil || infra.State != directory.InfraStateReady {
+		return fmt.Errorf(
+			"Infrastructure for this application hasn't been built yet.\n" +
+				"The build step requires this because the target infrastructure\n" +
+				"as well as its final properties can affect the build process.\n" +
+				"Please run `otto infra` to build the underlying infrastructure,\n" +
+				"then run `otto build` again.")
+	}
+
+	ctx.Ui.Message(fmt.Sprintf("%#v", infra))
+
+	p := &packer.Packer{Dir: ctx.Dir, Ui: ctx.Ui}
+	return p.Execute("version")
 }
 
 func (a *App) Dev(ctx *app.Context) error {

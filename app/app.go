@@ -15,6 +15,7 @@ package app
 
 import (
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -85,6 +86,11 @@ type Context struct {
 
 	// Application is the application configuration itself from the appfile.
 	Application *appfile.Application
+
+	// Directory is the directory service. This is available during
+	// both execution and compilation and can be used to view the
+	// global data prior to doing anything.
+	Directory directory.Backend
 
 	// Ui is the Ui object that can be used to communicate with the user.
 	Ui ui.Ui
