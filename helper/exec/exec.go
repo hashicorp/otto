@@ -2,8 +2,10 @@ package exec
 
 import (
 	"io"
+	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/hashicorp/otto/ui"
 )
@@ -39,6 +41,7 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 	}()
 
 	// Run the command
+	log.Printf("[DEBUG] exec: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
 	err := cmd.Run()
 
 	// Wait for all the output to finish

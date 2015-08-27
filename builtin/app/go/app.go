@@ -65,10 +65,19 @@ func (a *App) Build(ctx *app.Context) error {
 				"then run `otto build` again.")
 	}
 
-	ctx.Ui.Message(fmt.Sprintf("%#v", infra))
+	// Construct the variables map for Packer
+	variables := make(map[string]string)
+	variables["aws_region"] = infra.Outputs["region"]
+	variables["aws_access_key"] = ctx.InfraCreds["aws_access_key"]
+	variables["aws_secret_key"] = ctx.InfraCreds["aws_secret_key"]
 
-	p := &packer.Packer{Dir: ctx.Dir, Ui: ctx.Ui}
-	return p.Execute("version")
+	// Build and execute Packer
+	p := &packer.Packer{
+		Dir:       ctx.Dir,
+		Ui:        ctx.Ui,
+		Variables: variables,
+	}
+	return p.Execute("build", filepath.Join(ctx.Dir, "build", "template.json"))
 }
 
 func (a *App) Dev(ctx *app.Context) error {

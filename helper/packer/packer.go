@@ -1,7 +1,10 @@
 package packer
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"os/exec"
 
 	execHelper "github.com/hashicorp/otto/helper/exec"
@@ -21,15 +24,27 @@ type Packer struct {
 	// Callbacks is a list of callbacks that will be called for certain
 	// event types within the output
 	Callbacks map[string]OutputCallback
+
+	// Variables is a list of variables to pass to Packer.
+	Variables map[string]string
 }
 
 // Execute executes a raw Packer command.
 func (p *Packer) Execute(commandRaw ...string) error {
+	varfile, err := p.varfile()
+	if err != nil {
+		return err
+	}
+	defer os.Remove(varfile)
+
 	// The command must always be machine-readable. We use this
 	// exclusively to mirror the UI output.
-	command := make([]string, len(commandRaw)+1)
-	command[0] = "-machine-readable"
-	copy(command[1:], commandRaw)
+	command := make([]string, len(commandRaw)+3)
+	command[0] = commandRaw[0]
+	command[1] = "-machine-readable"
+	command[2] = "-var-file"
+	command[3] = varfile
+	copy(command[4:], commandRaw[1:])
 
 	// Build the command to execute
 	cmd := exec.Command("packer", command...)
@@ -45,7 +60,7 @@ func (p *Packer) Execute(commandRaw ...string) error {
 	ui := &packerUi{Callbacks: callbacks}
 
 	// Execute!
-	err := execHelper.Run(ui, cmd)
+	err = execHelper.Run(ui, cmd)
 	ui.Finish()
 	if err != nil {
 		return fmt.Errorf(
@@ -68,4 +83,19 @@ func (p *Packer) uiCallback(o *Output) {
 
 	// Output the things to our own UI!
 	p.Ui.Raw(o.Data[1] + "\n")
+}
+
+func (p *Packer) varfile() (string, error) {
+	f, err := ioutil.TempFile("", "otto")
+	if err != nil {
+		return "", err
+	}
+
+	err = json.NewEncoder(f).Encode(p.Variables)
+	f.Close()
+	if err != nil {
+		os.Remove(f.Name())
+	}
+
+	return f.Name(), err
 }
