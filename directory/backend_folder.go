@@ -3,6 +3,7 @@ package directory
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -74,8 +75,19 @@ func (b *FolderBackend) PutInfra(k string, infra *Infra) error {
 	return b.putData(b.infraPath(k), infra)
 }
 
+func (b *FolderBackend) PutBuild(build *Build) error {
+	return b.putData(b.buildPath(build), build)
+}
+
 func (b *FolderBackend) blobPath(k string) string {
 	return filepath.Join(b.Dir, "blob", k)
+}
+
+func (b *FolderBackend) buildPath(build *Build) string {
+	return filepath.Join(
+		b.Dir,
+		"build",
+		fmt.Sprintf("%s-%s-%s", build.App, build.Infra, build.InfraFlavor))
 }
 
 func (b *FolderBackend) infraPath(k string) string {

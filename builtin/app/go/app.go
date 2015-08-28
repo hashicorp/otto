@@ -71,13 +71,62 @@ func (a *App) Build(ctx *app.Context) error {
 	variables["aws_access_key"] = ctx.InfraCreds["aws_access_key"]
 	variables["aws_secret_key"] = ctx.InfraCreds["aws_secret_key"]
 
+	// Start building the resulting build
+	build := &directory.Build{
+		App:         ctx.Tuple.App,
+		Infra:       ctx.Tuple.Infra,
+		InfraFlavor: ctx.Tuple.InfraFlavor,
+		Artifact:    make(map[string]string),
+	}
+
 	// Build and execute Packer
 	p := &packer.Packer{
 		Dir:       ctx.Dir,
 		Ui:        ctx.Ui,
 		Variables: variables,
+		Callbacks: map[string]packer.OutputCallback{
+			"artifact": a.parseArtifact(build.Artifact),
+		},
 	}
-	return p.Execute("build", filepath.Join(ctx.Dir, "build", "template.json"))
+	err = p.Execute("build", filepath.Join(ctx.Dir, "build", "template.json"))
+	if err != nil {
+		return err
+	}
+
+	// Store the build!
+	if err := ctx.Directory.PutBuild(build); err != nil {
+		return fmt.Errorf(
+			"Error storing the build in the directory service: %s\n\n" +
+				"Despite the build itself completing successfully, Otto must\n" +
+				"also successfully store the results in the directory service\n" +
+				"to be able to deploy this build. Please fix the above error and\n" +
+				"rebuild.")
+	}
+
+	// Store the successful build
+	ctx.Ui.Header("[green]Build success!")
+	ctx.Ui.Message(
+		"[green]The build was completed successfully and stored within\n" +
+			"the directory service, meaning other members of your team\n" +
+			"don't need to rebuild this same version and can deploy it\n" +
+			"immediately.")
+
+	return nil
+}
+
+func (a *App) parseArtifact(m map[string]string) packer.OutputCallback {
+	return func(o *packer.Output) {
+		// We're looking for ID events.
+		//
+		// Example: 1440649959,amazon-ebs,artifact,0,id,us-east-1:ami-9d66def6
+		if len(o.Data) < 3 || o.Data[1] != "id" {
+			return
+		}
+
+		// TODO: multiple AMIs
+		parts := strings.Split(o.Data[2], ":")
+		m[parts[0]] = parts[1]
+	}
 }
 
 func (a *App) Dev(ctx *app.Context) error {

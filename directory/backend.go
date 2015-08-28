@@ -22,6 +22,9 @@ type Backend interface {
 	// data about infrastructures.
 	PutInfra(string, *Infra) error
 	GetInfra(string) (*Infra, error)
+
+	// PutBuild stores the result of a build.
+	PutBuild(*Build) error
 }
 
 // BlobData is the metadata and data associated with stored binary
