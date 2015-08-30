@@ -11,6 +11,10 @@ type Mock struct {
 	BuildContext *Context
 	BuildErr     error
 
+	DeployCalled  bool
+	DeployContext *Context
+	DeployErr     error
+
 	DevCalled  bool
 	DevContext *Context
 	DevErr     error
@@ -32,6 +36,12 @@ func (m *Mock) Build(ctx *Context) error {
 	m.BuildCalled = true
 	m.BuildContext = ctx
 	return m.BuildErr
+}
+
+func (m *Mock) Deploy(ctx *Context) error {
+	m.DeployCalled = true
+	m.DeployContext = ctx
+	return m.DeployErr
 }
 
 func (m *Mock) Dev(ctx *Context) error {

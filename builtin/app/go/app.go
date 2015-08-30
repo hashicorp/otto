@@ -114,6 +114,10 @@ func (a *App) Build(ctx *app.Context) error {
 	return nil
 }
 
+func (a *App) Deploy(ctx *app.Context) error {
+	return nil
+}
+
 func (a *App) parseArtifact(m map[string]string) packer.OutputCallback {
 	return func(o *packer.Output) {
 		// We're looking for ID events.

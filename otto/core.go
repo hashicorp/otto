@@ -229,6 +229,42 @@ func (c *Core) Build() error {
 	return rootApp.Build(rootCtx)
 }
 
+// Deploy deploys the application.
+func (c *Core) Deploy() error {
+	// Get the infra implementation for this
+	infra, infraCtx, err := c.infra()
+	if err != nil {
+		return err
+	}
+	if err := c.creds(infra, infraCtx); err != nil {
+		return err
+	}
+
+	// TODO: Verify that upstream dependencies are deployed
+
+	// We only use the root application for this task, upstream dependencies
+	// don't have an effect on the build process.
+	root, err := c.appfileCompiled.Graph.Root()
+	if err != nil {
+		return err
+	}
+	rootCtx, err := c.appContext(root.(*appfile.CompiledGraphVertex).File)
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading App: %s", err)
+	}
+	rootApp, err := c.app(rootCtx)
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading App: %s", err)
+	}
+
+	// Just update our shared data so we get the creds
+	rootCtx.Shared = infraCtx.Shared
+
+	return rootApp.Deploy(rootCtx)
+}
+
 // Dev starts a dev environment for the current application. For destroying
 // and other tasks against the dev environment, use the generic `Execute`
 // method.

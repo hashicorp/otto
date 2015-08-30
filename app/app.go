@@ -29,6 +29,10 @@ type App interface {
 	// application.
 	Build(*Context) error
 
+	// Deploy is called to deploy this application. The existence of
+	// a prior build artifact is confirmed before this is called.
+	Deploy(*Context) error
+
 	// Dev should manage a development environment for this app
 	// type. This is called for the local, mutable dev environment
 	// where this application is the main thing under development.

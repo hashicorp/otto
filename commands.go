@@ -57,6 +57,12 @@ func init() {
 			}, nil
 		},
 
+		"deploy": func() (cli.Command, error) {
+			return &command.DeployCommand{
+				Meta: meta,
+			}, nil
+		},
+
 		"dev": func() (cli.Command, error) {
 			return &command.DevCommand{
 				Meta: meta,
