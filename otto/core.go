@@ -394,6 +394,7 @@ func (c *Core) creds(
 			Id:          "creds_password",
 			Query:       "Encrypted Credentials Password",
 			Description: strings.TrimSpace(credsQueryPassExists),
+			Hide:        true,
 		})
 		if err != nil {
 			return err
@@ -440,6 +441,7 @@ func (c *Core) creds(
 				Id:          "creds_password",
 				Query:       "Password for Encrypting Credentials",
 				Description: strings.TrimSpace(credsQueryPassNew),
+				Hide:        true,
 			})
 			if err != nil {
 				return err

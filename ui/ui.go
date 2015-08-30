@@ -49,4 +49,7 @@ type InputOpts struct {
 
 	// Default will be the value returned if no data is entered.
 	Default string
+
+	// Hide will hide the text while it is being typed.
+	Hide bool
 }

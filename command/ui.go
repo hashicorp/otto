@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/hashicorp/otto/ui"
+	"github.com/hashicorp/vault/helper/password"
 	"github.com/mitchellh/cli"
 )
 
@@ -112,14 +113,28 @@ func (i *cliUi) Input(opts *ui.InputOpts) (string, error) {
 	// Listen for the input in a goroutine. This will allow us to
 	// interrupt this if we are interrupted (SIGINT)
 	result := make(chan string, 1)
-	go func() {
-		var line string
-		if _, err := fmt.Fscanln(r, &line); err != nil {
-			log.Printf("[ERR] UIInput scan err: %s", err)
+	if opts.Hide {
+		f, ok := r.(*os.File)
+		if !ok {
+			return "", fmt.Errorf("reader must be a file")
+		}
+
+		line, err := password.Read(f)
+		if err != nil {
+			return "", err
 		}
 
 		result <- line
-	}()
+	} else {
+		go func() {
+			var line string
+			if _, err := fmt.Fscanln(r, &line); err != nil {
+				log.Printf("[ERR] UIInput scan err: %s", err)
+			}
+
+			result <- line
+		}()
+	}
 
 	select {
 	case line := <-result:
