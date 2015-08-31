@@ -2,6 +2,8 @@ package goapp
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/packer"
+	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
 
@@ -115,6 +118,15 @@ func (a *App) Build(ctx *app.Context) error {
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
+	// Temporary paths for the states
+	stateDir, err := ioutil.TempDir("", "otto-temp")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(stateDir)
+	statePath := filepath.Join(stateDir, "state")
+	stateOldPath := filepath.Join(stateDir, "state.old")
+
 	// Get the infrastructure state
 	infra, err := ctx.Directory.GetInfra(directory.InfraId(
 		ctx.Appfile.ActiveInfrastructure()))
@@ -150,6 +162,37 @@ func (a *App) Deploy(ctx *app.Context) error {
 		return fmt.Errorf(
 			"This application hasn't been built yet. Please run `otto build`\n" +
 				"first so that the deploy step has an artifact to deploy.")
+	}
+
+	// Get the AMI out of it
+	ami, ok := build.Artifact[infra.Outputs["region"]]
+	if !ok {
+		return fmt.Errorf(
+			"An artifact for the region '%s' could not be found. Please run\n"+
+				"`otto build` and try again.",
+			infra.Outputs["region"])
+	}
+	variables["ami"] = ami
+
+	// Get our old deploy to populate the old state path if we have it
+	// TODO
+
+	// Run Terraform!
+	tf := &terraform.Terraform{
+		Dir:       filepath.Join(ctx.Dir, "deploy"),
+		Ui:        ctx.Ui,
+		Variables: variables,
+	}
+	err = tf.Execute(
+		"apply",
+		"-state", stateOldPath,
+		"-state-out", statePath)
+	if err != nil {
+		return fmt.Errorf(
+			"Error running Terraform: %s\n\n" +
+				"Terraform usually has helpful error messages. Please read the error\n" +
+				"messages above and resolve them. Sometimes simply running `otto deply`\n" +
+				"again will work.")
 	}
 
 	return nil
