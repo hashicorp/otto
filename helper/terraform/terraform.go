@@ -81,8 +81,8 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 		}
 		if data != nil {
 			err = data.WriteToFile(stateOldPath)
+			data.Close()
 		}
-		data.Close()
 		if err != nil {
 			return fmt.Errorf("Error writing Terraform state: %s", err)
 		}
