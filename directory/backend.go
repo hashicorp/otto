@@ -21,8 +21,8 @@ type Backend interface {
 
 	// PutInfra and GetInfra are the functions used to store and retrieve
 	// data about infrastructures.
-	PutInfra(string, *Infra) error
-	GetInfra(string) (*Infra, error)
+	PutInfra(*Infra) error
+	GetInfra(*Infra) (*Infra, error)
 
 	// PutBuild stores the result of a build.
 	//

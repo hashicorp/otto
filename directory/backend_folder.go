@@ -58,9 +58,9 @@ func (b *FolderBackend) PutBlob(k string, d *BlobData) error {
 	return err
 }
 
-func (b *FolderBackend) GetInfra(k string) (*Infra, error) {
-	var infra Infra
-	ok, err := b.getData(b.infraPath(k), &infra)
+func (b *FolderBackend) GetInfra(infra *Infra) (*Infra, error) {
+	var result Infra
+	ok, err := b.getData(b.infraPath(infra), &result)
 	if err != nil {
 		return nil, err
 	}
@@ -68,15 +68,15 @@ func (b *FolderBackend) GetInfra(k string) (*Infra, error) {
 		return nil, nil
 	}
 
-	return &infra, nil
+	return &result, nil
 }
 
-func (b *FolderBackend) PutInfra(k string, infra *Infra) error {
+func (b *FolderBackend) PutInfra(infra *Infra) error {
 	if infra.ID == "" {
 		infra.setId()
 	}
 
-	return b.putData(b.infraPath(k), infra)
+	return b.putData(b.infraPath(infra), infra)
 }
 
 func (b *FolderBackend) PutBuild(build *Build) error {
@@ -135,8 +135,8 @@ func (b *FolderBackend) deployPath(deploy *Deploy) string {
 		fmt.Sprintf("%s-%s-%s", deploy.App, deploy.Infra, deploy.InfraFlavor))
 }
 
-func (b *FolderBackend) infraPath(k string) string {
-	return filepath.Join(b.Dir, "infra", k)
+func (b *FolderBackend) infraPath(infra *Infra) string {
+	return filepath.Join(b.Dir, "infra", infra.Lookup.Infra)
 }
 
 func (b *FolderBackend) getData(path string, d interface{}) (bool, error) {

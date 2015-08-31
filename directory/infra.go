@@ -21,6 +21,10 @@ const (
 // Infra represents the data stored in the directory service about
 // Infrastructures.
 type Infra struct {
+	// Lookup information for the Infra. The only required field for
+	// this is Infra. The remainder are ignored.
+	Lookup
+
 	// State is the state of this infrastructure. This is important since
 	// it is possible for there to be a partial state. If we're in a
 	// partial state then deploys and such can't go through yet.

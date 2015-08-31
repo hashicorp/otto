@@ -43,20 +43,21 @@ func TestBackend(t *testing.T, b Backend) {
 	//---------------------------------------------------------------
 
 	// GetInfra (doesn't exist)
-	infra, err := b.GetInfra("foo")
+	infra := &Infra{Lookup: Lookup{Infra: "foo"}}
+	actualInfra, err := b.GetInfra(infra)
 	if err != nil {
 		t.Fatalf("GetInfra (non-exist) error: %s", err)
 	}
-	if infra != nil {
+	if actualInfra != nil {
 		t.Fatal("GetInfra (non-exist): infra should be nil")
 	}
 
 	// PutInfra (doesn't exist)
-	infra = &Infra{Outputs: map[string]string{"foo": "bar"}}
+	infra.Outputs = map[string]string{"foo": "bar"}
 	if infra.ID != "" {
 		t.Fatalf("PutInfra: ID should be empty before set")
 	}
-	if err := b.PutInfra("foo", infra); err != nil {
+	if err := b.PutInfra(infra); err != nil {
 		t.Fatalf("PutInfra err: %s", err)
 	}
 	if infra.ID == "" {
@@ -64,7 +65,7 @@ func TestBackend(t *testing.T, b Backend) {
 	}
 
 	// GetInfra (exists)
-	actualInfra, err := b.GetInfra("foo")
+	actualInfra, err = b.GetInfra(infra)
 	if err != nil {
 		t.Fatalf("GetInfra (exist) error: %s", err)
 	}
