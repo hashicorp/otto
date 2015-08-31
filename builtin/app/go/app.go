@@ -2,8 +2,6 @@ package goapp
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -118,15 +116,6 @@ func (a *App) Build(ctx *app.Context) error {
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
-	// Temporary paths for the states
-	stateDir, err := ioutil.TempDir("", "otto-temp")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(stateDir)
-	statePath := filepath.Join(stateDir, "state")
-	stateOldPath := filepath.Join(stateDir, "state.old")
-
 	// Get the infrastructure state
 	infra, err := ctx.Directory.GetInfra(directory.InfraId(
 		ctx.Appfile.ActiveInfrastructure()))
@@ -175,19 +164,39 @@ func (a *App) Deploy(ctx *app.Context) error {
 	variables["ami"] = ami
 
 	// Get our old deploy to populate the old state path if we have it
-	// TODO
+	deployLookup := &directory.Deploy{
+		App:         ctx.Tuple.App,
+		Infra:       ctx.Tuple.Infra,
+		InfraFlavor: ctx.Tuple.InfraFlavor,
+	}
+	deploy, err := ctx.Directory.GetDeploy(&directory.Deploy{
+		App:         ctx.Tuple.App,
+		Infra:       ctx.Tuple.Infra,
+		InfraFlavor: ctx.Tuple.InfraFlavor,
+	})
+	if err != nil {
+		return err
+	}
+	if deploy == nil {
+		// If we have no deploy, put in a temporary one
+		deploy = deployLookup
+		deploy.State = directory.DeployStateNew
+
+		// Write the temporary deploy so we have an ID to use for the state
+		if err := ctx.Directory.PutDeploy(deploy); err != nil {
+			return err
+		}
+	}
 
 	// Run Terraform!
 	tf := &terraform.Terraform{
 		Dir:       filepath.Join(ctx.Dir, "deploy"),
 		Ui:        ctx.Ui,
 		Variables: variables,
+		Directory: ctx.Directory,
+		StateId:   deploy.ID,
 	}
-	err = tf.Execute(
-		"apply",
-		"-state", stateOldPath,
-		"-state-out", statePath)
-	if err != nil {
+	if err := tf.Execute("apply"); err != nil {
 		return fmt.Errorf(
 			"Error running Terraform: %s\n\n" +
 				"Terraform usually has helpful error messages. Please read the error\n" +
