@@ -147,6 +147,10 @@ func (t *Terraform) Outputs() (map[string]string, error) {
 	// careful management of file handles here.
 	data, err := t.Directory.GetBlob(t.StateId)
 	if err == nil {
+		if data == nil {
+			return nil, nil
+		}
+
 		_, err = io.Copy(tf, data.Data)
 		data.Close()
 	}
