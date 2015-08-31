@@ -72,6 +72,10 @@ func (b *FolderBackend) GetInfra(k string) (*Infra, error) {
 }
 
 func (b *FolderBackend) PutInfra(k string, infra *Infra) error {
+	if infra.ID == "" {
+		infra.setId()
+	}
+
 	return b.putData(b.infraPath(k), infra)
 }
 

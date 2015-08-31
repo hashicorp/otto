@@ -53,8 +53,14 @@ func TestBackend(t *testing.T, b Backend) {
 
 	// PutInfra (doesn't exist)
 	infra = &Infra{Outputs: map[string]string{"foo": "bar"}}
+	if infra.ID != "" {
+		t.Fatalf("PutInfra: ID should be empty before set")
+	}
 	if err := b.PutInfra("foo", infra); err != nil {
 		t.Fatalf("PutInfra err: %s", err)
+	}
+	if infra.ID == "" {
+		t.Fatalf("PutInfra: infra ID not set")
 	}
 
 	// GetInfra (exists)

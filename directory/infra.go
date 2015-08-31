@@ -2,6 +2,7 @@ package directory
 
 import (
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/helper/uuid"
 )
 
 // InfraState is used to track the state of an infrastructure.
@@ -30,6 +31,15 @@ type Infra struct {
 	// type. Please refer to docs of a specific infra to learn more about
 	// what values are here.
 	Outputs map[string]string `json:"outputs"`
+
+	// Private fields. These are usually set on Get or Put.
+	//
+	// DO NOT MODIFY THESE.
+	ID string
+}
+
+func (i *Infra) setId() {
+	i.ID = uuid.GenerateUUID()
 }
 
 // InfraId generates the ID to use to reference an infrastructure in
