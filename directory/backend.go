@@ -47,14 +47,6 @@ type Build struct {
 	Artifact    map[string]string // Resulting artifact from the build
 }
 
-// Deploy represents a deploy of an App.
-type Deploy struct {
-	App         string            // App is the app type, i.e. "go"
-	Infra       string            // Infra is the infra type, i.e. "aws"
-	InfraFlavor string            // InfraFlavor is the flavor, i.e. "vpc-public-private"
-	Deploy      map[string]string // Deploy information
-}
-
 // BlobData is the metadata and data associated with stored binary
 // data. The fields and their usage varies depending on the operations,
 // so please read the documentation for each field carefully.

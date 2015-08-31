@@ -93,6 +93,10 @@ func (b *FolderBackend) GetBuild(build *Build) (*Build, error) {
 }
 
 func (b *FolderBackend) PutDeploy(deploy *Deploy) error {
+	if deploy.ID == "" {
+		deploy.setId()
+	}
+
 	return b.putData(b.deployPath(deploy), deploy)
 }
 
