@@ -1,17 +1,10 @@
 package terraform
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
-	"os/exec"
-	"path/filepath"
 
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
-	execHelper "github.com/hashicorp/otto/helper/exec"
 	"github.com/hashicorp/otto/infrastructure"
 )
 
@@ -83,56 +76,7 @@ func (i *Infrastructure) executeApply(ctx *infrastructure.Context) error {
 }
 
 func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) error {
-	dirId := directory.InfraId(ctx.Infra)
-	dirIdState := dirId + "/state"
-
-	// Build the paths for the state files
-	stateOldPath, err := filepath.Abs(filepath.Join(ctx.Dir, "terraform.tfstate"))
-	if err != nil {
-		return fmt.Errorf(
-			"Error building state output path: %s\n\n"+
-				"This is an internal error that should really never happen.\n"+
-				"No infrastructure was created. Please report this as a bug.", err)
-	}
-
-	statePath, err := filepath.Abs(filepath.Join(ctx.Dir, "terraform.tfstate.new"))
-	if err != nil {
-		return fmt.Errorf(
-			"Error building state output path: %s\n\n"+
-				"This is an internal error that should really never happen.\n"+
-				"No infrastructure was created. Please report this as a bug.", err)
-	}
-
-	// Load the old state if it exists and put it into a file.
-	ctx.Ui.Header("Querying infrastructure data from app directory...")
-	data, err := ctx.Directory.GetBlob(dirIdState)
-	if err != nil {
-		return fmt.Errorf(
-			"Error querying infrastructure state from app directory: %s\n\n"+
-				"Otto will not continue since it can't safely know whether the\n"+
-				"infrastructure exists or not and what state it is in.", err)
-	}
-	if data != nil {
-		f, err := os.Create(stateOldPath)
-		if err != nil {
-			data.Close()
-			return err
-		}
-
-		_, err = io.Copy(f, data.Data)
-		data.Close()
-		f.Close()
-		if err != nil {
-			return err
-		}
-	}
-
-	// Write variables into a file
-	varfile, err := ioutil.TempFile("", "otto")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(varfile.Name())
+	// Build the variables
 	vars := make(map[string]string)
 	for k, v := range ctx.InfraCreds {
 		vars[k] = v
@@ -140,20 +84,43 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 	for k, v := range i.Variables {
 		vars[k] = v
 	}
-	err = json.NewEncoder(varfile).Encode(vars)
-	varfile.Close()
+
+	// Setup the lookup information and query the existing infra so we
+	// can get our UUID for storing data.
+	lookup := directory.Lookup{Infra: ctx.Infra.Name}
+	infra, err := ctx.Directory.GetInfra(&directory.Infra{Lookup: lookup})
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"Error looking up existing infrastructure data: %s\n\n"+
+				"These errors are usually transient and can be fixed by retrying\n"+
+				"the command. Additional causes of errors are networking or disk\n"+
+				"issues that can be resolved external to Otto.",
+			err)
+	}
+	if infra == nil {
+		// If we don't have an infra, create one
+		infra = &directory.Infra{Lookup: lookup}
+		infra.State = directory.InfraStatePartial
+
+		// Put the infrastructure so we can get the UUID to use for our state
+		if err := ctx.Directory.PutInfra(infra); err != nil {
+			return fmt.Errorf(
+				"Error preparing infrastructure: %s\n\n"+
+					"These errors are usually transient and can be fixed by retrying\n"+
+					"the command. Additional causes of errors are networking or disk\n"+
+					"issues that can be resolved external to Otto.",
+				err)
+		}
 	}
 
-	// Build the command to execute
-	cmd := exec.Command(
-		"terraform",
-		command,
-		"-var-file", varfile.Name(),
-		"-state", stateOldPath,
-		"-state-out", statePath)
-	cmd.Dir = ctx.Dir
+	// Build our executor
+	tf := &Terraform{
+		Dir:       ctx.Dir,
+		Ui:        ctx.Ui,
+		Variables: vars,
+		Directory: ctx.Directory,
+		StateId:   infra.ID,
+	}
 
 	ctx.Ui.Header("Executing Terraform to manage infrastructure...")
 	ctx.Ui.Message(
@@ -165,11 +132,8 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 			"consistently within the same Otto environment." +
 			"\n\n")
 
-	var infra directory.Infra
-	infra.State = directory.InfraStateReady
-
 	// Start the Terraform command
-	err = execHelper.Run(ctx.Ui, cmd)
+	err = tf.Execute("apply")
 	if err != nil {
 		err = fmt.Errorf("Error running Terraform: %s", err)
 		infra.State = directory.InfraStatePartial
@@ -177,34 +141,9 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 
 	ctx.Ui.Header("Terraform execution complete. Saving results...")
 
-	// Save the state file contents if we have it
-	if f, ferr := os.Open(statePath); ferr == nil {
-		// Store the state
-		derr := ctx.Directory.PutBlob(dirIdState, &directory.BlobData{
-			Data: f,
-		})
-
-		// Always close the file
-		f.Close()
-
-		// If we couldn't save the state, then note the error. This
-		// is a really bad error since it is currently unrecoverable.
-		if derr != nil {
-			err = fmt.Errorf(
-				"Failed to save Terraform state: %s\n\n"+
-					"This means that Otto was unable to store the state of your infrastructure.\n"+
-					"At this time, Otto doesn't support gracefully recovering from this\n"+
-					"scenario. The state should be in the path below. Please ask the\n"+
-					"community for assistance.\n\n"+
-					"%s",
-				err, statePath)
-			infra.State = directory.InfraStatePartial
-		}
-	}
-
 	// Read the outputs if everything is looking good so far
 	if err == nil {
-		infra.Outputs, err = Outputs(statePath)
+		infra.Outputs, err = tf.Outputs()
 		if err != nil {
 			err = fmt.Errorf("Error reading Terraform outputs: %s", err)
 			infra.State = directory.InfraStatePartial
@@ -212,7 +151,7 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 	}
 
 	// Save the infrastructure information
-	if err := ctx.Directory.PutInfra(dirId, &infra); err != nil {
+	if err := ctx.Directory.PutInfra(infra); err != nil {
 		return fmt.Errorf(
 			"Error storing infrastructure data: %s\n\n"+
 				"This means that Otto won't be able to know that your infrastructure\n"+

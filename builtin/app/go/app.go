@@ -51,8 +51,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 
 func (a *App) Build(ctx *app.Context) error {
 	// Get the infrastructure state
-	infra, err := ctx.Directory.GetInfra(directory.InfraId(
-		ctx.Appfile.ActiveInfrastructure()))
+	infra, err := ctx.Directory.GetInfra(&directory.Infra{
+		Lookup: directory.Lookup{
+			Infra: ctx.Appfile.ActiveInfrastructure().Name}})
 	if err != nil {
 		return err
 	}
@@ -117,8 +118,9 @@ func (a *App) Build(ctx *app.Context) error {
 
 func (a *App) Deploy(ctx *app.Context) error {
 	// Get the infrastructure state
-	infra, err := ctx.Directory.GetInfra(directory.InfraId(
-		ctx.Appfile.ActiveInfrastructure()))
+	infra, err := ctx.Directory.GetInfra(&directory.Infra{
+		Lookup: directory.Lookup{
+			Infra: ctx.Appfile.ActiveInfrastructure().Name}})
 	if err != nil {
 		return err
 	}
