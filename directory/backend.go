@@ -24,7 +24,11 @@ type Backend interface {
 	GetInfra(string) (*Infra, error)
 
 	// PutBuild stores the result of a build.
+	//
+	// GetBuild queries a build. The result is returned. The parameter
+	// must fill in the App, Infra, and InfraFlavor fields.
 	PutBuild(*Build) error
+	GetBuild(*Build) (*Build, error)
 }
 
 // BlobData is the metadata and data associated with stored binary

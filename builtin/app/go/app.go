@@ -115,6 +115,43 @@ func (a *App) Build(ctx *app.Context) error {
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
+	// Get the infrastructure state
+	infra, err := ctx.Directory.GetInfra(directory.InfraId(
+		ctx.Appfile.ActiveInfrastructure()))
+	if err != nil {
+		return err
+	}
+
+	if infra == nil || infra.State != directory.InfraStateReady {
+		return fmt.Errorf(
+			"Infrastructure for this application hasn't been built yet.\n" +
+				"The deploy step requires this because the target infrastructure\n" +
+				"as well as its final properties can affect the deploy process.\n" +
+				"Please run `otto infra` to build the underlying infrastructure,\n" +
+				"then run `otto deploy` again.")
+	}
+
+	// Construct the variables map for Packer
+	variables := make(map[string]string)
+	variables["aws_region"] = infra.Outputs["region"]
+	variables["aws_access_key"] = ctx.InfraCreds["aws_access_key"]
+	variables["aws_secret_key"] = ctx.InfraCreds["aws_secret_key"]
+
+	// Get the build information
+	build, err := ctx.Directory.GetBuild(&directory.Build{
+		App:         ctx.Tuple.App,
+		Infra:       ctx.Tuple.Infra,
+		InfraFlavor: ctx.Tuple.InfraFlavor,
+	})
+	if err != nil {
+		return err
+	}
+	if build == nil {
+		return fmt.Errorf(
+			"This application hasn't been built yet. Please run `otto build`\n" +
+				"first so that the deploy step has an artifact to deploy.")
+	}
+
 	return nil
 }
 

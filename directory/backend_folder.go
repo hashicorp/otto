@@ -79,6 +79,19 @@ func (b *FolderBackend) PutBuild(build *Build) error {
 	return b.putData(b.buildPath(build), build)
 }
 
+func (b *FolderBackend) GetBuild(build *Build) (*Build, error) {
+	var result Build
+	ok, err := b.getData(b.buildPath(build), &result)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, nil
+	}
+
+	return &result, nil
+}
+
 func (b *FolderBackend) blobPath(k string) string {
 	return filepath.Join(b.Dir, "blob", k)
 }
