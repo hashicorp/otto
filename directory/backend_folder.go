@@ -92,6 +92,23 @@ func (b *FolderBackend) GetBuild(build *Build) (*Build, error) {
 	return &result, nil
 }
 
+func (b *FolderBackend) PutDeploy(deploy *Deploy) error {
+	return b.putData(b.deployPath(deploy), deploy)
+}
+
+func (b *FolderBackend) GetDeploy(deploy *Deploy) (*Deploy, error) {
+	var result Deploy
+	ok, err := b.getData(b.deployPath(deploy), &result)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, nil
+	}
+
+	return &result, nil
+}
+
 func (b *FolderBackend) blobPath(k string) string {
 	return filepath.Join(b.Dir, "blob", k)
 }
@@ -101,6 +118,13 @@ func (b *FolderBackend) buildPath(build *Build) string {
 		b.Dir,
 		"build",
 		fmt.Sprintf("%s-%s-%s", build.App, build.Infra, build.InfraFlavor))
+}
+
+func (b *FolderBackend) deployPath(deploy *Deploy) string {
+	return filepath.Join(
+		b.Dir,
+		"deploy",
+		fmt.Sprintf("%s-%s-%s", deploy.App, deploy.Infra, deploy.InfraFlavor))
 }
 
 func (b *FolderBackend) infraPath(k string) string {

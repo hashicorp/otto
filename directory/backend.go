@@ -2,6 +2,7 @@ package directory
 
 import (
 	"io"
+	"os"
 )
 
 // Backend is the interface for any directory service. It is effectively
@@ -29,6 +30,29 @@ type Backend interface {
 	// must fill in the App, Infra, and InfraFlavor fields.
 	PutBuild(*Build) error
 	GetBuild(*Build) (*Build, error)
+
+	// PutDeploy stores the result of a build.
+	//
+	// GetDeploy queries a deploy. The result is returned. The parameter
+	// must fill in the App, Infra, and InfraFlavor fields.
+	PutDeploy(*Deploy) error
+	GetDeploy(*Deploy) (*Deploy, error)
+}
+
+// Build represents a build of an App.
+type Build struct {
+	App         string            // App is the app type, i.e. "go"
+	Infra       string            // Infra is the infra type, i.e. "aws"
+	InfraFlavor string            // InfraFlavor is the flavor, i.e. "vpc-public-private"
+	Artifact    map[string]string // Resulting artifact from the build
+}
+
+// Deploy represents a deploy of an App.
+type Deploy struct {
+	App         string            // App is the app type, i.e. "go"
+	Infra       string            // Infra is the infra type, i.e. "aws"
+	InfraFlavor string            // InfraFlavor is the flavor, i.e. "vpc-public-private"
+	Deploy      map[string]string // Deploy information
 }
 
 // BlobData is the metadata and data associated with stored binary
@@ -52,4 +76,18 @@ func (d *BlobData) Close() error {
 	}
 
 	return nil
+}
+
+// WriteToFile is a helper to write BlobData to a file. While this is
+// a very easy thing to do, it is so common that we provide a function
+// for doing so.
+func (d *BlobData) WriteToFile(path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = io.Copy(f, d.Data)
+	return err
 }
