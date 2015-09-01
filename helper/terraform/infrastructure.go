@@ -133,7 +133,7 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 			"\n\n")
 
 	// Start the Terraform command
-	err = tf.Execute("apply")
+	err = tf.Execute(command)
 	if err != nil {
 		err = fmt.Errorf("Error running Terraform: %s", err)
 		infra.State = directory.InfraStatePartial

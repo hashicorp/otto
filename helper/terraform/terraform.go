@@ -61,8 +61,7 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 
 	// If we care about state, then setup the state directory and
 	// load it up.
-	var stateDir string
-	statePath := filepath.Join(stateDir, "state")
+	var stateDir, statePath string
 	if t.StateId != "" && t.Directory != nil {
 		var err error
 		stateDir, err = ioutil.TempDir("", "otto-tf")
@@ -73,6 +72,7 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 
 		// State path
 		stateOldPath := filepath.Join(stateDir, "state.old")
+		statePath = filepath.Join(stateDir, "state")
 
 		// Load the state from the directory
 		data, err := t.Directory.GetBlob(t.StateId)
@@ -105,7 +105,13 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 	}
 
 	// Save the state file if we have it.
-	if f, ferr := os.Open(statePath); ferr == nil {
+	if t.StateId != "" && t.Directory != nil {
+		f, ferr := os.Open(statePath)
+		if ferr != nil {
+			return fmt.Errorf(
+				"Error reading Terraform state for saving: %s", ferr)
+		}
+
 		// Store the state
 		derr := t.Directory.PutBlob(t.StateId, &directory.BlobData{
 			Data: f,
