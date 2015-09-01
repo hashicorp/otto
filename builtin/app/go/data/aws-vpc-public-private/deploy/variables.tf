@@ -26,3 +26,7 @@ variable "instance_type" {
     description = "Instance type"
     default = "t2.small"
 }
+
+variable "subnet_id" {
+    description = "Subnet to deploy into"
+}

@@ -136,6 +136,7 @@ func (a *App) Deploy(ctx *app.Context) error {
 
 	// Construct the variables map for Packer
 	variables := make(map[string]string)
+	variables["subnet_id"] = infra.Outputs["subnet-private"]
 	variables["aws_region"] = infra.Outputs["region"]
 	variables["aws_access_key"] = ctx.InfraCreds["aws_access_key"]
 	variables["aws_secret_key"] = ctx.InfraCreds["aws_secret_key"]

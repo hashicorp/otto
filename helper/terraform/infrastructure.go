@@ -143,6 +143,7 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 
 	// Read the outputs if everything is looking good so far
 	if err == nil {
+		infra.State = directory.InfraStateReady
 		infra.Outputs, err = tf.Outputs()
 		if err != nil {
 			err = fmt.Errorf("Error reading Terraform outputs: %s", err)
