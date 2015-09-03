@@ -34,6 +34,8 @@ type BuildOptions struct {
 // This function implements the app.App.Build function.
 // TODO: Test
 func Build(ctx *app.Context, opts *BuildOptions) error {
+	ctx.Ui.Header("Querying infrastructure data for build...")
+
 	// Get the infrastructure, since it needs to be ready for building
 	// to occur. We'll copy the outputs and the credentials as variables
 	// to Packer.
@@ -87,6 +89,12 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 		templatePath = filepath.Join(packerDir, "template.json")
 	}
 
+	ctx.Ui.Header("Building deployment artifact with Packer...")
+	ctx.Ui.Message(
+		"Raw Packer output will begin streaming in below. Otto\n" +
+			"does not create this output. It is mirrored directly from\n" +
+			"Packer while the build is being run.\n\n")
+
 	// Build and execute Packer
 	p := &Packer{
 		Dir:       packerDir,
@@ -101,6 +109,7 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 	}
 
 	// Store the build!
+	ctx.Ui.Header("Storing build data in directory...")
 	if err := ctx.Directory.PutBuild(build); err != nil {
 		return fmt.Errorf(
 			"Error storing the build in the directory service: %s\n\n" +
@@ -109,6 +118,13 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 				"to be able to deploy this build. Please fix the above error and\n" +
 				"rebuild.")
 	}
+
+	ctx.Ui.Header("[green]Build success!")
+	ctx.Ui.Message(
+		"[green]The build was completed successfully and stored within\n" +
+			"the directory service, meaning other members of your team\n" +
+			"don't need to rebuild this same version and can deploy it\n" +
+			"immediately.")
 
 	return nil
 }

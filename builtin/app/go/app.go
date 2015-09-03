@@ -50,24 +50,11 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 }
 
 func (a *App) Build(ctx *app.Context) error {
-	err := packer.Build(ctx, &packer.BuildOptions{
+	return packer.Build(ctx, &packer.BuildOptions{
 		InfraOutputMap: map[string]string{
 			"region": "aws_region",
 		},
 	})
-	if err != nil {
-		return err
-	}
-
-	// Store the successful build
-	ctx.Ui.Header("[green]Build success!")
-	ctx.Ui.Message(
-		"[green]The build was completed successfully and stored within\n" +
-			"the directory service, meaning other members of your team\n" +
-			"don't need to rebuild this same version and can deploy it\n" +
-			"immediately.")
-
-	return nil
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
