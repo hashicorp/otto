@@ -1,8 +1,11 @@
 package compile
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/helper/bindata"
 )
 

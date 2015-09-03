@@ -1,12 +1,12 @@
 package goapp
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/helper/bindata"
+	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/packer"
 	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
