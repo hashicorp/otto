@@ -164,21 +164,6 @@ func (a *App) Deploy(ctx *app.Context) error {
 	return nil
 }
 
-func (a *App) parseArtifact(m map[string]string) packer.OutputCallback {
-	return func(o *packer.Output) {
-		// We're looking for ID events.
-		//
-		// Example: 1440649959,amazon-ebs,artifact,0,id,us-east-1:ami-9d66def6
-		if len(o.Data) < 3 || o.Data[1] != "id" {
-			return
-		}
-
-		// TODO: multiple AMIs
-		parts := strings.Split(o.Data[2], ":")
-		m[parts[0]] = parts[1]
-	}
-}
-
 func (a *App) Dev(ctx *app.Context) error {
 	return vagrant.Dev(ctx, &vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
