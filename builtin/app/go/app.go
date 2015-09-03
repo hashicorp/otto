@@ -158,29 +158,11 @@ func (a *App) Dev(ctx *app.Context) error {
 }
 
 func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
-	// For Go, we build a binary using Vagrant, extract that binary,
-	// and setup a Vagrantfile fragment to copy that binary in plus
-	// setup the scripts to start it on boot.
-	src.Ui.Header(fmt.Sprintf(
-		"Building the dev dependency for '%s'", src.Appfile.Application.Name))
-	src.Ui.Message(
-		"To ensure cross-platform compatibility, we'll use Vagrant to\n" +
-			"build this application. This is slow, and in a lot of cases we\n" +
-			"can do something faster. Future versions of Otto will detect and\n" +
-			"do this. As long as the application doesn't change, Otto will\n" +
-			"cache the results of this build.\n\n")
-	err := vagrant.Build(src, &vagrant.BuildOptions{
+	return vagrant.DevDep(dst, src, &vagrant.DevDepOptions{
 		Dir:    filepath.Join(src.Dir, "dev-dep/build"),
 		Script: "/otto/build.sh",
+		Files:  []string{"dev-dep-output"},
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	// Return the fragment path we have setup
-	return &app.DevDep{
-		Files: []string{"dev-dep-output"},
-	}, nil
 }
 
 const devInstructions = `
