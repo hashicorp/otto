@@ -50,59 +50,13 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 }
 
 func (a *App) Build(ctx *app.Context) error {
-	// Get the infrastructure state
-	infra, err := ctx.Directory.GetInfra(&directory.Infra{
-		Lookup: directory.Lookup{
-			Infra: ctx.Appfile.ActiveInfrastructure().Name}})
-	if err != nil {
-		return err
-	}
-
-	if infra == nil || infra.State != directory.InfraStateReady {
-		return fmt.Errorf(
-			"Infrastructure for this application hasn't been built yet.\n" +
-				"The build step requires this because the target infrastructure\n" +
-				"as well as its final properties can affect the build process.\n" +
-				"Please run `otto infra` to build the underlying infrastructure,\n" +
-				"then run `otto build` again.")
-	}
-
-	// Construct the variables map for Packer
-	variables := make(map[string]string)
-	variables["aws_region"] = infra.Outputs["region"]
-	variables["aws_access_key"] = ctx.InfraCreds["aws_access_key"]
-	variables["aws_secret_key"] = ctx.InfraCreds["aws_secret_key"]
-
-	// Start building the resulting build
-	build := &directory.Build{
-		App:         ctx.Tuple.App,
-		Infra:       ctx.Tuple.Infra,
-		InfraFlavor: ctx.Tuple.InfraFlavor,
-		Artifact:    make(map[string]string),
-	}
-
-	// Build and execute Packer
-	p := &packer.Packer{
-		Dir:       ctx.Dir,
-		Ui:        ctx.Ui,
-		Variables: variables,
-		Callbacks: map[string]packer.OutputCallback{
-			"artifact": a.parseArtifact(build.Artifact),
+	err := packer.Build(ctx, &packer.BuildOptions{
+		InfraOutputMap: map[string]string{
+			"region": "aws_region",
 		},
-	}
-	err = p.Execute("build", filepath.Join(ctx.Dir, "build", "template.json"))
+	})
 	if err != nil {
 		return err
-	}
-
-	// Store the build!
-	if err := ctx.Directory.PutBuild(build); err != nil {
-		return fmt.Errorf(
-			"Error storing the build in the directory service: %s\n\n" +
-				"Despite the build itself completing successfully, Otto must\n" +
-				"also successfully store the results in the directory service\n" +
-				"to be able to deploy this build. Please fix the above error and\n" +
-				"rebuild.")
 	}
 
 	// Store the successful build
