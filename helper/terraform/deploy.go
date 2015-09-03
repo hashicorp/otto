@@ -12,6 +12,10 @@ type DeployOptions struct {
 	// Dir is the directory where Terraform is run. If this isn't set, it'll
 	// default to "#{ctx.Dir}/deploy".
 	Dir string
+
+	// ArtifactExtractors is a mapping of artifact extractors. The
+	// built-in artifact extractors will populate this if a key isn't set.
+	ArtifactExtractors map[string]DeployArtifactExtractor
 }
 
 // Deploy deploys an application using Terraform.
@@ -65,7 +69,31 @@ func Deploy(ctx *app.Context, opts *DeployOptions) error {
 				"first so that the deploy step has an artifact to deploy.")
 	}
 
-	// TODO: extract artifact info into variables...
+	// Extract the artifact from the build. We do this based on the
+	// infrastructure type.
+	if opts.ArtifactExtractors == nil {
+		opts.ArtifactExtractors = make(map[string]DeployArtifactExtractor)
+	}
+	for k, v := range deployArtifactExtractors {
+		if _, ok := opts.ArtifactExtractors[k]; !ok {
+			opts.ArtifactExtractors[k] = v
+		}
+	}
+	ext, ok := opts.ArtifactExtractors[ctx.Tuple.Infra]
+	if !ok {
+		return fmt.Errorf(
+			"Unknown deployment target infrastructure: %s\n\n"+
+				"This app currently doesn't know how to deploy to this infrastructure.\n"+
+				"Please report this to the project.",
+			ctx.Tuple.Infra)
+	}
+	artifactVars, err := ext(ctx, build, infra)
+	if err != nil {
+		return err
+	}
+	for k, v := range artifactVars {
+		vars[k] = v
+	}
 
 	// Get our old deploy to populate the old state data if we have it.
 	// This step is critical to make sure that Terraform remains idempotent

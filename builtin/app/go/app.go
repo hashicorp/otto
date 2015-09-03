@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
-	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/packer"
 	"github.com/hashicorp/otto/helper/terraform"
@@ -58,97 +57,7 @@ func (a *App) Build(ctx *app.Context) error {
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
-	// Get the infrastructure state
-	infra, err := ctx.Directory.GetInfra(&directory.Infra{
-		Lookup: directory.Lookup{
-			Infra: ctx.Appfile.ActiveInfrastructure().Name}})
-	if err != nil {
-		return err
-	}
-
-	if infra == nil || infra.State != directory.InfraStateReady {
-		return fmt.Errorf(
-			"Infrastructure for this application hasn't been built yet.\n" +
-				"The deploy step requires this because the target infrastructure\n" +
-				"as well as its final properties can affect the deploy process.\n" +
-				"Please run `otto infra` to build the underlying infrastructure,\n" +
-				"then run `otto deploy` again.")
-	}
-
-	// Construct the variables map for Packer
-	variables := make(map[string]string)
-	variables["subnet_id"] = infra.Outputs["subnet-private"]
-	variables["aws_region"] = infra.Outputs["region"]
-	variables["aws_access_key"] = ctx.InfraCreds["aws_access_key"]
-	variables["aws_secret_key"] = ctx.InfraCreds["aws_secret_key"]
-
-	// Get the build information
-	build, err := ctx.Directory.GetBuild(&directory.Build{
-		App:         ctx.Tuple.App,
-		Infra:       ctx.Tuple.Infra,
-		InfraFlavor: ctx.Tuple.InfraFlavor,
-	})
-	if err != nil {
-		return err
-	}
-	if build == nil {
-		return fmt.Errorf(
-			"This application hasn't been built yet. Please run `otto build`\n" +
-				"first so that the deploy step has an artifact to deploy.")
-	}
-
-	// Get the AMI out of it
-	ami, ok := build.Artifact[infra.Outputs["region"]]
-	if !ok {
-		return fmt.Errorf(
-			"An artifact for the region '%s' could not be found. Please run\n"+
-				"`otto build` and try again.",
-			infra.Outputs["region"])
-	}
-	variables["ami"] = ami
-
-	// Get our old deploy to populate the old state path if we have it
-	deployLookup := &directory.Deploy{
-		App:         ctx.Tuple.App,
-		Infra:       ctx.Tuple.Infra,
-		InfraFlavor: ctx.Tuple.InfraFlavor,
-	}
-	deploy, err := ctx.Directory.GetDeploy(&directory.Deploy{
-		App:         ctx.Tuple.App,
-		Infra:       ctx.Tuple.Infra,
-		InfraFlavor: ctx.Tuple.InfraFlavor,
-	})
-	if err != nil {
-		return err
-	}
-	if deploy == nil {
-		// If we have no deploy, put in a temporary one
-		deploy = deployLookup
-		deploy.State = directory.DeployStateNew
-
-		// Write the temporary deploy so we have an ID to use for the state
-		if err := ctx.Directory.PutDeploy(deploy); err != nil {
-			return err
-		}
-	}
-
-	// Run Terraform!
-	tf := &terraform.Terraform{
-		Dir:       filepath.Join(ctx.Dir, "deploy"),
-		Ui:        ctx.Ui,
-		Variables: variables,
-		Directory: ctx.Directory,
-		StateId:   deploy.ID,
-	}
-	if err := tf.Execute("apply"); err != nil {
-		return fmt.Errorf(
-			"Error running Terraform: %s\n\n" +
-				"Terraform usually has helpful error messages. Please read the error\n" +
-				"messages above and resolve them. Sometimes simply running `otto deply`\n" +
-				"again will work.")
-	}
-
-	return nil
+	return terraform.Deploy(ctx, &terraform.DeployOptions{})
 }
 
 func (a *App) Dev(ctx *app.Context) error {
