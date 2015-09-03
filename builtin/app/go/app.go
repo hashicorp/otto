@@ -18,34 +18,12 @@ import (
 type App struct{}
 
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
-	data := &bindata.Data{
-		Asset:    Asset,
-		AssetDir: AssetDir,
-		Context: map[string]interface{}{
-			"name":          ctx.Appfile.Application.Name,
-			"dev_fragments": ctx.DevDepFragments,
-			"path": map[string]string{
-				"cache":    ctx.CacheDir,
-				"compiled": ctx.Dir,
-				"working":  filepath.Dir(ctx.Appfile.Path),
-			},
+	return compile.App(ctx, &compile.AppOptions{
+		Bindata: &bindata.Data{
+			Asset:    Asset,
+			AssetDir: AssetDir,
 		},
-	}
-
-	// Copy all the common files
-	if err := data.CopyDir(ctx.Dir, "data/common"); err != nil {
-		return nil, err
-	}
-
-	// Copy the infrastructure specific files
-	prefix := fmt.Sprintf("data/%s-%s", ctx.Tuple.Infra, ctx.Tuple.InfraFlavor)
-	if err := data.CopyDir(ctx.Dir, prefix); err != nil {
-		return nil, err
-	}
-
-	return &app.CompileResult{
-		DevDepFragmentPath: filepath.Join(ctx.Dir, "dev-dep/build/Vagrantfile.fragment"),
-	}, nil
+	})
 }
 
 func (a *App) Build(ctx *app.Context) error {
@@ -68,7 +46,7 @@ func (a *App) Dev(ctx *app.Context) error {
 
 func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 	return vagrant.DevDep(dst, src, &vagrant.DevDepOptions{
-		Dir:    filepath.Join(src.Dir, "dev-dep/build"),
+		Dir:    filepath.Join(src.Dir, "dev-dep"),
 		Script: "/otto/build.sh",
 		Files:  []string{"dev-dep-output"},
 	})
