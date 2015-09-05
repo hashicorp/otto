@@ -26,8 +26,8 @@ end
 $script_golang = <<SCRIPT
 set -e
 
-echo "Downloading Go..."
-wget -q -O /home/vagrant/go.tar.gz https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz
+echo "Downloading Go {{ dev_go_version }}..."
+wget -q -O /home/vagrant/go.tar.gz https://storage.googleapis.com/golang/go{{ dev_go_version }}.linux-amd64.tar.gz
 
 echo "Untarring Go..."
 sudo tar -C /usr/local -xzf /home/vagrant/go.tar.gz

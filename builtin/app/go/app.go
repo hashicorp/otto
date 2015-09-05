@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/packer"
+	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
@@ -22,6 +23,19 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,
+		},
+		Customizations: []*compile.Customization{
+			&compile.Customization{
+				Type:     "dev",
+				Callback: processCustomDev,
+				Schema: map[string]*schema.FieldSchema{
+					"go_version": &schema.FieldSchema{
+						Type:        schema.TypeString,
+						Default:     "1.5",
+						Description: "Go version to install",
+					},
+				},
+			},
 		},
 	})
 }
@@ -50,6 +64,14 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 		Script: "/otto/build.sh",
 		Files:  []string{"dev-dep-output"},
 	})
+}
+
+func processCustomDev(d *schema.FieldData) (*compile.CustomizationResult, error) {
+	return &compile.CustomizationResult{
+		TemplateContext: map[string]interface{}{
+			"dev_go_version": d.Get("go_version"),
+		},
+	}, nil
 }
 
 const devInstructions = `

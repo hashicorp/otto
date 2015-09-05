@@ -14,6 +14,10 @@ type AppOptions struct {
 	// Template data should also be set on this. This will be modified with
 	// default template data if those keys are not set.
 	Bindata *bindata.Data
+
+	// Customizations is a list of helpers to process customizations
+	// in the Appfile. See the Customization docs for more information.
+	Customizations []*Customization
 }
 
 // App is an opinionated compilation function to help implement
@@ -33,6 +37,16 @@ func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 		"cache":    ctx.CacheDir,
 		"compiled": ctx.Dir,
 		"working":  filepath.Dir(ctx.Appfile.Path),
+	}
+
+	// Process the customizations!
+	err := processCustomizations(&processOpts{
+		Customizations: opts.Customizations,
+		Appfile:        ctx.Appfile,
+		Bindata:        data,
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	// Create the directory list that we'll copy from, and copy those
