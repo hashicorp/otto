@@ -56,7 +56,6 @@ type Dependency struct {
 type Project struct {
 	Name           string
 	Infrastructure string
-	Stack          *Stack
 }
 
 // Infrastructure is the structure of defining the infrastructure
@@ -65,12 +64,6 @@ type Infrastructure struct {
 	Name   string
 	Type   string
 	Flavor string
-}
-
-// Stack is the structure that defines the stack that a project is
-// built on.
-type Stack struct {
-	Name string
 }
 
 //-------------------------------------------------------------------

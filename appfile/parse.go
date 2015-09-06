@@ -195,58 +195,12 @@ func parseProject(result *File, obj *hclobj.Object) error {
 	if err := hcl.DecodeObject(&m, obj); err != nil {
 		return err
 	}
-	delete(m, "stack")
 
 	// Parse the project
 	var proj Project
 	result.Project = &proj
 	if err := mapstructure.WeakDecode(m, &proj); err != nil {
 		return err
-	}
-
-	// Parse the stack out separately
-	if o := obj.Get("stack", false); o != nil {
-		if err := parseStack(&proj, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func parseStack(proj *Project, obj *hclobj.Object) error {
-	// Get all the maps of keys to the actual object
-	objects := make(map[string]*hclobj.Object)
-	for _, o1 := range obj.Elem(false) {
-		for _, o2 := range o1.Elem(true) {
-			if _, ok := objects[o2.Key]; ok {
-				return fmt.Errorf(
-					"stack '%s' defined more than once",
-					o2.Key)
-			}
-
-			objects[o2.Key] = o2
-		}
-	}
-	if len(objects) == 0 {
-		return nil
-	}
-	if len(objects) != 1 {
-		return fmt.Errorf(
-			"only one stack can be defined per project")
-	}
-
-	for k, o := range objects {
-		m := make(map[string]interface{})
-		if err := hcl.DecodeObject(&m, o); err != nil {
-			return err
-		}
-
-		if err := mapstructure.WeakDecode(m, &proj.Stack); err != nil {
-			return err
-		}
-
-		proj.Stack.Name = k
 	}
 
 	return nil

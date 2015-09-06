@@ -29,9 +29,6 @@ func TestParse(t *testing.T) {
 				Project: &Project{
 					Name:           "foo",
 					Infrastructure: "aws",
-					Stack: &Stack{
-						Name: "bar",
-					},
 				},
 				Infrastructure: []*Infrastructure{
 					&Infrastructure{
@@ -89,13 +86,6 @@ func TestParse(t *testing.T) {
 		// Infrastructures
 		{
 			"infra-dup.hcl",
-			nil,
-			true,
-		},
-
-		// Stacks
-		{
-			"multi-stack.hcl",
 			nil,
 			true,
 		},
