@@ -64,8 +64,7 @@ func (c *DevCommand) Run(args []string) int {
 		Args:   execArgs,
 	})
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf(
-			"Error occurred: %s", err))
+		c.Ui.Error(err.Error())
 		return 1
 	}
 
@@ -78,7 +77,7 @@ func (c *DevCommand) Synopsis() string {
 
 func (c *DevCommand) Help() string {
 	helpText := `
-Usage: otto dev [options]
+Usage: otto dev [subcommand] [options]
 
   Start and manage a development environment for your application.
 
@@ -89,6 +88,9 @@ Usage: otto dev [options]
   The development environment will be local and will automatically include
   all upstream dependencies within the environment properly configured
   and started.
+
+  The list of available subcommands depends on the type of application
+  you're developing. To see the list, run "otto dev help".
 
 `
 
