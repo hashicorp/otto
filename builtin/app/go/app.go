@@ -53,9 +53,9 @@ func (a *App) Deploy(ctx *app.Context) error {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
-	return vagrant.Dev(ctx, &vagrant.DevOptions{
+	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
-	})
+	}).Route(ctx)
 }
 
 func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {

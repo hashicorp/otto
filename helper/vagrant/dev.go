@@ -25,18 +25,33 @@ type DevOptions struct {
 // Dev can be used as an implementation of app.App.Dev to automatically
 // handle creating a development environment and forwarding commands down
 // to Vagrant.
-func Dev(ctx *app.Context, opts *DevOptions) error {
-	switch ctx.Action {
-	case "":
-		return opts.actionUp(ctx)
-	case "destroy":
-		return opts.actionDestroy(ctx)
-	case "ssh":
-		return opts.actionSSH(ctx)
-	case "vagrant":
-		return opts.actionRaw(ctx)
-	default:
-		return fmt.Errorf("Unknown action for dev: %s", ctx.Action)
+func Dev(opts *DevOptions) *app.Router {
+	return &app.Router{
+		Actions: map[string]*app.Action{
+			"": &app.Action{
+				Execute:  opts.actionUp,
+				Synopsis: actionUpSyn,
+				Help:     strings.TrimSpace(actionUpHelp),
+			},
+
+			"destroy": &app.Action{
+				Execute:  opts.actionDestroy,
+				Synopsis: actionDestroySyn,
+				Help:     strings.TrimSpace(actionDestroyHelp),
+			},
+
+			"ssh": &app.Action{
+				Execute:  opts.actionSSH,
+				Synopsis: actionSSHSyn,
+				Help:     strings.TrimSpace(actionSSHHelp),
+			},
+
+			"vagrant": &app.Action{
+				Execute:  opts.actionRaw,
+				Synopsis: actionVagrantSyn,
+				Help:     strings.TrimSpace(actionVagrantHelp),
+			},
+		},
 	}
 }
 
@@ -121,3 +136,63 @@ func (opts *DevOptions) vagrantError(err error) error {
 			"the message isn't clear, please report this to the Otto project.",
 		err)
 }
+
+// Synopsis text for actions
+const (
+	actionUpSyn      = "Starts the development environment"
+	actionDestroySyn = "Destroy the development environment"
+	actionSSHSyn     = "SSH into the development environment"
+	actionVagrantSyn = "Run arbitrary Vagrant commands"
+)
+
+// Help text for actions
+const actionUpHelp = `
+Usage: otto dev
+
+  Builds and starts the development environment.
+
+  The development environment runs locally via Vagrant. Otto manages
+  Vagrant for you. All upstream dependencies will automatically be started
+  and running within the development environment.
+
+  At the end of running this command, help text will be shown that tell
+  you how to interact with the build environment.
+`
+
+const actionDestroyHelp = `
+Usage: otto dev destroy
+
+  Destroys the development environment.
+
+  This command will stop and delete the development environment.
+  Any data that was put onto the development environment will be deleted,
+  except for your own project's code (the directory and any subdirectories
+  where the Appfile exists).
+
+`
+
+const actionSSHHelp = `
+Usage: otto dev ssh
+
+  Connect to the development environment via SSH.
+
+  The development environment typically is headless, meaning that the
+  preferred way to access it is SSH. This command will automatically SSH
+  you into the development environment.
+
+`
+
+const actionVagrantHelp = `
+Usage: otto dev vagrant [command...]
+
+  Run arbitrary Vagrant commands against the development environment.
+
+  This is for advanced users who know and are comfortable with Vagrant.
+  In average day to day usage, this command isn't needed.
+
+  Because the development environment is backed by Vagrant, this command
+  lets you access it directly via Vagrant. For example, if you want to
+  run "vagrant ssh-config" against the environment, you can use
+  "otto dev vagrant ssh-config"
+
+`
