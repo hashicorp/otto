@@ -67,6 +67,54 @@ type Infrastructure struct {
 }
 
 //-------------------------------------------------------------------
+// Merging
+//-------------------------------------------------------------------
+
+// Merge will merge the other File onto this one, modifying this
+// File with the merged contents.
+func (f *File) Merge(other *File) error {
+	if other.ID != "" {
+		f.ID = other.ID
+	}
+	if other.Path != "" {
+		f.Path = other.Path
+	}
+
+	// Application
+	if f.Application == nil {
+		f.Application = other.Application
+	} else if other.Application != nil {
+		// Note this won't copy dependencies properly
+		*f.Application = *other.Application
+	}
+
+	// Project
+	if f.Project == nil {
+		f.Project = other.Project
+	} else if other.Project != nil {
+		// Note this won't copy dependencies properly
+		*f.Project = *other.Project
+	}
+
+	// Infrastructure
+	infraMap := make(map[string]int)
+	for i, infra := range f.Infrastructure {
+		infraMap[infra.Name] = i
+	}
+	for _, i := range other.Infrastructure {
+		if idx, ok := infraMap[i.Name]; !ok {
+			f.Infrastructure = append(f.Infrastructure, i)
+		} else {
+			f.Infrastructure[idx] = i
+		}
+	}
+
+	// TODO: customizations
+
+	return nil
+}
+
+//-------------------------------------------------------------------
 // Helper Methods
 //-------------------------------------------------------------------
 

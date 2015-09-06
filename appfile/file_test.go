@@ -2,6 +2,7 @@ package appfile
 
 import (
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -27,6 +28,147 @@ func TestFileActiveInfrastructure(t *testing.T) {
 		infra := actual.ActiveInfrastructure()
 		if infra.Name != tc.Result {
 			t.Fatalf("file: %s\n\n%s", tc.File, infra.Name)
+		}
+	}
+}
+
+func TestFileMerge(t *testing.T) {
+	cases := map[string]struct {
+		One, Two, Three *File
+	}{
+		"ID": {
+			One: &File{
+				ID: "foo",
+			},
+			Two: &File{
+				ID: "bar",
+			},
+			Three: &File{
+				ID: "bar",
+			},
+		},
+
+		"Path": {
+			One: &File{
+				Path: "foo",
+			},
+			Two: &File{
+				Path: "bar",
+			},
+			Three: &File{
+				Path: "bar",
+			},
+		},
+
+		"Application": {
+			One: &File{
+				Application: &Application{
+					Name: "foo",
+				},
+			},
+			Two: &File{
+				Application: &Application{
+					Type: "foo",
+				},
+			},
+			Three: &File{
+				Application: &Application{
+					Type: "foo",
+				},
+			},
+		},
+
+		"Application (no merge)": {
+			One: &File{
+				Application: &Application{
+					Name: "foo",
+				},
+			},
+			Two: &File{},
+			Three: &File{
+				Application: &Application{
+					Name: "foo",
+				},
+			},
+		},
+
+		"Infra (no merge)": {
+			One: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+					},
+				},
+			},
+			Two: &File{},
+			Three: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+					},
+				},
+			},
+		},
+
+		"Infra (add)": {
+			One: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+					},
+				},
+			},
+			Two: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "google",
+					},
+				},
+			},
+			Three: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+					},
+					&Infrastructure{
+						Name: "google",
+					},
+				},
+			},
+		},
+
+		"Infra (override)": {
+			One: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+					},
+				},
+			},
+			Two: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+					},
+				},
+			},
+			Three: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+					},
+				},
+			},
+		},
+	}
+
+	for name, tc := range cases {
+		if err := tc.One.Merge(tc.Two); err != nil {
+			t.Fatalf("%s: %s", name, err)
+		}
+
+		if !reflect.DeepEqual(tc.One, tc.Three) {
+			t.Fatalf("%s:\n\n%#v\n\n%#v", name, tc.One, tc.Three)
 		}
 	}
 }
