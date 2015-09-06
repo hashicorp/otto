@@ -531,13 +531,13 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 	// it goes directly into "app" or it is a dependency and goes into
 	// a dep folder.
 	outputDir := filepath.Join(c.compileDir, "app")
-	if id := f.ID(); id != c.appfile.ID() {
+	if id := f.ID; id != c.appfile.ID {
 		outputDir = filepath.Join(
 			c.compileDir, fmt.Sprintf("dep-%s", id))
 	}
 
 	// The cache directory for this app
-	cacheDir := filepath.Join(c.dataDir, "cache", f.ID())
+	cacheDir := filepath.Join(c.dataDir, "cache", f.ID)
 	if err := os.MkdirAll(cacheDir, 0755); err != nil {
 		return nil, fmt.Errorf(
 			"error making cache directory '%s': %s",
