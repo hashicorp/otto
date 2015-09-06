@@ -57,6 +57,7 @@ func TestCompile(t *testing.T) {
 			opts := testCompileOpts(t)
 			defer os.RemoveAll(opts.Dir)
 			f := testFile(t, tc.Dir)
+			defer f.resetID()
 
 			c, err := Compile(f, opts)
 			if (err != nil) != tc.Err {
@@ -68,6 +69,44 @@ func TestCompile(t *testing.T) {
 				testCompileMarshal(t, c, opts.Dir)
 			}
 		}()
+	}
+}
+
+func TestCompileID(t *testing.T) {
+	opts := testCompileOpts(t)
+	defer os.RemoveAll(opts.Dir)
+	f := testFile(t, "compile-id")
+	defer f.resetID()
+
+	c, err := Compile(f, opts)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if f.ID == "" {
+		t.Fatalf("ID should not be blank")
+	}
+	if f.ID != c.File.ID {
+		t.Fatalf("%s != %s", f.ID, c.File.ID)
+	}
+}
+
+func TestCompileID_existing(t *testing.T) {
+	opts := testCompileOpts(t)
+	defer os.RemoveAll(opts.Dir)
+	f := testFile(t, "compile-id-exists")
+	if f.ID == "" {
+		t.Fatalf("ID should not be blank")
+	}
+
+	copyId := f.ID
+	c, err := Compile(f, opts)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if copyId != c.File.ID {
+		t.Fatalf("%s != %s", f.ID, c.File.ID)
 	}
 }
 

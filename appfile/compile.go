@@ -177,6 +177,28 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	// Start building our compiled Appfile
 	compiled := &Compiled{File: f, Graph: new(dag.AcyclicGraph)}
 
+	// Check if we have an ID for this or not. If we don't, then we need
+	// to write the ID file. We only do this if the file has a path.
+	if f.Path != "" {
+		hasID, err := f.hasID()
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Error checking for Appfile UUID: %s", err)
+		}
+
+		if !hasID {
+			if err := f.initID(); err != nil {
+				return nil, fmt.Errorf(
+					"Error writing UUID for this Appfile: %s", err)
+			}
+		}
+
+		if err := f.loadID(); err != nil {
+			return nil, fmt.Errorf(
+				"Error loading Appfile UUID: %s", err)
+		}
+	}
+
 	// Add our root vertex for this Appfile
 	vertex := &CompiledGraphVertex{File: f, NameValue: f.Application.Name}
 	compiled.Graph.Add(vertex)

@@ -80,6 +80,9 @@ func ParseFile(path string) (*File, error) {
 	result, err := Parse(f)
 	if result != nil {
 		result.Path = path
+		if err := result.loadID(); err != nil {
+			return nil, err
+		}
 	}
 
 	return result, err
