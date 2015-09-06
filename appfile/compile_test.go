@@ -39,6 +39,12 @@ func TestCompile(t *testing.T) {
 			true,
 		},
 
+		{
+			"compile-deps-no-id",
+			"",
+			true,
+		},
+
 		/*
 			TODO: uncomment once we can enforce this
 			{

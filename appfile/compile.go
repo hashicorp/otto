@@ -288,6 +288,26 @@ func compileDependencies(
 						"Error parsing Appfile in %s: %s", key, err)
 				}
 
+				// If it doesn't have an otto ID then we can't do anything
+				hasID, err := f.hasID()
+				if err != nil {
+					return fmt.Errorf(
+						"Error checking for ID file for Appfile in %s: %s",
+						key, err)
+				}
+				if !hasID {
+					return fmt.Errorf(
+						"Dependency '%s' doesn't have an Otto ID yet!\n\n"+
+							"An Otto ID is generated on the first compilation of the Appfile.\n"+
+							"It is a globally unique ID that is used to track the application\n"+
+							"across multiple deploys. It is required for the application to be\n"+
+							"used as a dependency. To fix this, check out that application and\n"+
+							"compile the Appfile with `otto compile` once. Make sure you commit\n"+
+							"the .ottoid file into version control, and then try this command\n"+
+							"again.",
+						key)
+				}
+
 				// Build the vertex for this
 				vertex = &CompiledGraphVertex{
 					File:      f,
