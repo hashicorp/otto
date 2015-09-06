@@ -16,4 +16,5 @@ website/node_modules
 *~
 .*.swp
 .otto/
+.ottoid
 otto-data/
