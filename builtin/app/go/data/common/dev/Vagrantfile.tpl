@@ -10,6 +10,9 @@ Vagrant.configure("2") do |config|
   # Setup a synced folder from our working directory to /vagrant
   config.vm.synced_folder "{{ path.working }}", "/vagrant"
 
+  # Enable SSH agent forwarding so getting private dependencies works
+  config.ssh.forward_agent = true
+
   # Load all our fragments here for any dependencies.
   {% for fragment in dev_fragments %}
   {{ fragment|read }}
@@ -34,7 +37,7 @@ sudo tar -C /usr/local -xzf /home/vagrant/go.tar.gz
 
 echo "Making GOPATH..."
 sudo mkdir -p /opt/gopath
-sudo chown `whoami`:`whoami` /opt/gopath
+sudo chown vagrant:vagrant /opt/gopath
 
 echo "Setting up PATH..."
 echo 'export PATH=/opt/gopath/bin:/usr/local/go/bin:$PATH' >> /home/vagrant/.bashrc
