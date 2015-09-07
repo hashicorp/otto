@@ -20,7 +20,6 @@ type FieldData struct {
 // an error at this point, so we don't worry about it.
 func (d *FieldData) Validate() error {
 	for field, value := range d.Raw {
-
 		schema, ok := d.Schema[field]
 		if !ok {
 			continue
@@ -34,7 +33,7 @@ func (d *FieldData) Validate() error {
 			}
 		default:
 			return fmt.Errorf("unknown field type %s for field %s",
-			    schema.Type, field)
+				schema.Type, field)
 		}
 	}
 

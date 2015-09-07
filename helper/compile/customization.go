@@ -58,20 +58,21 @@ func processCustomizations(opts *processOpts) error {
 	// We start by going through, building the FieldData.
 	data := make([]*schema.FieldData, len(opts.Customizations))
 	for i, c := range opts.Customizations {
+		raw := make(map[string]interface{})
+
 		// Grab the real customizations
 		cs := opts.Appfile.Customization.Filter(c.Type)
-		if len(cs) == 0 {
-			continue
+		if len(cs) > 0 {
+			// We just want the last one. We don't do any merging for now
+			// or validation of the earlier ones. I'm sure this will cause problems
+			// one day.
+			realC := cs[len(cs)-1]
+			raw = realC.Config
 		}
-
-		// We just want the last one. We don't do any merging for now
-		// or validation of the earlier ones. I'm sure this will cause problems
-		// one day.
-		realC := cs[len(cs)-1]
 
 		// Build the FieldData structure from it
 		data[i] = &schema.FieldData{
-			Raw:    realC.Config,
+			Raw:    raw,
 			Schema: c.Schema,
 		}
 	}
