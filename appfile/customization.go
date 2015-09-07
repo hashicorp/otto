@@ -18,6 +18,11 @@ type CustomizationSet struct {
 // Filter filters the customizations by the given type and returns only
 // the matching list of customizations.
 func (s *CustomizationSet) Filter(t string) []*Customization {
+	// Allow this method call on nil s
+	if s == nil {
+		return nil
+	}
+
 	// Lowercase the type
 	t = strings.ToLower(t)
 

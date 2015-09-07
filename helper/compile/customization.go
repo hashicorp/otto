@@ -104,6 +104,10 @@ func processCustomizations(opts *processOpts) error {
 	// Go through the fields, call the callbacks, and record those results
 	results := make([]*CustomizationResult, len(data))
 	for i, d := range data {
+		if d == nil {
+			continue
+		}
+
 		c := opts.Customizations[i]
 		result, cerr := c.Callback(d)
 		if cerr != nil {

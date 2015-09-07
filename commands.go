@@ -8,6 +8,7 @@ import (
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/command"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/otto"
@@ -44,10 +45,18 @@ func init() {
 		Ui: Ui,
 	}
 
+	detectors := []*detect.Detector{
+		&detect.Detector{
+			Type: "go",
+			File: "*.go",
+		},
+	}
+
 	Commands = map[string]cli.CommandFactory{
 		"compile": func() (cli.Command, error) {
 			return &command.CompileCommand{
-				Meta: meta,
+				Meta:      meta,
+				Detectors: detectors,
 			}, nil
 		},
 
