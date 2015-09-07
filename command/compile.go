@@ -74,6 +74,17 @@ func (c *CompileCommand) Run(args []string) int {
 		}
 	}
 
+	// Tell the user what is happening if they have no Appfile
+	if app == nil {
+		ui.Header("No Appfile found! Detecting project information...")
+		ui.Message(fmt.Sprintf(
+			"No Appfile was found. If there is no Appfile, Otto will do its best\n" +
+				"to detect the type of application this is and set reasonable defaults.\n" +
+				"This is a good way to get started with Otto, but over time we recommend\n" +
+				"writing a real Appfile since this will allow more complex customizations,\n" +
+				"the ability to reference dependencies, versioning, and more."))
+	}
+
 	// Load the default Appfile so we can merge in any defaults into
 	// the loaded Appfile (if there is one).
 	detectConfig := &detect.Config{
