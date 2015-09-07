@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -15,39 +16,92 @@ import (
 // execution.
 type CompileCommand struct {
 	Meta
+
+	Detectors []*detect.Detector
 }
 
 func (c *CompileCommand) Run(args []string) int {
 	var flagAppfile string
 	fs := c.FlagSet("compile", FlagSetNone)
 	fs.Usage = func() { c.Ui.Error(c.Help()) }
-	fs.StringVar(&flagAppfile, "appfile", os.Getenv(EnvAppFile), "")
+	fs.StringVar(&flagAppfile, "appfile", "", "")
 	if err := fs.Parse(args); err != nil {
 		return 1
 	}
 
 	// Load a UI
 	ui := c.OttoUi()
+	ui.Header("Loading Appfile...")
+
+	// Determine all the Appfile paths
+	//
+	// First, if an Appfile was specified on the command-line, it must
+	// exist so we validate that it exists.
+	if flagAppfile != "" {
+		fi, err := os.Stat(flagAppfile)
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf(
+				"Error loading Appfile: %s", err))
+			return 1
+		}
+
+		if fi.IsDir() {
+			flagAppfile = filepath.Join(flagAppfile, DefaultAppfile)
+		}
+	}
+
+	// If the Appfile is still blank, just use our current directory
+	if flagAppfile == "" {
+		var err error
+		flagAppfile, err = os.Getwd()
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf(
+				"Error loading working directory: %s", err))
+			return 1
+		}
+
+		flagAppfile = filepath.Join(flagAppfile, DefaultAppfile)
+	}
 
 	// Load the appfile. This is the only time we ever load the
 	// raw Appfile. All other commands load the compiled Appfile.
-	if flagAppfile == "" {
-		flagAppfile = "."
+	var app *appfile.File
+	if fi, err := os.Stat(flagAppfile); err == nil && !fi.IsDir() {
+		app, err = appfile.ParseFile(flagAppfile)
+		if err != nil {
+			c.Ui.Error(err.Error())
+			return 1
+		}
 	}
-	fi, err := os.Stat(flagAppfile)
+
+	// Load the default Appfile so we can merge in any defaults into
+	// the loaded Appfile (if there is one).
+	detectConfig := &detect.Config{
+		Detectors: c.Detectors,
+	}
+	appDef, err := appfile.Default(filepath.Dir(flagAppfile), detectConfig)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf(
-			"Error checking Appfile path: %s", err))
+			"Error loading Appfile: %s", err))
 		return 1
 	}
-	if fi.IsDir() {
-		flagAppfile = filepath.Join(flagAppfile, DefaultAppfile)
-	}
-	app, err := appfile.ParseFile(flagAppfile)
-	if err != nil {
-		c.Ui.Error(err.Error())
+
+	// If there was no loaded Appfile and we don't have an application
+	// type then we weren't able to detect the type. Error.
+	if app == nil && appDef.Application.Type == "" {
+		c.Ui.Error(strings.TrimSpace(errCantDetectType))
 		return 1
 	}
+
+	// Merge the appfiles
+	if app != nil {
+		if err := appDef.Merge(app); err != nil {
+			c.Ui.Error(fmt.Sprintf(
+				"Error loading Appfile: %s", err))
+			return 1
+		}
+	}
+	app = appDef
 
 	// Compile the Appfile
 	ui.Header("Fetching all Appfile dependencies...")
@@ -132,3 +186,20 @@ func (c *CompileCommand) compileCallback(ui ui.Ui) func(appfile.CompileEvent) {
 		}
 	}
 }
+
+const errCantDetectType = `
+No Appfile is present and Otto couldn't detect the project type automatically.
+Otto does its best without an Appfile to detect what kind of project this is
+automatically, but sometimes this fails if the project is in a structure
+Otto doesn't recognize or its a project type that Otto doesn't yet support.
+
+Please create an Appfile and specify at a minimum the project type. Below
+is an example minimal Appfile specifying the "go" project type:
+
+    application {
+        type = "go"
+    }
+
+If you believe Otto should've been able to automatically detect your
+project type, then please open an issue with the Otto project.
+`

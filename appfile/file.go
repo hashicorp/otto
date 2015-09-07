@@ -110,6 +110,7 @@ func (f *File) Merge(other *File) error {
 	}
 
 	// TODO: customizations
+	f.Customization = other.Customization
 
 	return nil
 }

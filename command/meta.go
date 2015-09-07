@@ -33,9 +33,6 @@ const (
 	// DefaultDataDir is the default directory for the directory
 	// data if a directory in the Appfile isn't specified.
 	DefaultDataDir = "otto-data"
-
-	// EnvAppFile is the environment variable to point to an appfile.
-	EnvAppFile = "OTTO_APPFILE"
 )
 
 // FlagSetFlags is an enum to define what flags are present in the
