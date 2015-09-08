@@ -44,7 +44,7 @@ sudo tar -C /usr/local -xzf /home/vagrant/go.tar.gz
 echo "Making GOPATH..."
 sudo mkdir -p /opt/gopath
 fstype=$(find /opt/gopath -mindepth 0 -maxdepth 0 -type d -printf "%F")
-find /opt/gopath -fstype ${fstype} | xargs chown vagrant:vagrant
+find /opt/gopath -fstype ${fstype} -print0 | xargs -0 -n 100 chown vagrant:vagrant
 
 echo "Setting up PATH..."
 echo 'export PATH=/opt/gopath/bin:/usr/local/go/bin:$PATH' >> /home/vagrant/.bashrc
