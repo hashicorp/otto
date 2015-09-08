@@ -12,26 +12,15 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
-	"unsafe"
 	"os"
 	"time"
 	"io/ioutil"
-	"path"
 	"path/filepath"
 )
 
 func bindataRead(data, name string) ([]byte, error) {
-	var empty [0]byte
-	sx := (*reflect.StringHeader)(unsafe.Pointer(&data))
-	b := empty[:]
-	bx := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	bx.Data = sx.Data
-	bx.Len = len(data)
-	bx.Cap = bx.Len
-
-	gz, err := gzip.NewReader(bytes.NewBuffer(b))
+	gz, err := gzip.NewReader(strings.NewReader(data))
 	if err != nil {
 		return nil, fmt.Errorf("Read %q: %v", name, err)
 	}
@@ -96,7 +85,7 @@ func dataVpcPublicPrivateMainTf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/vpc-public-private/main.tf", size: 753, mode: os.FileMode(420), modTime: time.Unix(1440697362, 0)}
+	info := bindataFileInfo{name: "data/vpc-public-private/main.tf", size: 753, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -116,7 +105,7 @@ func dataVpcPublicPrivateOutputsTf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/vpc-public-private/outputs.tf", size: 556, mode: os.FileMode(420), modTime: time.Unix(1440697246, 0)}
+	info := bindataFileInfo{name: "data/vpc-public-private/outputs.tf", size: 556, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -136,7 +125,7 @@ func dataVpcPublicPrivateVariablesTf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/vpc-public-private/variables.tf", size: 216, mode: os.FileMode(420), modTime: time.Unix(1440697193, 0)}
+	info := bindataFileInfo{name: "data/vpc-public-private/variables.tf", size: 216, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -260,7 +249,7 @@ func RestoreAsset(dir, name string) error {
         if err != nil {
                 return err
         }
-        err = os.MkdirAll(_filePath(dir, path.Dir(name)), os.FileMode(0755))
+        err = os.MkdirAll(_filePath(dir, filepath.Dir(name)), os.FileMode(0755))
         if err != nil {
                 return err
         }
@@ -284,7 +273,7 @@ func RestoreAssets(dir, name string) error {
         }
         // Dir
         for _, child := range children {
-                err = RestoreAssets(dir, path.Join(name, child))
+                err = RestoreAssets(dir, filepath.Join(name, child))
                 if err != nil {
                         return err
                 }
