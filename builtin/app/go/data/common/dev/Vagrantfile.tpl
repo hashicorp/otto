@@ -8,7 +8,13 @@ Vagrant.configure("2") do |config|
   config.vm.box = "hashicorp/precise64"
 
   # Setup a synced folder from our working directory to /vagrant
-  config.vm.synced_folder "{{ path.working }}", "/vagrant"
+  config.vm.synced_folder "{{ path.working }}", "{{ shared_folder_path }}",
+    owner: "vagrant", group: "vagrant"
+
+  {% if import_path != "" %}
+  # Disable the default synced folder
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  {% endif %}
 
   # Enable SSH agent forwarding so getting private dependencies works
   config.ssh.forward_agent = true
@@ -23,7 +29,7 @@ Vagrant.configure("2") do |config|
 
   # Make it so that `vagrant ssh` goes directly to the correct dir
   config.vm.provision "shell", inline:
-    %Q[echo "cd /vagrant" >> /home/vagrant/.bashrc]
+    %Q[echo "cd {{ shared_folder_path }}" >> /home/vagrant/.bashrc]
 end
 
 $script_golang = <<SCRIPT
@@ -37,7 +43,8 @@ sudo tar -C /usr/local -xzf /home/vagrant/go.tar.gz
 
 echo "Making GOPATH..."
 sudo mkdir -p /opt/gopath
-sudo chown vagrant:vagrant /opt/gopath
+fstype=$(find /opt/gopath -mindepth 0 -maxdepth 0 -type d -printf "%F")
+find /opt/gopath -fstype ${fstype} | xargs chown vagrant:vagrant
 
 echo "Setting up PATH..."
 echo 'export PATH=/opt/gopath/bin:/usr/local/go/bin:$PATH' >> /home/vagrant/.bashrc
@@ -46,4 +53,7 @@ echo 'export GOPATH=/opt/gopath' >> /home/vagrant/.bashrc
 echo "Installing VCSs for go get..."
 sudo apt-get update -y >/dev/null 2>&1
 sudo apt-get install -y git bzr mercurial
+
+echo "Configuring Go to use SSH instead of HTTP..."
+git config --global url."git@github.com:".insteadOf "https://github.com/"
 SCRIPT

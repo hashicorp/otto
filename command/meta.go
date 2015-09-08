@@ -77,6 +77,11 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 		return nil, err
 	}
 
+	rootDir, err = filepath.Abs(rootDir)
+	if err != nil {
+		return nil, err
+	}
+
 	localDir, err := homedir.Expand(DefaultLocalDataDir)
 	if err != nil {
 		return nil, err

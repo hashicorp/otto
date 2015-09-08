@@ -19,10 +19,31 @@ import (
 type App struct{}
 
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
+	// Go is really finicky about the GOPATH. To help make the dev
+	// environment and build environment more correct, we attempt to
+	// detect the GOPATH automatically.
+	//
+	// We use this GOPATH for example in Vagrant to setup the synced
+	// folder directly into the GOPATH properly. Magic!
+	ctx.Ui.Header("Detecting application import path for GOPATH...")
+	gopathPath, err := detectImportPath(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	folderPath := "/vagrant"
+	if gopathPath != "" {
+		folderPath = "/opt/gopath/src/" + gopathPath
+	}
+
 	return compile.App(ctx, &compile.AppOptions{
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,
+			Context: map[string]interface{}{
+				"import_path":        gopathPath,
+				"shared_folder_path": folderPath,
+			},
 		},
 		Customizations: []*compile.Customization{
 			&compile.Customization{

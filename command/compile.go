@@ -63,6 +63,17 @@ func (c *CompileCommand) Run(args []string) int {
 		flagAppfile = filepath.Join(flagAppfile, DefaultAppfile)
 	}
 
+	// If we have the Appfile, then make sure it is an absoute path
+	if flagAppfile != "" {
+		var err error
+		flagAppfile, err = filepath.Abs(flagAppfile)
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf(
+				"Error getting Appfile path: %s", err))
+			return 1
+		}
+	}
+
 	// Load the appfile. This is the only time we ever load the
 	// raw Appfile. All other commands load the compiled Appfile.
 	var app *appfile.File
