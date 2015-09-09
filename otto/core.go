@@ -145,7 +145,7 @@ func (c *Core) Compile() error {
 		return nil
 	})
 
-	return nil
+	return err
 }
 
 func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
@@ -558,6 +558,8 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 }
 
 func (c *Core) app(ctx *app.Context) (app.App, error) {
+	log.Printf("[INFO] Loading app implementation for Tuple: %s", ctx.Tuple)
+
 	// Look for the app impl. factory
 	f, ok := c.apps[ctx.Tuple]
 	if !ok {
