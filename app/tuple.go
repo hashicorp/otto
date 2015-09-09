@@ -54,3 +54,37 @@ func (s TupleSlice) Map(f Factory) TupleMap {
 // TupleMap is an alias of map[Tuple]Factory that adds additional helper
 // methods on top to help work with app tuples.
 type TupleMap map[Tuple]Factory
+
+// Lookup looks up a Tuple. This should be used instead of direct [] access
+// since it respects wildcards ('*') within the Tuple.
+func (m TupleMap) Lookup(t Tuple) Factory {
+	// If it just exists, return it
+	if f, ok := m[t]; ok {
+		return f
+	}
+
+	// Eh, this isn't terrible complexity, but we should probably look
+	// to do better than this at some point.
+	for h, f := range m {
+		if h.App != "*" && h.App != t.App {
+			continue
+		}
+		if h.Infra != "*" && h.Infra != t.Infra {
+			continue
+		}
+		if h.InfraFlavor != "*" && h.InfraFlavor != t.InfraFlavor {
+			continue
+		}
+
+		return f
+	}
+
+	return nil
+}
+
+// Add is a helper to add another map to this one.
+func (m TupleMap) Add(m2 TupleMap) {
+	for k, v := range m2 {
+		m[k] = v
+	}
+}
