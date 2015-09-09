@@ -19,10 +19,19 @@ type AppOptions struct {
 	// Customizations is a list of helpers to process customizations
 	// in the Appfile. See the Customization docs for more information.
 	Customizations []*Customization
+
+	// Callbacks are called just prior to compilation completing.
+	Callbacks []CompileCallback
 }
+
+// CompileCallback is a callback that can be registered to be run after
+// compilation.
+type CompileCallback func(*app.Context, *bindata.Data) error
 
 // App is an opinionated compilation function to help implement
 // app.App.Compile.
+//
+// AppOptions may be modified during this call.
 func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 	// Setup the basic templating data. We put this into the "data" local
 	// var just so that it is easier to reference.
@@ -31,6 +40,7 @@ func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 	data := opts.Bindata
 	if data.Context == nil {
 		data.Context = make(map[string]interface{})
+		opts.Bindata = data
 	}
 	data.Context["name"] = ctx.Appfile.Application.Name
 	data.Context["dev_fragments"] = ctx.DevDepFragments
@@ -41,7 +51,7 @@ func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 	}
 
 	// Process the customizations!
-	err := processCustomizations(&processOpts{
+	customResult, err := processCustomizations(&processOpts{
 		Customizations: opts.Customizations,
 		Appfile:        ctx.Appfile,
 		Bindata:        data,
@@ -49,6 +59,11 @@ func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Store the callbacks
+	callbacks := make([]CompileCallback, 0, len(opts.Callbacks)+len(customResult.Callbacks))
+	callbacks = append(callbacks, opts.Callbacks...)
+	callbacks = append(callbacks, customResult.Callbacks...)
 
 	// Create the directory list that we'll copy from, and copy those
 	// directly into the compilation directory.
@@ -64,6 +79,13 @@ func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 				continue
 			}
 
+			return nil, err
+		}
+	}
+
+	// Callbacks
+	for _, cb := range callbacks {
+		if err := cb(ctx, opts.Bindata); err != nil {
 			return nil, err
 		}
 	}

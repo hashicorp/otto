@@ -36,6 +36,10 @@ type CustomizationFunc func(*schema.FieldData) (*CustomizationResult, error)
 // CustomizationResult is the result of processing a customization. It
 // tells the compile helpers how to behave with this latest customization.
 type CustomizationResult struct {
+	// Callback is a function to execute just before the compilation completes.
+	// This allows customizations to copy in new data or fail late.
+	Callback CompileCallback
+
 	// TemplateContext is extra contextual information to add or change in the
 	// context. This will overwrite any keys (at the _top level_ only) that
 	// already exist in the context.
@@ -49,7 +53,11 @@ type processOpts struct {
 	Bindata *bindata.Data
 }
 
-func processCustomizations(opts *processOpts) error {
+type processResults struct {
+	Callbacks []CompileCallback
+}
+
+func processCustomizations(opts *processOpts) (*processResults, error) {
 	// We process customizations below by going through multiple
 	// passes. We can very likely condense this into one for loop but
 	// it helps the semantic understanding to split it out and there should
@@ -99,7 +107,7 @@ func processCustomizations(opts *processOpts) error {
 
 	// If we have validation errors, return now
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Go through the fields, call the callbacks, and record those results
@@ -122,10 +130,11 @@ func processCustomizations(opts *processOpts) error {
 
 	// If we had errors there, then return
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Process the results
+	var result processResults
 	for _, r := range results {
 		if r == nil {
 			continue
@@ -137,7 +146,12 @@ func processCustomizations(opts *processOpts) error {
 				opts.Bindata.Context[k] = v
 			}
 		}
+
+		// If we have a callback, add those
+		if r.Callback != nil {
+			result.Callbacks = append(result.Callbacks, r.Callback)
+		}
 	}
 
-	return nil
+	return &result, nil
 }
