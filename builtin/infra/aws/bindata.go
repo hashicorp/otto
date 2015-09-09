@@ -85,7 +85,7 @@ func dataVpcPublicPrivateMainTf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/vpc-public-private/main.tf", size: 753, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	info := bindataFileInfo{name: "data/vpc-public-private/main.tf", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -105,7 +105,7 @@ func dataVpcPublicPrivateOutputsTf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/vpc-public-private/outputs.tf", size: 556, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	info := bindataFileInfo{name: "data/vpc-public-private/outputs.tf", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -125,7 +125,7 @@ func dataVpcPublicPrivateVariablesTf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/vpc-public-private/variables.tf", size: 216, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	info := bindataFileInfo{name: "data/vpc-public-private/variables.tf", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/otto/ui"
 )
 
-//go:generate go-bindata -pkg=aws -nomemcopy ./data/...
+//go:generate go-bindata -pkg=aws -nomemcopy -nometadata ./data/...
 
 // Infra returns the infrastructure.Infrastructure implementation.
 // This function is a infrastructure.Factory.

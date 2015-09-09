@@ -85,7 +85,7 @@ func testDataCopyDirBasicATxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/a.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/a.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1435862930, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -105,7 +105,7 @@ func testDataCopyDirBasicBTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/b.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/b.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1435862933, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -125,7 +125,7 @@ func testDataCopyDirBasicDirCTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/dir/c.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/dir/c.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1435863315, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }

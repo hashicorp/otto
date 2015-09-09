@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/otto/helper/vagrant"
 )
 
-//go:generate go-bindata -pkg=goapp -nomemcopy ./data/...
+//go:generate go-bindata -pkg=goapp -nomemcopy -nometadata ./data/...
 
 // App is an implementation of app.App
 type App struct{}
