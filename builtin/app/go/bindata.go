@@ -4,7 +4,6 @@
 // data/aws-vpc-public-private/deploy/main.tf.tpl
 // data/aws-vpc-public-private/deploy/variables.tf
 // data/common/dev/Vagrantfile.tpl
-// data/common/dev-dep/.DS_Store
 // data/common/dev-dep/Vagrantfile.fragment.tpl
 // data/common/dev-dep/Vagrantfile.tpl
 // data/common/dev-dep/build.sh.tpl
@@ -18,26 +17,15 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
-	"unsafe"
 	"os"
 	"time"
 	"io/ioutil"
-	"path"
 	"path/filepath"
 )
 
 func bindataRead(data, name string) ([]byte, error) {
-	var empty [0]byte
-	sx := (*reflect.StringHeader)(unsafe.Pointer(&data))
-	b := empty[:]
-	bx := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	bx.Data = sx.Data
-	bx.Len = len(data)
-	bx.Cap = bx.Len
-
-	gz, err := gzip.NewReader(bytes.NewBuffer(b))
+	gz, err := gzip.NewReader(strings.NewReader(data))
 	if err != nil {
 		return nil, fmt.Errorf("Read %q: %v", name, err)
 	}
@@ -102,7 +90,7 @@ func dataAwsVpcPublicPrivateBuildTemplateJsonTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/aws-vpc-public-private/build/template.json.tpl", size: 667, mode: os.FileMode(420), modTime: time.Unix(1440649977, 0)}
+	info := bindataFileInfo{name: "data/aws-vpc-public-private/build/template.json.tpl", size: 667, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -122,7 +110,7 @@ func dataAwsVpcPublicPrivateDeployMainTfTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/aws-vpc-public-private/deploy/main.tf.tpl", size: 394, mode: os.FileMode(420), modTime: time.Unix(1441079596, 0)}
+	info := bindataFileInfo{name: "data/aws-vpc-public-private/deploy/main.tf.tpl", size: 394, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -142,7 +130,7 @@ func dataAwsVpcPublicPrivateDeployVariablesTf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/aws-vpc-public-private/deploy/variables.tf", size: 737, mode: os.FileMode(420), modTime: time.Unix(1441079586, 0)}
+	info := bindataFileInfo{name: "data/aws-vpc-public-private/deploy/variables.tf", size: 737, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -162,27 +150,7 @@ func dataCommonDevVagrantfileTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/common/dev/Vagrantfile.tpl", size: 2006, mode: os.FileMode(420), modTime: time.Unix(1441693340, 0)}
-	a := &asset{bytes: bytes, info:  info}
-	return a, nil
-}
-
-var _dataCommonDevDepDs_store = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xec\x98\x3b\x0e\xc2\x30\x10\x44\x77\x8c\x0b\x4b\x34\x2e\x29\xdd\x70\x00\x6e\x60\x45\xe1\x04\x5c\x80\x82\x2b\xd0\xfb\xe8\x24\xda\x11\xb2\x14\x52\x50\x25\x82\x79\x92\xf5\x56\x8a\x9d\x4f\xe3\xec\xd8\xcc\x30\x3c\x1f\x17\xb3\x3c\x95\xc9\xdc\x76\xb6\x8f\x24\x8e\x05\xa1\xab\xc1\x7b\x08\x21\x84\x10\x62\xdf\xc0\x95\x8e\xdb\xbe\x86\x10\x62\x87\xcc\xfb\x43\xa1\x2b\xdd\xdc\xe0\xf5\x40\xc7\x6e\x4d\xa6\x0b\x5d\xe9\xe6\x06\xe7\x05\x3a\xd2\x89\xce\x74\xa1\x2b\xdd\xdc\xdc\xb4\xc0\xf0\x01\x3e\x19\x4c\x28\x60\x0a\x41\xa1\xeb\x97\x1f\x2d\xc4\x9f\x70\x70\xe5\xf9\xff\x7f\xb5\xd5\xfc\x2f\x84\xf8\x61\x10\xc7\xdb\x38\xd8\x3b\x10\x2c\x27\x4c\xe3\xde\xd5\xcd\xd6\x9b\x80\xe0\x87\x85\xa7\x6e\x6d\xa1\x2b\xdd\xdc\x6a\x04\x84\xd8\x8a\x57\x00\x00\x00\xff\xff\x6a\x00\x88\x6d\x04\x18\x00\x00"
-
-func dataCommonDevDepDs_storeBytes() ([]byte, error) {
-	return bindataRead(
-		_dataCommonDevDepDs_store,
-		"data/common/dev-dep/.DS_Store",
-	)
-}
-
-func dataCommonDevDepDs_store() (*asset, error) {
-	bytes, err := dataCommonDevDepDs_storeBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "data/common/dev-dep/.DS_Store", size: 6148, mode: os.FileMode(420), modTime: time.Unix(1441324292, 0)}
+	info := bindataFileInfo{name: "data/common/dev/Vagrantfile.tpl", size: 2006, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -202,7 +170,7 @@ func dataCommonDevDepVagrantfileFragmentTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/common/dev-dep/Vagrantfile.fragment.tpl", size: 656, mode: os.FileMode(420), modTime: time.Unix(1440375056, 0)}
+	info := bindataFileInfo{name: "data/common/dev-dep/Vagrantfile.fragment.tpl", size: 656, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -222,7 +190,7 @@ func dataCommonDevDepVagrantfileTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/common/dev-dep/Vagrantfile.tpl", size: 1458, mode: os.FileMode(420), modTime: time.Unix(1440375056, 0)}
+	info := bindataFileInfo{name: "data/common/dev-dep/Vagrantfile.tpl", size: 1458, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -242,7 +210,7 @@ func dataCommonDevDepBuildShTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/common/dev-dep/build.sh.tpl", size: 564, mode: os.FileMode(493), modTime: time.Unix(1440375056, 0)}
+	info := bindataFileInfo{name: "data/common/dev-dep/build.sh.tpl", size: 564, mode: os.FileMode(493), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -262,7 +230,7 @@ func dataCommonDevDepUpstartConfTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/common/dev-dep/upstart.conf.tpl", size: 268, mode: os.FileMode(420), modTime: time.Unix(1440179369, 0)}
+	info := bindataFileInfo{name: "data/common/dev-dep/upstart.conf.tpl", size: 268, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -323,7 +291,6 @@ var _bindata = map[string]func() (*asset, error){
 	"data/aws-vpc-public-private/deploy/main.tf.tpl": dataAwsVpcPublicPrivateDeployMainTfTpl,
 	"data/aws-vpc-public-private/deploy/variables.tf": dataAwsVpcPublicPrivateDeployVariablesTf,
 	"data/common/dev/Vagrantfile.tpl": dataCommonDevVagrantfileTpl,
-	"data/common/dev-dep/.DS_Store": dataCommonDevDepDs_store,
 	"data/common/dev-dep/Vagrantfile.fragment.tpl": dataCommonDevDepVagrantfileFragmentTpl,
 	"data/common/dev-dep/Vagrantfile.tpl": dataCommonDevDepVagrantfileTpl,
 	"data/common/dev-dep/build.sh.tpl": dataCommonDevDepBuildShTpl,
@@ -389,8 +356,6 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				}},
 			}},
 			"dev-dep": &bintree{nil, map[string]*bintree{
-				".DS_Store": &bintree{dataCommonDevDepDs_store, map[string]*bintree{
-				}},
 				"Vagrantfile.fragment.tpl": &bintree{dataCommonDevDepVagrantfileFragmentTpl, map[string]*bintree{
 				}},
 				"Vagrantfile.tpl": &bintree{dataCommonDevDepVagrantfileTpl, map[string]*bintree{
@@ -414,7 +379,7 @@ func RestoreAsset(dir, name string) error {
         if err != nil {
                 return err
         }
-        err = os.MkdirAll(_filePath(dir, path.Dir(name)), os.FileMode(0755))
+        err = os.MkdirAll(_filePath(dir, filepath.Dir(name)), os.FileMode(0755))
         if err != nil {
                 return err
         }
@@ -438,7 +403,7 @@ func RestoreAssets(dir, name string) error {
         }
         // Dir
         for _, child := range children {
-                err = RestoreAssets(dir, path.Join(name, child))
+                err = RestoreAssets(dir, filepath.Join(name, child))
                 if err != nil {
                         return err
                 }
