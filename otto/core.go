@@ -561,8 +561,8 @@ func (c *Core) app(ctx *app.Context) (app.App, error) {
 	log.Printf("[INFO] Loading app implementation for Tuple: %s", ctx.Tuple)
 
 	// Look for the app impl. factory
-	f, ok := c.apps[ctx.Tuple]
-	if !ok {
+	f := app.TupleMap(c.apps).Lookup(ctx.Tuple)
+	if f == nil {
 		return nil, fmt.Errorf(
 			"app implementation for tuple not found: %s", ctx.Tuple)
 	}
