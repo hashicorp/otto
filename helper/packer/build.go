@@ -112,11 +112,12 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 	ctx.Ui.Header("Storing build data in directory...")
 	if err := ctx.Directory.PutBuild(build); err != nil {
 		return fmt.Errorf(
-			"Error storing the build in the directory service: %s\n\n" +
-				"Despite the build itself completing successfully, Otto must\n" +
-				"also successfully store the results in the directory service\n" +
-				"to be able to deploy this build. Please fix the above error and\n" +
-				"rebuild.")
+			"Error storing the build in the directory service: %s\n\n"+
+				"Despite the build itself completing successfully, Otto must\n"+
+				"also successfully store the results in the directory service\n"+
+				"to be able to deploy this build. Please fix the above error and\n"+
+				"rebuild.",
+			err)
 	}
 
 	ctx.Ui.Header("[green]Build success!")

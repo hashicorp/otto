@@ -128,8 +128,8 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 			// TODO: copy state
 
 			err = fmt.Errorf(
-				"Failed to save Terraform state: %s\n\n",
-				"This means that Otto was unable to store the state of your infrastructure.\n"+
+				"Failed to save Terraform state: %s\n\n"+
+					"This means that Otto was unable to store the state of your infrastructure.\n"+
 					"At this time, Otto doesn't support gracefully recovering from this\n"+
 					"scenario. The state should be in the path below. Please ask the\n"+
 					"community for assistance.",

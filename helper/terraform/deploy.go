@@ -142,10 +142,11 @@ func Deploy(ctx *app.Context, opts *DeployOptions) error {
 	}
 	if err := tf.Execute("apply"); err != nil {
 		return fmt.Errorf(
-			"Error running Terraform: %s\n\n" +
-				"Terraform usually has helpful error messages. Please read the error\n" +
-				"messages above and resolve them. Sometimes simply running `otto deply`\n" +
-				"again will work.")
+			"Error running Terraform: %s\n\n"+
+				"Terraform usually has helpful error messages. Please read the error\n"+
+				"messages above and resolve them. Sometimes simply running `otto deply`\n"+
+				"again will work.",
+			err)
 	}
 
 	return nil
