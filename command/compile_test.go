@@ -1,6 +1,8 @@
 package command
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/otto/app"
@@ -20,7 +22,10 @@ func TestCompile(t *testing.T) {
 		},
 	}
 
-	args := []string{"-appfile", fixtureDir("compile-basic")}
+	dir := fixtureDir("compile-basic")
+	defer os.Remove(filepath.Join(dir, ".ottoid"))
+
+	args := []string{"-appfile", dir}
 	if code := c.Run(args); code != 0 {
 		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
 	}
@@ -42,7 +47,10 @@ func TestCompile_pathFile(t *testing.T) {
 		},
 	}
 
-	args := []string{"-appfile", fixtureDir("compile-file/Appfile.other")}
+	dir := fixtureDir("compile-file")
+	defer os.Remove(filepath.Join(dir, ".ottoid"))
+
+	args := []string{"-appfile", filepath.Join(dir, "Appfile.other")}
 	if code := c.Run(args); code != 0 {
 		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
 	}
