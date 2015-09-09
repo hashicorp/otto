@@ -24,8 +24,9 @@ func TestCompile(t *testing.T) {
 
 	dir := fixtureDir("compile-basic")
 	defer os.Remove(filepath.Join(dir, ".ottoid"))
+	defer testChdir(t, dir)()
 
-	args := []string{"-appfile", dir}
+	args := []string{}
 	if code := c.Run(args); code != 0 {
 		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
 	}
@@ -49,9 +50,25 @@ func TestCompile_pathFile(t *testing.T) {
 
 	dir := fixtureDir("compile-file")
 	defer os.Remove(filepath.Join(dir, ".ottoid"))
+	defer testChdir(t, dir)()
 
-	args := []string{"-appfile", filepath.Join(dir, "Appfile.other")}
+	args := []string{"-appfile", "Appfile.other"}
 	if code := c.Run(args); code != 0 {
 		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
+	}
+}
+
+func testChdir(t *testing.T, dir string) func() {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	return func() {
+		if err := os.Chdir(wd); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
