@@ -57,6 +57,7 @@ vet:
 # generate runs `go generate` to build the dynamically generated
 # source files.
 generate:
+	find . -type f -name '.DS_Store' -delete
 	go generate ./...
 
 .PHONY: bin default generate test updatedeps vet
