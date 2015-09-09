@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/helper/bindata"
@@ -58,6 +59,11 @@ func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 	for _, dir := range bindirs {
 		// Copy all the common files that exist
 		if err := data.CopyDir(ctx.Dir, dir); err != nil {
+			// Ignore any directories that don't exist
+			if strings.Contains(err.Error(), "not found") {
+				continue
+			}
+
 			return nil, err
 		}
 	}
