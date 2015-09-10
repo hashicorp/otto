@@ -2,6 +2,7 @@
 // sources:
 // data/dev/Vagrantfile.tpl
 // data/sentinels/terraform_path.tpl
+// data/sentinels/vagrant_path.tpl
 // DO NOT EDIT!
 
 package custom
@@ -109,6 +110,26 @@ func dataSentinelsTerraform_pathTpl() (*asset, error) {
 	return a, nil
 }
 
+var _dataSentinelsVagrant_pathTpl = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x24\xcd\x41\x0a\xc2\x40\x0c\x85\xe1\xfd\x9c\xe2\x9d\xc0\xab\xb8\x11\xb7\xe5\xd5\x09\xce\xa0\x4e\x24\xa6\x29\xa5\xf4\xee\x06\x5d\xfe\x1f\x0f\xde\xbe\xa3\x4a\x4c\xc1\xbb\x71\xf8\xf4\xa6\x37\x1c\x47\x29\x97\x26\xf8\x05\x67\x0d\x41\xff\x80\x08\x3e\x17\x81\x09\x2b\xe6\x0d\x67\x77\x05\x1d\xb6\x0c\xef\x2f\x41\xd6\x63\xe8\x8a\xb5\x25\xd6\x6e\x72\x73\xb5\xad\x24\xe7\x02\xd7\xff\x01\xfa\x38\x95\x6f\x00\x00\x00\xff\xff\xd1\xf8\x61\x5e\x74\x00\x00\x00"
+
+func dataSentinelsVagrant_pathTplBytes() ([]byte, error) {
+	return bindataRead(
+		_dataSentinelsVagrant_pathTpl,
+		"data/sentinels/vagrant_path.tpl",
+	)
+}
+
+func dataSentinelsVagrant_pathTpl() (*asset, error) {
+	bytes, err := dataSentinelsVagrant_pathTplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "data/sentinels/vagrant_path.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -163,6 +184,7 @@ func AssetNames() []string {
 var _bindata = map[string]func() (*asset, error){
 	"data/dev/Vagrantfile.tpl": dataDevVagrantfileTpl,
 	"data/sentinels/terraform_path.tpl": dataSentinelsTerraform_pathTpl,
+	"data/sentinels/vagrant_path.tpl": dataSentinelsVagrant_pathTpl,
 }
 
 // AssetDir returns the file names below a certain
@@ -212,6 +234,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		}},
 		"sentinels": &bintree{nil, map[string]*bintree{
 			"terraform_path.tpl": &bintree{dataSentinelsTerraform_pathTpl, map[string]*bintree{
+			}},
+			"vagrant_path.tpl": &bintree{dataSentinelsVagrant_pathTpl, map[string]*bintree{
 			}},
 		}},
 	}},

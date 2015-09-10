@@ -33,6 +33,17 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		},
 		Customizations: []*compile.Customization{
 			&compile.Customization{
+				Type:     "dev",
+				Callback: processCustomDev,
+				Schema: map[string]*schema.FieldSchema{
+					"vagrantfile": &schema.FieldSchema{
+						Type:        schema.TypeString,
+						Description: "Path to Vagrantfile template",
+					},
+				},
+			},
+
+			&compile.Customization{
 				Type:     "dev-dep",
 				Callback: processCustomDevDep,
 				Schema: map[string]*schema.FieldSchema{
@@ -89,8 +100,44 @@ func (a *App) Deploy(ctx *app.Context) error {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
+	// Determine if we have a Vagrant path set...
+	instructions := devInstructionsCustom
+	path := filepath.Join(ctx.Dir, "dev", "vagrant_path")
+	if _, err := os.Stat(path); err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
+
+		path = ""
+	}
+	if path != "" {
+		var err error
+		path, err = oneline.Read(path)
+		if err != nil {
+			return fmt.Errorf(
+				"Error reading the Vagrant directory: %s\n\n"+
+					"An Otto recompile with `otto compile` usually fixes this.",
+				err)
+		}
+	}
+
+	if path == "" {
+		// Determine if we have our own Vagrantfile
+		path = filepath.Join(ctx.Dir, "dev", "Vagrantfile")
+		if _, err := os.Stat(path); err != nil {
+			if os.IsNotExist(err) {
+				return errors.New(strings.TrimSpace(errVagrantNotSet))
+			}
+
+			return err
+		}
+
+		instructions = devInstructionsDevDep
+	}
+
 	return vagrant.Dev(&vagrant.DevOptions{
-		Instructions: strings.TrimSpace(devInstructions),
+		Dir:          filepath.Dir(path),
+		Instructions: strings.TrimSpace(instructions),
 	}).Route(ctx)
 }
 
@@ -125,13 +172,27 @@ func processCustomDeploy(d *schema.FieldData) (*compile.CustomizationResult, err
 	}, nil
 }
 
+func processCustomDev(d *schema.FieldData) (*compile.CustomizationResult, error) {
+	p, ok := d.GetOk("vagrant")
+	if !ok {
+		return nil, nil
+	}
+
+	return &compile.CustomizationResult{
+		Callback: compileCustomDev(d),
+		TemplateContext: map[string]interface{}{
+			"dev_vagrant_path": p.(string),
+		},
+	}, nil
+}
+
 func processCustomDevDep(d *schema.FieldData) (*compile.CustomizationResult, error) {
 	if _, ok := d.GetOk("vagrantfile"); !ok {
 		return nil, nil
 	}
 
 	return &compile.CustomizationResult{
-		Callback: compileDev(d),
+		Callback: compileCustomDevDep(d),
 	}, nil
 }
 
@@ -143,7 +204,15 @@ func compileCustomDeploy(d *schema.FieldData) compile.CompileCallback {
 	}
 }
 
-func compileDev(d *schema.FieldData) compile.CompileCallback {
+func compileCustomDev(d *schema.FieldData) compile.CompileCallback {
+	return func(ctx *app.Context, data *bindata.Data) error {
+		return data.RenderAsset(
+			filepath.Join(ctx.Dir, "dev", "vagrantfile_path"),
+			"data/sentinels/vagrant_path.tpl")
+	}
+}
+
+func compileCustomDevDep(d *schema.FieldData) compile.CompileCallback {
 	vf := d.Get("vagrantfile").(string)
 
 	return func(ctx *app.Context, data *bindata.Data) error {
@@ -158,7 +227,12 @@ func compileDev(d *schema.FieldData) compile.CompileCallback {
 	}
 }
 
-const devInstructions = `
+const devInstructionsCustom = `
+Vagrant was executed in the directory specified by the "dev"
+customization.
+`
+
+const devInstructionsDevDep = `
 A development has been created.
 
 Note that this development environment is just an example of what a
