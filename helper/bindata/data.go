@@ -112,7 +112,7 @@ func (d *Data) renderLowLevel(dst string, src string, r io.Reader) error {
 			return err
 		}
 
-		filename = strings.TrimSuffix(filename, ".tpl")
+		dst = strings.TrimSuffix(dst, ".tpl")
 		tpl, err = pongo2.FromString(buf.String())
 		if err != nil {
 			return err
