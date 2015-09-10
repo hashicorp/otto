@@ -15,7 +15,7 @@ import (
 	_ "github.com/hashicorp/otto/helper/pongo2"
 )
 
-//go:generate go-bindata -o=bindata_test.go -pkg=bindata -nomemcopy ./test-data/...
+//go:generate go-bindata -o=bindata_test.go -pkg=bindata -nomemcopy -nometadata ./test-data/...
 
 // Data is the struct that wraps the assets go-bindata generates in your
 // package to provide more helpers.

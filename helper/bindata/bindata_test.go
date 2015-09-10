@@ -86,7 +86,7 @@ func testDataCopyDirBasicATxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/a.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/a.txt", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -106,7 +106,7 @@ func testDataCopyDirBasicBTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/b.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/b.txt", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -126,12 +126,12 @@ func testDataCopyDirBasicDirCTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/dir/c.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/dir/c.txt", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
 
-var _testDataCopyDirBasicTTpl = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x72\x2e\x2d\x2a\x4a\xcd\x2b\x51\x88\x4c\x4d\x2c\xb2\x52\xa8\xae\x56\xc8\xcb\x2f\x57\x50\x8a\x54\x52\xa8\xad\xe5\x02\x04\x00\x00\xff\xff\xb0\x8d\xda\xc1\x1c\x00\x00\x00"
+var _testDataCopyDirBasicTTpl = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x72\x2e\x2d\x2a\x4a\xcd\x2b\x51\x88\x4c\x4d\x2c\xb2\x52\xa8\x56\x55\xc8\xcb\x2f\x57\x50\x32\x32\x30\x30\x53\x52\x50\xad\xe5\x02\x04\x00\x00\xff\xff\x60\xf6\x08\xe9\x1f\x00\x00\x00"
 
 func testDataCopyDirBasicTTplBytes() ([]byte, error) {
 	return bindataRead(
@@ -146,7 +146,7 @@ func testDataCopyDirBasicTTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/t.tpl", size: 28, mode: os.FileMode(420), modTime: time.Unix(1441903105, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/t.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
