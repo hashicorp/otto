@@ -67,11 +67,6 @@ func (m *Meta) Appfile() (*appfile.Compiled, error) {
 // root appfile path will be used as the default output directory
 // for Otto.
 func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
-	dir, err := m.Directory(f.File)
-	if err != nil {
-		return nil, err
-	}
-
 	rootDir, err := m.RootDir()
 	if err != nil {
 		return nil, err
@@ -89,13 +84,17 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 
 	config := *m.CoreConfig
 	config.Appfile = f
-	config.Directory = dir
 	config.DataDir = localDir
 	config.LocalDir = filepath.Join(
 		rootDir, DefaultOutputDir, DefaultOutputDirLocalData)
 	config.CompileDir = filepath.Join(
 		rootDir, DefaultOutputDir, DefaultOutputDirCompiledData)
 	config.Ui = m.OttoUi()
+
+	config.Directory, err = m.Directory(&config)
+	if err != nil {
+		return nil, err
+	}
 
 	return otto.NewCore(&config)
 }
@@ -138,10 +137,10 @@ func (m *Meta) RootDir() (string, error) {
 // Directory returns the Otto directory backend for the given
 // Appfile. If no directory backend is specified, a local folder
 // will be used.
-func (m *Meta) Directory(f *appfile.File) (directory.Backend, error) {
-	// TODO: Appfile can't specify directory configuration
-
-	return &directory.FolderBackend{Dir: DefaultDataDir}, nil
+func (m *Meta) Directory(config *otto.CoreConfig) (directory.Backend, error) {
+	return &directory.FolderBackend{
+		Dir: filepath.Join(config.LocalDir, "directory"),
+	}, nil
 }
 
 // FlagSet returns a FlagSet with the common flags that every
