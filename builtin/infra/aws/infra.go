@@ -30,11 +30,13 @@ func creds(ctx *infrastructure.Context) (map[string]string, error) {
 			Id:          "aws_access_key",
 			Query:       "AWS Access Key",
 			Description: "AWS access key used for API calls.",
+			EnvVars:     []string{"AWS_ACCESS_KEY_ID"},
 		},
 		&ui.InputOpts{
 			Id:          "aws_secret_key",
 			Query:       "AWS Secret Key",
 			Description: "AWS secret key used for API calls.",
+			EnvVars:     []string{"AWS_SECRET_ACCESS_KEY"},
 		},
 	}
 

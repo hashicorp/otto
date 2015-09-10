@@ -1,5 +1,7 @@
 package ui
 
+import "os"
+
 // Ui is the component of Otto responsible for reading/writing to the
 // console.
 //
@@ -52,4 +54,21 @@ type InputOpts struct {
 
 	// Hide will hide the text while it is being typed.
 	Hide bool
+
+	// EnvVars is a list of environment variables where the value can be looked
+	// up, in priority order. If any of these environment Variables are
+	// non-empty, they will be returned as the value for this input and the user
+	// will not be prompted.
+	EnvVars []string
+}
+
+// EnvVarValue reads the configured list of EnvVars, returns the first
+// non-empty value it finds, otherwise returns an empty string.
+func (o *InputOpts) EnvVarValue() string {
+	for _, envVar := range o.EnvVars {
+		if val := os.Getenv(envVar); val != "" {
+			return val
+		}
+	}
+	return ""
 }

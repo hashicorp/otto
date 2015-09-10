@@ -57,6 +57,11 @@ func (u *cliUi) Raw(msg string) {
 }
 
 func (i *cliUi) Input(opts *ui.InputOpts) (string, error) {
+	// If any of the configured EnvVars are set, we don't ask for input.
+	if value := opts.EnvVarValue(); value != "" {
+		return value, nil
+	}
+
 	r := i.Reader
 	w := i.Writer
 	if r == nil {
