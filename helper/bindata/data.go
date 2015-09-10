@@ -68,40 +68,75 @@ func (d *Data) CopyDir(dst, prefix string) error {
 			continue
 		}
 
-		// Determine the filename and whether we're dealing with a template
-		var tpl *pongo2.Template = nil
-		filename := asset
-		if strings.HasSuffix(filename, ".tpl") {
-			filename = strings.TrimSuffix(filename, ".tpl")
-			tpl, err = pongo2.FromString(string(data))
-			if err != nil {
-				return err
-			}
-		}
-
-		// Write the file
-		f, err := os.Create(filepath.Join(dst, filename))
-		if err != nil {
-			return err
-		}
-
-		// If it isn't a template, do a direct byte copy
-		if tpl == nil {
-			_, err = io.Copy(f, bytes.NewReader(data))
-			f.Close()
-			if err != nil {
-				return err
-			}
-
-			continue
-		}
-
-		err = tpl.ExecuteWriter(d.Context, f)
-		f.Close()
+		err = d.renderLowLevel(filepath.Join(dst, asset), asset, bytes.NewReader(data))
 		if err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+// RenderAsset renders a single bindata asset. This file
+// will be processed as a template if it ends in ".tpl".
+func (d *Data) RenderAsset(dst, src string) error {
+	data, err := d.Asset(src)
+	if err != nil {
+		return err
+	}
+
+	return d.renderLowLevel(dst, src, bytes.NewReader(data))
+}
+
+// RenderReal renders a real file (not a bindata'd file). This file
+// will be processed as a template if it ends in ".tpl".
+func (d *Data) RenderReal(dst, src string) error {
+	f, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return d.renderLowLevel(dst, src, f)
+}
+
+func (d *Data) renderLowLevel(dst string, src string, r io.Reader) error {
+	var err error
+
+	// Determine the filename and whether we're dealing with a template
+	var tpl *pongo2.Template = nil
+	filename := src
+	if strings.HasSuffix(filename, ".tpl") {
+		var buf bytes.Buffer
+		if _, err := io.Copy(&buf, r); err != nil {
+			return err
+		}
+
+		filename = strings.TrimSuffix(filename, ".tpl")
+		tpl, err = pongo2.FromString(buf.String())
+		if err != nil {
+			return err
+		}
+	}
+
+	// Make the directory containing the final path.
+	dir := filepath.Dir(dst)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+
+	// Create the file itself
+	f, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	// If it isn't a template, do a direct byte copy
+	if tpl == nil {
+		_, err = io.Copy(f, r)
+		return err
+	}
+
+	return tpl.ExecuteWriter(d.Context, f)
 }
