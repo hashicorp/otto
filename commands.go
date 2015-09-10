@@ -6,6 +6,7 @@ import (
 
 	appCustom "github.com/hashicorp/otto/builtin/app/custom"
 	appGo "github.com/hashicorp/otto/builtin/app/go"
+	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
 
 	"github.com/hashicorp/otto/app"
@@ -38,6 +39,7 @@ func init() {
 
 	apps := appGo.Tuples.Map(app.StructFactory(new(appGo.App)))
 	apps.Add(appCustom.Tuples.Map(app.StructFactory(new(appCustom.App))))
+	apps.Add(appRuby.Tuples.Map(app.StructFactory(new(appRuby.App))))
 
 	meta := command.Meta{
 		CoreConfig: &otto.CoreConfig{
@@ -53,6 +55,10 @@ func init() {
 		&detect.Detector{
 			Type: "go",
 			File: "*.go",
+		},
+		&detect.Detector{
+			Type: "ruby",
+			File: "Gemfile",
 		},
 	}
 
