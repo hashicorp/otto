@@ -13,6 +13,11 @@ type DeployOptions struct {
 	// default to "#{ctx.Dir}/deploy".
 	Dir string
 
+	// DisableBuild, if true, will not load a build associated with this
+	// appfile and attempt to extract the artifact from it. In this case,
+	// AritfactExtractors is also useless.
+	DisableBuild bool
+
 	// ArtifactExtractors is a mapping of artifact extractors. The
 	// built-in artifact extractors will populate this if a key isn't set.
 	ArtifactExtractors map[string]DeployArtifactExtractor
@@ -53,46 +58,48 @@ func Deploy(ctx *app.Context, opts *DeployOptions) error {
 		vars[k] = v
 	}
 
-	// Get the build information. We must have had a prior build in
-	// order to deploy.
-	build, err := ctx.Directory.GetBuild(&directory.Build{
-		App:         ctx.Tuple.App,
-		Infra:       ctx.Tuple.Infra,
-		InfraFlavor: ctx.Tuple.InfraFlavor,
-	})
-	if err != nil {
-		return err
-	}
-	if build == nil {
-		return fmt.Errorf(
-			"This application hasn't been built yet. Please run `otto build`\n" +
-				"first so that the deploy step has an artifact to deploy.")
-	}
-
-	// Extract the artifact from the build. We do this based on the
-	// infrastructure type.
-	if opts.ArtifactExtractors == nil {
-		opts.ArtifactExtractors = make(map[string]DeployArtifactExtractor)
-	}
-	for k, v := range deployArtifactExtractors {
-		if _, ok := opts.ArtifactExtractors[k]; !ok {
-			opts.ArtifactExtractors[k] = v
+	if !opts.DisableBuild {
+		// Get the build information. We must have had a prior build in
+		// order to deploy.
+		build, err := ctx.Directory.GetBuild(&directory.Build{
+			App:         ctx.Tuple.App,
+			Infra:       ctx.Tuple.Infra,
+			InfraFlavor: ctx.Tuple.InfraFlavor,
+		})
+		if err != nil {
+			return err
 		}
-	}
-	ext, ok := opts.ArtifactExtractors[ctx.Tuple.Infra]
-	if !ok {
-		return fmt.Errorf(
-			"Unknown deployment target infrastructure: %s\n\n"+
-				"This app currently doesn't know how to deploy to this infrastructure.\n"+
-				"Please report this to the project.",
-			ctx.Tuple.Infra)
-	}
-	artifactVars, err := ext(ctx, build, infra)
-	if err != nil {
-		return err
-	}
-	for k, v := range artifactVars {
-		vars[k] = v
+		if build == nil {
+			return fmt.Errorf(
+				"This application hasn't been built yet. Please run `otto build`\n" +
+					"first so that the deploy step has an artifact to deploy.")
+		}
+
+		// Extract the artifact from the build. We do this based on the
+		// infrastructure type.
+		if opts.ArtifactExtractors == nil {
+			opts.ArtifactExtractors = make(map[string]DeployArtifactExtractor)
+		}
+		for k, v := range deployArtifactExtractors {
+			if _, ok := opts.ArtifactExtractors[k]; !ok {
+				opts.ArtifactExtractors[k] = v
+			}
+		}
+		ext, ok := opts.ArtifactExtractors[ctx.Tuple.Infra]
+		if !ok {
+			return fmt.Errorf(
+				"Unknown deployment target infrastructure: %s\n\n"+
+					"This app currently doesn't know how to deploy to this infrastructure.\n"+
+					"Please report this to the project.",
+				ctx.Tuple.Infra)
+		}
+		artifactVars, err := ext(ctx, build, infra)
+		if err != nil {
+			return err
+		}
+		for k, v := range artifactVars {
+			vars[k] = v
+		}
 	}
 
 	// Get our old deploy to populate the old state data if we have it.

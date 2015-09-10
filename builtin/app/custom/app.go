@@ -127,9 +127,18 @@ func (a *App) Deploy(ctx *app.Context) error {
 			err)
 	}
 
+	// Determine if we set a Packer path. If we didn't, we disable
+	// the build loading for deploys.
+	disableBuild := true
+	path = filepath.Join(ctx.Dir, "build", "packer_path")
+	if _, err := os.Stat(path); err == nil {
+		disableBuild = false
+	}
+
 	// But if we did, then deploy using Terraform
 	return terraform.Deploy(ctx, &terraform.DeployOptions{
-		Dir: tfdir,
+		Dir:          tfdir,
+		DisableBuild: disableBuild,
 	})
 }
 
