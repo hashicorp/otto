@@ -320,7 +320,7 @@ func (c *Core) Dev() error {
 		// If we have a dependency with files, then verify the files
 		// and store it in our cache directory so we can retrieve it
 		// later.
-		if len(dep.Files) > 0 {
+		if dep != nil && len(dep.Files) > 0 {
 			if err := dep.RelFiles(ctx.CacheDir); err != nil {
 				return fmt.Errorf(
 					"Error caching dependency for dev '%s': %s",
