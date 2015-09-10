@@ -3,6 +3,7 @@
 // test-data/copy-dir-basic/a.txt
 // test-data/copy-dir-basic/b.txt
 // test-data/copy-dir-basic/dir/c.txt
+// test-data/copy-dir-basic/t.tpl
 // DO NOT EDIT!
 
 package bindata
@@ -85,7 +86,7 @@ func testDataCopyDirBasicATxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/a.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1435862930, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/a.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -105,7 +106,7 @@ func testDataCopyDirBasicBTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/b.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1435862933, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/b.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -125,7 +126,27 @@ func testDataCopyDirBasicDirCTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "test-data/copy-dir-basic/dir/c.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1435863315, 0)}
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/dir/c.txt", size: 2, mode: os.FileMode(420), modTime: time.Unix(1441732290, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
+var _testDataCopyDirBasicTTpl = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x72\x2e\x2d\x2a\x4a\xcd\x2b\x51\x88\x4c\x4d\x2c\xb2\x52\xa8\xae\x56\xc8\xcb\x2f\x57\x50\x8a\x54\x52\xa8\xad\xe5\x02\x04\x00\x00\xff\xff\xb0\x8d\xda\xc1\x1c\x00\x00\x00"
+
+func testDataCopyDirBasicTTplBytes() ([]byte, error) {
+	return bindataRead(
+		_testDataCopyDirBasicTTpl,
+		"test-data/copy-dir-basic/t.tpl",
+	)
+}
+
+func testDataCopyDirBasicTTpl() (*asset, error) {
+	bytes, err := testDataCopyDirBasicTTplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test-data/copy-dir-basic/t.tpl", size: 28, mode: os.FileMode(420), modTime: time.Unix(1441903105, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -185,6 +206,7 @@ var _bindata = map[string]func() (*asset, error){
 	"test-data/copy-dir-basic/a.txt": testDataCopyDirBasicATxt,
 	"test-data/copy-dir-basic/b.txt": testDataCopyDirBasicBTxt,
 	"test-data/copy-dir-basic/dir/c.txt": testDataCopyDirBasicDirCTxt,
+	"test-data/copy-dir-basic/t.tpl": testDataCopyDirBasicTTpl,
 }
 
 // AssetDir returns the file names below a certain
@@ -236,6 +258,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"dir": &bintree{nil, map[string]*bintree{
 				"c.txt": &bintree{testDataCopyDirBasicDirCTxt, map[string]*bintree{
 				}},
+			}},
+			"t.tpl": &bintree{testDataCopyDirBasicTTpl, map[string]*bintree{
 			}},
 		}},
 	}},
