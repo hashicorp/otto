@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/signal"
 
+	appCustom "github.com/hashicorp/otto/builtin/app/custom"
 	appGo "github.com/hashicorp/otto/builtin/app/go"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
 
@@ -35,9 +36,12 @@ func init() {
 		Ui:           &cli.BasicUi{Writer: os.Stdout},
 	}
 
+	apps := appGo.Tuples.Map(app.StructFactory(new(appGo.App)))
+	apps.Add(appCustom.Tuples.Map(app.StructFactory(new(appCustom.App))))
+
 	meta := command.Meta{
 		CoreConfig: &otto.CoreConfig{
-			Apps: appGo.Tuples.Map(app.StructFactory(new(appGo.App))),
+			Apps: apps,
 			Infrastructures: map[string]infrastructure.Factory{
 				"aws": infraAws.Infra,
 			},

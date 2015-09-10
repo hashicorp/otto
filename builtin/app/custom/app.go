@@ -38,6 +38,17 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 					},
 				},
 			},
+
+			&compile.Customization{
+				Type:     "deploy",
+				Callback: processCustomDeploy,
+				Schema: map[string]*schema.FieldSchema{
+					"terraform": &schema.FieldSchema{
+						Type:        schema.TypeString,
+						Description: "Path to a Terraform module",
+					},
+				},
+			},
 		},
 	})
 }
@@ -62,6 +73,20 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 	return nil, nil
 }
 
+func processCustomDeploy(d *schema.FieldData) (*compile.CustomizationResult, error) {
+	tf, ok := d.GetOk("terraform")
+	if !ok {
+		return nil, nil
+	}
+
+	return &compile.CustomizationResult{
+		Callback: compileCustomDeploy(d),
+		TemplateContext: map[string]interface{}{
+			"deploy_terraform_path": tf.(string),
+		},
+	}, nil
+}
+
 func processCustomDevDep(d *schema.FieldData) (*compile.CustomizationResult, error) {
 	if _, ok := d.GetOk("vagrantfile"); !ok {
 		return nil, fmt.Errorf(
@@ -71,6 +96,14 @@ func processCustomDevDep(d *schema.FieldData) (*compile.CustomizationResult, err
 	return &compile.CustomizationResult{
 		Callback: compileDev(d),
 	}, nil
+}
+
+func compileCustomDeploy(d *schema.FieldData) compile.CompileCallback {
+	return func(ctx *app.Context, data *bindata.Data) error {
+		return data.RenderAsset(
+			filepath.Join(ctx.Dir, "deploy", "terraform_path"),
+			"data/sentinels/terraform_path.tpl")
+	}
 }
 
 func compileDev(d *schema.FieldData) compile.CompileCallback {
