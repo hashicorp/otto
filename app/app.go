@@ -50,6 +50,10 @@ type App interface {
 	// The results of this call are cached to speed up development
 	// of the destination app until there is a change, which is detected
 	// based on VCS.
+	//
+	// The resulting DevDep can be nil if nothing needs to be done that
+	// is part of the DevDep structure. Any DevDepFragments from the
+	// compilation will still be used, of course.
 	DevDep(dst *Context, src *Context) (*DevDep, error)
 }
 
