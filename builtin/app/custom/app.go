@@ -95,6 +95,17 @@ func (a *App) Dev(ctx *app.Context) error {
 }
 
 func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
+	// Determine if we have a Vagrantfile. This is a sentinel that
+	// we set this setting.
+	path := filepath.Join(src.Dir, "dev", "Vagrantfile")
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return nil, errors.New(strings.TrimSpace(errVagrantNotSet))
+		}
+
+		return nil, err
+	}
+
 	// We purposely return nil here. We don't need to do anything. It
 	// is all already setup from the compilation step.
 	return nil, nil
@@ -116,8 +127,7 @@ func processCustomDeploy(d *schema.FieldData) (*compile.CustomizationResult, err
 
 func processCustomDevDep(d *schema.FieldData) (*compile.CustomizationResult, error) {
 	if _, ok := d.GetOk("vagrantfile"); !ok {
-		return nil, fmt.Errorf(
-			"Customization 'dev-dep': 'vagrantfile' must be specified")
+		return nil, nil
 	}
 
 	return &compile.CustomizationResult{
@@ -169,6 +179,24 @@ Example:
 
     customization "deploy" {
         terraform = "path/to/module"
+    }
+
+`
+
+const errVagrantNotSet = `
+Otto can't build a development environment for this because the
+"vagrant" setting hasn't been set in the "dev" or "dev-dep" customization.
+
+For the "custom" application type, customizations must be used to
+tell Otto what to do. For the dev command, Otto requires either
+the "dev" or "dev-dep" customization to be set with the "vagrant" setting.
+The "vagrant" setting depends on which customization is being set. Please
+refer to the documentation for more details.
+
+Example:
+
+    customization "dev" {
+        vagrant = "path/to/Vagrantfile"
     }
 
 `
