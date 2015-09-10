@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/oneline"
+	"github.com/hashicorp/otto/helper/packer"
 	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
@@ -38,7 +39,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				Schema: map[string]*schema.FieldSchema{
 					"vagrantfile": &schema.FieldSchema{
 						Type:        schema.TypeString,
-						Description: "Path to Vagrantfile template",
+						Description: "Path to Vagrantfile",
 					},
 				},
 			},
@@ -50,6 +51,17 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 					"vagrantfile": &schema.FieldSchema{
 						Type:        schema.TypeString,
 						Description: "Path to Vagrantfile template",
+					},
+				},
+			},
+
+			&compile.Customization{
+				Type:     "build",
+				Callback: processCustomBuild,
+				Schema: map[string]*schema.FieldSchema{
+					"packer": &schema.FieldSchema{
+						Type:        schema.TypeString,
+						Description: "Path to Packer template",
 					},
 				},
 			},
@@ -69,7 +81,29 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 }
 
 func (a *App) Build(ctx *app.Context) error {
-	return nil
+	// Determine if we set a Packer path.
+	path := filepath.Join(ctx.Dir, "build", "packer_path")
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return errors.New(strings.TrimSpace(errPackerNotSet))
+		}
+
+		return err
+	}
+
+	// Read the actual Packer dir
+	packerPath, err := oneline.Read(path)
+	if err != nil {
+		return fmt.Errorf(
+			"Error reading the Packer template path: %s\n\n"+
+				"An Otto recompile with `otto compile` usually fixes this.",
+			err)
+	}
+
+	return packer.Build(ctx, &packer.BuildOptions{
+		Dir:          filepath.Dir(packerPath),
+		TemplatePath: packerPath,
+	})
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
@@ -158,6 +192,20 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 	return nil, nil
 }
 
+func processCustomBuild(d *schema.FieldData) (*compile.CustomizationResult, error) {
+	p, ok := d.GetOk("packer")
+	if !ok {
+		return nil, nil
+	}
+
+	return &compile.CustomizationResult{
+		Callback: compileCustomBuild(d),
+		TemplateContext: map[string]interface{}{
+			"build_packer_path": p.(string),
+		},
+	}, nil
+}
+
 func processCustomDeploy(d *schema.FieldData) (*compile.CustomizationResult, error) {
 	tf, ok := d.GetOk("terraform")
 	if !ok {
@@ -194,6 +242,14 @@ func processCustomDevDep(d *schema.FieldData) (*compile.CustomizationResult, err
 	return &compile.CustomizationResult{
 		Callback: compileCustomDevDep(d),
 	}, nil
+}
+
+func compileCustomBuild(d *schema.FieldData) compile.CompileCallback {
+	return func(ctx *app.Context, data *bindata.Data) error {
+		return data.RenderAsset(
+			filepath.Join(ctx.Dir, "build", "packer_path"),
+			"data/sentinels/packer_path.tpl")
+	}
 }
 
 func compileCustomDeploy(d *schema.FieldData) compile.CompileCallback {
@@ -239,6 +295,22 @@ Note that this development environment is just an example of what a
 consumer of this application might see as a development dependency.
 "Custom" types are not meant to be mutably developed like normal
 applications.
+`
+
+const errPackerNotSet = `
+Otto can't build this application because the "packer" setting
+isn't set in the "build" customization.
+
+For the "custom" application type, the "build" customization must
+set the "packer" setting to point to a Packer template to execute.
+Otto will execute this for the build.
+
+Example:
+
+    customization "build" {
+        packer = "path/to/template.json"
+    }
+
 `
 
 const errTerraformNotSet = `
