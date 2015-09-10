@@ -1,13 +1,13 @@
 package appfile
 
 import (
-	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/otto/helper/uuid"
 )
 
@@ -169,13 +169,7 @@ func (appF *File) loadID() error {
 	}
 
 	path := filepath.Join(filepath.Dir(appF.Path), IDFile)
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	uuid, err := bufio.NewReader(f).ReadString('\n')
+	uuid, err := oneline.Read(path)
 	if err != nil {
 		return err
 	}
