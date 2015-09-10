@@ -57,6 +57,8 @@ func (a *App) Dev(ctx *app.Context) error {
 }
 
 func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
+	// We purposely return nil here. We don't need to do anything. It
+	// is all already setup from the compilation step.
 	return nil, nil
 }
 
