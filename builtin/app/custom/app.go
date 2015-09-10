@@ -1,14 +1,18 @@
 package custom
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
+	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/otto/helper/schema"
+	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
 
@@ -58,7 +62,30 @@ func (a *App) Build(ctx *app.Context) error {
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
-	return nil
+	// Determine if we set a Terraform path. If we didn't, then
+	// tell the user we can't deploy.
+	path := filepath.Join(ctx.Dir, "deploy", "terraform_path")
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return errors.New(strings.TrimSpace(errTerraformNotSet))
+		}
+
+		return err
+	}
+
+	// Read the actual TF dir
+	tfdir, err := oneline.Read(path)
+	if err != nil {
+		return fmt.Errorf(
+			"Error reading the Terraform module directory: %s\n\n"+
+				"An Otto recompile with `otto compile` usually fixes this.",
+			err)
+	}
+
+	// But if we did, then deploy using Terraform
+	return terraform.Deploy(ctx, &terraform.DeployOptions{
+		Dir: tfdir,
+	})
 }
 
 func (a *App) Dev(ctx *app.Context) error {
@@ -128,4 +155,20 @@ Note that this development environment is just an example of what a
 consumer of this application might see as a development dependency.
 "Custom" types are not meant to be mutably developed like normal
 applications.
+`
+
+const errTerraformNotSet = `
+Otto can't deploy this application because the "terraform" setting
+hasn't been set in the "deploy" customization.
+
+For the "custom" application type, the "deploy" customization must
+set the "terraform" setting to point to a Terraform module to execute.
+Otto will execute this module for the deploy.
+
+Example:
+
+    customization "deploy" {
+        terraform = "path/to/module"
+    }
+
 `
