@@ -9,6 +9,8 @@ const (
 	ExecuteTaskDev
 )
 
+//go:generate stringer -type=ExecuteTask
+
 // ExecuteOpts are the options used for executing generic tasks
 // on the Otto environment.
 type ExecuteOpts struct {
