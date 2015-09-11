@@ -160,6 +160,79 @@ func TestFileMerge(t *testing.T) {
 				},
 			},
 		},
+
+		"Foundations (none)": {
+			One: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+						Foundations: []*Foundation{
+							&Foundation{
+								Name: "consul",
+							},
+						},
+					},
+				},
+			},
+			Two: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+					},
+				},
+			},
+			Three: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+						Foundations: []*Foundation{
+							&Foundation{
+								Name: "consul",
+							},
+						},
+					},
+				},
+			},
+		},
+
+		"Foundations (override)": {
+			One: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+						Foundations: []*Foundation{
+							&Foundation{
+								Name: "consul",
+							},
+						},
+					},
+				},
+			},
+			Two: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+						Foundations: []*Foundation{
+							&Foundation{
+								Name: "tubes",
+							},
+						},
+					},
+				},
+			},
+			Three: &File{
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+						Foundations: []*Foundation{
+							&Foundation{
+								Name: "tubes",
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for name, tc := range cases {
