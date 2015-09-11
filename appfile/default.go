@@ -35,6 +35,12 @@ func Default(dir string, det *detect.Config) (*File, error) {
 				Name:   "aws",
 				Type:   "aws",
 				Flavor: "vpc-public-private",
+
+				Foundations: []*Foundation{
+					&Foundation{
+						Name: "consul",
+					},
+				},
 			},
 		},
 	}, nil
