@@ -89,6 +89,37 @@ func TestParse(t *testing.T) {
 			nil,
 			true,
 		},
+
+		{
+			"infra-foundations.hcl",
+			&File{
+				Application: &Application{
+					Name: "foo",
+				},
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name:   "aws",
+						Type:   "aws",
+						Flavor: "foo",
+						Foundations: []*Foundation{
+							&Foundation{
+								Name: "consul",
+								Config: map[string]interface{}{
+									"foo": "bar",
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"infra-foundations-dup.hcl",
+			nil,
+			true,
+		},
 	}
 
 	for _, tc := range cases {

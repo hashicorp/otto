@@ -64,6 +64,15 @@ type Infrastructure struct {
 	Name   string
 	Type   string
 	Flavor string
+
+	Foundations []*Foundation
+}
+
+// Foundation is the configuration for the fundamental building blocks
+// of the infrastructure.
+type Foundation struct {
+	Name   string
+	Config map[string]interface{}
 }
 
 //-------------------------------------------------------------------
