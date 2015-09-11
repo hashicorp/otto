@@ -21,14 +21,18 @@ type Foundation interface {
 type Context struct {
 	context.Shared
 
-	// Config is the foundation configuration that was returned by the
+	// Config is the raw configuration from the Appfile itself for
+	// this foundation.
+	Config map[string]interface{}
+
+	// AppConfig is the foundation configuration that was returned by the
 	// application that we're working with. This is only available during
 	// the Compile function if we're compiling for an application.
 	//
 	// It should be expected during compilation that this might be nil.
 	// The cases where it is nil are not currently well defined, but the
 	// behavior in the nil case should be to do nothing except Deploy.
-	Config *Config
+	AppConfig *Config
 
 	// Dir is the directory that the compilation is allowed to write to
 	// for persistant storage of data that is available during task

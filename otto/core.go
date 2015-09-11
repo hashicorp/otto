@@ -27,7 +27,7 @@ type Core struct {
 	apps            map[app.Tuple]app.Factory
 	dir             directory.Backend
 	infras          map[string]infrastructure.Factory
-	foundations     map[string]foundation.Factory
+	foundationMap   map[foundation.Tuple]foundation.Factory
 	dataDir         string
 	localDir        string
 	compileDir      string
@@ -64,7 +64,7 @@ type CoreConfig struct {
 
 	// Foundations is the map of available foundations. The
 	// value is a factory that can create the impl.
-	Foundations map[string]foundation.Factory
+	Foundations map[foundation.Tuple]foundation.Factory
 
 	// Ui is the Ui that will be used to communicate with the user.
 	Ui ui.Ui
@@ -81,7 +81,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		apps:            c.Apps,
 		dir:             c.Directory,
 		infras:          c.Infrastructures,
-		foundations:     c.Foundations,
+		foundationMap:   c.Foundations,
 		dataDir:         c.DataDir,
 		localDir:        c.LocalDir,
 		compileDir:      c.CompileDir,
@@ -97,6 +97,13 @@ func (c *Core) Compile() error {
 		return err
 	}
 
+	// Get all the foundation implementations (which are tied as singletons
+	// to the infrastructure).
+	foundations, foundationCtxs, err := c.foundations()
+	if err != nil {
+		return err
+	}
+
 	// Delete the prior output directory
 	log.Printf("[INFO] deleting prior compilation contents: %s", c.compileDir)
 	if err := os.RemoveAll(c.compileDir); err != nil {
@@ -107,6 +114,15 @@ func (c *Core) Compile() error {
 	log.Printf("[INFO] running infra compile...")
 	if _, err := infra.Compile(infraCtx); err != nil {
 		return err
+	}
+
+	// Compile the foundation (not tied to any app). This compilation
+	// of the foundation is used for `otto infra` to set everything up.
+	log.Printf("[INFO] running foundation compilations")
+	for i, f := range foundations {
+		if _, err := f.Compile(foundationCtxs[i]); err != nil {
+			return err
+		}
 	}
 
 	// Walk through the dependencies and compile all of them.
@@ -623,6 +639,69 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 			Ui:        c.ui,
 		},
 	}, nil
+}
+
+func (c *Core) foundations() ([]foundation.Foundation, []*foundation.Context, error) {
+	// Get the infrastructure configuration
+	config := c.appfile.ActiveInfrastructure()
+	if config == nil {
+		return nil, nil, fmt.Errorf(
+			"infrastructure not found in appfile: %s",
+			c.appfile.Project.Infrastructure)
+	}
+
+	// If there are no foundations, return nothing.
+	if len(config.Foundations) == 0 {
+		return nil, nil, nil
+	}
+
+	// Create the arrays for our list
+	fs := make([]foundation.Foundation, 0, len(config.Foundations))
+	ctxs := make([]*foundation.Context, 0, cap(fs))
+	for _, f := range config.Foundations {
+		// The tuple we're looking for is the foundation type, the
+		// infrastructure type, and the infrastructure flavor. Build that
+		// tuple.
+		tuple := foundation.Tuple{
+			Type:        f.Name,
+			Infra:       config.Type,
+			InfraFlavor: config.Flavor,
+		}
+
+		// Look for the matching foundation
+		fun := foundation.TupleMap(c.foundationMap).Lookup(tuple)
+		if fun == nil {
+			return nil, nil, fmt.Errorf(
+				"foundation implementation for tuple not found: %s",
+				tuple)
+		}
+
+		// Instantiate the implementation
+		impl, err := fun()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		// The output directory for data
+		outputDir := filepath.Join(
+			c.compileDir, fmt.Sprintf("foundation-%s", f.Name))
+
+		// Build the context
+		ctx := &foundation.Context{
+			Config: f.Config,
+			Dir:    outputDir,
+			Shared: context.Shared{
+				Directory: c.dir,
+				Ui:        c.ui,
+			},
+		}
+
+		// Add to our results
+		fs = append(fs, impl)
+		ctxs = append(ctxs, ctx)
+	}
+
+	return fs, ctxs, nil
 }
 
 const credsQueryPassExists = `

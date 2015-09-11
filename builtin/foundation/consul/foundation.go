@@ -1,7 +1,7 @@
 package consul
 
-import(
-	"github.com/hashicorp/otto/helper/foundation"
+import (
+	"github.com/hashicorp/otto/foundation"
 )
 
 // Foundation is an implementation of foundation.Foundation
