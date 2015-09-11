@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 	"github.com/hashicorp/terraform/dag"
@@ -26,6 +27,7 @@ type Core struct {
 	apps            map[app.Tuple]app.Factory
 	dir             directory.Backend
 	infras          map[string]infrastructure.Factory
+	foundations     map[string]foundation.Factory
 	dataDir         string
 	localDir        string
 	compileDir      string
@@ -60,6 +62,10 @@ type CoreConfig struct {
 	// value is a factory that can create the infrastructure impl.
 	Infrastructures map[string]infrastructure.Factory
 
+	// Foundations is the map of available foundations. The
+	// value is a factory that can create the impl.
+	Foundations map[string]foundation.Factory
+
 	// Ui is the Ui that will be used to communicate with the user.
 	Ui ui.Ui
 }
@@ -75,6 +81,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		apps:            c.Apps,
 		dir:             c.Directory,
 		infras:          c.Infrastructures,
+		foundations:     c.Foundations,
 		dataDir:         c.DataDir,
 		localDir:        c.LocalDir,
 		compileDir:      c.CompileDir,
