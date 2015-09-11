@@ -85,6 +85,10 @@ type Context struct {
 	// this cache directory can be cleared at any time between runs.
 	CacheDir string
 
+	// LocalDir is the directory where data local to this single Appfile
+	// will be stored; it isn't cleared for compilation.
+	LocalDir string
+
 	// Tuple is the Tuple that identifies this application. This can be
 	// used so that an implementatin of App can work with multiple tuple
 	// types.

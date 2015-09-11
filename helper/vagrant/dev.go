@@ -2,13 +2,10 @@ package vagrant
 
 import (
 	"fmt"
-	"log"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/otto/app"
-	execHelper "github.com/hashicorp/otto/helper/exec"
 )
 
 // DevOptions is the configuration struct used for Dev.
@@ -16,6 +13,10 @@ type DevOptions struct {
 	// Dir is the path to the directory with the Vagrantfile. This
 	// will default to `#{ctx.Dir}/dev` if empty.
 	Dir string
+
+	// DataDir is the path to the directory where Vagrant should store its data.
+	// Defaults to `#{ctx.LocalDir/vagrant}` if empty.
+	DataDir string
 
 	// Instructions are help text that is shown after creating the
 	// development environment.
@@ -57,9 +58,9 @@ func Dev(opts *DevOptions) *app.Router {
 
 func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
 	ctx.Ui.Header("Destroying the local development environment...")
-	cmd := opts.command(ctx, "destroy", "-f")
-	if err := execHelper.Run(ctx.Ui, cmd); err != nil {
-		return opts.vagrantError(err)
+
+	if err := opts.vagrant(ctx).Execute("destroy", "-f"); err != nil {
+		return err
 	}
 
 	ctx.Ui.Raw("\n")
@@ -71,9 +72,9 @@ func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
 func (opts *DevOptions) actionRaw(ctx *app.Context) error {
 	ctx.Ui.Header(fmt.Sprintf(
 		"Executing: 'vagrant %s'", strings.Join(ctx.ActionArgs, " ")))
-	cmd := opts.command(ctx, ctx.ActionArgs...)
-	if err := execHelper.Run(ctx.Ui, cmd); err != nil {
-		return opts.vagrantError(err)
+
+	if err := opts.vagrant(ctx).Execute(ctx.ActionArgs...); err != nil {
+		return err
 	}
 
 	return nil
@@ -81,18 +82,14 @@ func (opts *DevOptions) actionRaw(ctx *app.Context) error {
 
 func (opts *DevOptions) actionSSH(ctx *app.Context) error {
 	ctx.Ui.Header("Executing SSH. This may take a few seconds...")
-	cmd := opts.command(ctx, "ssh")
-	if err := execHelper.Run(ctx.Ui, cmd); err != nil {
-		return opts.vagrantError(err)
+	if err := opts.vagrant(ctx).Execute("ssh"); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (opts *DevOptions) actionUp(ctx *app.Context) error {
-	// Build the command to execute
-	cmd := opts.command(ctx, "up")
-
 	// Output some info the user prior to running
 	ctx.Ui.Header(
 		"Creating local development environment with Vagrant if it doesn't exist...")
@@ -102,10 +99,9 @@ func (opts *DevOptions) actionUp(ctx *app.Context) error {
 			"while the development environment is being created.\n\n")
 
 	// Run it!
-	if err := execHelper.Run(ctx.Ui, cmd); err != nil {
-		return opts.vagrantError(err)
+	if err := opts.vagrant(ctx).Execute("up"); err != nil {
+		return err
 	}
-
 	// Success, let the user know whats up
 	ctx.Ui.Raw("\n")
 	ctx.Ui.Header("[green]Development environment successfully created!")
@@ -116,25 +112,20 @@ func (opts *DevOptions) actionUp(ctx *app.Context) error {
 	return nil
 }
 
-func (opts *DevOptions) command(ctx *app.Context, command ...string) *exec.Cmd {
-	// Build the command to execute
-	cmd := exec.Command("vagrant", command...)
-	cmd.Dir = filepath.Join(ctx.Dir, "dev")
-	if opts.Dir != "" {
-		cmd.Dir = opts.Dir
+func (opts *DevOptions) vagrant(ctx *app.Context) *Vagrant {
+	dir := opts.Dir
+	if dir == "" {
+		dir = filepath.Join(ctx.Dir, "dev")
 	}
-
-	log.Printf("[DEBUG] dev: executing vagrant up in dir: %s", cmd.Dir)
-	return cmd
-}
-
-func (opts *DevOptions) vagrantError(err error) error {
-	return fmt.Errorf(
-		"Error executing Vagrant: %s\n\n"+
-			"The error messages from Vagrant are usually very informative.\n"+
-			"Please read it carefully and fix any issues it mentions. If\n"+
-			"the message isn't clear, please report this to the Otto project.",
-		err)
+	dataDir := opts.DataDir
+	if dataDir == "" {
+		dataDir = filepath.Join(ctx.LocalDir, "vagrant")
+	}
+	return &Vagrant{
+		Dir:     dir,
+		DataDir: dataDir,
+		Ui:      ctx.Ui,
+	}
 }
 
 // Synopsis text for actions

@@ -549,6 +549,7 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 	return &app.Context{
 		Dir:         outputDir,
 		CacheDir:    cacheDir,
+		LocalDir:    c.localDir,
 		Tuple:       tuple,
 		Appfile:     f,
 		Application: f.Application,
