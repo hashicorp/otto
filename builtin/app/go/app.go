@@ -36,7 +36,10 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		folderPath = "/opt/gopath/src/" + gopathPath
 	}
 
-	return compile.App(ctx, &compile.AppOptions{
+	var opts compile.AppOptions
+	custom := &customizations{Opts: &opts}
+	opts = compile.AppOptions{
+		Ctx: ctx,
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,
@@ -48,7 +51,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		Customizations: []*compile.Customization{
 			&compile.Customization{
 				Type:     "dev",
-				Callback: processCustomDev,
+				Callback: custom.processDev,
 				Schema: map[string]*schema.FieldSchema{
 					"go_version": &schema.FieldSchema{
 						Type:        schema.TypeString,
@@ -58,7 +61,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 			},
 		},
-	})
+	}
+
+	return compile.App(&opts)
 }
 
 func (a *App) Build(ctx *app.Context) error {
@@ -85,14 +90,6 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 		Script: "/otto/build.sh",
 		Files:  []string{"dev-dep-output"},
 	})
-}
-
-func processCustomDev(d *schema.FieldData) (*compile.CustomizationResult, error) {
-	return &compile.CustomizationResult{
-		TemplateContext: map[string]interface{}{
-			"dev_go_version": d.Get("go_version"),
-		},
-	}, nil
 }
 
 const devInstructions = `

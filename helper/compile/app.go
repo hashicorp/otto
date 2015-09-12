@@ -10,7 +10,16 @@ import (
 	"github.com/hashicorp/otto/helper/bindata"
 )
 
+// AppOptions are the options for compiling an application.
+//
+// These options may be modified during customization processing, and
+// in fact that is an intended use case and common pattern. To do this,
+// use the AppCustomizationFunc method. See some of the builtin types for
+// examples.
 type AppOptions struct {
+	// Ctx is the app context of this compilation.
+	Ctx *app.Context
+
 	// Bindata is the data that is used for templating. This must be set.
 	// Template data should also be set on this. This will be modified with
 	// default template data if those keys are not set.
@@ -25,14 +34,17 @@ type AppOptions struct {
 }
 
 // CompileCallback is a callback that can be registered to be run after
-// compilation.
-type CompileCallback func(*app.Context, *bindata.Data) error
+// compilation. To access any data within this callback, it should be created
+// as a closure around the AppOptions.
+type CompileCallback func() error
 
 // App is an opinionated compilation function to help implement
 // app.App.Compile.
 //
-// AppOptions may be modified during this call.
-func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
+// AppOptions may be modified by this function during this call.
+func App(opts *AppOptions) (*app.CompileResult, error) {
+	ctx := opts.Ctx
+
 	// Setup the basic templating data. We put this into the "data" local
 	// var just so that it is easier to reference.
 	//
@@ -51,7 +63,7 @@ func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 	}
 
 	// Process the customizations!
-	customResult, err := processCustomizations(&processOpts{
+	err := processCustomizations(&processOpts{
 		Customizations: opts.Customizations,
 		Appfile:        ctx.Appfile,
 		Bindata:        data,
@@ -59,11 +71,6 @@ func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// Store the callbacks
-	callbacks := make([]CompileCallback, 0, len(opts.Callbacks)+len(customResult.Callbacks))
-	callbacks = append(callbacks, opts.Callbacks...)
-	callbacks = append(callbacks, customResult.Callbacks...)
 
 	// Create the directory list that we'll copy from, and copy those
 	// directly into the compilation directory.
@@ -84,8 +91,8 @@ func App(ctx *app.Context, opts *AppOptions) (*app.CompileResult, error) {
 	}
 
 	// Callbacks
-	for _, cb := range callbacks {
-		if err := cb(ctx, opts.Bindata); err != nil {
+	for _, cb := range opts.Callbacks {
+		if err := cb(); err != nil {
 			return nil, err
 		}
 	}

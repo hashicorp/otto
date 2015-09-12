@@ -25,26 +25,12 @@ type Customization struct {
 	// validated with the data from the configuration.
 	Schema map[string]*schema.FieldSchema
 
-	// Callback is the function called for the customization. If multiple
-	// customizations exist, only the last one will be given.
+	// Callback is called to process this customization.
 	Callback CustomizationFunc
 }
 
 // CustomizationFunc is the callback called for customizations.
-type CustomizationFunc func(*schema.FieldData) (*CustomizationResult, error)
-
-// CustomizationResult is the result of processing a customization. It
-// tells the compile helpers how to behave with this latest customization.
-type CustomizationResult struct {
-	// Callback is a function to execute just before the compilation completes.
-	// This allows customizations to copy in new data or fail late.
-	Callback CompileCallback
-
-	// TemplateContext is extra contextual information to add or change in the
-	// context. This will overwrite any keys (at the _top level_ only) that
-	// already exist in the context.
-	TemplateContext map[string]interface{}
-}
+type CustomizationFunc func(*schema.FieldData) error
 
 type processOpts struct {
 	Customizations []*Customization
@@ -53,11 +39,7 @@ type processOpts struct {
 	Bindata *bindata.Data
 }
 
-type processResults struct {
-	Callbacks []CompileCallback
-}
-
-func processCustomizations(opts *processOpts) (*processResults, error) {
+func processCustomizations(opts *processOpts) error {
 	// We process customizations below by going through multiple
 	// passes. We can very likely condense this into one for loop but
 	// it helps the semantic understanding to split it out and there should
@@ -107,51 +89,22 @@ func processCustomizations(opts *processOpts) (*processResults, error) {
 
 	// If we have validation errors, return now
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Go through the fields, call the callbacks, and record those results
-	results := make([]*CustomizationResult, len(data))
 	for i, d := range data {
 		if d == nil {
 			continue
 		}
 
 		c := opts.Customizations[i]
-		result, cerr := c.Callback(d)
-		if cerr != nil {
+		if cerr := c.Callback(d); cerr != nil {
 			err = multierror.Append(err, fmt.Errorf(
 				"Error in '%s' customization: %s", c.Type, cerr))
 			continue
 		}
-
-		results[i] = result
 	}
 
-	// If we had errors there, then return
-	if err != nil {
-		return nil, err
-	}
-
-	// Process the results
-	var result processResults
-	for _, r := range results {
-		if r == nil {
-			continue
-		}
-
-		// If the template context is modified, merge those in
-		if r.TemplateContext != nil {
-			for k, v := range r.TemplateContext {
-				opts.Bindata.Context[k] = v
-			}
-		}
-
-		// If we have a callback, add those
-		if r.Callback != nil {
-			result.Callbacks = append(result.Callbacks, r.Callback)
-		}
-	}
-
-	return &result, nil
+	return err
 }

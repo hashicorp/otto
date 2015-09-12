@@ -24,7 +24,11 @@ type App struct{}
 
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	fragmentPath := filepath.Join(ctx.Dir, "dev-dep", "Vagrantfile.fragment")
-	return compile.App(ctx, &compile.AppOptions{
+
+	var opts compile.AppOptions
+	custom := &customizations{Opts: &opts}
+	opts = compile.AppOptions{
+		Ctx: ctx,
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,
@@ -35,7 +39,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		Customizations: []*compile.Customization{
 			&compile.Customization{
 				Type:     "dev",
-				Callback: processCustomDev,
+				Callback: custom.processDev,
 				Schema: map[string]*schema.FieldSchema{
 					"vagrantfile": &schema.FieldSchema{
 						Type:        schema.TypeString,
@@ -46,7 +50,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 
 			&compile.Customization{
 				Type:     "dev-dep",
-				Callback: processCustomDevDep,
+				Callback: custom.processDevDep,
 				Schema: map[string]*schema.FieldSchema{
 					"vagrantfile": &schema.FieldSchema{
 						Type:        schema.TypeString,
@@ -57,7 +61,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 
 			&compile.Customization{
 				Type:     "build",
-				Callback: processCustomBuild,
+				Callback: custom.processBuild,
 				Schema: map[string]*schema.FieldSchema{
 					"packer": &schema.FieldSchema{
 						Type:        schema.TypeString,
@@ -68,7 +72,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 
 			&compile.Customization{
 				Type:     "deploy",
-				Callback: processCustomDeploy,
+				Callback: custom.processDeploy,
 				Schema: map[string]*schema.FieldSchema{
 					"terraform": &schema.FieldSchema{
 						Type:        schema.TypeString,
@@ -77,7 +81,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 			},
 		},
-	})
+	}
+
+	return compile.App(&opts)
 }
 
 func (a *App) Build(ctx *app.Context) error {
@@ -199,97 +205,6 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 	// We purposely return nil here. We don't need to do anything. It
 	// is all already setup from the compilation step.
 	return nil, nil
-}
-
-func processCustomBuild(d *schema.FieldData) (*compile.CustomizationResult, error) {
-	p, ok := d.GetOk("packer")
-	if !ok {
-		return nil, nil
-	}
-
-	return &compile.CustomizationResult{
-		Callback: compileCustomBuild(d),
-		TemplateContext: map[string]interface{}{
-			"build_packer_path": p.(string),
-		},
-	}, nil
-}
-
-func processCustomDeploy(d *schema.FieldData) (*compile.CustomizationResult, error) {
-	tf, ok := d.GetOk("terraform")
-	if !ok {
-		return nil, nil
-	}
-
-	return &compile.CustomizationResult{
-		Callback: compileCustomDeploy(d),
-		TemplateContext: map[string]interface{}{
-			"deploy_terraform_path": tf.(string),
-		},
-	}, nil
-}
-
-func processCustomDev(d *schema.FieldData) (*compile.CustomizationResult, error) {
-	p, ok := d.GetOk("vagrant")
-	if !ok {
-		return nil, nil
-	}
-
-	return &compile.CustomizationResult{
-		Callback: compileCustomDev(d),
-		TemplateContext: map[string]interface{}{
-			"dev_vagrant_path": p.(string),
-		},
-	}, nil
-}
-
-func processCustomDevDep(d *schema.FieldData) (*compile.CustomizationResult, error) {
-	if _, ok := d.GetOk("vagrantfile"); !ok {
-		return nil, nil
-	}
-
-	return &compile.CustomizationResult{
-		Callback: compileCustomDevDep(d),
-	}, nil
-}
-
-func compileCustomBuild(d *schema.FieldData) compile.CompileCallback {
-	return func(ctx *app.Context, data *bindata.Data) error {
-		return data.RenderAsset(
-			filepath.Join(ctx.Dir, "build", "packer_path"),
-			"data/sentinels/packer_path.tpl")
-	}
-}
-
-func compileCustomDeploy(d *schema.FieldData) compile.CompileCallback {
-	return func(ctx *app.Context, data *bindata.Data) error {
-		return data.RenderAsset(
-			filepath.Join(ctx.Dir, "deploy", "terraform_path"),
-			"data/sentinels/terraform_path.tpl")
-	}
-}
-
-func compileCustomDev(d *schema.FieldData) compile.CompileCallback {
-	return func(ctx *app.Context, data *bindata.Data) error {
-		return data.RenderAsset(
-			filepath.Join(ctx.Dir, "dev", "vagrantfile_path"),
-			"data/sentinels/vagrant_path.tpl")
-	}
-}
-
-func compileCustomDevDep(d *schema.FieldData) compile.CompileCallback {
-	vf := d.Get("vagrantfile").(string)
-
-	return func(ctx *app.Context, data *bindata.Data) error {
-		fragment := data.Context["fragment_path"].(string)
-		if err := data.RenderReal(fragment, vf); err != nil {
-			return err
-		}
-
-		return data.RenderAsset(
-			filepath.Join(ctx.Dir, "dev", "Vagrantfile"),
-			"data/dev/Vagrantfile.tpl")
-	}
 }
 
 const devInstructionsCustom = `
