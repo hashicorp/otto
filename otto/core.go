@@ -374,13 +374,73 @@ func (c *Core) Dev() error {
 	return rootApp.Dev(rootCtx)
 }
 
+// Infra manages the infrastructure for this Appfile.
+//
+// Infra supports subactions, which can be specified with action and args.
+// Infra recognizes two special actions: "" (blank string) and "destroy".
+// The former expects to create or update the complete infrastructure,
+// and the latter will destroy the infrastructure.
+func (c *Core) Infra(action string, args []string) error {
+	// Get the infra implementation for this
+	infra, infraCtx, err := c.infra()
+	if err != nil {
+		return err
+	}
+	if err := c.creds(infra, infraCtx); err != nil {
+		return err
+	}
+
+	// Set the action and action args
+	infraCtx.Action = action
+	infraCtx.ActionArgs = args
+
+	// If we need the foundations, then get them
+	var foundations []foundation.Foundation
+	var foundationCtxs []*foundation.Context
+	if action == "" || action == "destroy" {
+		foundations, foundationCtxs, err = c.foundations()
+		if err != nil {
+			return err
+		}
+	}
+
+	// If we're doing anything other than destroying, then
+	// run the execution now.
+	if action != "destroy" {
+		if err := infra.Execute(infraCtx); err != nil {
+			return err
+		}
+	}
+
+	// If we have any foundations, we now run their infra deployment.
+	// This should only ever execute if action is to deploy or destroy,
+	// since those are the only cases that we load foundations.
+	for i, _ := range foundations {
+		ctx := foundationCtxs[i]
+		log.Printf(
+			"[INFO] infra action '%s' on foundation '%s'",
+			action, ctx.Tuple.Type)
+		// TODO
+	}
+
+	// If the action is destroy, we run the infrastructure execution
+	// here. We mirror creation above since in the destruction case
+	// we need to first destroy all applications and foundations that
+	// are using this infra.
+	if action == "destroy" {
+		if err := infra.Execute(infraCtx); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Execute executes the given task for this Appfile.
 func (c *Core) Execute(opts *ExecuteOpts) error {
 	switch opts.Task {
 	case ExecuteTaskDev:
 		return c.executeApp(opts)
-	case ExecuteTaskInfra:
-		return c.executeInfra(opts)
 	default:
 		return fmt.Errorf("unknown task: %s", opts.Task)
 	}
@@ -517,24 +577,6 @@ func (c *Core) executeApp(opts *ExecuteOpts) error {
 	default:
 		panic(fmt.Sprintf("uknown task: %s", opts.Task))
 	}
-}
-
-func (c *Core) executeInfra(opts *ExecuteOpts) error {
-	// Get the infra implementation for this
-	infra, infraCtx, err := c.infra()
-	if err != nil {
-		return err
-	}
-	if err := c.creds(infra, infraCtx); err != nil {
-		return err
-	}
-
-	// Set the action and action args
-	infraCtx.Action = opts.Action
-	infraCtx.ActionArgs = opts.Args
-
-	// Build the infrastructure compilation context
-	return infra.Execute(infraCtx)
 }
 
 func (c *Core) appContext(f *appfile.File) (*app.Context, error) {

@@ -4,9 +4,9 @@ package otto
 
 import "fmt"
 
-const _ExecuteTask_name = "ExecuteTaskInvalidExecuteTaskInfraExecuteTaskDev"
+const _ExecuteTask_name = "ExecuteTaskInvalid"
 
-var _ExecuteTask_index = [...]uint8{0, 18, 34, 48}
+var _ExecuteTask_index = [...]uint8{0, 18}
 
 func (i ExecuteTask) String() string {
 	if i >= ExecuteTask(len(_ExecuteTask_index)-1) {

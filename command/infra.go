@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/helper/flag"
-	"github.com/hashicorp/otto/otto"
 )
 
 // InfraCommand is the command that sets up the infrastructure for an
@@ -45,11 +44,7 @@ func (c *InfraCommand) Run(args []string) int {
 	}
 
 	// Execute the task
-	err = core.Execute(&otto.ExecuteOpts{
-		Task:   otto.ExecuteTaskInfra,
-		Action: action,
-		Args:   execArgs,
-	})
+	err = core.Infra(action, execArgs)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf(
 			"Error occurred: %s", err))
