@@ -73,6 +73,37 @@ func TestBackend(t *testing.T, b Backend) {
 		t.Fatalf("GetInfra (exist) bad: %#v", actualInfra)
 	}
 
+	// GetInfra with foundation (doesn't exist)
+	infra = &Infra{Lookup: Lookup{Infra: "foo", Foundation: "bar"}}
+	actualInfra, err = b.GetInfra(infra)
+	if err != nil {
+		t.Fatalf("GetInfra (non-exist) error: %s", err)
+	}
+	if actualInfra != nil {
+		t.Fatal("GetInfra (non-exist): infra should be nil")
+	}
+
+	// PutInfra with foundation (doesn't exist)
+	infra.Outputs = map[string]string{"foo": "bar"}
+	if infra.ID != "" {
+		t.Fatalf("PutInfra: ID should be empty before set")
+	}
+	if err := b.PutInfra(infra); err != nil {
+		t.Fatalf("PutInfra err: %s", err)
+	}
+	if infra.ID == "" {
+		t.Fatalf("PutInfra: infra ID not set")
+	}
+
+	// GetInfra with foundation (exists)
+	actualInfra, err = b.GetInfra(infra)
+	if err != nil {
+		t.Fatalf("GetInfra (exist) error: %s", err)
+	}
+	if !reflect.DeepEqual(actualInfra, infra) {
+		t.Fatalf("GetInfra (exist) bad: %#v", actualInfra)
+	}
+
 	//---------------------------------------------------------------
 	// Deploy
 	//---------------------------------------------------------------

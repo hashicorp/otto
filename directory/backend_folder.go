@@ -136,7 +136,12 @@ func (b *FolderBackend) deployPath(deploy *Deploy) string {
 }
 
 func (b *FolderBackend) infraPath(infra *Infra) string {
-	return filepath.Join(b.Dir, "infra", infra.Lookup.Infra)
+	key := infra.Lookup.Infra
+	if infra.Lookup.Foundation != "" {
+		key += "-" + infra.Lookup.Foundation
+	}
+
+	return filepath.Join(b.Dir, "infra", key)
 }
 
 func (b *FolderBackend) getData(path string, d interface{}) (bool, error) {
