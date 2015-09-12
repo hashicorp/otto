@@ -112,6 +112,7 @@ func (c *Core) Compile() error {
 
 	// Compile the infrastructure for our application
 	log.Printf("[INFO] running infra compile...")
+	c.ui.Message("Compiling infra...")
 	if _, err := infra.Compile(infraCtx); err != nil {
 		return err
 	}
@@ -120,7 +121,10 @@ func (c *Core) Compile() error {
 	// of the foundation is used for `otto infra` to set everything up.
 	log.Printf("[INFO] running foundation compilations")
 	for i, f := range foundations {
-		if _, err := f.Compile(foundationCtxs[i]); err != nil {
+		ctx := foundationCtxs[i]
+		c.ui.Message(fmt.Sprintf(
+			"Compiling foundation: %s", ctx.Tuple.Type))
+		if _, err := f.Compile(ctx); err != nil {
 			return err
 		}
 	}
@@ -688,8 +692,10 @@ func (c *Core) foundations() ([]foundation.Foundation, []*foundation.Context, er
 
 		// Build the context
 		ctx := &foundation.Context{
-			Config: f.Config,
-			Dir:    outputDir,
+			Config:  f.Config,
+			Dir:     outputDir,
+			Tuple:   tuple,
+			Appfile: c.appfile,
 			Shared: context.Shared{
 				Directory: c.dir,
 				Ui:        c.ui,

@@ -44,6 +44,9 @@ type Context struct {
 
 	// Appfile is the full appfile
 	Appfile *appfile.File
+
+	// Tuple is the tuple used for this foundation.
+	Tuple Tuple
 }
 
 // CompileResult is the structure containing compilation result values.
