@@ -15,10 +15,30 @@ output "vpc_id" {
     value = "${aws_vpc.main.id}"
 }
 
+output "vpc_cidr" {
+    value = "${aws_vpc.main.cidr_block}"
+}
+
 output "subnet-public" {
     value = "${aws_subnet.public.id}"
 }
 
 output "subnet-private" {
     value = "${aws_subnet.private.id}"
+}
+
+output "key_name" {
+    value = "${aws_key_pair.main.id}"
+}
+
+output "bastion_host" {
+    value = "${aws_instance.bastion.public_ip}"
+}
+
+output "bastion_user" {
+    value = "ubuntu"
+}
+
+output "infra_id" {
+    value = "${element(split("-", aws_vpc.main.id), 1)}"
 }

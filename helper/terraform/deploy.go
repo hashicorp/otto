@@ -21,6 +21,11 @@ type DeployOptions struct {
 	// ArtifactExtractors is a mapping of artifact extractors. The
 	// built-in artifact extractors will populate this if a key isn't set.
 	ArtifactExtractors map[string]DeployArtifactExtractor
+
+	// InfraOutputMap is a map to change the key of an infra output
+	// to a different key for a Terraform variable. The key of this map
+	// is the infra output key, and teh value is the Terraform variable name.
+	InfraOutputMap map[string]string
 }
 
 // Deploy deploys an application using Terraform.
@@ -52,6 +57,11 @@ func Deploy(ctx *app.Context, opts *DeployOptions) error {
 	// Construct the variables for Terraform from our queried infra
 	vars := make(map[string]string)
 	for k, v := range infra.Outputs {
+		if opts.InfraOutputMap != nil {
+			if nk, ok := opts.InfraOutputMap[k]; ok {
+				k = nk
+			}
+		}
 		vars[k] = v
 	}
 	for k, v := range ctx.InfraCreds {

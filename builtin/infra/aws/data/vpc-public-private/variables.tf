@@ -9,3 +9,7 @@ variable "aws_secret_key" {
 variable "aws_region" {
     description = "Region where we will operate."
 }
+
+variable "ssh_public_key" {
+    description = "Contents of an SSH public key to grant access to created instances"
+}
