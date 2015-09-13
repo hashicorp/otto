@@ -407,6 +407,7 @@ func (c *Core) Infra(action string, args []string) error {
 	// If we're doing anything other than destroying, then
 	// run the execution now.
 	if action != "destroy" {
+		c.ui.Header("Building main infrastructure...")
 		if err := infra.Execute(infraCtx); err != nil {
 			return err
 		}
@@ -424,6 +425,17 @@ func (c *Core) Infra(action string, args []string) error {
 			"[INFO] infra action '%s' on foundation '%s'",
 			action, ctx.Tuple.Type)
 
+		switch action {
+		case "":
+			c.ui.Header(fmt.Sprintf(
+				"Building infrastructure for foundation: %s",
+				ctx.Tuple.Type))
+		case "destroy":
+			c.ui.Header(fmt.Sprintf(
+				"Destroying infrastructure for foundation: %s",
+				ctx.Tuple.Type))
+		}
+
 		if err := f.Infra(ctx); err != nil {
 			return err
 		}
@@ -434,9 +446,24 @@ func (c *Core) Infra(action string, args []string) error {
 	// we need to first destroy all applications and foundations that
 	// are using this infra.
 	if action == "destroy" {
+		c.ui.Header("Destroying main infrastructure...")
 		if err := infra.Execute(infraCtx); err != nil {
 			return err
 		}
+	}
+
+	// Output the right thing
+	switch action {
+	case "":
+		infraCtx.Ui.Header("[green]Infrastructure successfully created!")
+		infraCtx.Ui.Message(
+			"[green]The infrastructure necessary to deploy this application\n" +
+				"is now available. You can now deploy using `otto deploy`.")
+	case "destroy":
+		infraCtx.Ui.Header("[green]Infrastructure successfully destroyed!")
+		infraCtx.Ui.Message(
+			"[green]The infrastructure necessary to run this application and\n" +
+				"all other applications in this project has been destroyed.")
 	}
 
 	return nil
