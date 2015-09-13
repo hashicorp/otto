@@ -41,7 +41,8 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 	}()
 
 	// Run the command
-	log.Printf("[DEBUG] exec: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
+	log.Printf("[DEBUG] execDir: %s", cmd.Dir)
+	log.Printf("[DEBUG] exec: %s %s", cmd.Path, strings.Join(cmd.Args[1:], " "))
 	err := cmd.Run()
 
 	// Wait for all the output to finish
@@ -53,4 +54,15 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 
 	// Return the output from the command
 	return err
+}
+
+// OttoSkipCleanupEnvVar, when set, tells Otto to avoid cleaning up its
+// temporary workspace files, which can be helpful for debugging.
+const OttoSkipCleanupEnvVar = "OTTO_SKIP_CLEANUP"
+
+// ShouldCleanup returns true for normal operation. It returns false if the
+// user requested that Otto avoid cleaning up its temporary files for
+// debugging purposes.
+func ShouldCleanup() bool {
+	return os.Getenv(OttoSkipCleanupEnvVar) == ""
 }

@@ -35,7 +35,9 @@ func (p *Packer) Execute(commandRaw ...string) error {
 	if err != nil {
 		return err
 	}
-	defer os.Remove(varfile)
+	if execHelper.ShouldCleanup() {
+		defer os.Remove(varfile)
+	}
 
 	// The command must always be machine-readable. We use this
 	// exclusively to mirror the UI output.

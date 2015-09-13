@@ -53,7 +53,9 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 		if err != nil {
 			return err
 		}
-		defer os.Remove(varfile)
+		if execHelper.ShouldCleanup() {
+			defer os.Remove(varfile)
+		}
 
 		// Append the varfile onto our command.
 		command = append(command, "-var-file", varfile)
@@ -68,7 +70,9 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 		if err != nil {
 			return err
 		}
-		defer os.RemoveAll(stateDir)
+		if execHelper.ShouldCleanup() {
+			defer os.RemoveAll(stateDir)
+		}
 
 		// State path
 		stateOldPath := filepath.Join(stateDir, "state.old")
@@ -147,7 +151,9 @@ func (t *Terraform) Outputs() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer os.Remove(tf.Name())
+	if execHelper.ShouldCleanup() {
+		defer os.Remove(tf.Name())
+	}
 
 	// Read the state from the directory and put it on disk. Lots of
 	// careful management of file handles here.
