@@ -18,7 +18,9 @@ import (
 type App struct{}
 
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
-	return compile.App(ctx, &compile.AppOptions{
+	var opts compile.AppOptions
+	custom := &customizations{Opts: &opts}
+	opts = compile.AppOptions{
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,
@@ -27,7 +29,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		Customizations: []*compile.Customization{
 			&compile.Customization{
 				Type:     "dev",
-				Callback: processCustomDev,
+				Callback: custom.processDev,
 				Schema: map[string]*schema.FieldSchema{
 					"ruby_version": &schema.FieldSchema{
 						Type:        schema.TypeString,
@@ -37,7 +39,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 			},
 		},
-	})
+	}
+
+	return compile.App(&opts)
 }
 
 func (a *App) Build(ctx *app.Context) error {
@@ -66,14 +70,6 @@ func (a *App) Dev(ctx *app.Context) error {
 
 func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 	return vagrant.DevDep(dst, src, &vagrant.DevDepOptions{})
-}
-
-func processCustomDev(d *schema.FieldData) (*compile.CustomizationResult, error) {
-	return &compile.CustomizationResult{
-		TemplateContext: map[string]interface{}{
-			"dev_ruby_version": d.Get("ruby_version"),
-		},
-	}, nil
 }
 
 const devInstructions = `
