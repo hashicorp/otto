@@ -10,14 +10,14 @@ variable "aws_secret_key" {
     description = "Secret key for AWS"
 }
 
-variable "aws_region" {
+variable "region" {
     description = "Region where we will operate."
 }
 
 #--------------------------------------------------------------
 # General settings
 #--------------------------------------------------------------
-variable "ssh-key" {
+variable "key_name" {
     description = "SSH key name"
 }
 
@@ -25,6 +25,6 @@ variable "subnet-private" {
     description = "Private subnet"
 }
 
-variable "vpc-id" {
+variable "vpc_id" {
     description = "VPC ID"
 }
