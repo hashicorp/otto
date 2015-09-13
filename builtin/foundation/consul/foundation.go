@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
+	"github.com/hashicorp/otto/helper/terraform"
 )
 
 //go:generate go-bindata -pkg=consul -nomemcopy -nometadata ./data/...
@@ -25,5 +26,5 @@ func (f *Foundation) Compile(ctx *foundation.Context) (*foundation.CompileResult
 }
 
 func (f *Foundation) Infra(ctx *foundation.Context) error {
-	return nil
+	return (&terraform.Foundation{}).Infra(ctx)
 }
