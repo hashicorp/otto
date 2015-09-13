@@ -415,12 +415,18 @@ func (c *Core) Infra(action string, args []string) error {
 	// If we have any foundations, we now run their infra deployment.
 	// This should only ever execute if action is to deploy or destroy,
 	// since those are the only cases that we load foundations.
-	for i, _ := range foundations {
+	for i, f := range foundations {
 		ctx := foundationCtxs[i]
+		ctx.Action = action
+		ctx.ActionArgs = args
+
 		log.Printf(
 			"[INFO] infra action '%s' on foundation '%s'",
 			action, ctx.Tuple.Type)
-		// TODO
+
+		if err := f.Infra(ctx); err != nil {
+			return err
+		}
 	}
 
 	// If the action is destroy, we run the infrastructure execution

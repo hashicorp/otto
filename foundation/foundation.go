@@ -15,11 +15,26 @@ type Foundation interface {
 	// Compile is called to compile the files that are used to manage
 	// this foundation.
 	Compile(*Context) (*CompileResult, error)
+
+	// Infra is called to build or destroy the infrastructure for this
+	// foundation. The "Action" field in the Context can be used to
+	// determine the desired action. This will be either "" (build)
+	// or "destroy". Foundations currently don't support any other
+	// actions.
+	Infra(*Context) error
 }
 
 // Context is the context for operations on a Foundation.
 type Context struct {
 	context.Shared
+
+	// Action is the sub-action to take when being executed.
+	//
+	// ActionArgs is the list of arguments for this action.
+	//
+	// Both of these fields will only be set for the Infra call currently.
+	Action     string
+	ActionArgs []string
 
 	// Config is the raw configuration from the Appfile itself for
 	// this foundation.

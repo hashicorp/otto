@@ -23,3 +23,7 @@ func (f *Foundation) Compile(ctx *foundation.Context) (*foundation.CompileResult
 
 	return compile.Foundation(&opts)
 }
+
+func (f *Foundation) Infra(ctx *foundation.Context) error {
+	return nil
+}
