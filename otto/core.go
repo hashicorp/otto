@@ -420,6 +420,7 @@ func (c *Core) Infra(action string, args []string) error {
 		ctx := foundationCtxs[i]
 		ctx.Action = action
 		ctx.ActionArgs = args
+		ctx.InfraCreds = infraCtx.InfraCreds
 
 		log.Printf(
 			"[INFO] infra action '%s' on foundation '%s'",

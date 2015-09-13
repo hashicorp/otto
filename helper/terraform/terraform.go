@@ -66,6 +66,11 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 
 		// Append the varfile onto our command.
 		command = append(command, "-var-file", varfile)
+
+		// Log some of the vars we're using
+		for k, _ := range t.Variables {
+			log.Printf("[DEBUG] setting TF var: %s", k)
+		}
 	}
 
 	// Determine if we need to skip state flags or not. This is just
