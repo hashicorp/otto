@@ -16,14 +16,25 @@ type Foundation struct {
 	Dir string
 }
 
-// Deploy deploys a foundation using Terraform.
+// Infra manages a foundation using Terraform.
 //
 // This will verify the infrastruction is created and use that information
 // to execute Terraform with the options given.
 //
-// This function implements foundation.Foundation.Deploy.
-func (f *Foundation) Deploy(ctx *foundation.Context) error {
-	return f.execute(ctx, "apply")
+// This function implements foundation.Foundation.Infra.
+func (f *Foundation) Infra(ctx *foundation.Context) error {
+	switch ctx.Action {
+	case "":
+		if err := f.execute(ctx, "get", "."); err != nil {
+			return err
+		}
+
+		return f.execute(ctx, "apply")
+	case "destroy":
+		return f.execute(ctx, "destroy", "-force")
+	default:
+		return fmt.Errorf("unknown action: %s", ctx.Action)
+	}
 }
 
 func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {

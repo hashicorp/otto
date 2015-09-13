@@ -39,9 +39,9 @@ func (i *Infrastructure) Creds(ctx *infrastructure.Context) (map[string]string, 
 func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
 	switch ctx.Action {
 	case "destroy":
-		return i.executeDestroy(ctx)
+		return i.execute(ctx, "destroy")
 	case "":
-		return i.executeApply(ctx)
+		return i.execute(ctx, "apply")
 	default:
 		return nil
 	}
