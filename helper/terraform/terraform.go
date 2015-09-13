@@ -95,6 +95,10 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 		if err != nil {
 			return fmt.Errorf("Error loading Terraform state: %s", err)
 		}
+		if data == nil && command[0] == "destroy" {
+			// Destroy we can just execute, we don't need state
+			return nil
+		}
 		if data != nil {
 			err = data.WriteToFile(stateOldPath)
 			data.Close()

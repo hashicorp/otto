@@ -40,6 +40,35 @@ func (f *Foundation) Infra(ctx *foundation.Context) error {
 func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
 	appInfra := ctx.Appfile.ActiveInfrastructure()
 
+	// Foundations themselves are represented as infrastructure in the
+	// backend. Let's look that up. If it doesn't exist, we have to create
+	// it in order to get our UUID for storing state.
+	lookup := directory.Lookup{Infra: appInfra.Name, Foundation: ctx.Tuple.Type}
+	foundationInfra, err := ctx.Directory.GetInfra(&directory.Infra{Lookup: lookup})
+	if err != nil {
+		return fmt.Errorf(
+			"Error looking up existing infrastructure data: %s\n\n"+
+				"These errors are usually transient and can be fixed by retrying\n"+
+				"the command. Additional causes of errors are networking or disk\n"+
+				"issues that can be resolved external to Otto.",
+			err)
+	}
+	if foundationInfra == nil {
+		// If we don't have an infra, create one
+		foundationInfra = &directory.Infra{Lookup: lookup}
+		foundationInfra.State = directory.InfraStatePartial
+
+		// Put the infrastructure so we can get the UUID to use for our state
+		if err := ctx.Directory.PutInfra(foundationInfra); err != nil {
+			return fmt.Errorf(
+				"Error preparing infrastructure: %s\n\n"+
+					"These errors are usually transient and can be fixed by retrying\n"+
+					"the command. Additional causes of errors are networking or disk\n"+
+					"issues that can be resolved external to Otto.",
+				err)
+		}
+	}
+
 	// Get the infrastructure state. The infrastructure must be
 	// created for us to deploy to it.
 	infra, err := ctx.Directory.GetInfra(&directory.Infra{
@@ -64,35 +93,6 @@ func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
 		vars[k] = v
 	}
 
-	// Foundations themselves are represented as infrastructure in the
-	// backend. Let's look that up. If it doesn't exist, we have to create
-	// it in order to get our UUID for storing state.
-	lookup := directory.Lookup{Infra: appInfra.Name, Foundation: ctx.Tuple.Type}
-	infra, err = ctx.Directory.GetInfra(&directory.Infra{Lookup: lookup})
-	if err != nil {
-		return fmt.Errorf(
-			"Error looking up existing infrastructure data: %s\n\n"+
-				"These errors are usually transient and can be fixed by retrying\n"+
-				"the command. Additional causes of errors are networking or disk\n"+
-				"issues that can be resolved external to Otto.",
-			err)
-	}
-	if infra == nil {
-		// If we don't have an infra, create one
-		infra = &directory.Infra{Lookup: lookup}
-		infra.State = directory.InfraStatePartial
-
-		// Put the infrastructure so we can get the UUID to use for our state
-		if err := ctx.Directory.PutInfra(infra); err != nil {
-			return fmt.Errorf(
-				"Error preparing infrastructure: %s\n\n"+
-					"These errors are usually transient and can be fixed by retrying\n"+
-					"the command. Additional causes of errors are networking or disk\n"+
-					"issues that can be resolved external to Otto.",
-				err)
-		}
-	}
-
 	// Get the directory
 	tfDir := f.Dir
 	if tfDir == "" {
@@ -105,7 +105,7 @@ func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
 		Ui:        ctx.Ui,
 		Variables: vars,
 		Directory: ctx.Directory,
-		StateId:   infra.ID,
+		StateId:   foundationInfra.ID,
 	}
 	if err := tf.Execute(args...); err != nil {
 		return fmt.Errorf(
