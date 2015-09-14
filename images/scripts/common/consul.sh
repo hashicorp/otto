@@ -50,3 +50,8 @@ script
     >>/var/log/consul.log 2>&1
 end script
 EOF
+
+# Install dnsmasq
+apt-get install -y dnsmasq
+echo "server=/consul/127.0.0.1#8600" > /etc/dnsmasq.d/10-consul
+/etc/init.d/dnsmasq restart
