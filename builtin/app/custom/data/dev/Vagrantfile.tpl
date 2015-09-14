@@ -4,6 +4,13 @@ Vagrant.configure("2") do |config|
   # Setup some stuff
   config.vm.provision "shell", inline: $script
 
+  # Foundation configuration (if any)
+  {% for dir in foundation_dirs.dev %}
+  dir = "/otto/foundation-{{ forloop.Counter }}"
+  config.vm.synced_folder "{{ dir }}", dir
+  config.vm.provision "shell", inline: "cd #{dir} && bash #{dir}/main.sh"
+  {% endfor %}
+
   # Read in the fragment that we use as a dep
   {{ fragment_path|read }}
 

@@ -158,6 +158,15 @@ func (c *Core) Compile() error {
 			resultLock.Unlock()
 		}
 
+		// Build the contexts for the foundations. We use this
+		// to also compile the list of foundation dirs.
+		ctx.FoundationDirs = make([]string, len(foundations))
+		for i, _ := range foundations {
+			fCtx := foundationCtxs[i]
+			fCtx.Dir = filepath.Join(ctx.Dir, fmt.Sprintf("foundation-%s", fCtx.Tuple.Type))
+			ctx.FoundationDirs[i] = fCtx.Dir
+		}
+
 		// Compile!
 		result, err := app.Compile(ctx)
 		if err != nil {
@@ -167,13 +176,19 @@ func (c *Core) Compile() error {
 		// Compile the foundations for this app
 		for i, f := range foundations {
 			fCtx := foundationCtxs[i]
-			fCtx.Dir = filepath.Join(ctx.Dir, fmt.Sprintf("foundation-%s", fCtx.Tuple.Type))
-
 			if result != nil {
 				fCtx.AppConfig = &result.FoundationConfig
 			}
 
 			if _, err := f.Compile(fCtx); err != nil {
+				return err
+			}
+
+			// Make sure the dev/deploy directories exist
+			if err := os.MkdirAll(filepath.Join(fCtx.Dir, "app-dev"), 0755); err != nil {
+				return err
+			}
+			if err := os.MkdirAll(filepath.Join(fCtx.Dir, "app-deploy"), 0755); err != nil {
 				return err
 			}
 		}

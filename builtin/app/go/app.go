@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/packer"
@@ -40,6 +41,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	custom := &customizations{Opts: &opts}
 	opts = compile.AppOptions{
 		Ctx: ctx,
+		FoundationConfig: foundation.Config{
+			ServiceName: ctx.Application.Name,
+		},
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,

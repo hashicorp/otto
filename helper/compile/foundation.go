@@ -53,6 +53,10 @@ func Foundation(opts *FoundationOptions) (*foundation.CompileResult, error) {
 		"compiled": ctx.Dir,
 		"working":  filepath.Dir(ctx.Appfile.Path),
 	}
+	data.Context["app_config"] = ctx.AppConfig
+	if ctx.AppConfig == nil {
+		data.Context["app_config"] = &foundation.Config{}
+	}
 
 	// Process the customizations!
 	err := processCustomizations(&processOpts{

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/oneline"
@@ -35,6 +36,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			Context: map[string]interface{}{
 				"fragment_path": fragmentPath,
 			},
+		},
+		FoundationConfig: foundation.Config{
+			ServiceName: ctx.Application.Name,
 		},
 		Customizations: []*compile.Customization{
 			&compile.Customization{
