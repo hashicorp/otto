@@ -21,6 +21,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	var opts compile.AppOptions
 	custom := &customizations{Opts: &opts}
 	opts = compile.AppOptions{
+		Ctx: ctx,
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,
