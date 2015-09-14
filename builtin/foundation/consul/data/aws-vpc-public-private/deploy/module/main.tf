@@ -9,6 +9,25 @@ resource "aws_instance" "consul" {
     tags {
         Name = "consul ${var.index}"
     }
+
+    connection {
+        user         = "ubuntu"
+        host         = "${self.private_ip}"
+        bastion_host = "${var.bastion_host}"
+        bastion_user = "${var.bastion_user}"
+    }
+
+    provisioner "file" {
+        source = "${path.module}/join.sh"
+        destination = "/tmp/script.sh"
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            "chmod +x /tmp/script.sh",
+            "/tmp/script.sh ${var.join_addr}",
+        ]
+    }
 }
 
 resource "aws_security_group" "consul" {
