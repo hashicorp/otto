@@ -164,6 +164,20 @@ func (c *Core) Compile() error {
 			return err
 		}
 
+		// Compile the foundations for this app
+		for i, f := range foundations {
+			fCtx := foundationCtxs[i]
+			fCtx.Dir = filepath.Join(ctx.Dir, fmt.Sprintf("foundation-%s", fCtx.Tuple.Type))
+
+			if result != nil {
+				fCtx.AppConfig = &result.FoundationConfig
+			}
+
+			if _, err := f.Compile(fCtx); err != nil {
+				return err
+			}
+		}
+
 		// Store the compilation result for later
 		resultLock.Lock()
 		defer resultLock.Unlock()
