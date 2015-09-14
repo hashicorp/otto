@@ -14,7 +14,7 @@
       "source_ami": "ami-76b2a71e",
       "instance_type": "{{ user `instance` }}",
       "ssh_username": "ubuntu",
-      "ami_users": ["209146746714"],
+      "ami_users": ["209146746714", "762203914556"],
       "ami_name": "otto-consul {{ timestamp }}",
       "tags": {
         "Name": "Otto: Consul"
