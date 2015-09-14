@@ -67,11 +67,13 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 		"working":  filepath.Dir(ctx.Appfile.Path),
 	}
 	foundationDirsContext := map[string][]string{
-		"dev":    make([]string, len(ctx.FoundationDirs)),
-		"deploy": make([]string, len(ctx.FoundationDirs)),
+		"dev":     make([]string, len(ctx.FoundationDirs)),
+		"dev_dep": make([]string, len(ctx.FoundationDirs)),
+		"deploy":  make([]string, len(ctx.FoundationDirs)),
 	}
 	for i, dir := range ctx.FoundationDirs {
 		foundationDirsContext["dev"][i] = filepath.Join(dir, "app-dev")
+		foundationDirsContext["dev_dep"][i] = filepath.Join(dir, "app-dev-dep")
 		foundationDirsContext["deploy"][i] = filepath.Join(dir, "app-deploy")
 	}
 	data.Context["foundation_dirs"] = foundationDirsContext

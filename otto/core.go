@@ -174,6 +174,7 @@ func (c *Core) Compile() error {
 		}
 
 		// Compile the foundations for this app
+		subdirs := []string{"app-dev", "app-dev-dep", "app-deploy"}
 		for i, f := range foundations {
 			fCtx := foundationCtxs[i]
 			if result != nil {
@@ -184,12 +185,11 @@ func (c *Core) Compile() error {
 				return err
 			}
 
-			// Make sure the dev/deploy directories exist
-			if err := os.MkdirAll(filepath.Join(fCtx.Dir, "app-dev"), 0755); err != nil {
-				return err
-			}
-			if err := os.MkdirAll(filepath.Join(fCtx.Dir, "app-deploy"), 0755); err != nil {
-				return err
+			// Make sure the subdirs exist
+			for _, dir := range subdirs {
+				if err := os.MkdirAll(filepath.Join(fCtx.Dir, dir), 0755); err != nil {
+					return err
+				}
 			}
 		}
 
