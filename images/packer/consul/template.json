@@ -1,0 +1,55 @@
+{
+  "variables": {
+    "access_key": "{{ env `AWS_ACCESS_KEY` }}",
+    "secret_key": "{{ env `AWS_SECRET_KEY` }}",
+    "instance": "c3.large",
+    "platform": "ubuntu"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{ user `access_key` }}",
+      "secret_key": "{{ user `secret_key` }}",
+      "region": "us-east-1",
+      "source_ami": "ami-76b2a71e",
+      "instance_type": "{{ user `instance` }}",
+      "ssh_username": "ubuntu",
+      "ami_users": ["209146746714", "762203914556"],
+      "ami_name": "otto-consul {{ timestamp }}",
+      "tags": {
+        "Name": "Otto: Consul"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "mkdir /tmp/scripts"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "scripts/{{ user `platform` }}/",
+      "destination": "/tmp/scripts"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "chmod +x /tmp/scripts/install.sh",
+        "sudo /tmp/scripts/install.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "atlas",
+      "artifact": "hashicorp/otto-consul",
+      "artifact_type": "amazon.ami"
+    }
+  ],
+  "push": {
+    "name": "hashicorp/otto-consul",
+    "vcs": false
+  }
+}

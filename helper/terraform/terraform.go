@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -45,10 +46,16 @@ type Terraform struct {
 
 // Execute executes a raw Terraform command
 func (t *Terraform) Execute(commandRaw ...string) error {
-	command := commandRaw
+	command := make([]string, 1, len(commandRaw)*2)
+	command[0] = commandRaw[0]
+	commandArgs := commandRaw[1:]
+
+	// Determine if we need to skip var flags or not.
+	varSkip := false
+	varSkip = command[0] == "get"
 
 	// If we have variables, create the var file
-	if len(t.Variables) > 0 {
+	if !varSkip && len(t.Variables) > 0 {
 		varfile, err := t.varfile()
 		if err != nil {
 			return err
@@ -59,12 +66,22 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 
 		// Append the varfile onto our command.
 		command = append(command, "-var-file", varfile)
+
+		// Log some of the vars we're using
+		for k, _ := range t.Variables {
+			log.Printf("[DEBUG] setting TF var: %s", k)
+		}
 	}
+
+	// Determine if we need to skip state flags or not. This is just
+	// hardcoded for now.
+	stateSkip := false
+	stateSkip = command[0] == "get"
 
 	// If we care about state, then setup the state directory and
 	// load it up.
 	var stateDir, statePath string
-	if t.StateId != "" && t.Directory != nil {
+	if !stateSkip && t.StateId != "" && t.Directory != nil {
 		var err error
 		stateDir, err = ioutil.TempDir("", "otto-tf")
 		if err != nil {
@@ -83,6 +100,10 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 		if err != nil {
 			return fmt.Errorf("Error loading Terraform state: %s", err)
 		}
+		if data == nil && command[0] == "destroy" {
+			// Destroy we can just execute, we don't need state
+			return nil
+		}
 		if data != nil {
 			err = data.WriteToFile(stateOldPath)
 			data.Close()
@@ -96,7 +117,11 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 		command = append(command, "-state-out", statePath)
 	}
 
+	// Append all the final args
+	command = append(command, commandArgs...)
+
 	// Build the command to execute
+	log.Printf("[DEBUG] executing terraform: %v", command)
 	cmd := exec.Command("terraform", command...)
 	cmd.Dir = t.Dir
 
@@ -109,7 +134,7 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 	}
 
 	// Save the state file if we have it.
-	if t.StateId != "" && t.Directory != nil {
+	if t.StateId != "" && t.Directory != nil && statePath != "" {
 		f, ferr := os.Open(statePath)
 		if ferr != nil {
 			return fmt.Errorf(

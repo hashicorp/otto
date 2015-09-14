@@ -64,6 +64,15 @@ type Infrastructure struct {
 	Name   string
 	Type   string
 	Flavor string
+
+	Foundations []*Foundation
+}
+
+// Foundation is the configuration for the fundamental building blocks
+// of the infrastructure.
+type Foundation struct {
+	Name   string
+	Config map[string]interface{}
 }
 
 //-------------------------------------------------------------------
@@ -102,11 +111,18 @@ func (f *File) Merge(other *File) error {
 		infraMap[infra.Name] = i
 	}
 	for _, i := range other.Infrastructure {
-		if idx, ok := infraMap[i.Name]; !ok {
+		idx, ok := infraMap[i.Name]
+		if !ok {
 			f.Infrastructure = append(f.Infrastructure, i)
-		} else {
-			f.Infrastructure[idx] = i
+			continue
 		}
+
+		old := f.Infrastructure[idx]
+		if len(i.Foundations) == 0 {
+			i.Foundations = old.Foundations
+		}
+
+		f.Infrastructure[idx] = i
 	}
 
 	// TODO: customizations

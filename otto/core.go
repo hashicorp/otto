@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 	"github.com/hashicorp/terraform/dag"
@@ -26,6 +27,7 @@ type Core struct {
 	apps            map[app.Tuple]app.Factory
 	dir             directory.Backend
 	infras          map[string]infrastructure.Factory
+	foundationMap   map[foundation.Tuple]foundation.Factory
 	dataDir         string
 	localDir        string
 	compileDir      string
@@ -60,6 +62,10 @@ type CoreConfig struct {
 	// value is a factory that can create the infrastructure impl.
 	Infrastructures map[string]infrastructure.Factory
 
+	// Foundations is the map of available foundations. The
+	// value is a factory that can create the impl.
+	Foundations map[foundation.Tuple]foundation.Factory
+
 	// Ui is the Ui that will be used to communicate with the user.
 	Ui ui.Ui
 }
@@ -75,6 +81,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		apps:            c.Apps,
 		dir:             c.Directory,
 		infras:          c.Infrastructures,
+		foundationMap:   c.Foundations,
 		dataDir:         c.DataDir,
 		localDir:        c.LocalDir,
 		compileDir:      c.CompileDir,
@@ -90,6 +97,13 @@ func (c *Core) Compile() error {
 		return err
 	}
 
+	// Get all the foundation implementations (which are tied as singletons
+	// to the infrastructure).
+	foundations, foundationCtxs, err := c.foundations()
+	if err != nil {
+		return err
+	}
+
 	// Delete the prior output directory
 	log.Printf("[INFO] deleting prior compilation contents: %s", c.compileDir)
 	if err := os.RemoveAll(c.compileDir); err != nil {
@@ -98,8 +112,21 @@ func (c *Core) Compile() error {
 
 	// Compile the infrastructure for our application
 	log.Printf("[INFO] running infra compile...")
+	c.ui.Message("Compiling infra...")
 	if _, err := infra.Compile(infraCtx); err != nil {
 		return err
+	}
+
+	// Compile the foundation (not tied to any app). This compilation
+	// of the foundation is used for `otto infra` to set everything up.
+	log.Printf("[INFO] running foundation compilations")
+	for i, f := range foundations {
+		ctx := foundationCtxs[i]
+		c.ui.Message(fmt.Sprintf(
+			"Compiling foundation: %s", ctx.Tuple.Type))
+		if _, err := f.Compile(ctx); err != nil {
+			return err
+		}
 	}
 
 	// Walk through the dependencies and compile all of them.
@@ -131,10 +158,39 @@ func (c *Core) Compile() error {
 			resultLock.Unlock()
 		}
 
+		// Build the contexts for the foundations. We use this
+		// to also compile the list of foundation dirs.
+		ctx.FoundationDirs = make([]string, len(foundations))
+		for i, _ := range foundations {
+			fCtx := foundationCtxs[i]
+			fCtx.Dir = filepath.Join(ctx.Dir, fmt.Sprintf("foundation-%s", fCtx.Tuple.Type))
+			ctx.FoundationDirs[i] = fCtx.Dir
+		}
+
 		// Compile!
 		result, err := app.Compile(ctx)
 		if err != nil {
 			return err
+		}
+
+		// Compile the foundations for this app
+		subdirs := []string{"app-dev", "app-dev-dep", "app-deploy"}
+		for i, f := range foundations {
+			fCtx := foundationCtxs[i]
+			if result != nil {
+				fCtx.AppConfig = &result.FoundationConfig
+			}
+
+			if _, err := f.Compile(fCtx); err != nil {
+				return err
+			}
+
+			// Make sure the subdirs exist
+			for _, dir := range subdirs {
+				if err := os.MkdirAll(filepath.Join(fCtx.Dir, dir), 0755); err != nil {
+					return err
+				}
+			}
 		}
 
 		// Store the compilation result for later
@@ -347,13 +403,107 @@ func (c *Core) Dev() error {
 	return rootApp.Dev(rootCtx)
 }
 
+// Infra manages the infrastructure for this Appfile.
+//
+// Infra supports subactions, which can be specified with action and args.
+// Infra recognizes two special actions: "" (blank string) and "destroy".
+// The former expects to create or update the complete infrastructure,
+// and the latter will destroy the infrastructure.
+func (c *Core) Infra(action string, args []string) error {
+	// Get the infra implementation for this
+	infra, infraCtx, err := c.infra()
+	if err != nil {
+		return err
+	}
+	if err := c.creds(infra, infraCtx); err != nil {
+		return err
+	}
+
+	// Set the action and action args
+	infraCtx.Action = action
+	infraCtx.ActionArgs = args
+
+	// If we need the foundations, then get them
+	var foundations []foundation.Foundation
+	var foundationCtxs []*foundation.Context
+	if action == "" || action == "destroy" {
+		foundations, foundationCtxs, err = c.foundations()
+		if err != nil {
+			return err
+		}
+	}
+
+	// If we're doing anything other than destroying, then
+	// run the execution now.
+	if action != "destroy" {
+		c.ui.Header("Building main infrastructure...")
+		if err := infra.Execute(infraCtx); err != nil {
+			return err
+		}
+	}
+
+	// If we have any foundations, we now run their infra deployment.
+	// This should only ever execute if action is to deploy or destroy,
+	// since those are the only cases that we load foundations.
+	for i, f := range foundations {
+		ctx := foundationCtxs[i]
+		ctx.Action = action
+		ctx.ActionArgs = args
+		ctx.InfraCreds = infraCtx.InfraCreds
+
+		log.Printf(
+			"[INFO] infra action '%s' on foundation '%s'",
+			action, ctx.Tuple.Type)
+
+		switch action {
+		case "":
+			c.ui.Header(fmt.Sprintf(
+				"Building infrastructure for foundation: %s",
+				ctx.Tuple.Type))
+		case "destroy":
+			c.ui.Header(fmt.Sprintf(
+				"Destroying infrastructure for foundation: %s",
+				ctx.Tuple.Type))
+		}
+
+		if err := f.Infra(ctx); err != nil {
+			return err
+		}
+	}
+
+	// If the action is destroy, we run the infrastructure execution
+	// here. We mirror creation above since in the destruction case
+	// we need to first destroy all applications and foundations that
+	// are using this infra.
+	if action == "destroy" {
+		c.ui.Header("Destroying main infrastructure...")
+		if err := infra.Execute(infraCtx); err != nil {
+			return err
+		}
+	}
+
+	// Output the right thing
+	switch action {
+	case "":
+		infraCtx.Ui.Header("[green]Infrastructure successfully created!")
+		infraCtx.Ui.Message(
+			"[green]The infrastructure necessary to deploy this application\n" +
+				"is now available. You can now deploy using `otto deploy`.")
+	case "destroy":
+		infraCtx.Ui.Header("[green]Infrastructure successfully destroyed!")
+		infraCtx.Ui.Message(
+			"[green]The infrastructure necessary to run this application and\n" +
+				"all other applications in this project has been destroyed.")
+	}
+
+	return nil
+}
+
 // Execute executes the given task for this Appfile.
 func (c *Core) Execute(opts *ExecuteOpts) error {
 	switch opts.Task {
 	case ExecuteTaskDev:
 		return c.executeApp(opts)
-	case ExecuteTaskInfra:
-		return c.executeInfra(opts)
 	default:
 		return fmt.Errorf("unknown task: %s", opts.Task)
 	}
@@ -492,24 +642,6 @@ func (c *Core) executeApp(opts *ExecuteOpts) error {
 	}
 }
 
-func (c *Core) executeInfra(opts *ExecuteOpts) error {
-	// Get the infra implementation for this
-	infra, infraCtx, err := c.infra()
-	if err != nil {
-		return err
-	}
-	if err := c.creds(infra, infraCtx); err != nil {
-		return err
-	}
-
-	// Set the action and action args
-	infraCtx.Action = opts.Action
-	infraCtx.ActionArgs = opts.Args
-
-	// Build the infrastructure compilation context
-	return infra.Execute(infraCtx)
-}
-
 func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 	// We need the configuration for the active infrastructure
 	// so that we can build the tuple below
@@ -616,6 +748,71 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 			Ui:        c.ui,
 		},
 	}, nil
+}
+
+func (c *Core) foundations() ([]foundation.Foundation, []*foundation.Context, error) {
+	// Get the infrastructure configuration
+	config := c.appfile.ActiveInfrastructure()
+	if config == nil {
+		return nil, nil, fmt.Errorf(
+			"infrastructure not found in appfile: %s",
+			c.appfile.Project.Infrastructure)
+	}
+
+	// If there are no foundations, return nothing.
+	if len(config.Foundations) == 0 {
+		return nil, nil, nil
+	}
+
+	// Create the arrays for our list
+	fs := make([]foundation.Foundation, 0, len(config.Foundations))
+	ctxs := make([]*foundation.Context, 0, cap(fs))
+	for _, f := range config.Foundations {
+		// The tuple we're looking for is the foundation type, the
+		// infrastructure type, and the infrastructure flavor. Build that
+		// tuple.
+		tuple := foundation.Tuple{
+			Type:        f.Name,
+			Infra:       config.Type,
+			InfraFlavor: config.Flavor,
+		}
+
+		// Look for the matching foundation
+		fun := foundation.TupleMap(c.foundationMap).Lookup(tuple)
+		if fun == nil {
+			return nil, nil, fmt.Errorf(
+				"foundation implementation for tuple not found: %s",
+				tuple)
+		}
+
+		// Instantiate the implementation
+		impl, err := fun()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		// The output directory for data
+		outputDir := filepath.Join(
+			c.compileDir, fmt.Sprintf("foundation-%s", f.Name))
+
+		// Build the context
+		ctx := &foundation.Context{
+			Config:  f.Config,
+			Dir:     outputDir,
+			Tuple:   tuple,
+			Appfile: c.appfile,
+			Shared: context.Shared{
+				Directory: c.dir,
+				Ui:        c.ui,
+			},
+		}
+
+		// Add to our results
+		fs = append(fs, impl)
+		ctxs = append(ctxs, ctx)
+	}
+
+	return fs, ctxs, nil
 }
 
 const credsQueryPassExists = `

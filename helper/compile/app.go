@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 )
 
@@ -19,6 +20,10 @@ import (
 type AppOptions struct {
 	// Ctx is the app context of this compilation.
 	Ctx *app.Context
+
+	// FoundationConfig is the configuration for the foundation that
+	// will be returned as the compilation result.
+	FoundationConfig foundation.Config
 
 	// Bindata is the data that is used for templating. This must be set.
 	// Template data should also be set on this. This will be modified with
@@ -61,6 +66,17 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 		"compiled": ctx.Dir,
 		"working":  filepath.Dir(ctx.Appfile.Path),
 	}
+	foundationDirsContext := map[string][]string{
+		"dev":     make([]string, len(ctx.FoundationDirs)),
+		"dev_dep": make([]string, len(ctx.FoundationDirs)),
+		"deploy":  make([]string, len(ctx.FoundationDirs)),
+	}
+	for i, dir := range ctx.FoundationDirs {
+		foundationDirsContext["dev"][i] = filepath.Join(dir, "app-dev")
+		foundationDirsContext["dev_dep"][i] = filepath.Join(dir, "app-dev-dep")
+		foundationDirsContext["deploy"][i] = filepath.Join(dir, "app-deploy")
+	}
+	data.Context["foundation_dirs"] = foundationDirsContext
 
 	// Process the customizations!
 	err := processCustomizations(&processOpts{
@@ -104,6 +120,7 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 	}
 
 	return &app.CompileResult{
+		FoundationConfig:   opts.FoundationConfig,
 		DevDepFragmentPath: fragmentPath,
 	}, nil
 }

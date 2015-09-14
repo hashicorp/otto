@@ -7,11 +7,13 @@ import (
 	appCustom "github.com/hashicorp/otto/builtin/app/custom"
 	appGo "github.com/hashicorp/otto/builtin/app/go"
 	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
+	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/command"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/otto"
 	"github.com/mitchellh/cli"
@@ -41,9 +43,12 @@ func init() {
 	apps.Add(appCustom.Tuples.Map(app.StructFactory(new(appCustom.App))))
 	apps.Add(appRuby.Tuples.Map(app.StructFactory(new(appRuby.App))))
 
+	foundations := foundationConsul.Tuples.Map(foundation.StructFactory(new(foundationConsul.Foundation)))
+
 	meta := command.Meta{
 		CoreConfig: &otto.CoreConfig{
-			Apps: apps,
+			Apps:        apps,
+			Foundations: foundations,
 			Infrastructures: map[string]infrastructure.Factory{
 				"aws": infraAws.Infra,
 			},

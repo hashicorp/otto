@@ -39,40 +39,12 @@ func (i *Infrastructure) Creds(ctx *infrastructure.Context) (map[string]string, 
 func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
 	switch ctx.Action {
 	case "destroy":
-		return i.executeDestroy(ctx)
+		return i.execute(ctx, "destroy")
 	case "":
-		return i.executeApply(ctx)
+		return i.execute(ctx, "apply")
 	default:
 		return nil
 	}
-}
-
-func (i *Infrastructure) executeDestroy(ctx *infrastructure.Context) error {
-	if err := i.execute(ctx, "destroy"); err != nil {
-		return err
-	}
-
-	// Output something to the user so they know what is going on.
-	ctx.Ui.Header("[green]Infrastructure successfully destroyed!")
-	ctx.Ui.Message(
-		"[green]The infrastructure necessary to run this application and\n" +
-			"all other applications in this project has been destroyed.")
-
-	return nil
-}
-
-func (i *Infrastructure) executeApply(ctx *infrastructure.Context) error {
-	if err := i.execute(ctx, "apply"); err != nil {
-		return err
-	}
-
-	// Output something to the user so they know what is going on.
-	ctx.Ui.Header("[green]Infrastructure successfully created!")
-	ctx.Ui.Message(
-		"[green]The infrastructure necessary to deploy this application\n" +
-			"is now available. You can now deploy using `otto deploy`.")
-
-	return nil
 }
 
 func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) error {

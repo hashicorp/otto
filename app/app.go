@@ -16,6 +16,7 @@ package app
 import (
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/context"
+	"github.com/hashicorp/otto/foundation"
 )
 
 // App is the interface that must be implemented by each
@@ -104,10 +105,24 @@ type Context struct {
 	// Vagrantfile fragment paths. This will only be available in the Compile
 	// call.
 	DevDepFragments []string
+
+	// FoundationDirs are the directories of the various foundation scripts.
+	//
+	// These directories will contain a "dev" and "deploy" subdirectory
+	// that should be uploaded and used for each of those environments.
+	// Within those folders, a "main.sh" file will exist that should be
+	// called.
+	//
+	// This will only be available in the Compile call.
+	FoundationDirs []string
 }
 
 // CompileResult is the structure containing compilation result values.
 type CompileResult struct {
+	// FoundationConfig is the configuration for the various foundational
+	// elements of Otto.
+	FoundationConfig foundation.Config
+
 	// DevDepFragmentPath is the path to the Vagrantfile fragment that
 	// should be added to other Vagrantfiles when this application is
 	// used as a dependency.

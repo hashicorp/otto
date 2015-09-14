@@ -19,6 +19,13 @@ Vagrant.configure("2") do |config|
   # Enable SSH agent forwarding so getting private dependencies works
   config.ssh.forward_agent = true
 
+  # Foundation configuration (if any)
+  {% for dir in foundation_dirs.dev %}
+  dir = "/otto/foundation-{{ forloop.Counter }}"
+  config.vm.synced_folder "{{ dir }}", dir
+  config.vm.provision "shell", inline: "cd #{dir} && bash #{dir}/main.sh"
+  {% endfor %}
+
   # Load all our fragments here for any dependencies.
   {% for fragment in dev_fragments %}
   {{ fragment|read }}
@@ -30,30 +37,40 @@ Vagrant.configure("2") do |config|
   # Make it so that `vagrant ssh` goes directly to the correct dir
   config.vm.provision "shell", inline:
     %Q[echo "cd {{ shared_folder_path }}" >> /home/vagrant/.bashrc]
+
+  # This is to work around some bugs right now
+  ["vmware_fusion", "vmware_workstation"].each do |name|
+    config.vm.provider(name) do |p|
+      p.enable_vmrun_ip_lookup = false
+    end
+  end
 end
 
 $script_golang = <<SCRIPT
 set -e
 
-echo "Downloading Go {{ dev_go_version }}..."
-wget -q -O /home/vagrant/go.tar.gz https://storage.googleapis.com/golang/go{{ dev_go_version }}.linux-amd64.tar.gz
+oe() { $@ 2>&1 | logger -t otto > /dev/null; }
+ol() { echo "[otto] $@"; }
 
-echo "Untarring Go..."
-sudo tar -C /usr/local -xzf /home/vagrant/go.tar.gz
+ol "Downloading Go {{ dev_go_version }}..."
+oe wget -q -O /home/vagrant/go.tar.gz https://storage.googleapis.com/golang/go{{ dev_go_version }}.linux-amd64.tar.gz
 
-echo "Making GOPATH..."
-sudo mkdir -p /opt/gopath
+ol "Untarring Go..."
+oe sudo tar -C /usr/local -xzf /home/vagrant/go.tar.gz
+
+ol "Making GOPATH..."
+oe sudo mkdir -p /opt/gopath
 fstype=$(find /opt/gopath -mindepth 0 -maxdepth 0 -type d -printf "%F")
 find /opt/gopath -fstype ${fstype} -print0 | xargs -0 -n 100 chown vagrant:vagrant
 
-echo "Setting up PATH..."
+ol "Setting up PATH..."
 echo 'export PATH=/opt/gopath/bin:/usr/local/go/bin:$PATH' >> /home/vagrant/.bashrc
 echo 'export GOPATH=/opt/gopath' >> /home/vagrant/.bashrc
 
-echo "Installing VCSs for go get..."
-sudo apt-get update -y >/dev/null 2>&1
-sudo apt-get install -y git bzr mercurial
+ol "Installing VCSs for go get..."
+oe sudo apt-get update -y
+oe sudo apt-get install -y git bzr mercurial
 
-echo "Configuring Go to use SSH instead of HTTP..."
+ol "Configuring Go to use SSH instead of HTTP..."
 git config --global url."git@github.com:".insteadOf "https://github.com/"
 SCRIPT

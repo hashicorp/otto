@@ -5,7 +5,6 @@ type ExecuteTask uint
 
 const (
 	ExecuteTaskInvalid ExecuteTask = 0
-	ExecuteTaskInfra   ExecuteTask = iota
 	ExecuteTaskDev
 )
 

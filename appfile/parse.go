@@ -179,10 +179,56 @@ func parseInfra(result *File, obj *hclobj.Object) error {
 			infra.Type = infra.Name
 		}
 
+		// Parse the foundations if we have any
+		if o2 := o.Get("foundation", false); o != nil {
+			if err := parseFoundations(&infra, o2); err != nil {
+				return fmt.Errorf("error parsing 'foundation': %s", err)
+			}
+		}
+
 		collection = append(collection, &infra)
 	}
 
 	result.Infrastructure = collection
+	return nil
+}
+
+func parseFoundations(result *Infrastructure, obj *hclobj.Object) error {
+	// Get all the maps of keys to the actual object
+	objects := make(map[string]*hclobj.Object)
+	for _, o1 := range obj.Elem(false) {
+		for _, o2 := range o1.Elem(true) {
+			if _, ok := objects[o2.Key]; ok {
+				return fmt.Errorf(
+					"foundation '%s' defined more than once",
+					o2.Key)
+			}
+
+			objects[o2.Key] = o2
+		}
+	}
+
+	if len(objects) == 0 {
+		return nil
+	}
+
+	// Go through each object and turn it into an actual result.
+	collection := make([]*Foundation, 0, len(objects))
+	for n, o := range objects {
+		var m map[string]interface{}
+		if err := hcl.DecodeObject(&m, o); err != nil {
+			return err
+		}
+
+		var f Foundation
+		f.Name = n
+		f.Config = m
+
+		collection = append(collection, &f)
+	}
+
+	// Set the results
+	result.Foundations = collection
 	return nil
 }
 

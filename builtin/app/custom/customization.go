@@ -81,6 +81,10 @@ func (c *customizations) compileCustomDevDep(d *schema.FieldData) compile.Compil
 	vf := d.Get("vagrantfile").(string)
 
 	return func() error {
+		if !filepath.IsAbs(vf) {
+			vf = filepath.Join(filepath.Dir(c.Opts.Ctx.Appfile.Path), vf)
+		}
+
 		data := c.Opts.Bindata
 		fragment := data.Context["fragment_path"].(string)
 		if err := data.RenderReal(fragment, vf); err != nil {

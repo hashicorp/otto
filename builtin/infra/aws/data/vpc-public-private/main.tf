@@ -16,7 +16,7 @@ resource "aws_vpc" "main" {
 # The public subnet is where resources connected to the internet will go
 resource "aws_subnet" "public" {
     vpc_id                  = "${aws_vpc.main.id}"
-    cidr_block              = "10.0.1.0/24"
+    cidr_block              = "10.0.2.0/24"
     map_public_ip_on_launch = true
 
     tags { Name = "public" }
@@ -25,7 +25,7 @@ resource "aws_subnet" "public" {
 # The private subnet is where resources that are internal only will go
 resource "aws_subnet" "private" {
     vpc_id     = "${aws_vpc.main.id}"
-    cidr_block = "10.0.2.0/24"
+    cidr_block = "10.0.1.0/24"
 
     # Doesn't matter which AZ we land in, but public/private subnets
     # need to be colocated in an AZ for ELBs to be able to route.
