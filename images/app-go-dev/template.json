@@ -28,6 +28,8 @@
       "boot_wait": "10s",
       "disk_size": 40960,
       "guest_os_type": "Ubuntu_64",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "guest_os_type": "Ubuntu_64",
       "http_directory": "{{pwd}}/app-go-dev/http",
       "iso_checksum": "9e5fecc94b3925bededed0fdca1bd417",
       "iso_checksum_type": "md5",
@@ -79,6 +81,7 @@
       "ssh_port": 22,
       "ssh_wait_timeout": "10000s",
       "shutdown_command": "echo 'shutdown -P now' > /tmp/shutdown.sh; echo 'vagrant'|sudo -S sh '/tmp/shutdown.sh'",
+      "tools_upload_flavor": "linux",
       "vmx_data": {
         "memsize": "512",
         "numvcpus": "1",
