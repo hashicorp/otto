@@ -34,6 +34,7 @@ func (p *Project) Path() string {
 	return p.Name
 }
 
+// Version reads the version of this project.
 func (p *Project) Version() (*version.Version, error) {
 	path := p.Path()
 	if !filepath.IsAbs(path) {
