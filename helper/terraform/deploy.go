@@ -72,9 +72,11 @@ func Deploy(ctx *app.Context, opts *DeployOptions) error {
 		// Get the build information. We must have had a prior build in
 		// order to deploy.
 		build, err := ctx.Directory.GetBuild(&directory.Build{
-			App:         ctx.Tuple.App,
-			Infra:       ctx.Tuple.Infra,
-			InfraFlavor: ctx.Tuple.InfraFlavor,
+			Lookup: directory.Lookup{
+				AppID:       ctx.Appfile.ID,
+				Infra:       ctx.Tuple.Infra,
+				InfraFlavor: ctx.Tuple.InfraFlavor,
+			},
 		})
 		if err != nil {
 			return err
@@ -119,22 +121,19 @@ func Deploy(ctx *app.Context, opts *DeployOptions) error {
 	// If we don't have a prior deploy, that is okay, we just create one
 	// now (with the DeployStateNew to note that we've never deployed). This
 	// gives us the UUID we can use for the state storage.
-	deployLookup := &directory.Deploy{
-		App:         ctx.Tuple.App,
+	deployLookup := directory.Lookup{
+		AppID:       ctx.Appfile.ID,
 		Infra:       ctx.Tuple.Infra,
 		InfraFlavor: ctx.Tuple.InfraFlavor,
 	}
 	deploy, err := ctx.Directory.GetDeploy(&directory.Deploy{
-		App:         ctx.Tuple.App,
-		Infra:       ctx.Tuple.Infra,
-		InfraFlavor: ctx.Tuple.InfraFlavor,
-	})
+		Lookup: deployLookup})
 	if err != nil {
 		return err
 	}
 	if deploy == nil {
 		// If we have no deploy, put in a temporary one
-		deploy = deployLookup
+		deploy = &directory.Deploy{Lookup: deployLookup}
 		deploy.State = directory.DeployStateNew
 
 		// Write the temporary deploy so we have an ID to use for the state
