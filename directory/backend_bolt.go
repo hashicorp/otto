@@ -13,14 +13,20 @@ import (
 )
 
 var (
+	boltOttoBucket  = []byte("otto")
 	boltAppsBucket  = []byte("apps")
 	boltBlobBucket  = []byte("blob")
 	boltInfraBucket = []byte("infra")
 	boltBuckets     = [][]byte{
+		boltOttoBucket,
 		boltAppsBucket,
 		boltBlobBucket,
 		boltInfraBucket,
 	}
+)
+
+var (
+	boltDataVersion byte = 1
 )
 
 // BoltBackend is a Directory backend that stores data on local disk
@@ -338,6 +344,33 @@ func (b *BoltBackend) db() (*bolt.DB, error) {
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	// Check the Otto version
+	var version byte
+	err = b.raw.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltOttoBucket)
+		data := bucket.Get([]byte("version"))
+		if data == nil || len(data) == 0 {
+			version = boltDataVersion
+			return bucket.Put([]byte("version"), []byte{boltDataVersion})
+		}
+
+		version = data[0]
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if version > boltDataVersion {
+		return nil, fmt.Errorf(
+			"Data version is higher than this version of Otto knows how\n"+
+				"to handle! This version of Otto can read up to version %d,\n"+
+				"but version %d data file found.\n\n"+
+				"This means that a newer version of Otto touched this data,\n"+
+				"or the data was corrupted in some other way.",
+			boltDataVersion, version)
 	}
 
 	return b.raw, nil
