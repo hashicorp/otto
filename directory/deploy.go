@@ -20,9 +20,9 @@ const (
 
 // Deploy represents a deploy of an App.
 type Deploy struct {
-	App         string // App is the app type, i.e. "go"
-	Infra       string // Infra is the infra type, i.e. "aws"
-	InfraFlavor string // InfraFlavor is the flavor, i.e. "vpc-public-private"
+	// Lookup information for the Deploy. AppID, Infra, and InfraFlavor
+	// are required.
+	Lookup
 
 	// These fields should be set for Put and will be populated on Get
 	State  DeployState       // State of the deploy

@@ -6,14 +6,14 @@ import (
 	"testing"
 )
 
-func TestFolderBackend(t *testing.T) {
+func TestBoltBackend(t *testing.T) {
 	td, err := ioutil.TempDir("", "otto")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
 
-	TestBackend(t, &FolderBackend{
+	TestBackend(t, &BoltBackend{
 		Dir: td,
 	})
 }
