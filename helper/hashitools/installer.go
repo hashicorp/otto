@@ -198,7 +198,7 @@ func (i *GoInstaller) Install(vsn *version.Version) error {
 		}
 	}
 
-	i.Ui.Header(fmt.Sprintf("[green]%s installed!", i.Name))
+	i.Ui.Header(fmt.Sprintf("[green]%s installed successfully!", i.Name))
 	return nil
 }
 
