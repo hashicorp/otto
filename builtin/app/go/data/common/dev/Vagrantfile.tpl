@@ -5,7 +5,7 @@
 # Vagrantfile, use the Appfile.
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "hashicorp/precise64"
+  config.vm.box = "hashicorp/otto-go"
 
   # Setup a synced folder from our working directory to /vagrant
   config.vm.synced_folder "{{ path.working }}", "{{ shared_folder_path }}",

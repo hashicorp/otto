@@ -5,7 +5,7 @@ package directory
 // Note that not all fields are required for every lookup operation. Please
 // see the documentation for the item you're trying to look up to learn more.
 type Lookup struct {
-	App         string // App is the app type, i.e. "go"
+	AppID       string // AppID is the compiled Appfile ID for an App
 	Infra       string // Infra is the infra type, i.e. "aws"
 	InfraFlavor string // InfraFlavor is the flavor, i.e. "vpc-public-private"
 	Foundation  string // Foundation is the name of he foundation, i.e. "consul"

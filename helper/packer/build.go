@@ -73,10 +73,13 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 
 	// Start building the resulting build
 	build := &directory.Build{
-		App:         ctx.Tuple.App,
-		Infra:       ctx.Tuple.Infra,
-		InfraFlavor: ctx.Tuple.InfraFlavor,
-		Artifact:    make(map[string]string),
+		Lookup: directory.Lookup{
+			AppID:       ctx.Appfile.ID,
+			Infra:       ctx.Tuple.Infra,
+			InfraFlavor: ctx.Tuple.InfraFlavor,
+		},
+
+		Artifact: make(map[string]string),
 	}
 
 	// Get the paths for Packer execution

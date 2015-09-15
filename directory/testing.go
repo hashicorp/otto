@@ -109,7 +109,8 @@ func TestBackend(t *testing.T, b Backend) {
 	//---------------------------------------------------------------
 
 	// GetDeploy (doesn't exist)
-	deploy := &Deploy{App: "foo", Infra: "bar", InfraFlavor: "baz"}
+	deploy := &Deploy{Lookup: Lookup{
+		AppID: "foo", Infra: "bar", InfraFlavor: "baz"}}
 	deployResult, err := b.GetDeploy(deploy)
 	if err != nil {
 		t.Fatalf("GetDeploy (non-exist) error: %s", err)

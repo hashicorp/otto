@@ -41,10 +41,12 @@ type Backend interface {
 
 // Build represents a build of an App.
 type Build struct {
-	App         string            // App is the app type, i.e. "go"
-	Infra       string            // Infra is the infra type, i.e. "aws"
-	InfraFlavor string            // InfraFlavor is the flavor, i.e. "vpc-public-private"
-	Artifact    map[string]string // Resulting artifact from the build
+	// Lookup information for the Build. AppID, Infra, and InfraFlavor
+	// are required.
+	Lookup
+
+	// Resulting artifact from the build
+	Artifact map[string]string
 }
 
 // BlobData is the metadata and data associated with stored binary
