@@ -10,13 +10,37 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/directory"
 	execHelper "github.com/hashicorp/otto/helper/exec"
+	"github.com/hashicorp/otto/helper/hashitools"
 	"github.com/hashicorp/otto/ui"
 )
 
+var (
+	tfMinVersion = version.Must(version.NewVersion("0.6.3"))
+)
+
+// Project returns the hashitools Project for this.
+func Project(ctx *context.Shared) *hashitools.Project {
+	return &hashitools.Project{
+		Name:       "terraform",
+		MinVersion: tfMinVersion,
+		Installer: &hashitools.GoInstaller{
+			Name: "terraform",
+			Dir:  filepath.Join(ctx.InstallDir),
+			Ui:   ctx.Ui,
+		},
+	}
+}
+
 // Terraform wraps `terraform` execution into an easy-to-use API
 type Terraform struct {
+	// Path is the path to Terraform itself. If empty, "terraform"
+	// will be used and looked up via the PATH var.
+	Path string
+
 	// Dir is the working directory where all Terraform commands are executed
 	Dir string
 
@@ -122,7 +146,11 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 
 	// Build the command to execute
 	log.Printf("[DEBUG] executing terraform: %v", command)
-	cmd := exec.Command("terraform", command...)
+	path := "terraform"
+	if t.Path != "" {
+		path = t.Path
+	}
+	cmd := exec.Command(path, command...)
 	cmd.Dir = t.Dir
 
 	// Start the Terraform command. If there is an error we just store

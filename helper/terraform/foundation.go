@@ -38,6 +38,11 @@ func (f *Foundation) Infra(ctx *foundation.Context) error {
 }
 
 func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
+	project := Project(&ctx.Shared)
+	if err := project.InstallIfNeeded(); err != nil {
+		return err
+	}
+
 	appInfra := ctx.Appfile.ActiveInfrastructure()
 
 	// Foundations themselves are represented as infrastructure in the
@@ -101,6 +106,7 @@ func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
 
 	// Run Terraform!
 	tf := &Terraform{
+		Path:      project.Path(),
 		Dir:       tfDir,
 		Ui:        ctx.Ui,
 		Variables: vars,
