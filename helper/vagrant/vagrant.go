@@ -6,11 +6,27 @@ import (
 	"os/exec"
 	"sync"
 
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/otto/context"
 	execHelper "github.com/hashicorp/otto/helper/exec"
+	"github.com/hashicorp/otto/helper/hashitools"
 	"github.com/hashicorp/otto/ui"
 )
 
-//go:generate go-bindata -pkg=vagrant -nomemcopy -nometadata ./data/...
+var (
+	vagrantMinVersion = version.Must(version.NewVersion("1.7.4"))
+)
+
+// Project returns the hashitools Project for this.
+func Project(ctx *context.Shared) *hashitools.Project {
+	return &hashitools.Project{
+		Name:       "vagrant",
+		MinVersion: vagrantMinVersion,
+		Installer: &hashitools.VagrantInstaller{
+			Ui: ctx.Ui,
+		},
+	}
+}
 
 // Vagrant wraps `vagrant` execution into an easy-to-use API.
 type Vagrant struct {

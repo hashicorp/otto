@@ -57,7 +57,8 @@ func Dev(opts *DevOptions) *app.Router {
 }
 
 func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
-	if err := InstallIfNeeded(ctx.Ui); err != nil {
+	project := Project(&ctx.Shared)
+	if err := project.InstallIfNeeded(); err != nil {
 		return err
 	}
 
@@ -74,7 +75,8 @@ func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
 }
 
 func (opts *DevOptions) actionRaw(ctx *app.Context) error {
-	if err := InstallIfNeeded(ctx.Ui); err != nil {
+	project := Project(&ctx.Shared)
+	if err := project.InstallIfNeeded(); err != nil {
 		return err
 	}
 
@@ -89,7 +91,8 @@ func (opts *DevOptions) actionRaw(ctx *app.Context) error {
 }
 
 func (opts *DevOptions) actionSSH(ctx *app.Context) error {
-	if err := InstallIfNeeded(ctx.Ui); err != nil {
+	project := Project(&ctx.Shared)
+	if err := project.InstallIfNeeded(); err != nil {
 		return err
 	}
 
@@ -102,7 +105,8 @@ func (opts *DevOptions) actionSSH(ctx *app.Context) error {
 }
 
 func (opts *DevOptions) actionUp(ctx *app.Context) error {
-	if err := InstallIfNeeded(ctx.Ui); err != nil {
+	project := Project(&ctx.Shared)
+	if err := project.InstallIfNeeded(); err != nil {
 		return err
 	}
 

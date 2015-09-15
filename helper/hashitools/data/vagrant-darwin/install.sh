@@ -4,11 +4,8 @@ set -e
 oe() { $@ 2>&1 | logger -t otto > /dev/null; }
 ol() { echo "[otto] $@"; }
 
-ol "Downloading Vagrant (this can take a few minutes)..."
-curl -L -# $1 >vagrant.dmg
-
 ol "Attaching Vagrant disk image..."
-oe hdiutil attach vagrant.dmg
+oe hdiutil attach $1
 
 ol "Starting Vagrant installer..."
 sudo installer -pkg /Volumes/Vagrant/Vagrant.pkg -target "/"

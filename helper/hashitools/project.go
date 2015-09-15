@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
+//go:generate go-bindata -pkg=hashitools -nomemcopy -nometadata ./data/...
+
 var (
 	versionRe = regexp.MustCompile(`v?(\d+\.\d+\.[^\s]+)`)
 )
@@ -131,8 +133,11 @@ func (p *Project) Version() (*version.Version, error) {
 	var buf bytes.Buffer
 	cmd := exec.Command(path, "--version")
 	cmd.Stdout = &buf
+	cmd.Stderr = &buf
 	if err := cmd.Run(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf(
+			"Error checking %s version: %s\n\n%s",
+			p.Name, err, buf.String())
 	}
 
 	// Match the version out
