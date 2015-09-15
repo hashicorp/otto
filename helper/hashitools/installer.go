@@ -230,7 +230,7 @@ Please enter 'yes' to continue. Any other value will exit.
 const installRequiredUpdate = `
 An older version of {{name}} was found installed ({{installed}}). Otto requires
 version {{required}} or higher. Otto can install the latest version of {{name}}
-for you ({{latest}}). Would you like Otto to install {{name}} for you?
+for you ({{latest}}). Would you like Otto to update {{name}} for you?
 
 Please enter 'yes' to continue. Any other value will exit.
 `
