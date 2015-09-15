@@ -20,7 +20,7 @@ variable "region" {
 
 variable "ami" {
     description = "AMI to launch with Consul"
-    default = "ami-df2055ba"
+    default = "ami-7f6a1f1a"
 }
 
 variable "bastion_host" {
