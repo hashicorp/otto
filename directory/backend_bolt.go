@@ -58,6 +58,9 @@ func (b *BoltBackend) GetBlob(k string) (*BlobData, error) {
 	if err != nil {
 		return nil, err
 	}
+	if data == nil {
+		return nil, nil
+	}
 
 	// We have to copy the data since it isn't valid once we close the DB
 	data = append([]byte{}, data...)

@@ -18,6 +18,16 @@ func TestBackend(t *testing.T, b Backend) {
 	// Blob
 	//---------------------------------------------------------------
 
+	// GetBlob (doesn't exist)
+	data, err := b.GetBlob("foo")
+	if err != nil {
+		t.Fatalf("GetBlob error: %s", err)
+	}
+	if data != nil {
+		data.Close()
+		t.Fatalf("GetBlob should be nil data")
+	}
+
 	// PutBlob
 	err = b.PutBlob("foo", &BlobData{Data: strings.NewReader("bar")})
 	if err != nil {
@@ -25,7 +35,7 @@ func TestBackend(t *testing.T, b Backend) {
 	}
 
 	// GetBlob (exists)
-	data, err := b.GetBlob("foo")
+	data, err = b.GetBlob("foo")
 	if err != nil {
 		t.Fatalf("GetBlob error: %s", err)
 	}
