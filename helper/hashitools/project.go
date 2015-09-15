@@ -1,4 +1,4 @@
-package hashigo
+package hashitools
 
 import (
 	"bytes"
