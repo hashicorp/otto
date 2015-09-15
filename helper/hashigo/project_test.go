@@ -40,6 +40,11 @@ func TestVersionRe(t *testing.T) {
 			"Consul v0.5.0\nConsul Protocol: 2 (Understands back to: 1)",
 			"0.5.0",
 		},
+
+		{
+			"Vagrant 1.7.4",
+			"1.7.4",
+		},
 	}
 
 	for _, tc := range cases {
