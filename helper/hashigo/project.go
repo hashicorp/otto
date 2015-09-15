@@ -3,7 +3,7 @@ package hashigo
 import (
 	"bytes"
 	"fmt"
-	"os"
+	"log"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -22,14 +22,81 @@ type Project struct {
 	// Name is the name of the project, all lowercase
 	Name string
 
-	// InstallDir is the directory where we will install the project.
-	// This will only work for Go projects distributed as zips.
-	InstallDir string
+	// Installer is the installer for this project
+	Installer Installer
 
 	// MinVersion is the minimum version of this project that Otto
 	// can use to function. This will be used with `InstallIfNeeded`
 	// to prompt the user to install.
 	MinVersion *version.Version
+}
+
+// InstallIfNeeded will check if installation of this project is required
+// and will invoke the installer if needed.
+func (p *Project) InstallIfNeeded() error {
+	log.Printf("[DEBUG] installIfNeeded: %s", p.Name)
+
+	// Start grabbing the latest version as early as possible since
+	// this requires a network call. We might as well do it while we're
+	// doing a subprocess.
+	latestCh := make(chan *version.Version, 1)
+	errCh := make(chan error, 1)
+	go func() {
+		latest, err := p.LatestVersion()
+		if err != nil {
+			errCh <- err
+		}
+		latestCh <- latest
+	}()
+
+	// Grab the version we have installed
+	installed, err := p.Version()
+	if err != nil {
+		return err
+	}
+	if installed == nil {
+		log.Printf("[DEBUG] installIfNeeded: %s not installed", p.Name)
+	} else {
+		log.Printf("[DEBUG] installIfNeeded: %s installed: %s", p.Name, installed)
+	}
+
+	// Wait for the latest
+	var latest *version.Version
+	select {
+	case latest = <-latestCh:
+	case err := <-errCh:
+		return err
+	}
+	log.Printf("[DEBUG] installIfNeeded: %s latest: %s", p.Name, latest)
+	log.Printf("[DEBUG] installIfNeeded: %s min: %s", p.Name, p.MinVersion)
+
+	// Determine if we require an install
+	installRequired := installed == nil
+	if installed != nil {
+		if installed.LessThan(p.MinVersion) {
+			installRequired = true
+		}
+
+		// TODO: updates
+	}
+
+	// No install required? Exit out.
+	if !installRequired {
+		log.Printf("[DEBUG] installIfNeeded: %s no installation needed", p.Name)
+		return nil
+	}
+
+	// We need to install! Ask the installer to verify for us
+	ok, err := p.Installer.InstallAsk(installed, p.MinVersion, latest)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("Installation cancelled")
+	}
+
+	// Install
+	return p.Installer.Install(latest)
 }
 
 // Latest version returns the latest version of this project.
@@ -81,9 +148,8 @@ func (p *Project) Version() (*version.Version, error) {
 // binary is pre-installed in our installation directory and use that path.
 // Otherwise, it will return the raw project name.
 func (p *Project) Path() string {
-	full := filepath.Join(p.InstallDir, p.Name, p.Name)
-	if _, err := os.Stat(full); err == nil {
-		return full
+	if p := p.Installer.Path(); p != "" {
+		return p
 	}
 
 	return p.Name
