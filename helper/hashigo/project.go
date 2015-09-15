@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/hashicorp/go-checkpoint"
 	"github.com/hashicorp/go-version"
 )
 
@@ -18,20 +19,30 @@ var (
 // Project represents a HashiCorp Go project and provides various operations
 // around that.
 type Project struct {
-	Name       string
+	// Name is the name of the project, all lowercase
+	Name string
+
+	// InstallDir is the directory where we will install the project.
+	// This will only work for Go projects distributed as zips.
 	InstallDir string
+
+	// MinVersion is the minimum version of this project that Otto
+	// can use to function. This will be used with `InstallIfNeeded`
+	// to prompt the user to install.
+	MinVersion *version.Version
 }
 
-// Path returns the path to this project. This will check if the project
-// binary is pre-installed in our installation directory and use that path.
-// Otherwise, it will return the raw project name.
-func (p *Project) Path() string {
-	full := filepath.Join(p.InstallDir, p.Name, p.Name)
-	if _, err := os.Stat(full); err == nil {
-		return full
+// Latest version returns the latest version of this project.
+func (p *Project) LatestVersion() (*version.Version, error) {
+	check, err := checkpoint.Check(&checkpoint.CheckParams{
+		Product: p.Name,
+		Force:   true,
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	return p.Name
+	return version.NewVersion(check.CurrentVersion)
 }
 
 // Version reads the version of this project.
@@ -64,4 +75,16 @@ func (p *Project) Version() (*version.Version, error) {
 	}
 
 	return version.NewVersion(matches[1])
+}
+
+// Path returns the path to this project. This will check if the project
+// binary is pre-installed in our installation directory and use that path.
+// Otherwise, it will return the raw project name.
+func (p *Project) Path() string {
+	full := filepath.Join(p.InstallDir, p.Name, p.Name)
+	if _, err := os.Stat(full); err == nil {
+		return full
+	}
+
+	return p.Name
 }

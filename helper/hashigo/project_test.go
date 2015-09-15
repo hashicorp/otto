@@ -2,7 +2,24 @@ package hashigo
 
 import (
 	"testing"
+
+	"github.com/hashicorp/go-version"
 )
+
+func TestProjectLatestVersion(t *testing.T) {
+	p := &Project{Name: "vagrant"}
+
+	vsn, err := p.LatestVersion()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	min := version.Must(version.NewVersion("1.0.0"))
+	max := version.Must(version.NewVersion("2.0.0"))
+	if vsn.LessThan(min) || vsn.GreaterThan(max) {
+		t.Fatalf("bad: %s", vsn)
+	}
+}
 
 func TestVersionRe(t *testing.T) {
 	cases := []struct {
