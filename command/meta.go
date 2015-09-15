@@ -139,7 +139,7 @@ func (m *Meta) RootDir() (string, error) {
 // will be used.
 func (m *Meta) Directory(config *otto.CoreConfig) (directory.Backend, error) {
 	return &directory.BoltBackend{
-		Dir: filepath.Join(config.LocalDir, "directory"),
+		Dir: filepath.Join(config.DataDir, "directory"),
 	}, nil
 }
 
