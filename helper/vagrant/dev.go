@@ -57,6 +57,10 @@ func Dev(opts *DevOptions) *app.Router {
 }
 
 func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
+	if err := InstallIfNeeded(ctx.Ui); err != nil {
+		return err
+	}
+
 	ctx.Ui.Header("Destroying the local development environment...")
 
 	if err := opts.vagrant(ctx).Execute("destroy", "-f"); err != nil {
@@ -70,6 +74,10 @@ func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
 }
 
 func (opts *DevOptions) actionRaw(ctx *app.Context) error {
+	if err := InstallIfNeeded(ctx.Ui); err != nil {
+		return err
+	}
+
 	ctx.Ui.Header(fmt.Sprintf(
 		"Executing: 'vagrant %s'", strings.Join(ctx.ActionArgs, " ")))
 
@@ -81,6 +89,10 @@ func (opts *DevOptions) actionRaw(ctx *app.Context) error {
 }
 
 func (opts *DevOptions) actionSSH(ctx *app.Context) error {
+	if err := InstallIfNeeded(ctx.Ui); err != nil {
+		return err
+	}
+
 	ctx.Ui.Header("Executing SSH. This may take a few seconds...")
 	if err := opts.vagrant(ctx).Execute("ssh"); err != nil {
 		return err
@@ -90,6 +102,10 @@ func (opts *DevOptions) actionSSH(ctx *app.Context) error {
 }
 
 func (opts *DevOptions) actionUp(ctx *app.Context) error {
+	if err := InstallIfNeeded(ctx.Ui); err != nil {
+		return err
+	}
+
 	// Output some info the user prior to running
 	ctx.Ui.Header(
 		"Creating local development environment with Vagrant if it doesn't exist...")

@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/otto/ui"
 )
 
+//go:generate go-bindata -pkg=vagrant -nomemcopy -nometadata ./data/...
+
 // Vagrant wraps `vagrant` execution into an easy-to-use API.
 type Vagrant struct {
 	// Dir is the working directory where all Vagrant commands will
