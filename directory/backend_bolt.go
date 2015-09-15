@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/boltdb/bolt"
 )
@@ -41,24 +40,6 @@ type BoltBackend struct {
 	// Directory where data will be written. This directory will be
 	// created if it doesn't exist.
 	Dir string
-
-	raw     *bolt.DB
-	rawLock sync.Mutex
-}
-
-func (b *BoltBackend) Close() error {
-	b.rawLock.Lock()
-	defer b.rawLock.Unlock()
-
-	if b.raw != nil {
-		err := b.raw.Close()
-		b.raw = nil
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func (b *BoltBackend) GetBlob(k string) (*BlobData, error) {
@@ -77,9 +58,14 @@ func (b *BoltBackend) GetBlob(k string) (*BlobData, error) {
 		return nil, err
 	}
 
+	// The data would have to copied into memory if we closed the DB. Instead
+	// we just return it streamed. Other reads/writes from other processes
+	// to our DB will block until this blobdata is closed but that should
+	// be quick.
 	return &BlobData{
-		Key:  k,
-		Data: bytes.NewReader(data),
+		Key:    k,
+		Data:   bytes.NewReader(data),
+		closer: db,
 	}, nil
 }
 
@@ -88,6 +74,7 @@ func (b *BoltBackend) PutBlob(k string, d *BlobData) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	var buf bytes.Buffer
 	if _, err := io.Copy(&buf, d.Data); err != nil {
@@ -105,6 +92,7 @@ func (b *BoltBackend) GetInfra(infra *Infra) (*Infra, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	var result *Infra
 	err = db.View(func(tx *bolt.Tx) error {
@@ -141,6 +129,7 @@ func (b *BoltBackend) PutInfra(infra *Infra) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	return db.Update(func(tx *bolt.Tx) error {
 		data, err := b.structData(infra)
@@ -164,6 +153,7 @@ func (b *BoltBackend) GetBuild(build *Build) (*Build, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	var result *Build
 	err = db.View(func(tx *bolt.Tx) error {
@@ -202,6 +192,7 @@ func (b *BoltBackend) PutBuild(build *Build) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	return db.Update(func(tx *bolt.Tx) error {
 		data, err := b.structData(build)
@@ -233,6 +224,7 @@ func (b *BoltBackend) GetDeploy(deploy *Deploy) (*Deploy, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	var result *Deploy
 	err = db.View(func(tx *bolt.Tx) error {
@@ -275,6 +267,7 @@ func (b *BoltBackend) PutDeploy(deploy *Deploy) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	return db.Update(func(tx *bolt.Tx) error {
 		data, err := b.structData(deploy)
@@ -313,27 +306,19 @@ func (b *BoltBackend) infraKey(infra *Infra) string {
 // db returns the database handle, and sets up the DB if it has never
 // been created.
 func (b *BoltBackend) db() (*bolt.DB, error) {
-	b.rawLock.Lock()
-	defer b.rawLock.Unlock()
-
-	if b.raw != nil {
-		return b.raw, nil
-	}
-
 	// Make the directory to store our DB
 	if err := os.MkdirAll(b.Dir, 0755); err != nil {
 		return nil, err
 	}
 
 	// Create/Open the DB
-	var err error
-	b.raw, err = bolt.Open(filepath.Join(b.Dir, "otto.db"), 0644, nil)
+	db, err := bolt.Open(filepath.Join(b.Dir, "otto.db"), 0644, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create the buckets
-	err = b.raw.Update(func(tx *bolt.Tx) error {
+	err = db.Update(func(tx *bolt.Tx) error {
 		for _, b := range boltBuckets {
 			if _, err := tx.CreateBucketIfNotExists(b); err != nil {
 				return err
@@ -348,7 +333,7 @@ func (b *BoltBackend) db() (*bolt.DB, error) {
 
 	// Check the Otto version
 	var version byte
-	err = b.raw.Update(func(tx *bolt.Tx) error {
+	err = db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(boltOttoBucket)
 		data := bucket.Get([]byte("version"))
 		if data == nil || len(data) == 0 {
@@ -373,7 +358,7 @@ func (b *BoltBackend) db() (*bolt.DB, error) {
 			boltDataVersion, version)
 	}
 
-	return b.raw, nil
+	return db, nil
 }
 
 func (b *BoltBackend) structData(d interface{}) ([]byte, error) {
