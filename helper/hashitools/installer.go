@@ -66,9 +66,9 @@ func (i *GoInstaller) InstallAsk(installed, required, latest *version.Version) (
 	}
 	input.Description, err = tpl.Execute(map[string]interface{}{
 		"name":      i.Name,
-		"installed": installed.String(),
-		"latest":    latest.String(),
-		"required":  required.String(),
+		"installed": installed,
+		"latest":    latest,
+		"required":  required,
 	})
 	if err != nil {
 		return false, err
@@ -101,6 +101,8 @@ system. Otto can install the latest version of {{name}} for you. Otto will
 install this into its own private data directory so it doesn't conflict
 with anything else on your system. Would you like Otto to install {{name}}
 for you? Alternatively, you may install this on your own.
+
+If you answer yes, Otto will install {{name}} version {{latest}}.
 
 Please enter 'yes' to continue. Any other value will exit.
 `
