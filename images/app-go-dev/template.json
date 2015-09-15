@@ -1,4 +1,7 @@
 {
+  "variables": {
+      "version": "0.0.3"
+  },
   "builders": [
     {
       "type": "virtualbox-iso",
@@ -119,7 +122,7 @@
           "artifact_type": "vagrant.box",
           "metadata": {
               "provider": "vmware_desktop",
-              "version": "0.0.2"
+              "version": "{{ user `version` }}"
           }
       },
       {
@@ -129,7 +132,7 @@
           "artifact_type": "vagrant.box",
           "metadata": {
               "provider": "virtualbox",
-              "version": "0.0.2"
+              "version": "{{ user `version` }}"
           }
       }]
   ],
