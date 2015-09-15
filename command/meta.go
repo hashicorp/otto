@@ -138,7 +138,7 @@ func (m *Meta) RootDir() (string, error) {
 // Appfile. If no directory backend is specified, a local folder
 // will be used.
 func (m *Meta) Directory(config *otto.CoreConfig) (directory.Backend, error) {
-	return &directory.FolderBackend{
+	return &directory.BoltBackend{
 		Dir: filepath.Join(config.LocalDir, "directory"),
 	}, nil
 }
