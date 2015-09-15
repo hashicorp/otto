@@ -2,9 +2,12 @@ package packer
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"
 )
@@ -75,6 +78,12 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 	for k, v := range ctx.InfraCreds {
 		vars[k] = v
 	}
+
+	slugPath, err := createAppSlug(filepath.Dir(ctx.Appfile.Path))
+	if err != nil {
+		return err
+	}
+	vars["slug_path"] = slugPath
 
 	// Start building the resulting build
 	build := &directory.Build{
@@ -156,4 +165,37 @@ func ParseArtifactAmazon(m map[string]string) OutputCallback {
 		parts := strings.Split(o.Data[2], ":")
 		m[parts[0]] = parts[1]
 	}
+}
+
+// createAppSlug makes an archive of the app with (otto-specific exclusions)
+// and yields a path to a tempfile containing that archive
+//
+// TODO: allow customization of the Exclude patterns
+func createAppSlug(path string) (string, error) {
+	archive, err := archive.CreateArchive(path, &archive.ArchiveOpts{
+		Exclude: []string{".otto"},
+		VCS:     true,
+	})
+	if err != nil {
+		return "", err
+	}
+	defer archive.Close()
+
+	// Archive is just a reader, and we need it in a file. The below seems
+	// fiddly, could there be a better way?
+	slug, err := ioutil.TempFile("", "otto-slug-")
+	if err != nil {
+		return "", err
+	}
+
+	_, err = io.Copy(slug, archive)
+	cerr := slug.Close()
+	if err != nil {
+		return "", err
+	}
+	if cerr != nil {
+		return "", err
+	}
+
+	return slug.Name(), nil
 }
