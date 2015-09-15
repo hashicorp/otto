@@ -34,6 +34,11 @@ type BuildOptions struct {
 // This function implements the app.App.Build function.
 // TODO: Test
 func Build(ctx *app.Context, opts *BuildOptions) error {
+	project := Project(&ctx.Shared)
+	if err := project.InstallIfNeeded(); err != nil {
+		return err
+	}
+
 	ctx.Ui.Header("Querying infrastructure data for build...")
 
 	// Get the infrastructure, since it needs to be ready for building
@@ -100,6 +105,7 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 
 	// Build and execute Packer
 	p := &Packer{
+		Path:      project.Path(),
 		Dir:       packerDir,
 		Ui:        ctx.Ui,
 		Variables: vars,

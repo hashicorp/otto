@@ -6,13 +6,38 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/otto/context"
 	execHelper "github.com/hashicorp/otto/helper/exec"
+	"github.com/hashicorp/otto/helper/hashitools"
 	"github.com/hashicorp/otto/ui"
 )
 
+var (
+	packerMinVersion = version.Must(version.NewVersion("0.8.6"))
+)
+
+// Project returns the hashitools Project for this.
+func Project(ctx *context.Shared) *hashitools.Project {
+	return &hashitools.Project{
+		Name:       "packer",
+		MinVersion: packerMinVersion,
+		Installer: &hashitools.GoInstaller{
+			Name: "packer",
+			Dir:  filepath.Join(ctx.InstallDir),
+			Ui:   ctx.Ui,
+		},
+	}
+}
+
 // Packer wraps `packer` execution into an easy-to-use API
 type Packer struct {
+	// Path is the path to Packer itself. If empty, "packer"
+	// will be used and looked up via the PATH var.
+	Path string
+
 	// Dir is the working directory where all Packer commands are executed
 	Dir string
 
@@ -49,7 +74,11 @@ func (p *Packer) Execute(commandRaw ...string) error {
 	copy(command[4:], commandRaw[1:])
 
 	// Build the command to execute
-	cmd := exec.Command("packer", command...)
+	path := "packer"
+	if p.Path != "" {
+		path = p.Path
+	}
+	cmd := exec.Command(path, command...)
 	cmd.Dir = p.Dir
 
 	// Build our custom UI that we'll use that'll call the registered
