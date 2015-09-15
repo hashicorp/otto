@@ -47,6 +47,7 @@ func (b *BoltBackend) GetBlob(k string) (*BlobData, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	var data []byte
 	err = db.View(func(tx *bolt.Tx) error {
@@ -58,14 +59,12 @@ func (b *BoltBackend) GetBlob(k string) (*BlobData, error) {
 		return nil, err
 	}
 
-	// The data would have to copied into memory if we closed the DB. Instead
-	// we just return it streamed. Other reads/writes from other processes
-	// to our DB will block until this blobdata is closed but that should
-	// be quick.
+	// We have to copy the data since it isn't valid once we close the DB
+	data = append([]byte{}, data...)
+
 	return &BlobData{
-		Key:    k,
-		Data:   bytes.NewReader(data),
-		closer: db,
+		Key:  k,
+		Data: bytes.NewReader(data),
 	}, nil
 }
 
