@@ -1,6 +1,6 @@
 package context
 
-import(
+import (
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/ui"
 )
@@ -23,4 +23,9 @@ type Shared struct {
 	// both execution and compilation and can be used to view the
 	// global data prior to doing anything.
 	Directory directory.Backend
+
+	// InstallDir is the directory where binaries can be installed. Consider
+	// this directory a cache: Otto may remove it at any point, although
+	// unlikely. And you're responsible to clean up anything in here.
+	InstallDir string
 }

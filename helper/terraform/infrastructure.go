@@ -48,6 +48,11 @@ func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
 }
 
 func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) error {
+	project := Project(&ctx.Shared)
+	if err := project.InstallIfNeeded(); err != nil {
+		return err
+	}
+
 	// Build the variables
 	vars := make(map[string]string)
 	for k, v := range ctx.InfraCreds {
@@ -87,6 +92,7 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 
 	// Build our executor
 	tf := &Terraform{
+		Path:      project.Path(),
 		Dir:       ctx.Dir,
 		Ui:        ctx.Ui,
 		Variables: vars,

@@ -36,6 +36,11 @@ type DeployOptions struct {
 //
 // This function implements app.App.Deploy.
 func Deploy(ctx *app.Context, opts *DeployOptions) error {
+	project := Project(&ctx.Shared)
+	if err := project.InstallIfNeeded(); err != nil {
+		return err
+	}
+
 	// Get the infrastructure state. The infrastructure must be
 	// created for us to deploy to it.
 	infra, err := ctx.Directory.GetInfra(&directory.Infra{
@@ -150,6 +155,7 @@ func Deploy(ctx *app.Context, opts *DeployOptions) error {
 
 	// Run Terraform!
 	tf := &Terraform{
+		Path:      project.Path(),
 		Dir:       tfDir,
 		Ui:        ctx.Ui,
 		Variables: vars,
