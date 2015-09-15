@@ -1,13 +1,20 @@
 package hashitools
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/otto/ui"
+	"github.com/mitchellh/ioprogress"
 	"gopkg.in/flosch/pongo2.v3"
 )
 
@@ -83,7 +90,116 @@ func (i *GoInstaller) InstallAsk(installed, required, latest *version.Version) (
 }
 
 func (i *GoInstaller) Install(vsn *version.Version) error {
-	return fmt.Errorf("error")
+	// All Go projects use a standard URL format
+	url := fmt.Sprintf(
+		"https://dl.bintray.com/mitchellh/%s/%s_%s_%s_%s.zip",
+		i.Name, i.Name, vsn, runtime.GOOS, runtime.GOARCH)
+
+	// Create the temporary directory where we'll store the data
+	td, err := ioutil.TempDir("", "otto")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(td)
+
+	// Create the ZIP file
+	zipPath := filepath.Join(td, "project.zip")
+	f, err := os.Create(zipPath)
+	if err != nil {
+		return err
+	}
+
+	// Download the ZIP
+	i.Ui.Header(fmt.Sprintf("Downloading %s v%s...", i.Name, vsn))
+	i.Ui.Message("URL: " + url)
+	i.Ui.Message("")
+	resp, err := http.Get(url)
+	if err != nil {
+		f.Close()
+		return err
+	}
+	if resp.StatusCode != 200 {
+		resp.Body.Close()
+		f.Close()
+		return fmt.Errorf("Error downloading, status code %d", resp.StatusCode)
+	}
+
+	// Build the progress bar for our download
+	progressR := &ioprogress.Reader{
+		Reader:   resp.Body,
+		Size:     resp.ContentLength,
+		DrawFunc: ioprogress.DrawTerminalf(os.Stdout, i.progressFormat),
+	}
+
+	// Listen for interrupts so we can cancel the download
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt)
+	defer signal.Stop(sigCh)
+
+	// Copy the zip data
+	errCh := make(chan error, 1)
+	go func() {
+		_, err := io.Copy(f, progressR)
+		errCh <- err
+	}()
+
+	// Wait for an interrupt or finish
+	select {
+	case err = <-errCh:
+	case <-sigCh:
+		err = fmt.Errorf("interrupted")
+	}
+
+	// Finish up
+	resp.Body.Close()
+	f.Close()
+	if err != nil {
+		return err
+	}
+
+	// Open the zip file
+	i.Ui.Header("Unzipping downloaded package...")
+	zipR, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return err
+	}
+	defer zipR.Close()
+
+	// Clear our install directory
+	installDir := filepath.Join(i.Dir, i.Name)
+	if err := os.RemoveAll(installDir); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(installDir, 0755); err != nil {
+		return err
+	}
+
+	// Copy all the files
+	for _, f := range zipR.File {
+		dst, err := os.OpenFile(
+			filepath.Join(installDir, f.Name),
+			os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
+			f.Mode())
+		if err != nil {
+			return err
+		}
+
+		fr, err := f.Open()
+		if err != nil {
+			dst.Close()
+			return err
+		}
+
+		_, err = io.Copy(dst, fr)
+		fr.Close()
+		dst.Close()
+		if err != nil {
+			return err
+		}
+	}
+
+	i.Ui.Header(fmt.Sprintf("[green]%s installed!", i.Name))
+	return nil
 }
 
 func (i *GoInstaller) Path() string {
@@ -93,6 +209,10 @@ func (i *GoInstaller) Path() string {
 	}
 
 	return ""
+}
+
+func (i *GoInstaller) progressFormat(progress, total int64) string {
+	return fmt.Sprintf("    %s", ioprogress.DrawTextFormatBytes(progress, total))
 }
 
 const installRequired = `
