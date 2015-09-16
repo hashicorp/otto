@@ -150,16 +150,18 @@ func parseCustomizations(result *File, obj *hclobj.Object) error {
 
 func parseImport(result *File, obj *hclobj.Object) error {
 	// Get all the maps of keys to the actual object
-	objects := make(map[string]*hclobj.Object)
+	objects := make([]*hclobj.Object, 0, 3)
+	set := make(map[string]struct{})
 	for _, o1 := range obj.Elem(false) {
 		for _, o2 := range o1.Elem(true) {
-			if _, ok := objects[o2.Key]; ok {
+			if _, ok := set[o2.Key]; ok {
 				return fmt.Errorf(
 					"imported '%s' more than once",
 					o2.Key)
 			}
 
-			objects[o2.Key] = o2
+			objects = append(objects, o2)
+			set[o2.Key] = struct{}{}
 		}
 	}
 
@@ -169,9 +171,9 @@ func parseImport(result *File, obj *hclobj.Object) error {
 
 	// Go through each object and turn it into an actual result.
 	collection := make([]*Import, 0, len(objects))
-	for n, _ := range objects {
+	for _, o := range objects {
 		collection = append(collection, &Import{
-			Source: n,
+			Source: o.Key,
 		})
 	}
 
