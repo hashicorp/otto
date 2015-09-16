@@ -19,7 +19,7 @@ func TestApp(t *testing.T) {
 			[]*Detector{
 				&Detector{
 					Type: "go",
-					File: "*.go",
+					File: []string{"*.go"},
 				},
 			},
 		},
@@ -31,7 +31,19 @@ func TestApp(t *testing.T) {
 			[]*Detector{
 				&Detector{
 					Type: "go",
-					File: "*.go",
+					File: []string{"*.go"},
+				},
+			},
+		},
+
+		{
+			"app-ruby",
+			"ruby",
+			false,
+			[]*Detector{
+				&Detector{
+					Type: "ruby",
+					File: []string{"*.rb", "Gemfile"},
 				},
 			},
 		},
