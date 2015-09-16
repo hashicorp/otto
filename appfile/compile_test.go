@@ -108,7 +108,7 @@ func TestCompile_imports(t *testing.T) {
 		{
 			"import-cycle",
 			nil,
-			false,
+			true,
 		},
 	}
 

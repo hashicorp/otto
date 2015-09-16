@@ -392,16 +392,6 @@ func compileImports(
 
 	// TODO: parallelization
 
-	// Create a map to keep track of the files that we can merge.
-	// We access this map in parallel as we load all the imports
-	// in parallel and do the merging in a single pass once they're
-	// all available.
-	/*
-		var mergeMapLock sync.Mutex
-		rootKey := uuid.GenerateUUID()
-		mergeMap := make(map[string][]*File)
-	*/
-
 	// A graph is used to track for cycles
 	var graphLock sync.Mutex
 	graph := new(dag.AcyclicGraph)
