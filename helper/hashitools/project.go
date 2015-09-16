@@ -134,16 +134,19 @@ func (p *Project) Version() (*version.Version, error) {
 	cmd := exec.Command(path, "--version")
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
-	if err := cmd.Run(); err != nil {
-		return nil, fmt.Errorf(
-			"Error checking %s version: %s\n\n%s",
-			p.Name, err, buf.String())
-	}
+	runErr := cmd.Run()
 
-	// Match the version out
+	// Match the version out before we check for a run error, since some `project
+	// --version` commands can return a non-zero exit code.
 	matches := versionRe.FindStringSubmatch(buf.String())
 	if len(matches) == 0 {
-		return nil, fmt.Errorf("unable to find Vagrant version: %s", buf.String())
+		if runErr != nil {
+			return nil, fmt.Errorf(
+				"Error checking %s version: %s\n\n%s",
+				p.Name, runErr, buf.String())
+		}
+		return nil, fmt.Errorf(
+			"unable to find %s version in output: %q", p.Name, buf.String())
 	}
 
 	return version.NewVersion(matches[1])
