@@ -68,8 +68,12 @@ func (c *Compiled) Validate() error {
 		if err := v.File.Validate(); err != nil {
 			errLock.Lock()
 			defer errLock.Unlock()
-			result = multierror.Append(result, multierror.Prefix(
-				err, fmt.Sprintf("Dependency %s:", v.File.Source)))
+
+			if s := v.File.Source; s != "" {
+				err = multierror.Prefix(err, fmt.Sprintf("Dependency: %s", s))
+			}
+
+			result = multierror.Append(result, err)
 		}
 
 		return nil
