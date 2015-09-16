@@ -375,10 +375,6 @@ func compileWrite(dir string, compiled *Compiled) error {
 	return err
 }
 
-type compileImportVertex struct {
-	Source *File
-}
-
 // compileImports takes a File, loads all the imports, and merges them
 // into the File.
 func compileImports(
