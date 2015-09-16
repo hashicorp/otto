@@ -12,16 +12,21 @@ type Config struct {
 // Detector is something that detects a single type.
 type Detector struct {
 	Type string
-	File string
+	File []string
 }
 
 // Detect will return true if this detector matches within the given
 // directory.
 func (d *Detector) Detect(dir string) (bool, error) {
-	matches, err := filepath.Glob(filepath.Join(dir, d.File))
-	if err != nil {
-		return false, err
+	for _, pattern := range d.File {
+		matches, err := filepath.Glob(filepath.Join(dir, pattern))
+		if err != nil {
+			return false, err
+		}
+		if len(matches) > 0 {
+			return true, nil
+		}
 	}
 
-	return len(matches) > 0, nil
+	return false, nil
 }
