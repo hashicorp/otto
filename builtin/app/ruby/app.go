@@ -54,13 +54,13 @@ func (a *App) Build(ctx *app.Context) error {
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
-	return terraform.Deploy(ctx, &terraform.DeployOptions{
+	return terraform.Deploy(&terraform.DeployOptions{
 		InfraOutputMap: map[string]string{
 			"region":         "aws_region",
 			"subnet-private": "private_subnet_id",
 			"subnet-public":  "public_subnet_id",
 		},
-	})
+	}).Route(ctx)
 }
 
 func (a *App) Dev(ctx *app.Context) error {

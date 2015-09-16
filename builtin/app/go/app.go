@@ -79,7 +79,7 @@ func (a *App) Build(ctx *app.Context) error {
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
-	return terraform.Deploy(ctx, &terraform.DeployOptions{})
+	return terraform.Deploy(&terraform.DeployOptions{}).Route(ctx)
 }
 
 func (a *App) Dev(ctx *app.Context) error {

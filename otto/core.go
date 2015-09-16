@@ -286,14 +286,21 @@ func (c *Core) Build() error {
 }
 
 // Deploy deploys the application.
-func (c *Core) Deploy() error {
+//
+// Deploy supports subactions, which can be specified with action and args.
+// Action can be "" to get the default deploy behavior.
+func (c *Core) Deploy(action string, args []string) error {
 	// Get the infra implementation for this
 	infra, infraCtx, err := c.infra()
 	if err != nil {
 		return err
 	}
-	if err := c.creds(infra, infraCtx); err != nil {
-		return err
+
+	// Special case: don't try to fetch creds during `otto deploy help`
+	if action != "help" {
+		if err := c.creds(infra, infraCtx); err != nil {
+			return err
+		}
 	}
 
 	// TODO: Verify that upstream dependencies are deployed
@@ -315,8 +322,12 @@ func (c *Core) Deploy() error {
 			"Error loading App: %s", err)
 	}
 
-	// Just update our shared data so we get the creds
+	// Update our shared data so we get the creds
 	rootCtx.Shared = infraCtx.Shared
+
+	// Pass through the requested action
+	rootCtx.Action = action
+	rootCtx.ActionArgs = args
 
 	return rootApp.Deploy(rootCtx)
 }

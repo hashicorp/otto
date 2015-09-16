@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"fmt"
+	"log"
 )
 
 // Router is a helper to route actions on the Context to specific callbacks.
@@ -40,6 +41,7 @@ func (r *Router) Route(ctx *Context) error {
 
 	action, ok := r.Actions[ctx.Action]
 	if !ok {
+		log.Printf("[DEBUG] No action found: %q; executing help.", ctx.Action)
 		return r.help(ctx)
 	}
 
