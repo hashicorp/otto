@@ -60,6 +60,10 @@ func ParseDir(path string) (*Config, error) {
 	// Read all the files
 	f, err := os.Open(path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 	files, err := f.Readdirnames(-1)

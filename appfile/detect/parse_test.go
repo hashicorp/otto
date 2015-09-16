@@ -67,6 +67,12 @@ func TestParseDir(t *testing.T) {
 			},
 			false,
 		},
+
+		{
+			"no-exist",
+			nil,
+			false,
+		},
 	}
 
 	for _, tc := range cases {
