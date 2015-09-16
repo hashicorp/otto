@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"sort"
 
 	"github.com/hashicorp/hcl"
 	hclobj "github.com/hashicorp/hcl/hcl"
@@ -50,6 +52,56 @@ func ParseFile(path string) (*Config, error) {
 	defer f.Close()
 
 	return Parse(f)
+}
+
+// ParseDir parses all the files ending in ".hcl" in a directory,
+// sorted alphabetically.
+func ParseDir(path string) (*Config, error) {
+	// Read all the files
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	files, err := f.Readdirnames(-1)
+	f.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	// Sort them
+	sort.Strings(files)
+
+	// Go through each, parse and merge.
+	var result Config
+	for _, f := range files {
+		// We only care if this is an HCL file
+		if filepath.Ext(f) != ".hcl" {
+			continue
+		}
+
+		// Stat the file. If it is a directory, ignore it
+		path := filepath.Join(path, f)
+		fi, err := os.Stat(path)
+		if err != nil {
+			return nil, err
+		}
+		if fi.IsDir() {
+			continue
+		}
+
+		// Parse
+		current, err := ParseFile(path)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing %s: %s", path, err)
+		}
+
+		// Merge
+		if err := result.Merge(current); err != nil {
+			return nil, fmt.Errorf("error merging %s: %s", path, err)
+		}
+	}
+
+	return &result, nil
 }
 
 func parseDetect(result *Config, obj *hclobj.Object) error {

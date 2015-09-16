@@ -1,6 +1,7 @@
 package detect
 
 import (
+	"fmt"
 	"path/filepath"
 )
 
@@ -38,4 +39,8 @@ func (d *Detector) Detect(dir string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (d *Detector) GoString() string {
+	return fmt.Sprintf("*%#v", *d)
 }
