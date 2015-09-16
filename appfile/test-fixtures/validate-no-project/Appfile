@@ -1,0 +1,6 @@
+application {
+    name = "foo"
+    type = "go"
+}
+
+infrastructure "aws" {}
