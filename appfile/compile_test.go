@@ -116,15 +116,15 @@ func TestCompile_imports(t *testing.T) {
 			f := testFile(t, tc.Dir)
 			defer f.resetID()
 
+			if tc.File != nil {
+				tc.File.ID = f.ID
+				tc.File.Path = f.Path
+				tc.File.Imports = f.Imports
+			}
+
 			c, err := Compile(f, opts)
 			if (err != nil) != tc.Err {
 				t.Fatalf("err: %s\n\n%s", tc.Dir, err)
-			}
-
-			if c.File != nil {
-				c.File.ID = ""
-				c.File.Path = ""
-				c.File.Imports = nil
 			}
 
 			if !reflect.DeepEqual(c.File, tc.File) {

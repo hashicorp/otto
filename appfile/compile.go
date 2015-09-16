@@ -469,6 +469,7 @@ func compileImports(
 		for _, importF := range merge {
 			source := importF.ID
 			importF.ID = ""
+			importF.Path = ""
 
 			// Merge it into our file!
 			if err := f.Merge(importF); err != nil {
