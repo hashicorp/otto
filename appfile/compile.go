@@ -390,7 +390,6 @@ func compileImports(
 		return nil
 	}
 
-	// TODO: cycle detection
 	// TODO: parallelization
 
 	// Create a map to keep track of the files that we can merge.
@@ -403,11 +402,26 @@ func compileImports(
 		mergeMap := make(map[string][]*File)
 	*/
 
+	// A graph is used to track for cycles
+	var graphLock sync.Mutex
+	graph := new(dag.AcyclicGraph)
+	graph.Add("root")
+
+	// Since we run the import in parallel, multiple errors can happen
+	// at the same time. We use multierror and a lock to keep track of errors.
 	var resultErr error
 	var resultErrLock sync.Mutex
-	var importSingle func(f *File) bool
-	importSingle = func(f *File) bool {
+
+	// importSingle is responsible for kicking off the imports and merging
+	// them for a single file. This will return true on success, false on
+	// failure. On failure, it is expected that any errors are appended to
+	// resultErr.
+	var importSingle func(parent string, f *File) bool
+	importSingle = func(parent string, f *File) bool {
+		// Build the list of files we'll merge later
 		merge := make([]*File, len(f.Imports))
+
+		// Go through the imports and kick off the download
 		for idx, i := range f.Imports {
 			source, err := module.Detect(i.Source, filepath.Dir(f.Path))
 			if err != nil {
@@ -418,9 +432,29 @@ func compileImports(
 				return false
 			}
 
-			log.Printf("[DEBUG] loading import: %s", source)
+			// Add this to the graph and check now if there are cycles
+			graphLock.Lock()
+			graph.Add(source)
+			graph.Connect(dag.BasicEdge(parent, source))
+			cycles := graph.Cycles()
+			graphLock.Unlock()
+			if len(cycles) > 0 {
+				for _, cycle := range cycles {
+					names := make([]string, len(cycle))
+					for i, v := range cycle {
+						names[i] = dag.VertexName(v)
+					}
+
+					resultErrLock.Lock()
+					defer resultErrLock.Unlock()
+					resultErr = multierror.Append(resultErr, fmt.Errorf(
+						"Cycle found: %s", strings.Join(names, ", ")))
+					return false
+				}
+			}
 
 			// Call the callback if we have one
+			log.Printf("[DEBUG] loading import: %s", source)
 			if opts.Callback != nil {
 				opts.Callback(&CompileEventImport{
 					Source: source,
@@ -459,7 +493,7 @@ func compileImports(
 			importF.ID = source
 
 			// Import the imports in this
-			if !importSingle(importF) {
+			if !importSingle(source, importF) {
 				return false
 			}
 
@@ -484,6 +518,6 @@ func compileImports(
 		return true
 	}
 
-	importSingle(root)
+	importSingle("root", root)
 	return resultErr
 }

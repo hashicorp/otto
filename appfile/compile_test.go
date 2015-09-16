@@ -104,6 +104,12 @@ func TestCompile_imports(t *testing.T) {
 			},
 			false,
 		},
+
+		{
+			"import-cycle",
+			nil,
+			false,
+		},
 	}
 
 	for _, tc := range cases {
@@ -114,6 +120,8 @@ func TestCompile_imports(t *testing.T) {
 			opts := testCompileOpts(t)
 			defer os.RemoveAll(opts.Dir)
 			f := testFile(t, tc.Dir)
+			f.initID()
+			f.loadID()
 			defer f.resetID()
 
 			if tc.File != nil {
@@ -126,9 +134,13 @@ func TestCompile_imports(t *testing.T) {
 			if (err != nil) != tc.Err {
 				t.Fatalf("err: %s\n\n%s", tc.Dir, err)
 			}
-
-			if !reflect.DeepEqual(c.File, tc.File) {
-				t.Fatalf("err: %s\n\n%#v\n\n%#v", tc.Dir, c.File, tc.File)
+			if err == nil && c == nil {
+				t.Fatalf("bad: compiled is nil\n\n%s", tc.Dir)
+			}
+			if err == nil {
+				if !reflect.DeepEqual(c.File, tc.File) {
+					t.Fatalf("err: %s\n\n%#v\n\n%#v", tc.Dir, c.File, tc.File)
+				}
 			}
 		}()
 	}
