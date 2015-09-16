@@ -33,6 +33,13 @@ func Parse(r io.Reader) (*File, error) {
 
 	var result File
 
+	// Parse the imports
+	if o := obj.Get("import", false); o != nil {
+		if err := parseImport(&result, o); err != nil {
+			return nil, fmt.Errorf("error parsing 'import': %s", err)
+		}
+	}
+
 	// Parse the application
 	if o := obj.Get("application", false); o != nil {
 		if err := parseApplication(&result, o); err != nil {
@@ -138,6 +145,37 @@ func parseCustomizations(result *File, obj *hclobj.Object) error {
 	}
 
 	result.Customization = &CustomizationSet{Raw: collection}
+	return nil
+}
+
+func parseImport(result *File, obj *hclobj.Object) error {
+	// Get all the maps of keys to the actual object
+	objects := make(map[string]*hclobj.Object)
+	for _, o1 := range obj.Elem(false) {
+		for _, o2 := range o1.Elem(true) {
+			if _, ok := objects[o2.Key]; ok {
+				return fmt.Errorf(
+					"imported '%s' more than once",
+					o2.Key)
+			}
+
+			objects[o2.Key] = o2
+		}
+	}
+
+	if len(objects) == 0 {
+		return nil
+	}
+
+	// Go through each object and turn it into an actual result.
+	collection := make([]*Import, 0, len(objects))
+	for n, _ := range objects {
+		collection = append(collection, &Import{
+			Source: n,
+		})
+	}
+
+	result.Imports = collection
 	return nil
 }
 
