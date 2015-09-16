@@ -61,21 +61,18 @@ func (c *Compiled) Validate() error {
 		}
 	}
 
-	// Verify that the project is equal in all dependencies. You can
-	// only depend on applications within a single project.
-	/*
-		c.Graph.Walk(func(raw dag.Vertex) error {
-			v := raw.(*CompiledGraphVertex)
-			if v.File.Project.Name != c.File.Project.Name {
-				return fmt.Errorf(
-					"Dependency project mismatch, got: %s, expected: %s",
-					v.File.Project.Name,
-					c.File.Project.Name)
-			}
+	// Validate all the files
+	var errLock sync.Mutex
+	c.Graph.Walk(func(raw dag.Vertex) error {
+		v := raw.(*CompiledGraphVertex)
+		if err := v.File.Validate(); err != nil {
+			errLock.Lock()
+			defer errLock.Unlock()
+			result = multierror.Append(result, err)
+		}
 
-			return nil
-		})
-	*/
+		return nil
+	})
 
 	return result
 }

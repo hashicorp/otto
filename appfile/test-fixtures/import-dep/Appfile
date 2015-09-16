@@ -1,7 +1,15 @@
 application {
     name = "root"
+    type = "bar"
 
     dependency {
         source = "./child"
     }
 }
+
+project {
+    name = "foo"
+    infrastructure = "aws"
+}
+
+infrastructure "aws" {}
