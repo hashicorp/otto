@@ -209,9 +209,11 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	}
 
 	// Build the storage we'll use for storing imports
+	var importCacheLock sync.Mutex
+	importCache := make(map[string]*File)
 	importStorage := &module.FolderStorage{
 		StorageDir: filepath.Join(opts.Dir, CompileImportsFolder)}
-	if err := compileImports(f, importStorage, opts); err != nil {
+	if err := compileImports(f, importStorage, importCache, &importCacheLock, opts); err != nil {
 		return nil, err
 	}
 
@@ -224,7 +226,10 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	// dependencies.
 	storage := &module.FolderStorage{
 		StorageDir: filepath.Join(opts.Dir, CompileDepsFolder)}
-	if err := compileDependencies(storage, importStorage, compiled.Graph, opts, vertex); err != nil {
+	if err := compileDependencies(
+		storage,
+		importStorage, importCache, &importCacheLock,
+		compiled.Graph, opts, vertex); err != nil {
 		return nil, err
 	}
 
@@ -244,6 +249,8 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 func compileDependencies(
 	storage module.Storage,
 	importStorage module.Storage,
+	importCache map[string]*File,
+	importCacheLock *sync.Mutex,
 	graph *dag.AcyclicGraph,
 	opts *CompileOpts,
 	root *CompiledGraphVertex) error {
@@ -326,7 +333,8 @@ func compileDependencies(
 				}
 
 				// Realize all the imports for this file
-				if err := compileImports(f, importStorage, opts); err != nil {
+				if err := compileImports(
+					f, importStorage, importCache, importCacheLock, opts); err != nil {
 					return err
 				}
 
@@ -386,6 +394,8 @@ func compileWrite(dir string, compiled *Compiled) error {
 func compileImports(
 	root *File,
 	storage module.Storage,
+	cache map[string]*File,
+	cacheLock *sync.Mutex,
 	opts *CompileOpts) error {
 	// If we have no imports, short-circuit the whole thing
 	if len(root.Imports) == 0 {
@@ -467,6 +477,10 @@ func compileImports(
 		}
 
 		for _, importF := range merge {
+			// We need to copy importF here so that we don't poison
+			// the cache by modifying the same pointer.
+			importFCopy := *importF
+			importF = &importFCopy
 			source := importF.ID
 			importF.ID = ""
 			importF.Path = ""
@@ -489,6 +503,17 @@ func compileImports(
 	// in a goroutine so we can parallelize grabbing the imports.
 	downloadSingle = func(source string, wg *sync.WaitGroup, l *sync.Mutex, result []*File, idx int) {
 		defer wg.Done()
+
+		// Read from the cache if we have it
+		cacheLock.Lock()
+		cached, ok := cache[source]
+		cacheLock.Unlock()
+		if ok {
+			l.Lock()
+			defer l.Unlock()
+			result[idx] = cached
+			return
+		}
 
 		// Call the callback if we have one
 		log.Printf("[DEBUG] loading import: %s", source)
@@ -536,8 +561,13 @@ func compileImports(
 
 		// Once we're done, acquire the lock and write it
 		l.Lock()
-		defer l.Unlock()
 		result[idx] = importF
+		l.Unlock()
+
+		// Write this into the cache.
+		cacheLock.Lock()
+		cache[source] = importF
+		cacheLock.Unlock()
 	}
 
 	importSingle("root", root)
