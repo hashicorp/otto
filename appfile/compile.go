@@ -208,11 +208,14 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	}
 
 	// Build the storage we'll use for storing imports
-	var importCacheLock sync.Mutex
-	importCache := make(map[string]*File)
 	importStorage := &module.FolderStorage{
 		StorageDir: filepath.Join(opts.Dir, CompileImportsFolder)}
-	if err := compileImports(f, importStorage, importCache, &importCacheLock, opts); err != nil {
+	importOpts := &compileImportOpts{
+		Storage:   importStorage,
+		Cache:     make(map[string]*File),
+		CacheLock: &sync.Mutex{},
+	}
+	if err := compileImports(f, importOpts, opts); err != nil {
 		return nil, err
 	}
 
@@ -227,7 +230,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 		StorageDir: filepath.Join(opts.Dir, CompileDepsFolder)}
 	if err := compileDependencies(
 		storage,
-		importStorage, importCache, &importCacheLock,
+		importOpts,
 		compiled.Graph, opts, vertex); err != nil {
 		return nil, err
 	}
@@ -247,9 +250,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 
 func compileDependencies(
 	storage module.Storage,
-	importStorage module.Storage,
-	importCache map[string]*File,
-	importCacheLock *sync.Mutex,
+	importOpts *compileImportOpts,
 	graph *dag.AcyclicGraph,
 	opts *CompileOpts,
 	root *CompiledGraphVertex) error {
@@ -332,8 +333,7 @@ func compileDependencies(
 				}
 
 				// Realize all the imports for this file
-				if err := compileImports(
-					f, importStorage, importCache, importCacheLock, opts); err != nil {
+				if err := compileImports(f, importOpts, opts); err != nil {
 					return err
 				}
 
@@ -388,18 +388,27 @@ func compileWrite(dir string, compiled *Compiled) error {
 	return err
 }
 
+type compileImportOpts struct {
+	Storage   module.Storage
+	Cache     map[string]*File
+	CacheLock *sync.Mutex
+}
+
 // compileImports takes a File, loads all the imports, and merges them
 // into the File.
 func compileImports(
 	root *File,
-	storage module.Storage,
-	cache map[string]*File,
-	cacheLock *sync.Mutex,
+	importOpts *compileImportOpts,
 	opts *CompileOpts) error {
 	// If we have no imports, short-circuit the whole thing
 	if len(root.Imports) == 0 {
 		return nil
 	}
+
+	// Pull these out into variables so they're easier to reference
+	storage := importOpts.Storage
+	cache := importOpts.Cache
+	cacheLock := importOpts.CacheLock
 
 	// A graph is used to track for cycles
 	var graphLock sync.Mutex
