@@ -34,6 +34,26 @@ func TestFileValidate(t *testing.T) {
 			"validate-app-no-name",
 			true,
 		},
+
+		{
+			"validate-app-no-type",
+			true,
+		},
+
+		{
+			"validate-project-no-name",
+			true,
+		},
+
+		{
+			"validate-project-no-infra",
+			true,
+		},
+
+		{
+			"validate-project-unknown-infra",
+			true,
+		},
 	}
 
 	for _, tc := range cases {

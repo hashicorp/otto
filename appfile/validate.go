@@ -21,7 +21,7 @@ func (f *File) Validate() error {
 	}
 	if f.Infrastructure == nil {
 		result = multierror.Append(result, fmt.Errorf(
-			"'infra' stanza required for Appfile"))
+			"'infrastructure' stanza required for Appfile"))
 	}
 
 	// Verify the application itself
@@ -33,6 +33,31 @@ func (f *File) Validate() error {
 		if f.Application.Type == "" {
 			result = multierror.Append(result, fmt.Errorf(
 				"application: type is required"))
+		}
+	}
+
+	// Validate the project
+	if f.Project != nil {
+		if f.Project.Name == "" {
+			result = multierror.Append(result, fmt.Errorf(
+				"project: name is required"))
+		}
+		if f.Project.Infrastructure == "" {
+			result = multierror.Append(result, fmt.Errorf(
+				"project: infrastructure is required"))
+		} else {
+			found := false
+			for _, i := range f.Infrastructure {
+				if i.Name == f.Project.Infrastructure {
+					found = true
+					break
+				}
+			}
+			if !found {
+				result = multierror.Append(result, fmt.Errorf(
+					"project: infra '%s' has no corresponding infrastruture stanza",
+					f.Project.Infrastructure))
+			}
 		}
 	}
 

@@ -1,0 +1,10 @@
+application {
+    name = "foo"
+    type = "go"
+}
+
+project {
+    name = "foo"
+}
+
+infrastructure "google" {}
