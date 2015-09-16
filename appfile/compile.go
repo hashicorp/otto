@@ -70,7 +70,7 @@ func (c *Compiled) Validate() error {
 			defer errLock.Unlock()
 
 			if s := v.File.Source; s != "" {
-				err = multierror.Prefix(err, fmt.Sprintf("Dependency: %s", s))
+				err = multierror.Prefix(err, fmt.Sprintf("Dependency %s:", s))
 			}
 
 			result = multierror.Append(result, err)
