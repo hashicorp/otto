@@ -5,7 +5,4 @@ application {
 
 project {
     name = "foo"
-    infrastructure = "aws"
 }
-
-infrastructure "aws" {}

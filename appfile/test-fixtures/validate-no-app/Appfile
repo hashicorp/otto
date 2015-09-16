@@ -1,5 +1,5 @@
 project {
-    name = "bar"
+    name = "foo"
     infrastructure = "aws"
 }
 

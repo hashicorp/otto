@@ -1,10 +1,6 @@
 application {
     name = "foo"
-    type = "bar"
-
-    dependency {
-        source = "./child"
-    }
+    type = ""
 }
 
 project {

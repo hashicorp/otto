@@ -37,6 +37,12 @@ func TestCompile(t *testing.T) {
 		},
 
 		{
+			"compile-invalid",
+			"",
+			true,
+		},
+
+		{
 			"compile-cycle",
 			"",
 			true,
@@ -94,6 +100,17 @@ func TestCompile_imports(t *testing.T) {
 			&File{
 				Application: &Application{
 					Name: "foo",
+					Type: "bar",
+				},
+				Project: &Project{
+					Name:           "foo",
+					Infrastructure: "aws",
+				},
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+						Type: "aws",
+					},
 				},
 			},
 			false,
@@ -105,6 +122,17 @@ func TestCompile_imports(t *testing.T) {
 			&File{
 				Application: &Application{
 					Name: "bar",
+					Type: "bar",
+				},
+				Project: &Project{
+					Name:           "foo",
+					Infrastructure: "aws",
+				},
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+						Type: "aws",
+					},
 				},
 			},
 			false,
@@ -123,9 +151,17 @@ func TestCompile_imports(t *testing.T) {
 			&File{
 				Application: &Application{
 					Name: "child",
+					Type: "bar",
 				},
 				Project: &Project{
-					Name: "bar",
+					Name:           "bar",
+					Infrastructure: "aws",
+				},
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "aws",
+						Type: "aws",
+					},
 				},
 			},
 			false,
@@ -185,10 +221,12 @@ func TestCompile_imports(t *testing.T) {
 				// For child files, we just clear these out.
 				actual.ID = ""
 				actual.Path = ""
+				actual.Source = ""
 				actual.Imports = nil
 				tc.File.ID = actual.ID
 				tc.File.Path = actual.Path
 				tc.File.Imports = actual.Imports
+				tc.File.Source = actual.Source
 			}
 
 			if !reflect.DeepEqual(actual, tc.File) {

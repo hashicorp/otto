@@ -1,6 +1,6 @@
 application {
-    name = "bar"
-    type = "bar"
+    name = "foo"
+    type = "go"
 }
 
 project {
@@ -8,4 +8,4 @@ project {
     infrastructure = "aws"
 }
 
-infrastructure "aws" {}
+infrastructure "google" {}
