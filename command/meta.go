@@ -22,7 +22,8 @@ const (
 
 	// DefaultLocalDataDir is the default path to the local data
 	// directory.
-	DefaultLocalDataDir = "~/.otto.d"
+	DefaultLocalDataDir         = "~/.otto.d"
+	DefaultLocalDataDetectorDir = "detect"
 
 	// DefaultOutputDir is the default filename for the output directory
 	DefaultOutputDir                = ".otto"
@@ -77,14 +78,14 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 		return nil, err
 	}
 
-	localDir, err := homedir.Expand(DefaultLocalDataDir)
+	dataDir, err := m.DataDir()
 	if err != nil {
 		return nil, err
 	}
 
 	config := *m.CoreConfig
 	config.Appfile = f
-	config.DataDir = localDir
+	config.DataDir = dataDir
 	config.LocalDir = filepath.Join(
 		rootDir, DefaultOutputDir, DefaultOutputDirLocalData)
 	config.CompileDir = filepath.Join(
@@ -97,6 +98,11 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 	}
 
 	return otto.NewCore(&config)
+}
+
+// DataDir returns the user-local data directory for Otto.
+func (m *Meta) DataDir() (string, error) {
+	return homedir.Expand(DefaultLocalDataDir)
 }
 
 // RootDir finds the "root" directory. This is the working directory of

@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -96,11 +97,27 @@ func (c *CompileCommand) Run(args []string) int {
 				"the ability to reference dependencies, versioning, and more."))
 	}
 
+	// Parse the detectors
+	dataDir, err := c.DataDir()
+	if err != nil {
+		c.Ui.Error(err.Error())
+		return 1
+	}
+	detectorDir := filepath.Join(dataDir, DefaultLocalDataDetectorDir)
+	log.Printf("[DEBUG] loading detectors from: %s", detectorDir)
+	detectConfig, err := detect.ParseDir(detectorDir)
+	if err != nil {
+		c.Ui.Error(err.Error())
+		return 1
+	}
+	err = detectConfig.Merge(&detect.Config{Detectors: c.Detectors})
+	if err != nil {
+		c.Ui.Error(err.Error())
+		return 1
+	}
+
 	// Load the default Appfile so we can merge in any defaults into
 	// the loaded Appfile (if there is one).
-	detectConfig := &detect.Config{
-		Detectors: c.Detectors,
-	}
 	appDef, err := appfile.Default(filepath.Dir(flagAppfile), detectConfig)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf(
