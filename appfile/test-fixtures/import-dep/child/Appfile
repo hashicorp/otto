@@ -1,0 +1,5 @@
+import "./import" {}
+
+application {
+    name = "child"
+}

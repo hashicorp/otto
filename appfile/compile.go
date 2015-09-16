@@ -224,7 +224,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	// dependencies.
 	storage := &module.FolderStorage{
 		StorageDir: filepath.Join(opts.Dir, CompileDepsFolder)}
-	if err := compileDependencies(storage, compiled.Graph, opts, vertex); err != nil {
+	if err := compileDependencies(storage, importStorage, compiled.Graph, opts, vertex); err != nil {
 		return nil, err
 	}
 
@@ -243,6 +243,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 
 func compileDependencies(
 	storage module.Storage,
+	importStorage module.Storage,
 	graph *dag.AcyclicGraph,
 	opts *CompileOpts,
 	root *CompiledGraphVertex) error {
@@ -322,6 +323,10 @@ func compileDependencies(
 							"the .ottoid file into version control, and then try this command\n"+
 							"again.",
 						key)
+				}
+
+				if err := compileImports(f, importStorage, opts); err != nil {
+					return err
 				}
 
 				// Build the vertex for this
