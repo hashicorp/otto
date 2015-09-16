@@ -59,11 +59,11 @@ func init() {
 	detectors := []*detect.Detector{
 		&detect.Detector{
 			Type: "go",
-			File: "*.go",
+			File: []string{"*.go"},
 		},
 		&detect.Detector{
 			Type: "ruby",
-			File: "Gemfile",
+			File: []string{"Gemfile"},
 		},
 	}
 
