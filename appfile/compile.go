@@ -12,7 +12,6 @@ import (
 	"sync"
 
 	"github.com/hashicorp/go-multierror"
-	_ "github.com/hashicorp/otto/helper/uuid"
 	"github.com/hashicorp/terraform/config/module"
 	"github.com/hashicorp/terraform/dag"
 )
