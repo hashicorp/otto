@@ -110,6 +110,9 @@ func (c *CompileCommand) Run(args []string) int {
 		c.Ui.Error(err.Error())
 		return 1
 	}
+	if detectConfig == nil {
+		detectConfig = &detect.Config{}
+	}
 	err = detectConfig.Merge(&detect.Config{Detectors: c.Detectors})
 	if err != nil {
 		c.Ui.Error(err.Error())
