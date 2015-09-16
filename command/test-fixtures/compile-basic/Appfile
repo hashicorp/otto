@@ -4,6 +4,7 @@ application {
 }
 
 project {
+    name = "test"
     infrastructure = "test"
 }
 
