@@ -509,6 +509,7 @@ func compileImports(
 		cached, ok := cache[source]
 		cacheLock.Unlock()
 		if ok {
+			log.Printf("[DEBUG] cache hit on import: %s", source)
 			l.Lock()
 			defer l.Unlock()
 			result[idx] = cached
