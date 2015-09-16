@@ -63,7 +63,7 @@ func init() {
 		},
 		&detect.Detector{
 			Type: "ruby",
-			File: []string{"Gemfile"},
+			File: []string{"*.rb", "Gemfile", "config.ru"},
 		},
 	}
 
