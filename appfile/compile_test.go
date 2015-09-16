@@ -221,10 +221,12 @@ func TestCompile_imports(t *testing.T) {
 				// For child files, we just clear these out.
 				actual.ID = ""
 				actual.Path = ""
+				actual.Source = ""
 				actual.Imports = nil
 				tc.File.ID = actual.ID
 				tc.File.Path = actual.Path
 				tc.File.Imports = actual.Imports
+				tc.File.Source = actual.Source
 			}
 
 			if !reflect.DeepEqual(actual, tc.File) {

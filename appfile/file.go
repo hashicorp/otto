@@ -26,6 +26,10 @@ type File struct {
 	// empty if the appfile was parsed from an io.Reader.
 	Path string
 
+	// Source is non-empty for dependencies and will be the raw source
+	// value. This can be used for debugging.
+	Source string
+
 	Application    *Application
 	Project        *Project
 	Infrastructure []*Infrastructure

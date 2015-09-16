@@ -68,7 +68,8 @@ func (c *Compiled) Validate() error {
 		if err := v.File.Validate(); err != nil {
 			errLock.Lock()
 			defer errLock.Unlock()
-			result = multierror.Append(result, err)
+			result = multierror.Append(result, multierror.Prefix(
+				err, fmt.Sprintf("Dependency %s:", v.File.Source)))
 		}
 
 		return nil
@@ -308,6 +309,9 @@ func compileDependencies(
 					return fmt.Errorf(
 						"Error parsing Appfile in %s: %s", key, err)
 				}
+
+				// Set the source
+				f.Source = key
 
 				// If it doesn't have an otto ID then we can't do anything
 				hasID, err := f.hasID()
