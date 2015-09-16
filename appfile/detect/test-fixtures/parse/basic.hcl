@@ -1,0 +1,3 @@
+detect "go" {
+    file = ["*.go"]
+}
