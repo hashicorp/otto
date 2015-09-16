@@ -119,13 +119,19 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 
 	ctx.Ui.Header("Terraform execution complete. Saving results...")
 
-	// Read the outputs if everything is looking good so far
 	if err == nil {
-		infra.State = directory.InfraStateReady
-		infra.Outputs, err = tf.Outputs()
-		if err != nil {
-			err = fmt.Errorf("Error reading Terraform outputs: %s", err)
-			infra.State = directory.InfraStatePartial
+		if ctx.Action == "destroy" {
+			// If we just destroyed successfully, the infra is now empty.
+			infra.State = directory.InfraStateInvalid
+			infra.Outputs = map[string]string{}
+		} else {
+			// If an apply was successful, populate the state and outputs.
+			infra.State = directory.InfraStateReady
+			infra.Outputs, err = tf.Outputs()
+			if err != nil {
+				err = fmt.Errorf("Error reading Terraform outputs: %s", err)
+				infra.State = directory.InfraStatePartial
+			}
 		}
 	}
 
