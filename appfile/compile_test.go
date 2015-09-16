@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -73,6 +74,61 @@ func TestCompile(t *testing.T) {
 			if err == nil {
 				testCompileCompare(t, c, tc.String)
 				testCompileMarshal(t, c, opts.Dir)
+			}
+		}()
+	}
+}
+
+func TestCompile_imports(t *testing.T) {
+	cases := []struct {
+		Dir  string
+		File *File
+		Err  bool
+	}{
+		{
+			"import-basic",
+			&File{
+				Application: &Application{
+					Name: "foo",
+				},
+			},
+			false,
+		},
+
+		{
+			"import-nested",
+			&File{
+				Application: &Application{
+					Name: "bar",
+				},
+			},
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Logf("Testing: %s", tc.Dir)
+
+		// We wrap this in a function just so we can use defers
+		func() {
+			opts := testCompileOpts(t)
+			defer os.RemoveAll(opts.Dir)
+			f := testFile(t, tc.Dir)
+			defer f.resetID()
+
+			c, err := Compile(f, opts)
+			if (err != nil) != tc.Err {
+				t.Fatalf("err: %s\n\n%s", tc.Dir, err)
+			}
+
+			if c.File != nil {
+				c.File.ID = ""
+				c.File.Path = ""
+				c.File.Imports = nil
+			}
+
+			if !reflect.DeepEqual(c.File, tc.File) {
+				t.Fatalf("err: %s\n\n%#v\n\n%#v", tc.Dir, c.File, tc.File)
 			}
 		}()
 	}

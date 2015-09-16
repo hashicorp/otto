@@ -208,6 +208,10 @@ func (appF *File) loadID() error {
 // GoStringer
 //-------------------------------------------------------------------
 
+func (v *Application) GoString() string {
+	return fmt.Sprintf("*%#v", *v)
+}
+
 func (v *Customization) GoString() string {
 	return fmt.Sprintf("*%#v", *v)
 }

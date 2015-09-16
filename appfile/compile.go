@@ -9,8 +9,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/hashicorp/go-multierror"
+	_ "github.com/hashicorp/otto/helper/uuid"
 	"github.com/hashicorp/terraform/config/module"
 	"github.com/hashicorp/terraform/dag"
 )
@@ -23,6 +25,7 @@ const (
 
 	CompileFilename        = "Appfile.compiled"
 	CompileDepsFolder      = "deps"
+	CompileImportsFolder   = "deps"
 	CompileVersionFilename = "version"
 )
 
@@ -128,6 +131,12 @@ type CompileEventDep struct {
 	Source string
 }
 
+// CompileEventImport is the event that is called when an import statement
+// is being loaded and merged.
+type CompileEventImport struct {
+	Source string
+}
+
 // LoadCompiled loads and verifies a compiled Appfile (*Compiled) from
 // disk.
 func LoadCompiled(dir string) (*Compiled, error) {
@@ -197,6 +206,13 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 			return nil, fmt.Errorf(
 				"Error loading Appfile UUID: %s", err)
 		}
+	}
+
+	// Build the storage we'll use for storing imports
+	importStorage := &module.FolderStorage{
+		StorageDir: filepath.Join(opts.Dir, CompileImportsFolder)}
+	if err := compileImports(f, importStorage, opts); err != nil {
+		return nil, err
 	}
 
 	// Add our root vertex for this Appfile
@@ -357,4 +373,116 @@ func compileWrite(dir string, compiled *Compiled) error {
 
 	_, err = io.Copy(f, bytes.NewReader(data))
 	return err
+}
+
+type compileImportVertex struct {
+	Source *File
+}
+
+// compileImports takes a File, loads all the imports, and merges them
+// into the File.
+func compileImports(
+	root *File,
+	storage module.Storage,
+	opts *CompileOpts) error {
+	// If we have no imports, short-circuit the whole thing
+	if len(root.Imports) == 0 {
+		return nil
+	}
+
+	// TODO: cycle detection
+	// TODO: parallelization
+
+	// Create a map to keep track of the files that we can merge.
+	// We access this map in parallel as we load all the imports
+	// in parallel and do the merging in a single pass once they're
+	// all available.
+	/*
+		var mergeMapLock sync.Mutex
+		rootKey := uuid.GenerateUUID()
+		mergeMap := make(map[string][]*File)
+	*/
+
+	var resultErr error
+	var resultErrLock sync.Mutex
+	var importSingle func(f *File) bool
+	importSingle = func(f *File) bool {
+		merge := make([]*File, len(f.Imports))
+		for idx, i := range f.Imports {
+			source, err := module.Detect(i.Source, filepath.Dir(f.Path))
+			if err != nil {
+				resultErrLock.Lock()
+				defer resultErrLock.Unlock()
+				resultErr = multierror.Append(resultErr, fmt.Errorf(
+					"Error loading import source: %s", err))
+				return false
+			}
+
+			log.Printf("[DEBUG] loading import: %s", source)
+
+			// Call the callback if we have one
+			if opts.Callback != nil {
+				opts.Callback(&CompileEventImport{
+					Source: source,
+				})
+			}
+
+			// Download the dependency
+			if err := storage.Get(source, source, true); err != nil {
+				resultErrLock.Lock()
+				defer resultErrLock.Unlock()
+				resultErr = multierror.Append(resultErr, fmt.Errorf(
+					"Error loading import source: %s", err))
+				return false
+			}
+			dir, _, err := storage.Dir(source)
+			if err != nil {
+				resultErrLock.Lock()
+				defer resultErrLock.Unlock()
+				resultErr = multierror.Append(resultErr, fmt.Errorf(
+					"Error loading import source: %s", err))
+				return false
+			}
+
+			// Parse the Appfile
+			importF, err := ParseFile(filepath.Join(dir, "Appfile"))
+			if err != nil {
+				resultErrLock.Lock()
+				defer resultErrLock.Unlock()
+				resultErr = multierror.Append(resultErr, fmt.Errorf(
+					"Error parsing Appfile in %s: %s", source, err))
+				return false
+			}
+
+			// We use the ID to store the source, but we clear it
+			// when we actually merge.
+			importF.ID = source
+
+			// Import the imports in this
+			if !importSingle(importF) {
+				return false
+			}
+
+			merge[idx] = importF
+		}
+
+		for _, importF := range merge {
+			source := importF.ID
+			importF.ID = ""
+
+			// Merge it into our file!
+			if err := f.Merge(importF); err != nil {
+				resultErrLock.Lock()
+				defer resultErrLock.Unlock()
+				resultErr = multierror.Append(resultErr, fmt.Errorf(
+					"Error merging import %s: %s", source, err))
+				return false
+			}
+		}
+
+		return true
+	}
+
+	importSingle(root)
+	return resultErr
 }

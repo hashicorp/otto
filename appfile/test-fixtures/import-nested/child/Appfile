@@ -1,0 +1,5 @@
+import "./subchild" {}
+
+application {
+    name = "foo"
+}
