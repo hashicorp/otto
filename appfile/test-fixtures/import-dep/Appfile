@@ -1,0 +1,7 @@
+application {
+    name = "root"
+
+    dependency {
+        source = "./child"
+    }
+}

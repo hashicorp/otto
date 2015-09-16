@@ -120,6 +120,24 @@ func TestParse(t *testing.T) {
 			nil,
 			true,
 		},
+
+		// Imports
+
+		{
+			"imports.hcl",
+			&File{
+				Application: &Application{
+					Name: "otto",
+					Type: "go",
+				},
+				Imports: []*Import{
+					&Import{
+						Source: "./foo",
+					},
+				},
+			},
+			false,
+		},
 	}
 
 	for _, tc := range cases {

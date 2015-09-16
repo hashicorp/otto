@@ -6,8 +6,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform/dag"
 )
 
 func TestCompiled_impl(t *testing.T) {
@@ -73,6 +76,123 @@ func TestCompile(t *testing.T) {
 			if err == nil {
 				testCompileCompare(t, c, tc.String)
 				testCompileMarshal(t, c, opts.Dir)
+			}
+		}()
+	}
+}
+
+func TestCompile_imports(t *testing.T) {
+	cases := []struct {
+		Dir  string
+		Name string
+		File *File
+		Err  bool
+	}{
+		{
+			"import-basic",
+			"",
+			&File{
+				Application: &Application{
+					Name: "foo",
+				},
+			},
+			false,
+		},
+
+		{
+			"import-nested",
+			"",
+			&File{
+				Application: &Application{
+					Name: "bar",
+				},
+			},
+			false,
+		},
+
+		{
+			"import-cycle",
+			"",
+			nil,
+			true,
+		},
+
+		{
+			"import-dep",
+			"child",
+			&File{
+				Application: &Application{
+					Name: "child",
+				},
+				Project: &Project{
+					Name: "bar",
+				},
+			},
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Logf("Testing: %s", tc.Dir)
+
+		// We wrap this in a function just so we can use defers
+		func() {
+			opts := testCompileOpts(t)
+			defer os.RemoveAll(opts.Dir)
+			f := testFile(t, tc.Dir)
+			f.initID()
+			f.loadID()
+			defer f.resetID()
+
+			if tc.File != nil {
+				tc.File.ID = f.ID
+				tc.File.Path = f.Path
+				tc.File.Imports = f.Imports
+			}
+
+			c, err := Compile(f, opts)
+			if (err != nil) != tc.Err {
+				t.Fatalf("err: %s\n\n%s", tc.Dir, err)
+			}
+			if err == nil && c == nil {
+				t.Fatalf("bad: compiled is nil\n\n%s", tc.Dir)
+			}
+			if err != nil {
+				return
+			}
+
+			// Get the root file. If we specified a name, then find
+			// the dependent application with that name since that is
+			// what we're comparing against.
+			actual := c.File
+			if tc.Name != "" {
+				actual = nil
+				c.Graph.Walk(func(raw dag.Vertex) error {
+					v := raw.(*CompiledGraphVertex)
+					if v.File.Application == nil {
+						return nil
+					}
+					if v.File.Application.Name == tc.Name {
+						actual = v.File
+					}
+					return nil
+				})
+
+				if actual == nil {
+					t.Fatalf("err: %s\n\n%s not found in graph", tc.Dir, tc.Name)
+				}
+
+				// For child files, we just clear these out.
+				actual.ID = ""
+				actual.Path = ""
+				actual.Imports = nil
+				tc.File.ID = actual.ID
+				tc.File.Path = actual.Path
+				tc.File.Imports = actual.Imports
+			}
+
+			if !reflect.DeepEqual(actual, tc.File) {
+				t.Fatalf("err: %s\n\n%#v\n\n%#v", tc.Dir, actual, tc.File)
 			}
 		}()
 	}

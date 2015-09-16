@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform/config/module"
@@ -23,6 +24,7 @@ const (
 
 	CompileFilename        = "Appfile.compiled"
 	CompileDepsFolder      = "deps"
+	CompileImportsFolder   = "deps"
 	CompileVersionFilename = "version"
 )
 
@@ -128,6 +130,12 @@ type CompileEventDep struct {
 	Source string
 }
 
+// CompileEventImport is the event that is called when an import statement
+// is being loaded and merged.
+type CompileEventImport struct {
+	Source string
+}
+
 // LoadCompiled loads and verifies a compiled Appfile (*Compiled) from
 // disk.
 func LoadCompiled(dir string) (*Compiled, error) {
@@ -199,6 +207,18 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 		}
 	}
 
+	// Build the storage we'll use for storing imports
+	importStorage := &module.FolderStorage{
+		StorageDir: filepath.Join(opts.Dir, CompileImportsFolder)}
+	importOpts := &compileImportOpts{
+		Storage:   importStorage,
+		Cache:     make(map[string]*File),
+		CacheLock: &sync.Mutex{},
+	}
+	if err := compileImports(f, importOpts, opts); err != nil {
+		return nil, err
+	}
+
 	// Add our root vertex for this Appfile
 	vertex := &CompiledGraphVertex{File: f, NameValue: f.Application.Name}
 	compiled.Graph.Add(vertex)
@@ -208,7 +228,10 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	// dependencies.
 	storage := &module.FolderStorage{
 		StorageDir: filepath.Join(opts.Dir, CompileDepsFolder)}
-	if err := compileDependencies(storage, compiled.Graph, opts, vertex); err != nil {
+	if err := compileDependencies(
+		storage,
+		importOpts,
+		compiled.Graph, opts, vertex); err != nil {
 		return nil, err
 	}
 
@@ -227,6 +250,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 
 func compileDependencies(
 	storage module.Storage,
+	importOpts *compileImportOpts,
 	graph *dag.AcyclicGraph,
 	opts *CompileOpts,
 	root *CompiledGraphVertex) error {
@@ -308,6 +332,11 @@ func compileDependencies(
 						key)
 				}
 
+				// Realize all the imports for this file
+				if err := compileImports(f, importOpts, opts); err != nil {
+					return err
+				}
+
 				// Build the vertex for this
 				vertex = &CompiledGraphVertex{
 					File:      f,
@@ -357,4 +386,199 @@ func compileWrite(dir string, compiled *Compiled) error {
 
 	_, err = io.Copy(f, bytes.NewReader(data))
 	return err
+}
+
+type compileImportOpts struct {
+	Storage   module.Storage
+	Cache     map[string]*File
+	CacheLock *sync.Mutex
+}
+
+// compileImports takes a File, loads all the imports, and merges them
+// into the File.
+func compileImports(
+	root *File,
+	importOpts *compileImportOpts,
+	opts *CompileOpts) error {
+	// If we have no imports, short-circuit the whole thing
+	if len(root.Imports) == 0 {
+		return nil
+	}
+
+	// Pull these out into variables so they're easier to reference
+	storage := importOpts.Storage
+	cache := importOpts.Cache
+	cacheLock := importOpts.CacheLock
+
+	// A graph is used to track for cycles
+	var graphLock sync.Mutex
+	graph := new(dag.AcyclicGraph)
+	graph.Add("root")
+
+	// Since we run the import in parallel, multiple errors can happen
+	// at the same time. We use multierror and a lock to keep track of errors.
+	var resultErr error
+	var resultErrLock sync.Mutex
+
+	// Forward declarations for some nested functions we use. The docs
+	// for these functions are above each.
+	var importSingle func(parent string, f *File) bool
+	var downloadSingle func(string, *sync.WaitGroup, *sync.Mutex, []*File, int)
+
+	// importSingle is responsible for kicking off the imports and merging
+	// them for a single file. This will return true on success, false on
+	// failure. On failure, it is expected that any errors are appended to
+	// resultErr.
+	importSingle = func(parent string, f *File) bool {
+		var wg sync.WaitGroup
+
+		// Build the list of files we'll merge later
+		var mergeLock sync.Mutex
+		merge := make([]*File, len(f.Imports))
+
+		// Go through the imports and kick off the download
+		for idx, i := range f.Imports {
+			source, err := module.Detect(i.Source, filepath.Dir(f.Path))
+			if err != nil {
+				resultErrLock.Lock()
+				defer resultErrLock.Unlock()
+				resultErr = multierror.Append(resultErr, fmt.Errorf(
+					"Error loading import source: %s", err))
+				return false
+			}
+
+			// Add this to the graph and check now if there are cycles
+			graphLock.Lock()
+			graph.Add(source)
+			graph.Connect(dag.BasicEdge(parent, source))
+			cycles := graph.Cycles()
+			graphLock.Unlock()
+			if len(cycles) > 0 {
+				for _, cycle := range cycles {
+					names := make([]string, len(cycle))
+					for i, v := range cycle {
+						names[i] = dag.VertexName(v)
+					}
+
+					resultErrLock.Lock()
+					defer resultErrLock.Unlock()
+					resultErr = multierror.Append(resultErr, fmt.Errorf(
+						"Cycle found: %s", strings.Join(names, ", ")))
+					return false
+				}
+			}
+
+			wg.Add(1)
+			go downloadSingle(source, &wg, &mergeLock, merge, idx)
+		}
+
+		// Wait for completion
+		wg.Wait()
+
+		// Go through the merge list and look for any nil entries, which
+		// means that download failed. In that case, return immediately.
+		// We assume any errors were put into resultErr.
+		for _, importF := range merge {
+			if importF == nil {
+				return false
+			}
+		}
+
+		for _, importF := range merge {
+			// We need to copy importF here so that we don't poison
+			// the cache by modifying the same pointer.
+			importFCopy := *importF
+			importF = &importFCopy
+			source := importF.ID
+			importF.ID = ""
+			importF.Path = ""
+
+			// Merge it into our file!
+			if err := f.Merge(importF); err != nil {
+				resultErrLock.Lock()
+				defer resultErrLock.Unlock()
+				resultErr = multierror.Append(resultErr, fmt.Errorf(
+					"Error merging import %s: %s", source, err))
+				return false
+			}
+		}
+
+		return true
+	}
+
+	// downloadSingle is used to download a single import and parse the
+	// Appfile. This is a separate function because it is generally run
+	// in a goroutine so we can parallelize grabbing the imports.
+	downloadSingle = func(source string, wg *sync.WaitGroup, l *sync.Mutex, result []*File, idx int) {
+		defer wg.Done()
+
+		// Read from the cache if we have it
+		cacheLock.Lock()
+		cached, ok := cache[source]
+		cacheLock.Unlock()
+		if ok {
+			log.Printf("[DEBUG] cache hit on import: %s", source)
+			l.Lock()
+			defer l.Unlock()
+			result[idx] = cached
+			return
+		}
+
+		// Call the callback if we have one
+		log.Printf("[DEBUG] loading import: %s", source)
+		if opts.Callback != nil {
+			opts.Callback(&CompileEventImport{
+				Source: source,
+			})
+		}
+
+		// Download the dependency
+		if err := storage.Get(source, source, true); err != nil {
+			resultErrLock.Lock()
+			defer resultErrLock.Unlock()
+			resultErr = multierror.Append(resultErr, fmt.Errorf(
+				"Error loading import source: %s", err))
+			return
+		}
+		dir, _, err := storage.Dir(source)
+		if err != nil {
+			resultErrLock.Lock()
+			defer resultErrLock.Unlock()
+			resultErr = multierror.Append(resultErr, fmt.Errorf(
+				"Error loading import source: %s", err))
+			return
+		}
+
+		// Parse the Appfile
+		importF, err := ParseFile(filepath.Join(dir, "Appfile"))
+		if err != nil {
+			resultErrLock.Lock()
+			defer resultErrLock.Unlock()
+			resultErr = multierror.Append(resultErr, fmt.Errorf(
+				"Error parsing Appfile in %s: %s", source, err))
+			return
+		}
+
+		// We use the ID to store the source, but we clear it
+		// when we actually merge.
+		importF.ID = source
+
+		// Import the imports in this
+		if !importSingle(source, importF) {
+			return
+		}
+
+		// Once we're done, acquire the lock and write it
+		l.Lock()
+		result[idx] = importF
+		l.Unlock()
+
+		// Write this into the cache.
+		cacheLock.Lock()
+		cache[source] = importF
+		cacheLock.Unlock()
+	}
+
+	importSingle("root", root)
+	return resultErr
 }

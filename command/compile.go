@@ -205,6 +205,9 @@ func (c *CompileCommand) compileCallback(ui ui.Ui) func(appfile.CompileEvent) {
 		case *appfile.CompileEventDep:
 			ui.Message(fmt.Sprintf(
 				"Fetching dependency: %s", e.Source))
+		case *appfile.CompileEventImport:
+			ui.Message(fmt.Sprintf(
+				"Fetching import: %s", e.Source))
 		}
 	}
 }

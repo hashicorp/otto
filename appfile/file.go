@@ -30,6 +30,11 @@ type File struct {
 	Project        *Project
 	Infrastructure []*Infrastructure
 	Customization  *CustomizationSet
+
+	// Imports is the list of imports that this File made. The imports
+	// are realized during compilation, but this list won't be cleared
+	// in case it wants to be inspected later.
+	Imports []*Import
 }
 
 // Application is the structure of an application definition.
@@ -73,6 +78,11 @@ type Infrastructure struct {
 type Foundation struct {
 	Name   string
 	Config map[string]interface{}
+}
+
+// Import is an import request of another Appfile into this one
+type Import struct {
+	Source string
 }
 
 //-------------------------------------------------------------------
@@ -197,6 +207,10 @@ func (appF *File) loadID() error {
 //-------------------------------------------------------------------
 // GoStringer
 //-------------------------------------------------------------------
+
+func (v *Application) GoString() string {
+	return fmt.Sprintf("*%#v", *v)
+}
 
 func (v *Customization) GoString() string {
 	return fmt.Sprintf("*%#v", *v)
