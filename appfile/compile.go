@@ -325,6 +325,7 @@ func compileDependencies(
 						key)
 				}
 
+				// Realize all the imports for this file
 				if err := compileImports(f, importStorage, opts); err != nil {
 					return err
 				}
