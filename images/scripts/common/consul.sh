@@ -1,7 +1,6 @@
 #!/bin/sh -eux
 
 # Install unzip since Consul is distributed as a zip
-apt-get update -y
 apt-get install -y unzip
 
 # Download Consul
