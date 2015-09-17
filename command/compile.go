@@ -191,9 +191,9 @@ func (c *CompileCommand) Run(args []string) int {
 	}
 
 	// Success!
-	ui.Header("Compilation success!")
+	ui.Header("[green]Compilation success!")
 	ui.Message(fmt.Sprintf(
-		"This means that Otto is now ready to start a development environment,\n" +
+		"[green]This means that Otto is now ready to start a development environment,\n" +
 			"deploy this application, build the supporting infastructure, and\n" +
 			"more. See the help for more information.\n\n" +
 			"Supporting files to enable Otto to manage your application from\n" +

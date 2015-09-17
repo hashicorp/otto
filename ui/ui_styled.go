@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"strings"
+
+	"github.com/mitchellh/colorstring"
 )
 
 // Styled is a wrapper around an existing UI that automatically
@@ -13,7 +15,7 @@ type Styled struct {
 }
 
 func (u *Styled) Header(msg string) {
-	u.Ui.Header(u.prefix("==> ", msg))
+	u.Ui.Header(u.prefix("[bold]==> ", msg))
 }
 
 func (u *Styled) Message(msg string) {
@@ -22,6 +24,11 @@ func (u *Styled) Message(msg string) {
 
 func (u *Styled) prefix(prefix, msg string) string {
 	var buf bytes.Buffer
+
+	// We first write the color sequence (if any) of our message.
+	// This makes it so that our prefix inherits the color properly
+	// of any message.
+	buf.WriteString(colorstring.ColorPrefix(msg))
 
 	scan := bufio.NewScanner(strings.NewReader(msg))
 	for scan.Scan() {
