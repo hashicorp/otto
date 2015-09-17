@@ -42,6 +42,10 @@ type Infra struct {
 	ID string
 }
 
+func (i *Infra) IsReady() bool {
+	return i != nil && i.State == InfraStateReady
+}
+
 func (i *Infra) setId() {
 	i.ID = uuid.GenerateUUID()
 }
