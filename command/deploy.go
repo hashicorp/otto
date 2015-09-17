@@ -3,6 +3,8 @@ package command
 import (
 	"fmt"
 	"strings"
+
+	"github.com/hashicorp/otto/helper/flag"
 )
 
 // DeployCommand is the command that deploys the app once it is built.
@@ -13,8 +15,16 @@ type DeployCommand struct {
 func (c *DeployCommand) Run(args []string) int {
 	fs := c.FlagSet("deploy", FlagSetNone)
 	fs.Usage = func() { c.Ui.Error(c.Help()) }
+	args, execArgs, posArgs := flag.FilterArgs(fs, args)
 	if err := fs.Parse(args); err != nil {
 		return 1
+	}
+
+	// Get the remaining args to determine if we have an action.
+	var action string
+	if len(posArgs) > 0 {
+		action = posArgs[0]
+		execArgs = append(execArgs, posArgs[1:]...)
 	}
 
 	// Load the appfile
@@ -33,9 +43,10 @@ func (c *DeployCommand) Run(args []string) int {
 	}
 
 	// Deploy the artifact
-	if err := core.Deploy(); err != nil {
-		c.Ui.Error(fmt.Sprintf(
-			"Error building app: %s", err))
+	if err := core.Deploy(action, execArgs); err != nil {
+		// Display errors without prefix, we expect them to be formatted in a way
+		// that's suitable for UI.
+		c.Ui.Error(err.Error())
 		return 1
 	}
 

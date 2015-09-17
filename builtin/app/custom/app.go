@@ -146,10 +146,10 @@ func (a *App) Deploy(ctx *app.Context) error {
 	}
 
 	// But if we did, then deploy using Terraform
-	return terraform.Deploy(ctx, &terraform.DeployOptions{
+	return terraform.Deploy(&terraform.DeployOptions{
 		Dir:          tfdir,
 		DisableBuild: disableBuild,
-	})
+	}).Route(ctx)
 }
 
 func (a *App) Dev(ctx *app.Context) error {

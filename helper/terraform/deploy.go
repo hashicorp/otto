@@ -3,6 +3,7 @@ package terraform
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"
@@ -28,14 +29,28 @@ type DeployOptions struct {
 	InfraOutputMap map[string]string
 }
 
-// Deploy deploys an application using Terraform.
+// Deploy can be used as an implementation of app.App.Deploy to handle calling
+// out to terraform w/ the configured config to get an app deployed to an
+// infrastructure.
 //
-// This will verify the infrastruction is created and a build is available,
+// This will verify the infrastructure is created and a build is available,
 // and use that information to run Terraform. Any edge cases around Terraform
 // failures is handled and state storage is automatic as well.
 //
 // This function implements app.App.Deploy.
-func Deploy(ctx *app.Context, opts *DeployOptions) error {
+func Deploy(opts *DeployOptions) *app.Router {
+	return &app.Router{
+		Actions: map[string]*app.Action{
+			"": &app.Action{
+				Execute:  opts.actionDeploy,
+				Synopsis: actionDeploySyn,
+				Help:     strings.TrimSpace(actionDeployHelp),
+			},
+		},
+	}
+}
+
+func (opts *DeployOptions) actionDeploy(ctx *app.Context) error {
 	project := Project(&ctx.Shared)
 	if err := project.InstallIfNeeded(); err != nil {
 		return err
@@ -173,3 +188,19 @@ func Deploy(ctx *app.Context, opts *DeployOptions) error {
 
 	return nil
 }
+
+// Synopsis text for actions
+const (
+	actionDeploySyn = "Deploy the latest built artifact into your infrastructure"
+)
+
+// Help text for actions
+const actionDeployHelp = `
+Usage: otto deploy
+
+  Deploys a built artifact into your infrastructure.
+
+	This command will take the latest built artifact and deploy it into your
+	infrastructure. Otto will create or replace any necessary resources required
+	to run your app.
+`
