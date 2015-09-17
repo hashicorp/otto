@@ -61,11 +61,14 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 	}
 	data.Context["name"] = ctx.Appfile.Application.Name
 	data.Context["dev_fragments"] = ctx.DevDepFragments
-	data.Context["path"] = map[string]string{
-		"cache":    ctx.CacheDir,
-		"compiled": ctx.Dir,
-		"working":  filepath.Dir(ctx.Appfile.Path),
+
+	if data.Context["path"] == nil {
+		data.Context["path"] = make(map[string]string)
 	}
+	pathMap := data.Context["path"].(map[string]string)
+	pathMap["cache"] = ctx.CacheDir
+	pathMap["compiled"] = ctx.Dir
+	pathMap["working"] = filepath.Dir(ctx.Appfile.Path)
 	foundationDirsContext := map[string][]string{
 		"dev":     make([]string, len(ctx.FoundationDirs)),
 		"dev_dep": make([]string, len(ctx.FoundationDirs)),

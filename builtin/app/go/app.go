@@ -33,6 +33,12 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			AssetDir: AssetDir,
 			Context: map[string]interface{}{
 				"dep_binary_path": fmt.Sprintf("/usr/local/bin/%s", ctx.Application.Name),
+				"path": map[string]string{
+					"guest_working": fmt.Sprintf(
+						"/otto-deps/%s-%s",
+						ctx.Application.Name,
+						ctx.Appfile.ID),
+				},
 			},
 		},
 		Customizations: []*compile.Customization{

@@ -10,6 +10,10 @@ sudo mv /tmp/dep-{{ name }}.upstart.conf /etc/init/{{ name }}.conf
 # Start it!
 sudo start {{ name }}
 COPY
+
+# Sync our own dep folder in there
+config.vm.synced_folder "{{ path.working }}", "{{ path.guest_working }}"
+
 # Copy files into a temp directory. The script will move them.
 config.vm.provision "file",
   source: "{{ path.cache }}/dev-dep-output",
