@@ -215,6 +215,11 @@ Usage: otto [options] [path]
   development, deploy, etc. If path is not specified, the current directory
   is assumed.
 
+  This command will download and update any dependencies as well as
+  the import statements in your Appfile. This process only happens during
+  compilation so that every other Otto operation begins executing much
+  more quickly.
+
 `
 
 	return strings.TrimSpace(helpText)
