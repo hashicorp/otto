@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/terraform/dag"
 )
 
@@ -32,6 +33,12 @@ func TestCompile(t *testing.T) {
 
 		{
 			"compile-deps",
+			testCompileDepsStr,
+			false,
+		},
+
+		{
+			"compile-deps-detect",
 			testCompileDepsStr,
 			false,
 		},
@@ -161,6 +168,9 @@ func TestCompile_imports(t *testing.T) {
 					&Infrastructure{
 						Name: "aws",
 						Type: "aws",
+						Foundations: []*Foundation{
+							&Foundation{Name: "consul"},
+						},
 					},
 				},
 			},
@@ -299,7 +309,10 @@ func testCompileOpts(t *testing.T) *CompileOpts {
 		t.Fatalf("err: %s", err)
 	}
 
-	return &CompileOpts{Dir: dir}
+	return &CompileOpts{
+		Dir:    dir,
+		Detect: &detect.Config{},
+	}
 }
 
 func testFile(t *testing.T, dir string) *File {

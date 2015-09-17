@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/terraform/config/module"
 	"github.com/hashicorp/terraform/dag"
 )
@@ -115,6 +116,10 @@ type CompileOpts struct {
 	// For use of Otto with a compiled Appfile, this directory must not
 	// be deleted.
 	Dir string
+
+	// Detect is the detect configuration that will be used for processing
+	// defaults for the various dependencies.
+	Detect *detect.Config
 
 	// Callback is an optional way to receive notifications of events
 	// during the compilation process. The CompileEvent argument should be
@@ -307,6 +312,13 @@ func compileDependencies(
 					return err
 				}
 
+				// Parse a default
+				fDef, err := Default(dir, opts.Detect)
+				if err != nil {
+					return fmt.Errorf(
+						"Error detecting defaults in %s: %s", key, err)
+				}
+
 				// Parse the Appfile
 				f, err := ParseFile(filepath.Join(dir, "Appfile"))
 				if err != nil {
@@ -341,6 +353,14 @@ func compileDependencies(
 				if err := compileImports(f, importOpts, opts); err != nil {
 					return err
 				}
+
+				// Merge the files
+				if err := fDef.Merge(f); err != nil {
+					return fmt.Errorf(
+						"Error merging default Appfile for dependency %s: %s",
+						key, err)
+				}
+				f = fDef
 
 				// Build the vertex for this
 				vertex = &CompiledGraphVertex{

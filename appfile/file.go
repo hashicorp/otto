@@ -220,6 +220,10 @@ func (v *Customization) GoString() string {
 	return fmt.Sprintf("*%#v", *v)
 }
 
+func (v *Foundation) GoString() string {
+	return fmt.Sprintf("*%#v", *v)
+}
+
 func (v *Infrastructure) GoString() string {
 	return fmt.Sprintf("*%#v", *v)
 }
