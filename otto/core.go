@@ -510,7 +510,48 @@ func (c *Core) Infra(action string, args []string) error {
 	return nil
 }
 
+// Status outputs to the UI the status of all the stages of this application.
 func (c *Core) Status() error {
+	infra := c.appfile.ActiveInfrastructure()
+	if infra == nil {
+		panic("infra not found")
+	}
+
+	// We output UI about loading because if the directory is remote
+	// (such as Atlas), then this can actually be slow.
+	c.ui.Header("Loading status information...")
+
+	// Dev
+	c.ui.Message("Loading development status")
+	dev, err := c.dir.GetDev(&directory.Dev{Lookup: directory.Lookup{
+		AppID: c.appfile.ID}})
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading development status: %s", err)
+	}
+
+	// Build
+	c.ui.Message("Loading build status")
+	build, err := c.dir.GetBuild(&directory.Build{Lookup: directory.Lookup{
+		AppID: c.appfile.ID, Infra: infra.Name, InfraFlavor: infra.Flavor}})
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading build status: %s", err)
+	}
+
+	// Create the status texts
+	devStatus := "[red]NOT CREATED"
+	if dev.IsReady() {
+		devStatus = "[green]CREATED"
+	}
+	buildStatus := "[red]NO BUILDS"
+	if build != nil {
+		buildStatus = "[green]BUILD READY"
+	}
+
+	c.ui.Header("Status results...")
+	c.ui.Message(fmt.Sprintf("Development environment: %s", devStatus))
+
 	return nil
 }
 
