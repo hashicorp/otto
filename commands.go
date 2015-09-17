@@ -99,6 +99,12 @@ func init() {
 			}, nil
 		},
 
+		"status": func() (cli.Command, error) {
+			return &command.StatusCommand{
+				Meta: meta,
+			}, nil
+		},
+
 		"version": func() (cli.Command, error) {
 			return &command.VersionCommand{
 				Meta:              meta,

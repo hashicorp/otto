@@ -510,6 +510,10 @@ func (c *Core) Infra(action string, args []string) error {
 	return nil
 }
 
+func (c *Core) Status() error {
+	return nil
+}
+
 // Execute executes the given task for this Appfile.
 func (c *Core) Execute(opts *ExecuteOpts) error {
 	switch opts.Task {
