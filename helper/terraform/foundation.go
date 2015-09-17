@@ -38,8 +38,8 @@ func (f *Foundation) Infra(ctx *foundation.Context) error {
 }
 
 func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
-	project := Project(&ctx.Shared)
-	if err := project.InstallIfNeeded(); err != nil {
+	project, err := Project(&ctx.Shared)
+	if err != nil {
 		return err
 	}
 

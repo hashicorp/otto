@@ -296,8 +296,8 @@ func (c *Core) Deploy(action string, args []string) error {
 		return err
 	}
 
-	// Special case: don't try to fetch creds during `otto deploy help`
-	if action != "help" {
+	// Special case: don't try to fetch creds during `help` or `info`
+	if action != "help" && action != "info" {
 		if err := c.creds(infra, infraCtx); err != nil {
 			return err
 		}

@@ -23,8 +23,8 @@ var (
 )
 
 // Project returns the hashitools Project for this.
-func Project(ctx *context.Shared) *hashitools.Project {
-	return &hashitools.Project{
+func Project(ctx *context.Shared) (*hashitools.Project, error) {
+	p := &hashitools.Project{
 		Name:       "terraform",
 		MinVersion: tfMinVersion,
 		Installer: &hashitools.GoInstaller{
@@ -33,6 +33,7 @@ func Project(ctx *context.Shared) *hashitools.Project {
 			Ui:   ctx.Ui,
 		},
 	}
+	return p, p.InstallIfNeeded()
 }
 
 // Terraform wraps `terraform` execution into an easy-to-use API
@@ -102,6 +103,10 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 	stateSkip := false
 	stateSkip = command[0] == "get"
 
+	// Output needs state but not state-out; more hard-coding
+	stateOutSkip := false
+	stateOutSkip = command[0] == "output"
+
 	// If we care about state, then setup the state directory and
 	// load it up.
 	var stateDir, statePath string
@@ -138,7 +143,9 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 
 		// Append the state to the args
 		command = append(command, "-state", stateOldPath)
-		command = append(command, "-state-out", statePath)
+		if !stateOutSkip {
+			command = append(command, "-state-out", statePath)
+		}
 	}
 
 	// Append all the final args
@@ -162,7 +169,7 @@ func (t *Terraform) Execute(commandRaw ...string) error {
 	}
 
 	// Save the state file if we have it.
-	if t.StateId != "" && t.Directory != nil && statePath != "" {
+	if t.StateId != "" && t.Directory != nil && statePath != "" && !stateOutSkip {
 		f, ferr := os.Open(statePath)
 		if ferr != nil {
 			return fmt.Errorf(

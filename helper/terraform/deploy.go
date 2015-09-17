@@ -51,13 +51,18 @@ func Deploy(opts *DeployOptions) *app.Router {
 				Synopsis: actionDestroySyn,
 				Help:     strings.TrimSpace(actionDestroyHelp),
 			},
+			"info": &app.Action{
+				Execute:  opts.actionInfo,
+				Synopsis: actionInfoSyn,
+				Help:     strings.TrimSpace(actionInfoHelp),
+			},
 		},
 	}
 }
 
 func (opts *DeployOptions) actionDeploy(ctx *app.Context) error {
-	project := Project(&ctx.Shared)
-	if err := project.InstallIfNeeded(); err != nil {
+	project, err := Project(&ctx.Shared)
+	if err != nil {
 		return err
 	}
 	vars := make(map[string]string)
@@ -118,11 +123,7 @@ func (opts *DeployOptions) actionDeploy(ctx *app.Context) error {
 				"This second error is a bug and should be reported.", err, putErr)
 		}
 
-		return fmt.Errorf(
-			"Error running Terraform: %s\n\n"+
-				"Terraform usually has helpful error messages. Please read the error\n"+
-				"messages above and resolve them. Sometimes simply running `otto deploy`\n"+
-				"again will work.", err)
+		return terraformError(err)
 	}
 
 	deploy.MarkSuccessful()
@@ -133,7 +134,10 @@ func (opts *DeployOptions) actionDeploy(ctx *app.Context) error {
 }
 
 func (opts *DeployOptions) actionDestroy(ctx *app.Context) error {
-	project := Project(&ctx.Shared)
+	project, err := Project(&ctx.Shared)
+	if err != nil {
+		return err
+	}
 	vars := make(map[string]string)
 
 	infra, infraVars, err := opts.lookupInfraVars(ctx)
@@ -188,17 +192,46 @@ func (opts *DeployOptions) actionDestroy(ctx *app.Context) error {
 				"This second error is a bug and should be reported.", err, putErr)
 		}
 
-		return fmt.Errorf(
-			"Error running Terraform: %s\n\n"+
-				"Terraform usually has helpful error messages. Please read the error\n"+
-				"messages above and resolve them. Sometimes simply running `otto deply`\n"+
-				"again will work.",
-			err)
+		return terraformError(err)
 	}
 
 	deploy.MarkGone()
 	if err := ctx.Directory.PutDeploy(deploy); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (opts *DeployOptions) actionInfo(ctx *app.Context) error {
+	project, err := Project(&ctx.Shared)
+	if err != nil {
+		return err
+	}
+
+	deploy, err := opts.lookupDeploy(ctx)
+	if err != nil {
+		return err
+	}
+	if deploy.IsNew() {
+		return fmt.Errorf(
+			"This application hasn't been deployed yet. Nothing to show.")
+	}
+
+	// Get the directory
+	// Run Terraform!
+	tf := &Terraform{
+		Path:      project.Path(),
+		Dir:       opts.tfDir(ctx),
+		Ui:        ctx.Ui,
+		Directory: ctx.Directory,
+		StateId:   deploy.ID,
+	}
+	args := make([]string, len(ctx.ActionArgs)+1)
+	args[0] = "output"
+	copy(args[1:], ctx.ActionArgs)
+	if err := tf.Execute(args...); err != nil {
+		return terraformError(err)
 	}
 
 	return nil
@@ -317,10 +350,21 @@ func (opts *DeployOptions) tfDir(ctx *app.Context) string {
 	return tfDir
 }
 
+// terraformError wraps an error from Terraform in a friendlier message.
+func terraformError(err error) error {
+	return fmt.Errorf(
+		"Error running Terraform: %s\n\n"+
+			"Terraform usually has helpful error messages. Please read the error\n"+
+			"messages above and resolve them. Sometimes simply running `otto deploy`\n"+
+			"again will work.",
+		err)
+}
+
 // Synopsis text for actions
 const (
 	actionDeploySyn  = "Deploy the latest built artifact into your infrastructure"
 	actionDestroySyn = "Destroy all deployed resources for this application"
+	actionInfoSyn    = "Display information about this application's deploy"
 )
 
 // Help text for actions
@@ -342,4 +386,14 @@ Usage: otto deploy destroy
 	This command will remove any previously-deployed resources from your
 	infrastructure. This must be run for all of apps in an infrastructure before
 	'otto infra destroy' will work.
+`
+
+const actionInfoHelp = `
+Usage: otto deploy info [NAME]
+
+  Displays information about this application's deploy.
+
+	This command will show any variables the deploy has specified as outputs. If
+	no NAME is specified, all outputs will be listed. If NAME is specified, just
+	the contents of that output will be printed.
 `
