@@ -28,8 +28,24 @@ func detectImportPath(ctx *app.Context) (string, error) {
 		return "", nil
 	}
 
-	gopath = filepath.Join(gopath, "src")
 	dir := filepath.Dir(ctx.Appfile.Path)
+
+	// If the directory to our Appfile is a symlink, resolve that symlink
+	// through. This makes this heuristic work for local dependencies.
+	if fi, err := os.Lstat(dir); err == nil {
+		if fi.Mode()&os.ModeSymlink != 0 {
+			newDir, err := os.Readlink(dir)
+			if err != nil {
+				return "", fmt.Errorf(
+					"Error reading symlink %s: %s", dir, err)
+			}
+
+			dir = newDir
+		}
+	}
+
+	// The directory has to be prefixed with the gopath
+	gopath = filepath.Join(gopath, "src")
 	if !strings.HasPrefix(dir, gopath) {
 		ctx.Ui.Message(
 			"Warning! It looks like your application is not within your set\n" +

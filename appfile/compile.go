@@ -360,6 +360,8 @@ func compileDependencies(
 				}
 
 				// Merge the files
+				log.Printf("DEF: %#v", fDef)
+				log.Printf("WHAT: %#v", f)
 				if err := fDef.Merge(f); err != nil {
 					return fmt.Errorf(
 						"Error merging default Appfile for dependency %s: %s",

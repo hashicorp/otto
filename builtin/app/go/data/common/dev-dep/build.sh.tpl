@@ -5,6 +5,8 @@
 # This is the build script for a Go-based project.
 set -e
 
+ol() { echo "[otto] $@"; }
+
 # Set this to fake the bashrc on some platforms that we're interactive.
 # Ubuntu in particular by default won't load the bashrc if this isn't
 # set.
@@ -14,8 +16,13 @@ export PS1="> "
 . /home/vagrant/.bashrc
 
 # Go into our working directory
-cd /vagrant
+cd {{ shared_folder_path }}
+
+# Get all the dependencies
+ol "Getting dependencies..."
+go get -v ./...
 
 # Build the project and write the output into our shared directory
 # with the compiled directory so that we can easily extract it.
+ol "Building..."
 go build -o "/otto-cache/dev-dep-output"

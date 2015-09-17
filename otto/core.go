@@ -135,11 +135,11 @@ func (c *Core) Compile() error {
 	results := make([]*app.CompileResult, 0, len(c.appfileCompiled.Graph.Vertices()))
 	err = c.walk(func(app app.App, ctx *app.Context, root bool) error {
 		if !root {
-			c.ui.Message(fmt.Sprintf(
+			c.ui.Header(fmt.Sprintf(
 				"Compiling dependency '%s'...",
 				ctx.Appfile.Application.Name))
 		} else {
-			c.ui.Message(fmt.Sprintf(
+			c.ui.Header(fmt.Sprintf(
 				"Compiling main application..."))
 		}
 
