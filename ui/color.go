@@ -13,7 +13,7 @@ var colorstringDisable = colorstring.Colorize{
 // Colorize is a helper to colorize the string according to the colorstring
 // library defaults.
 func Colorize(t string) string {
-	return colorstring.Color(t)
+	return colorstring.Color("[reset]" + t)
 }
 
 // StripColors is a helper to strip all the color tags from the text.
