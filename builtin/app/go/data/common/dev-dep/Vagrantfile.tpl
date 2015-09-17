@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
 
   # Setup a synced folder from where our compiled data is to
   # /otto. We do this to access the build script.
-  config.vm.synced_folder "{{ path.compiled }}/dev-dep/build", "/otto"
+  config.vm.synced_folder "{{ path.compiled }}/dev-dep", "/otto"
 
   # Setup a synced folder from where the cache dir is
   config.vm.synced_folder "{{ path.cache }}", "/otto-cache"

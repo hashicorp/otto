@@ -16,8 +16,15 @@ config.vm.provision "file",
   destination: "/tmp/dep-{{ name }}"
 
 config.vm.provision "file",
-  source: "{{ path.compiled }}/dev-dep/build/upstart.conf",
+  source: "{{ path.compiled }}/dev-dep/upstart.conf",
   destination: "/tmp/dep-{{ name }}.upstart.conf"
 
 config.vm.provision "shell",
   inline: ${{ name }}_setup
+
+# Foundation configuration for dev dep
+{% for dir in foundation_dirs.dev_dep %}
+dir = "/otto/foundation-{{ name }}-{{ forloop.Counter }}"
+config.vm.synced_folder "{{ dir }}", dir
+config.vm.provision "shell", inline: "cd #{dir} && bash #{dir}/main.sh"
+{% endfor %}
