@@ -94,7 +94,7 @@ func TestCompile(t *testing.T) {
 	}
 }
 
-func TestCompile_imports(t *testing.T) {
+func TestCompile_structure(t *testing.T) {
 	cases := []struct {
 		Dir  string
 		Name string
@@ -168,9 +168,28 @@ func TestCompile_imports(t *testing.T) {
 					&Infrastructure{
 						Name: "aws",
 						Type: "aws",
-						Foundations: []*Foundation{
-							&Foundation{Name: "consul"},
-						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"compile-dep-infra",
+			"child",
+			&File{
+				Application: &Application{
+					Name: "child",
+					Type: "bar",
+				},
+				Project: &Project{
+					Name:           "bar",
+					Infrastructure: "google",
+				},
+				Infrastructure: []*Infrastructure{
+					&Infrastructure{
+						Name: "google",
+						Type: "google",
 					},
 				},
 			},
