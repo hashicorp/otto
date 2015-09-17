@@ -48,8 +48,8 @@ func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
 }
 
 func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) error {
-	project := Project(&ctx.Shared)
-	if err := project.InstallIfNeeded(); err != nil {
+	project, err := Project(&ctx.Shared)
+	if err != nil {
 		return err
 	}
 
