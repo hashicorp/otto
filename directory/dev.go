@@ -18,6 +18,10 @@ type Dev struct {
 	ID string
 }
 
+func (d *Dev) IsReady() bool {
+	return d != nil && d.State == DevStateReady
+}
+
 func (d *Dev) MarkReady() {
 	d.State = DevStateReady
 }

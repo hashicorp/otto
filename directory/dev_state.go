@@ -1,6 +1,6 @@
 package directory
 
-//go:generate stringer -type=DevState infra_state.go
+//go:generate stringer -type=DevState dev_state.go
 
 // DevState is used to track the state of an infrastructure.
 //
