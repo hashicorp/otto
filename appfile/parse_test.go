@@ -138,6 +138,13 @@ func TestParse(t *testing.T) {
 			},
 			false,
 		},
+
+		// Unknown keys
+		{
+			"unknown-keys.hcl",
+			nil,
+			true,
+		},
 	}
 
 	for _, tc := range cases {

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl"
 	hclobj "github.com/hashicorp/hcl/hcl"
 	"github.com/mitchellh/mapstructure"
@@ -30,6 +31,18 @@ func Parse(r io.Reader) (*File, error) {
 		return nil, fmt.Errorf("error parsing: %s", err)
 	}
 	buf.Reset()
+
+	// Check for invalid keys
+	valid := []string{
+		"application",
+		"customization",
+		"import",
+		"infrastructure",
+		"project",
+	}
+	if err := checkHCLKeys(obj, valid); err != nil {
+		return nil, err
+	}
 
 	var result File
 
@@ -290,4 +303,21 @@ func parseProject(result *File, obj *hclobj.Object) error {
 	}
 
 	return nil
+}
+
+func checkHCLKeys(obj *hclobj.Object, valid []string) error {
+	validMap := make(map[string]struct{}, len(valid))
+	for _, v := range valid {
+		validMap[v] = struct{}{}
+	}
+
+	var result error
+	for _, o := range obj.Elem(true) {
+		if _, ok := validMap[o.Key]; !ok {
+			result = multierror.Append(result, fmt.Errorf(
+				"invald key: %s", o.Key))
+		}
+	}
+
+	return result
 }
