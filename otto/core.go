@@ -539,18 +539,51 @@ func (c *Core) Status() error {
 			"Error loading build status: %s", err)
 	}
 
+	// Deploy
+	c.ui.Message("Loading deploy status")
+	deploy, err := c.dir.GetDeploy(&directory.Deploy{Lookup: directory.Lookup{
+		AppID: c.appfile.ID, Infra: infra.Name, InfraFlavor: infra.Flavor}})
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading deploy status: %s", err)
+	}
+
+	// Infra
+	c.ui.Message("Loading infra status")
+	infraEntry, err := c.dir.GetInfra(&directory.Infra{Lookup: directory.Lookup{
+		Infra: infra.Name}})
+	if err != nil {
+		return fmt.Errorf(
+			"Error loading infra status: %s", err)
+	}
+
 	// Create the status texts
 	devStatus := "[red]NOT CREATED"
 	if dev.IsReady() {
 		devStatus = "[green]CREATED"
 	}
-	buildStatus := "[red]NO BUILDS"
+	buildStatus := "[red]NOT BUILT"
 	if build != nil {
 		buildStatus = "[green]BUILD READY"
 	}
+	deployStatus := "[red]NOT DEPLOYED"
+	if deploy.IsDeployed() {
+		deployStatus = "[green]DEPLOYED"
+	} else if deploy.IsFailed() {
+		deployStatus = "[red]DEPLOY FAILED"
+	}
+	infraStatus := "[red]NOT CREATED"
+	if infraEntry.IsReady() {
+		infraStatus = "[green]READY"
+	} else if infraEntry.IsPartial() {
+		infraStatus = "[yellow]PARTIAL"
+	}
 
 	c.ui.Header("Status results...")
-	c.ui.Message(fmt.Sprintf("Development environment: %s", devStatus))
+	c.ui.Message(fmt.Sprintf("Dev environment: %s", devStatus))
+	c.ui.Message(fmt.Sprintf("Build:           %s", buildStatus))
+	c.ui.Message(fmt.Sprintf("Deploy:          %s", deployStatus))
+	c.ui.Message(fmt.Sprintf("Infra:           %s", infraStatus))
 
 	return nil
 }

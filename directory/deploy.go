@@ -25,6 +25,16 @@ func (d *Deploy) IsNew() bool {
 	return d != nil && d.State == DeployStateNew
 }
 
+// IsDeployed reports if this deploy succeeded.
+func (d *Deploy) IsDeployed() bool {
+	return d != nil && d.State == DeployStateSuccess
+}
+
+// IsFailed reports if this deploy failed.
+func (d *Deploy) IsFailed() bool {
+	return d != nil && d.State == DeployStateFail
+}
+
 // MarkFailed sets a deploy's state to failed
 func (d *Deploy) MarkFailed() {
 	d.State = DeployStateFail
