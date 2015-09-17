@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
@@ -512,70 +513,45 @@ func (c *Core) Infra(action string, args []string) error {
 
 // Status outputs to the UI the status of all the stages of this application.
 func (c *Core) Status() error {
-	infra := c.appfile.ActiveInfrastructure()
-	if infra == nil {
-		panic("infra not found")
+	// Start loading the status info in a goroutine
+	statusCh := make(chan *statusInfo, 1)
+	go c.statusInfo(statusCh)
+
+	// Wait for the status. If this takes longer than a certain amount
+	// of time then we show a loading message.
+	var status *statusInfo
+	select {
+	case status = <-statusCh:
+	case <-time.After(150 * time.Millisecond):
+		c.ui.Header("Loading status...")
+		c.ui.Message(fmt.Sprintf(
+			"Depending on your configured directory backend, this may require\n" +
+				"network operations and can take some time. On a typical broadband\n" +
+				"connection, this shouldn't take more than a few seconds."))
 	}
-
-	// We output UI about loading because if the directory is remote
-	// (such as Atlas), then this can actually be slow.
-	c.ui.Header("Loading status information...")
-
-	// Dev
-	c.ui.Message("Loading development status")
-	dev, err := c.dir.GetDev(&directory.Dev{Lookup: directory.Lookup{
-		AppID: c.appfile.ID}})
-	if err != nil {
-		return fmt.Errorf(
-			"Error loading development status: %s", err)
-	}
-
-	// Build
-	c.ui.Message("Loading build status")
-	build, err := c.dir.GetBuild(&directory.Build{Lookup: directory.Lookup{
-		AppID: c.appfile.ID, Infra: infra.Name, InfraFlavor: infra.Flavor}})
-	if err != nil {
-		return fmt.Errorf(
-			"Error loading build status: %s", err)
-	}
-
-	// Deploy
-	c.ui.Message("Loading deploy status")
-	deploy, err := c.dir.GetDeploy(&directory.Deploy{Lookup: directory.Lookup{
-		AppID: c.appfile.ID, Infra: infra.Name, InfraFlavor: infra.Flavor}})
-	if err != nil {
-		return fmt.Errorf(
-			"Error loading deploy status: %s", err)
-	}
-
-	// Infra
-	c.ui.Message("Loading infra status")
-	infraEntry, err := c.dir.GetInfra(&directory.Infra{Lookup: directory.Lookup{
-		Infra: infra.Name}})
-	if err != nil {
-		return fmt.Errorf(
-			"Error loading infra status: %s", err)
+	if status == nil {
+		status = <-statusCh
 	}
 
 	// Create the status texts
 	devStatus := "[red]NOT CREATED"
-	if dev.IsReady() {
+	if status.Dev.IsReady() {
 		devStatus = "[green]CREATED"
 	}
 	buildStatus := "[red]NOT BUILT"
-	if build != nil {
+	if status.Build != nil {
 		buildStatus = "[green]BUILD READY"
 	}
 	deployStatus := "[red]NOT DEPLOYED"
-	if deploy.IsDeployed() {
+	if status.Deploy.IsDeployed() {
 		deployStatus = "[green]DEPLOYED"
-	} else if deploy.IsFailed() {
+	} else if status.Deploy.IsFailed() {
 		deployStatus = "[red]DEPLOY FAILED"
 	}
 	infraStatus := "[red]NOT CREATED"
-	if infraEntry.IsReady() {
+	if status.Infra.IsReady() {
 		infraStatus = "[green]READY"
-	} else if infraEntry.IsPartial() {
+	} else if status.Infra.IsPartial() {
 		infraStatus = "[yellow]PARTIAL"
 	}
 
