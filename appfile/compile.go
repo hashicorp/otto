@@ -226,6 +226,11 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 		return nil, err
 	}
 
+	// Validate the root early
+	if err := f.Validate(); err != nil {
+		return nil, err
+	}
+
 	// Add our root vertex for this Appfile
 	vertex := &CompiledGraphVertex{File: f, NameValue: f.Application.Name}
 	compiled.Graph.Add(vertex)
