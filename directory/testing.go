@@ -182,4 +182,23 @@ func TestBackend(t *testing.T, b Backend) {
 	if !reflect.DeepEqual(devResult, dev) {
 		t.Fatalf("GetDev (exist) bad: %#v", devResult)
 	}
+
+	// DeleteDev (exists)
+	err = b.DeleteDev(dev)
+	if err != nil {
+		t.Fatalf("DeleteDev error: %s", err)
+	}
+	devResult, err = b.GetDev(dev)
+	if err != nil {
+		t.Fatalf("GetDev (non-exist) error: %s", err)
+	}
+	if devResult != nil {
+		t.Fatal("GetDev (non-exist): result should be nil")
+	}
+
+	// DeleteDev (doesn't exist)
+	err = b.DeleteDev(dev)
+	if err != nil {
+		t.Fatalf("DeleteDev error: %s", err)
+	}
 }

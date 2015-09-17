@@ -211,6 +211,26 @@ func (b *BoltBackend) PutDev(dev *Dev) error {
 	})
 }
 
+func (b *BoltBackend) DeleteDev(dev *Dev) error {
+	db, err := b.db()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	return db.Update(func(tx *bolt.Tx) error {
+		// Get the app bucket
+		bucket := tx.Bucket(boltAppsBucket)
+		bucket, err = bucket.CreateBucketIfNotExists([]byte(
+			dev.Lookup.AppID))
+		if err != nil {
+			return err
+		}
+
+		return bucket.Delete([]byte("dev"))
+	})
+}
+
 func (b *BoltBackend) GetBuild(build *Build) (*Build, error) {
 	db, err := b.db()
 	if err != nil {

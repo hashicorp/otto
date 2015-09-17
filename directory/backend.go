@@ -30,6 +30,7 @@ type Backend interface {
 	// must fill in the App, Infra, and InfraFlavor fields.
 	PutDev(*Dev) error
 	GetDev(*Dev) (*Dev, error)
+	DeleteDev(*Dev) error
 
 	// PutBuild stores the result of a build.
 	//

@@ -18,6 +18,10 @@ type Dev struct {
 	ID string
 }
 
+func (d *Dev) MarkReady() {
+	d.State = DevStateReady
+}
+
 func (d *Dev) setId() {
 	d.ID = uuid.GenerateUUID()
 }
