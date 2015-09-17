@@ -148,4 +148,38 @@ func TestBackend(t *testing.T, b Backend) {
 	if !reflect.DeepEqual(deployResult, deploy) {
 		t.Fatalf("GetDeploy (exist) bad: %#v", deployResult)
 	}
+
+	//---------------------------------------------------------------
+	// Dev
+	//---------------------------------------------------------------
+
+	// GetDev (doesn't exist)
+	dev := &Dev{Lookup: Lookup{AppID: "foo"}}
+	devResult, err := b.GetDev(dev)
+	if err != nil {
+		t.Fatalf("GetDev (non-exist) error: %s", err)
+	}
+	if devResult != nil {
+		t.Fatal("GetDev (non-exist): result should be nil")
+	}
+
+	// PutDev (doesn't exist)
+	if dev.ID != "" {
+		t.Fatalf("PutDev: ID should be empty before set")
+	}
+	if err := b.PutDev(dev); err != nil {
+		t.Fatalf("PutDev err: %s", err)
+	}
+	if dev.ID == "" {
+		t.Fatalf("PutDev: dev ID not set")
+	}
+
+	// GetDev (exists)
+	devResult, err = b.GetDev(dev)
+	if err != nil {
+		t.Fatalf("GetDev (exist) error: %s", err)
+	}
+	if !reflect.DeepEqual(devResult, dev) {
+		t.Fatalf("GetDev (exist) bad: %#v", devResult)
+	}
 }

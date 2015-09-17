@@ -150,6 +150,67 @@ func (b *BoltBackend) PutInfra(infra *Infra) error {
 	})
 }
 
+func (b *BoltBackend) GetDev(dev *Dev) (*Dev, error) {
+	db, err := b.db()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	var result *Dev
+	err = db.View(func(tx *bolt.Tx) error {
+		// Get the app bucket
+		bucket := tx.Bucket(boltAppsBucket).Bucket([]byte(
+			dev.Lookup.AppID))
+		if bucket == nil {
+			return nil
+		}
+
+		// Get the key for this infra
+		data := bucket.Get([]byte("dev"))
+		if data == nil {
+			return nil
+		}
+
+		result = &Dev{}
+		return b.structRead(result, data)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (b *BoltBackend) PutDev(dev *Dev) error {
+	if dev.ID == "" {
+		dev.setId()
+	}
+
+	db, err := b.db()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	return db.Update(func(tx *bolt.Tx) error {
+		data, err := b.structData(dev)
+		if err != nil {
+			return err
+		}
+
+		// Get the app bucket
+		bucket := tx.Bucket(boltAppsBucket)
+		bucket, err = bucket.CreateBucketIfNotExists([]byte(
+			dev.Lookup.AppID))
+		if err != nil {
+			return err
+		}
+
+		return bucket.Put([]byte("dev"), data)
+	})
+}
+
 func (b *BoltBackend) GetBuild(build *Build) (*Build, error) {
 	db, err := b.db()
 	if err != nil {
