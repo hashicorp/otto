@@ -150,6 +150,7 @@ func (c *CompileCommand) Run(args []string) int {
 	capp, err := appfile.Compile(app, &appfile.CompileOpts{
 		Dir: filepath.Join(
 			filepath.Dir(app.Path), DefaultOutputDir, DefaultOutputDirCompiledAppfile),
+		Detect:   detectConfig,
 		Callback: c.compileCallback(ui),
 	})
 	if err != nil {
