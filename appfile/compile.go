@@ -362,6 +362,11 @@ func compileDependencies(
 				}
 				f = fDef
 
+				// We merge the root infrastructure choice upwards to
+				// all dependencies.
+				f.Infrastructure = root.File.Infrastructure
+				f.Project.Infrastructure = root.File.Project.Infrastructure
+
 				// Build the vertex for this
 				vertex = &CompiledGraphVertex{
 					File:      f,
