@@ -31,12 +31,18 @@ const (
 )
 
 func init() {
-	Ui = &cli.PrefixedUi{
-		AskPrefix:    OutputPrefix,
-		OutputPrefix: OutputPrefix,
-		InfoPrefix:   OutputPrefix,
-		ErrorPrefix:  ErrorPrefix,
-		Ui:           &cli.BasicUi{Writer: os.Stdout},
+	Ui = &cli.ColoredUi{
+		OutputColor: cli.UiColorNone,
+		InfoColor:   cli.UiColorNone,
+		ErrorColor:  cli.UiColorRed,
+		WarnColor:   cli.UiColorNone,
+		Ui: &cli.PrefixedUi{
+			AskPrefix:    OutputPrefix,
+			OutputPrefix: OutputPrefix,
+			InfoPrefix:   OutputPrefix,
+			ErrorPrefix:  ErrorPrefix,
+			Ui:           &cli.BasicUi{Writer: os.Stdout},
+		},
 	}
 
 	apps := appGo.Tuples.Map(app.StructFactory(new(appGo.App)))
