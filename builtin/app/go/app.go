@@ -1,6 +1,7 @@
 package goapp
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -30,6 +31,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,
+			Context: map[string]interface{}{
+				"dep_binary_path": fmt.Sprintf("/usr/local/bin/%s", ctx.Application.Name),
+			},
 		},
 		Customizations: []*compile.Customization{
 			&compile.Customization{
@@ -46,6 +50,18 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 						Type:        schema.TypeString,
 						Default:     "",
 						Description: "Go import path for where to put this in the GOPATH",
+					},
+				},
+			},
+
+			&compile.Customization{
+				Type:     "dev-dep",
+				Callback: custom.processDevDep,
+				Schema: map[string]*schema.FieldSchema{
+					"run_command": &schema.FieldSchema{
+						Type:        schema.TypeString,
+						Default:     "{{ dep_binary_path }}",
+						Description: "Command to run this app as a dep",
 					},
 				},
 			},

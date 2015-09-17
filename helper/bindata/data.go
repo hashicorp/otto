@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -98,6 +99,38 @@ func (d *Data) RenderReal(dst, src string) error {
 	defer f.Close()
 
 	return d.renderLowLevel(dst, src, f)
+}
+
+// RenderString renders a string.
+func (d *Data) RenderString(tpl string) (string, error) {
+	// Make a temporary file for the contents. This is kind of silly we
+	// need to do this but we can make this render in-memory later.
+	tf, err := ioutil.TempFile("", "otto")
+	if err != nil {
+		return "", err
+	}
+	tf.Close()
+	defer os.Remove(tf.Name())
+
+	// Render
+	err = d.renderLowLevel(tf.Name(), "dummy.tpl", strings.NewReader(tpl))
+	if err != nil {
+		return "", err
+	}
+
+	// Copy the file contents back into memory
+	var result bytes.Buffer
+	f, err := os.Open(tf.Name())
+	if err != nil {
+		return "", err
+	}
+	_, err = io.Copy(&result, f)
+	f.Close()
+	if err != nil {
+		return "", err
+	}
+
+	return result.String(), nil
 }
 
 func (d *Data) renderLowLevel(dst string, src string, r io.Reader) error {

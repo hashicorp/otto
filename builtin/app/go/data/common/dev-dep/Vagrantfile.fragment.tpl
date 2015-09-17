@@ -2,7 +2,7 @@
 
 ${{ name }}_setup = <<COPY
 # Copy our binary
-sudo mv /tmp/dep-{{ name }} /usr/local/bin/{{ name }}
+sudo mv /tmp/dep-{{ name }} {{ dep_binary_path }}
 
 # Copy the upstart file
 sudo mv /tmp/dep-{{ name }}.upstart.conf /etc/init/{{ name }}.conf

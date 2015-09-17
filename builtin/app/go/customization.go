@@ -1,12 +1,24 @@
 package goapp
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/schema"
 )
 
 type customizations struct {
 	Opts *compile.AppOptions
+}
+
+func (c *customizations) processDevDep(d *schema.FieldData) error {
+	cmd, err := c.Opts.Bindata.RenderString(d.Get("run_command").(string))
+	if err != nil {
+		return fmt.Errorf("Error processing 'run_command': %s", err)
+	}
+
+	c.Opts.Bindata.Context["dep_run_command"] = cmd
+	return nil
 }
 
 func (c *customizations) processGo(d *schema.FieldData) error {

@@ -10,5 +10,5 @@ stop on runlevel [06]
 post-stop exec sleep 5
 
 script
-  /usr/local/bin/{{ name }} >>/var/log/{{ name }}.log 2>&1
+  {{ dep_run_command }} >>/var/log/{{ name }}.log 2>&1
 end script
