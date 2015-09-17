@@ -113,6 +113,12 @@ func parseApplication(result *File, obj *hclobj.Object) error {
 		return fmt.Errorf("only one 'application' block allowed")
 	}
 
+	// Check for invalid keys
+	valid := []string{"name", "type", "dependency"}
+	if err := checkHCLKeys(obj, valid); err != nil {
+		return multierror.Prefix(err, "application:")
+	}
+
 	var m map[string]interface{}
 	if err := hcl.DecodeObject(&m, obj); err != nil {
 		return err
@@ -185,6 +191,12 @@ func parseImport(result *File, obj *hclobj.Object) error {
 	// Go through each object and turn it into an actual result.
 	collection := make([]*Import, 0, len(objects))
 	for _, o := range objects {
+		// Check for invalid keys
+		if err := checkHCLKeys(o, nil); err != nil {
+			return multierror.Prefix(err, fmt.Sprintf(
+				"import '%s':", o.Key))
+		}
+
 		collection = append(collection, &Import{
 			Source: o.Key,
 		})
@@ -216,6 +228,13 @@ func parseInfra(result *File, obj *hclobj.Object) error {
 	// Go through each object and turn it into an actual result.
 	collection := make([]*Infrastructure, 0, len(objects))
 	for n, o := range objects {
+		// Check for invalid keys
+		valid := []string{"name", "type", "flavor", "foundation"}
+		if err := checkHCLKeys(o, valid); err != nil {
+			return multierror.Prefix(err, fmt.Sprintf(
+				"infrastructure '%s':", n))
+		}
+
 		var m map[string]interface{}
 		if err := hcl.DecodeObject(&m, o); err != nil {
 			return err
@@ -288,6 +307,12 @@ func parseFoundations(result *Infrastructure, obj *hclobj.Object) error {
 func parseProject(result *File, obj *hclobj.Object) error {
 	if obj.Len() > 1 {
 		return fmt.Errorf("only one 'project' block allowed")
+	}
+
+	// Check for invalid keys
+	valid := []string{"name", "infrastructure"}
+	if err := checkHCLKeys(obj, valid); err != nil {
+		return multierror.Prefix(err, "project:")
 	}
 
 	var m map[string]interface{}
