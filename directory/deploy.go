@@ -34,6 +34,26 @@ type Deploy struct {
 	ID string
 }
 
+// IsNew reports if this deploy is freshly created and not yet run
+func (d *Deploy) IsNew() bool {
+	return d != nil && d.State == DeployStateNew
+}
+
+// MarkFailed sets a deploy's state to failed
+func (d *Deploy) MarkFailed() {
+	d.State = DeployStateFail
+}
+
+// MarkSuccess sets a deploy's state to success
+func (d *Deploy) MarkSuccessful() {
+	d.State = DeployStateSuccess
+}
+
+// MarkGone resets a deploy's state to the "new" state
+func (d *Deploy) MarkGone() {
+	d.State = DeployStateNew
+}
+
 func (d *Deploy) setId() {
 	d.ID = uuid.GenerateUUID()
 }
