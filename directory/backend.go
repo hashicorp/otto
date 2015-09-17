@@ -24,6 +24,14 @@ type Backend interface {
 	PutInfra(*Infra) error
 	GetInfra(*Infra) (*Infra, error)
 
+	// PutDev stores the result of a dev.
+	//
+	// GetDev queries a dev. The result is returned. The parameter
+	// must fill in the App, Infra, and InfraFlavor fields.
+	PutDev(*Dev) error
+	GetDev(*Dev) (*Dev, error)
+	DeleteDev(*Dev) error
+
 	// PutBuild stores the result of a build.
 	//
 	// GetBuild queries a build. The result is returned. The parameter

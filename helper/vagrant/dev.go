@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/directory"
 )
 
 // DevOptions is the configuration struct used for Dev.
@@ -67,10 +68,19 @@ func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
 	if err := opts.vagrant(ctx).Execute("destroy", "-f"); err != nil {
 		return err
 	}
-
 	ctx.Ui.Raw("\n")
-	ctx.Ui.Header("[green]Development environment has been destroyed!")
 
+	// Store the dev status into the directory. We just do this before
+	// since there are a lot of cases where Vagrant fails but still imported.
+	// We just override any prior dev.
+	ctx.Ui.Header("Deleting development environment metadata...")
+	dev := &directory.Dev{Lookup: directory.Lookup{AppID: ctx.Appfile.ID}}
+	if err := ctx.Directory.DeleteDev(dev); err != nil {
+		return fmt.Errorf(
+			"Error deleting dev environment metadata: %s", err)
+	}
+
+	ctx.Ui.Header("[green]Development environment has been destroyed!")
 	return nil
 }
 
@@ -117,6 +127,16 @@ func (opts *DevOptions) actionUp(ctx *app.Context) error {
 		"Raw Vagrant output will begin streaming in below. Otto does\n" +
 			"not create this output. It is mirrored directly from Vagrant\n" +
 			"while the development environment is being created.\n\n")
+
+	// Store the dev status into the directory. We just do this before
+	// since there are a lot of cases where Vagrant fails but still imported.
+	// We just override any prior dev.
+	dev := &directory.Dev{Lookup: directory.Lookup{AppID: ctx.Appfile.ID}}
+	dev.MarkReady()
+	if err := ctx.Directory.PutDev(dev); err != nil {
+		return fmt.Errorf(
+			"Error saving dev environment metadata: %s", err)
+	}
 
 	// Run it!
 	if err := opts.vagrant(ctx).Execute("up"); err != nil {
