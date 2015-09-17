@@ -534,21 +534,21 @@ func (c *Core) Status() error {
 	}
 
 	// Create the status texts
-	devStatus := "[red]NOT CREATED"
+	devStatus := "[reset]NOT CREATED"
 	if status.Dev.IsReady() {
 		devStatus = "[green]CREATED"
 	}
-	buildStatus := "[red]NOT BUILT"
+	buildStatus := "[reset]NOT BUILT"
 	if status.Build != nil {
 		buildStatus = "[green]BUILD READY"
 	}
-	deployStatus := "[red]NOT DEPLOYED"
+	deployStatus := "[reset]NOT DEPLOYED"
 	if status.Deploy.IsDeployed() {
 		deployStatus = "[green]DEPLOYED"
 	} else if status.Deploy.IsFailed() {
-		deployStatus = "[red]DEPLOY FAILED"
+		deployStatus = "[reset]DEPLOY FAILED"
 	}
-	infraStatus := "[red]NOT CREATED"
+	infraStatus := "[reset]NOT CREATED"
 	if status.Infra.IsReady() {
 		infraStatus = "[green]READY"
 	} else if status.Infra.IsPartial() {
