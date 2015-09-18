@@ -5,6 +5,7 @@ import (
 	"os/signal"
 
 	appCustom "github.com/hashicorp/otto/builtin/app/custom"
+	appDockerExt "github.com/hashicorp/otto/builtin/app/docker-external"
 	appGo "github.com/hashicorp/otto/builtin/app/go"
 	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
 	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
@@ -47,6 +48,7 @@ func init() {
 
 	apps := appGo.Tuples.Map(app.StructFactory(new(appGo.App)))
 	apps.Add(appCustom.Tuples.Map(app.StructFactory(new(appCustom.App))))
+	apps.Add(appDockerExt.Tuples.Map(app.StructFactory(new(appDockerExt.App))))
 	apps.Add(appRuby.Tuples.Map(app.StructFactory(new(appRuby.App))))
 
 	foundations := foundationConsul.Tuples.Map(foundation.StructFactory(new(foundationConsul.Foundation)))
