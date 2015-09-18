@@ -70,7 +70,7 @@ func (a *App) Build(ctx *app.Context) error {
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
-	return nil
+	return fmt.Errorf(deployError)
 }
 
 func (a *App) Dev(ctx *app.Context) error {
@@ -85,7 +85,7 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 }
 
 const devInstructions = `
-A development has been created.
+A development environment has been created.
 
 Note that this development environment is just an example of what a
 consumer of this application might see as a development dependency.
@@ -93,4 +93,12 @@ consumer of this application might see as a development dependency.
 developed and built external to Otto. A future version of Otto will include
 a native "docker" type for a Docker-based development workflow. For
 the "docker-external" type, the specified docker image is started.
+`
+
+const deplyError = `
+Deployment isn't supported for "docker-external" yet.
+
+This will be supported very soon. Otto plans to integrate with
+Nomad (nomadproject.io) and once we do that, Otto will schedule the
+container to run. Until then, deployment isn't supported. Sorry!
 `
