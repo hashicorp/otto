@@ -557,9 +557,9 @@ func (c *Core) Status() error {
 
 	c.ui.Header("Status results...")
 	c.ui.Message(fmt.Sprintf("Dev environment: %s", devStatus))
+	c.ui.Message(fmt.Sprintf("Infra:           %s", infraStatus))
 	c.ui.Message(fmt.Sprintf("Build:           %s", buildStatus))
 	c.ui.Message(fmt.Sprintf("Deploy:          %s", deployStatus))
-	c.ui.Message(fmt.Sprintf("Infra:           %s", infraStatus))
 
 	return nil
 }
