@@ -52,10 +52,10 @@ func Deploy(opts *DeployOptions) *router.Router {
 				SynopsisText: actionDestroySyn,
 				HelpText:     strings.TrimSpace(actionDestroyHelp),
 			},
-			"info": &app.Action{
-				Execute:  opts.actionInfo,
-				Synopsis: actionInfoSyn,
-				Help:     strings.TrimSpace(actionInfoHelp),
+			"info": &router.SimpleAction{
+				ExecuteFunc:  opts.actionInfo,
+				SynopsisText: actionInfoSyn,
+				HelpText:     strings.TrimSpace(actionInfoHelp),
 			},
 		},
 	}

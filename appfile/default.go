@@ -27,7 +27,7 @@ func Default(dir string, det *detect.Config) (*File, error) {
 
 		Project: &Project{
 			Name:           appName,
-			Infrastructure: "aws",
+			Infrastructure: appName,
 		},
 
 		Infrastructure: []*Infrastructure{
