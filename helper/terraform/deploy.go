@@ -153,16 +153,18 @@ func (opts *DeployOptions) actionDestroy(ctx *app.Context) error {
 		vars[k] = v
 	}
 
-	buildVars, err := opts.lookupBuildVars(ctx, infra)
-	if err != nil {
-		return err
-	}
-	if buildVars == nil {
-		return fmt.Errorf(
-			"This application hasn't been built yet. Nothing to destroy.")
-	}
-	for k, v := range buildVars {
-		vars[k] = v
+	if !opts.DisableBuild {
+		buildVars, err := opts.lookupBuildVars(ctx, infra)
+		if err != nil {
+			return err
+		}
+		if buildVars == nil {
+			return fmt.Errorf(
+				"This application hasn't been built yet. Nothing to destroy.")
+		}
+		for k, v := range buildVars {
+			vars[k] = v
+		}
 	}
 
 	deploy, err := opts.lookupDeploy(ctx)
