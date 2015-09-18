@@ -2,11 +2,15 @@ package vagrant
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/ui"
 )
 
 // DevOptions is the configuration struct used for Dev.
@@ -101,6 +105,23 @@ func (opts *DevOptions) actionRaw(ctx *app.Context) error {
 }
 
 func (opts *DevOptions) actionSSH(ctx *app.Context) error {
+	// Check if we have an SSH cache. If so, use that.
+	path := filepath.Join(ctx.CacheDir, "dev_ssh_cache")
+	if _, err := os.Stat(path); err == nil {
+		ctx.Ui.Header("Executing SSH with cached SSH info...")
+		cmd := exec.Command("ssh", "-F", path, "default")
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Start(); err != nil {
+			return err
+		}
+		if err := cmd.Wait(); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	project := Project(&ctx.Shared)
 	if err := project.InstallIfNeeded(); err != nil {
 		return err
@@ -142,8 +163,14 @@ func (opts *DevOptions) actionUp(ctx *app.Context) error {
 	if err := opts.vagrant(ctx).Execute("up"); err != nil {
 		return err
 	}
+
+	// Cache the SSH info
+	ctx.Ui.Header("Caching SSH credentials from Vagrant...")
+	if err := opts.sshCacheInit(ctx); err != nil {
+		return err
+	}
+
 	// Success, let the user know whats up
-	ctx.Ui.Raw("\n")
 	ctx.Ui.Header("[green]Development environment successfully created!")
 	if opts.Instructions != "" {
 		ctx.Ui.Message(opts.Instructions)
@@ -166,6 +193,33 @@ func (opts *DevOptions) vagrant(ctx *app.Context) *Vagrant {
 		DataDir: dataDir,
 		Ui:      ctx.Ui,
 	}
+}
+
+func (opts *DevOptions) sshCacheInit(ctx *app.Context) error {
+	// Create a Vagrant instance with a mock UI so we can capture
+	// all the output in memory.
+	var mockUi ui.Mock
+	vagrant := opts.vagrant(ctx)
+	vagrant.Ui = &mockUi
+	if err := vagrant.Execute("ssh-config"); err != nil {
+		return err
+	}
+
+	// Write the output to the cache
+	path := filepath.Join(ctx.CacheDir, "dev_ssh_cache")
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	for _, raw := range mockUi.RawBuf {
+		if _, err := io.Copy(f, strings.NewReader(raw)); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Synopsis text for actions
