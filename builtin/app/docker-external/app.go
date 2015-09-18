@@ -2,6 +2,7 @@ package dockerext
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/schema"
+	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
 
@@ -70,7 +72,20 @@ func (a *App) Build(ctx *app.Context) error {
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
-	return fmt.Errorf(deployError)
+	// Check if we have a deployment script
+	path := filepath.Join(ctx.Dir, "deploy", "main.tf")
+	if _, err := os.Stat(path); err != nil {
+		return fmt.Errorf(deployError)
+	}
+
+	// We do! Run it
+	return terraform.Deploy(&terraform.DeployOptions{
+		InfraOutputMap: map[string]string{
+			"region":         "aws_region",
+			"subnet-private": "private_subnet_id",
+			"subnet-public":  "public_subnet_id",
+		},
+	}).Route(ctx)
 }
 
 func (a *App) Dev(ctx *app.Context) error {
@@ -95,7 +110,7 @@ a native "docker" type for a Docker-based development workflow. For
 the "docker-external" type, the specified docker image is started.
 `
 
-const deplyError = `
+const deployError = `
 Deployment isn't supported for "docker-external" yet.
 
 This will be supported very soon. Otto plans to integrate with
