@@ -32,7 +32,7 @@ func Default(dir string, det *detect.Config) (*File, error) {
 
 		Infrastructure: []*Infrastructure{
 			&Infrastructure{
-				Name:   "aws",
+				Name:   appName,
 				Type:   "aws",
 				Flavor: "vpc-public-private",
 
