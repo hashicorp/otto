@@ -722,7 +722,7 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 	// tuple.
 	tuple := app.Tuple{
 		App:         f.Application.Type,
-		Infra:       f.Project.Infrastructure,
+		Infra:       config.Type,
 		InfraFlavor: config.Flavor,
 	}
 
@@ -779,19 +779,19 @@ func (c *Core) app(ctx *app.Context) (app.App, error) {
 }
 
 func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, error) {
-	// Get the infrastructure factory
-	f, ok := c.infras[c.appfile.Project.Infrastructure]
-	if !ok {
-		return nil, nil, fmt.Errorf(
-			"infrastructure type not supported: %s",
-			c.appfile.Project.Infrastructure)
-	}
-
 	// Get the infrastructure configuration
 	config := c.appfile.ActiveInfrastructure()
 	if config == nil {
 		return nil, nil, fmt.Errorf(
 			"infrastructure not found in appfile: %s",
+			c.appfile.Project.Infrastructure)
+	}
+
+	// Get the infrastructure factory
+	f, ok := c.infras[config.Type]
+	if !ok {
+		return nil, nil, fmt.Errorf(
+			"infrastructure type not supported: %s",
 			c.appfile.Project.Infrastructure)
 	}
 
