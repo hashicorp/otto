@@ -80,6 +80,11 @@ func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
 			"Error deleting dev environment metadata: %s", err)
 	}
 
+	if err := opts.sshCache(ctx).Delete(); err != nil {
+		return fmt.Errorf(
+			"Error cleaning SSH cache: %s", err)
+	}
+
 	ctx.Ui.Header("[green]Development environment has been destroyed!")
 	return nil
 }
@@ -107,11 +112,7 @@ func (opts *DevOptions) actionSSH(ctx *app.Context) error {
 	}
 
 	ctx.Ui.Header("Executing SSH. This may take a few seconds...")
-	if err := opts.vagrant(ctx).Execute("ssh"); err != nil {
-		return err
-	}
-
-	return nil
+	return opts.sshCache(ctx).Exec(true)
 }
 
 func (opts *DevOptions) actionUp(ctx *app.Context) error {
@@ -142,8 +143,14 @@ func (opts *DevOptions) actionUp(ctx *app.Context) error {
 	if err := opts.vagrant(ctx).Execute("up"); err != nil {
 		return err
 	}
+
+	// Cache the SSH info
+	ctx.Ui.Header("Caching SSH credentials from Vagrant...")
+	if err := opts.sshCache(ctx).Cache(); err != nil {
+		return err
+	}
+
 	// Success, let the user know whats up
-	ctx.Ui.Raw("\n")
 	ctx.Ui.Header("[green]Development environment successfully created!")
 	if opts.Instructions != "" {
 		ctx.Ui.Message(opts.Instructions)
@@ -165,6 +172,13 @@ func (opts *DevOptions) vagrant(ctx *app.Context) *Vagrant {
 		Dir:     dir,
 		DataDir: dataDir,
 		Ui:      ctx.Ui,
+	}
+}
+
+func (opts *DevOptions) sshCache(ctx *app.Context) *SSHCache {
+	return &SSHCache{
+		Path:    filepath.Join(ctx.CacheDir, "dev_ssh_cache"),
+		Vagrant: opts.vagrant(ctx),
 	}
 }
 
