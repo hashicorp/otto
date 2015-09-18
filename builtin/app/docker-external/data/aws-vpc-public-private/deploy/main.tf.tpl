@@ -53,6 +53,17 @@ resource "aws_instance" "app" {
   tags {
     Name = "{{ name }}"
   }
+
+  # Wait for cloud-init (ensures instance is fully booted before moving on)
+  provisioner "remote-exec" {
+    inline = ["while sudo pkill -0 cloud-init 2>/dev/null; do sleep 2; done"]
+    connection {
+      user         = "ubuntu"
+      host         = "${self.private_ip}"
+      bastion_host = "${var.bastion_host}"
+      bastion_user = "${var.bastion_user}"
+    }
+  }
 }
 
 output "ip" {
