@@ -22,7 +22,7 @@ provider "aws" {
   region     = "${var.aws_region}"
 }
 
-resource "aws_security_group" "docker" {
+resource "aws_security_group" "app" {
   name   = "{{ name }}-${var.infra_id}"
   vpc_id = "${var.vpc_id}"
 
@@ -55,6 +55,6 @@ resource "aws_instance" "app" {
   }
 }
 
-output "url" {
-  value = "http://${aws_elb.app.dns_name}/"
+output "ip" {
+  value = "${aws_instance.app.private_ip}"
 }

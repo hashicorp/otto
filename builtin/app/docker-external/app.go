@@ -80,6 +80,7 @@ func (a *App) Deploy(ctx *app.Context) error {
 
 	// We do! Run it
 	return terraform.Deploy(&terraform.DeployOptions{
+		DisableBuild: true,
 		InfraOutputMap: map[string]string{
 			"region":         "aws_region",
 			"subnet-private": "private_subnet_id",
