@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/helper/router"
 )
 
 type DeployOptions struct {
@@ -38,18 +39,18 @@ type DeployOptions struct {
 // failures is handled and state storage is automatic as well.
 //
 // This function implements app.App.Deploy.
-func Deploy(opts *DeployOptions) *app.Router {
-	return &app.Router{
-		Actions: map[string]*app.Action{
-			"": &app.Action{
-				Execute:  opts.actionDeploy,
-				Synopsis: actionDeploySyn,
-				Help:     strings.TrimSpace(actionDeployHelp),
+func Deploy(opts *DeployOptions) *router.Router {
+	return &router.Router{
+		Actions: map[string]router.Action{
+			"": &router.SimpleAction{
+				ExecuteFunc:  opts.actionDeploy,
+				SynopsisText: actionDeploySyn,
+				HelpText:     strings.TrimSpace(actionDeployHelp),
 			},
-			"destroy": &app.Action{
-				Execute:  opts.actionDestroy,
-				Synopsis: actionDestroySyn,
-				Help:     strings.TrimSpace(actionDestroyHelp),
+			"destroy": &router.SimpleAction{
+				ExecuteFunc:  opts.actionDestroy,
+				SynopsisText: actionDestroySyn,
+				HelpText:     strings.TrimSpace(actionDestroyHelp),
 			},
 			"info": &app.Action{
 				Execute:  opts.actionInfo,
@@ -60,7 +61,8 @@ func Deploy(opts *DeployOptions) *app.Router {
 	}
 }
 
-func (opts *DeployOptions) actionDeploy(ctx *app.Context) error {
+func (opts *DeployOptions) actionDeploy(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
 	project, err := Project(&ctx.Shared)
 	if err != nil {
 		return err
@@ -133,7 +135,8 @@ func (opts *DeployOptions) actionDeploy(ctx *app.Context) error {
 	return nil
 }
 
-func (opts *DeployOptions) actionDestroy(ctx *app.Context) error {
+func (opts *DeployOptions) actionDestroy(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
 	project, err := Project(&ctx.Shared)
 	if err != nil {
 		return err
@@ -203,7 +206,8 @@ func (opts *DeployOptions) actionDestroy(ctx *app.Context) error {
 	return nil
 }
 
-func (opts *DeployOptions) actionInfo(ctx *app.Context) error {
+func (opts *DeployOptions) actionInfo(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
 	project, err := Project(&ctx.Shared)
 	if err != nil {
 		return err
@@ -373,9 +377,9 @@ Usage: otto deploy
 
   Deploys a built artifact into your infrastructure.
 
-	This command will take the latest built artifact and deploy it into your
-	infrastructure. Otto will create or replace any necessary resources required
-	to run your app.
+  This command will take the latest built artifact and deploy it into your
+  infrastructure. Otto will create or replace any necessary resources required
+  to run your app.
 `
 
 const actionDestroyHelp = `
@@ -383,9 +387,9 @@ Usage: otto deploy destroy
 
   Destroys any deployed resources associated with this application.
 
-	This command will remove any previously-deployed resources from your
-	infrastructure. This must be run for all of apps in an infrastructure before
-	'otto infra destroy' will work.
+  This command will remove any previously-deployed resources from your
+  infrastructure. This must be run for all of apps in an infrastructure before
+  'otto infra destroy' will work.
 `
 
 const actionInfoHelp = `

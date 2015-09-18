@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/helper/router"
 )
 
 // DevOptions is the configuration struct used for Dev.
@@ -27,37 +28,38 @@ type DevOptions struct {
 // Dev can be used as an implementation of app.App.Dev to automatically
 // handle creating a development environment and forwarding commands down
 // to Vagrant.
-func Dev(opts *DevOptions) *app.Router {
-	return &app.Router{
-		Actions: map[string]*app.Action{
-			"": &app.Action{
-				Execute:  opts.actionUp,
-				Synopsis: actionUpSyn,
-				Help:     strings.TrimSpace(actionUpHelp),
+func Dev(opts *DevOptions) *router.Router {
+	return &router.Router{
+		Actions: map[string]router.Action{
+			"": &router.SimpleAction{
+				ExecuteFunc:  opts.actionUp,
+				SynopsisText: actionUpSyn,
+				HelpText:     strings.TrimSpace(actionUpHelp),
 			},
 
-			"destroy": &app.Action{
-				Execute:  opts.actionDestroy,
-				Synopsis: actionDestroySyn,
-				Help:     strings.TrimSpace(actionDestroyHelp),
+			"destroy": &router.SimpleAction{
+				ExecuteFunc:  opts.actionDestroy,
+				SynopsisText: actionDestroySyn,
+				HelpText:     strings.TrimSpace(actionDestroyHelp),
 			},
 
-			"ssh": &app.Action{
-				Execute:  opts.actionSSH,
-				Synopsis: actionSSHSyn,
-				Help:     strings.TrimSpace(actionSSHHelp),
+			"ssh": &router.SimpleAction{
+				ExecuteFunc:  opts.actionSSH,
+				SynopsisText: actionSSHSyn,
+				HelpText:     strings.TrimSpace(actionSSHHelp),
 			},
 
-			"vagrant": &app.Action{
-				Execute:  opts.actionRaw,
-				Synopsis: actionVagrantSyn,
-				Help:     strings.TrimSpace(actionVagrantHelp),
+			"vagrant": &router.SimpleAction{
+				ExecuteFunc:  opts.actionRaw,
+				SynopsisText: actionVagrantSyn,
+				HelpText:     strings.TrimSpace(actionVagrantHelp),
 			},
 		},
 	}
 }
 
-func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
+func (opts *DevOptions) actionDestroy(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
 	project := Project(&ctx.Shared)
 	if err := project.InstallIfNeeded(); err != nil {
 		return err
@@ -89,7 +91,8 @@ func (opts *DevOptions) actionDestroy(ctx *app.Context) error {
 	return nil
 }
 
-func (opts *DevOptions) actionRaw(ctx *app.Context) error {
+func (opts *DevOptions) actionRaw(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
 	project := Project(&ctx.Shared)
 	if err := project.InstallIfNeeded(); err != nil {
 		return err
@@ -105,7 +108,8 @@ func (opts *DevOptions) actionRaw(ctx *app.Context) error {
 	return nil
 }
 
-func (opts *DevOptions) actionSSH(ctx *app.Context) error {
+func (opts *DevOptions) actionSSH(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
 	project := Project(&ctx.Shared)
 	if err := project.InstallIfNeeded(); err != nil {
 		return err
@@ -115,7 +119,8 @@ func (opts *DevOptions) actionSSH(ctx *app.Context) error {
 	return opts.sshCache(ctx).Exec(true)
 }
 
-func (opts *DevOptions) actionUp(ctx *app.Context) error {
+func (opts *DevOptions) actionUp(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
 	project := Project(&ctx.Shared)
 	if err := project.InstallIfNeeded(); err != nil {
 		return err

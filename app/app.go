@@ -117,6 +117,16 @@ type Context struct {
 	FoundationDirs []string
 }
 
+// RouteName implements the router.Context interface so we can use Router
+func (c *Context) RouteName() string {
+	return c.Action
+}
+
+// RouteArgs implements the router.Context interface so we can use Router
+func (c *Context) RouteArgs() []string {
+	return c.ActionArgs
+}
+
 // CompileResult is the structure containing compilation result values.
 type CompileResult struct {
 	// FoundationConfig is the configuration for the various foundational
