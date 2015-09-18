@@ -29,6 +29,10 @@ type Infra struct {
 	ID string
 }
 
+func (i *Infra) IsPartial() bool {
+	return i != nil && i.State == InfraStatePartial
+}
+
 func (i *Infra) IsReady() bool {
 	return i != nil && i.State == InfraStateReady
 }

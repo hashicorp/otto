@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
@@ -506,6 +507,59 @@ func (c *Core) Infra(action string, args []string) error {
 			"[green]The infrastructure necessary to run this application and\n" +
 				"all other applications in this project has been destroyed.")
 	}
+
+	return nil
+}
+
+// Status outputs to the UI the status of all the stages of this application.
+func (c *Core) Status() error {
+	// Start loading the status info in a goroutine
+	statusCh := make(chan *statusInfo, 1)
+	go c.statusInfo(statusCh)
+
+	// Wait for the status. If this takes longer than a certain amount
+	// of time then we show a loading message.
+	var status *statusInfo
+	select {
+	case status = <-statusCh:
+	case <-time.After(150 * time.Millisecond):
+		c.ui.Header("Loading status...")
+		c.ui.Message(fmt.Sprintf(
+			"Depending on your configured directory backend, this may require\n" +
+				"network operations and can take some time. On a typical broadband\n" +
+				"connection, this shouldn't take more than a few seconds."))
+	}
+	if status == nil {
+		status = <-statusCh
+	}
+
+	// Create the status texts
+	devStatus := "[reset]NOT CREATED"
+	if status.Dev.IsReady() {
+		devStatus = "[green]CREATED"
+	}
+	buildStatus := "[reset]NOT BUILT"
+	if status.Build != nil {
+		buildStatus = "[green]BUILD READY"
+	}
+	deployStatus := "[reset]NOT DEPLOYED"
+	if status.Deploy.IsDeployed() {
+		deployStatus = "[green]DEPLOYED"
+	} else if status.Deploy.IsFailed() {
+		deployStatus = "[reset]DEPLOY FAILED"
+	}
+	infraStatus := "[reset]NOT CREATED"
+	if status.Infra.IsReady() {
+		infraStatus = "[green]READY"
+	} else if status.Infra.IsPartial() {
+		infraStatus = "[yellow]PARTIAL"
+	}
+
+	c.ui.Header("Status results...")
+	c.ui.Message(fmt.Sprintf("Dev environment: %s", devStatus))
+	c.ui.Message(fmt.Sprintf("Build:           %s", buildStatus))
+	c.ui.Message(fmt.Sprintf("Deploy:          %s", deployStatus))
+	c.ui.Message(fmt.Sprintf("Infra:           %s", infraStatus))
 
 	return nil
 }
