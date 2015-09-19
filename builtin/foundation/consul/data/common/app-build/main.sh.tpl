@@ -7,7 +7,7 @@ ol() { echo "[otto] $@"; }
 dir=$(pwd)
 
 # Source the variables
-source $1
+source ./vars
 
 # Download and setup Consul directories
 if ! command -v consul >/dev/null 2>&1; then
