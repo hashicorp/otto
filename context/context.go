@@ -32,4 +32,12 @@ type Shared struct {
 
 	// Appfile is the full appfile
 	Appfile *appfile.File
+
+	// FoundationDirs are the directories of the various foundation scripts.
+	//
+	// These directories will contain a "dev" and "deploy" subdirectory
+	// that should be uploaded and used for each of those environments.
+	// Within those folders, a "main.sh" file will exist that should be
+	// called.
+	FoundationDirs []string
 }

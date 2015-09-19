@@ -159,15 +159,6 @@ func (c *Core) Compile() error {
 			resultLock.Unlock()
 		}
 
-		// Build the contexts for the foundations. We use this
-		// to also compile the list of foundation dirs.
-		ctx.FoundationDirs = make([]string, len(foundations))
-		for i, _ := range foundations {
-			fCtx := foundationCtxs[i]
-			fCtx.Dir = filepath.Join(ctx.Dir, fmt.Sprintf("foundation-%s", fCtx.Tuple.Type))
-			ctx.FoundationDirs[i] = fCtx.Dir
-		}
-
 		// Compile!
 		result, err := app.Compile(ctx)
 		if err != nil {
@@ -743,6 +734,14 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 			cacheDir, err)
 	}
 
+	// Build the contexts for the foundations. We use this
+	// to also compile the list of foundation dirs.
+	foundationDirs := make([]string, len(config.Foundations))
+	for i, f := range config.Foundations {
+		foundationDirs[i] = filepath.Join(
+			outputDir, fmt.Sprintf("foundation-%s", f.Name))
+	}
+
 	return &app.Context{
 		Dir:         outputDir,
 		CacheDir:    cacheDir,
@@ -750,10 +749,11 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 		Tuple:       tuple,
 		Application: f.Application,
 		Shared: context.Shared{
-			Appfile:    f,
-			InstallDir: filepath.Join(c.dataDir, "binaries"),
-			Directory:  c.dir,
-			Ui:         c.ui,
+			Appfile:        f,
+			FoundationDirs: foundationDirs,
+			InstallDir:     filepath.Join(c.dataDir, "binaries"),
+			Directory:      c.dir,
+			Ui:             c.ui,
 		},
 	}, nil
 }
