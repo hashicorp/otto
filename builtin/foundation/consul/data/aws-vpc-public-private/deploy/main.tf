@@ -45,3 +45,7 @@ module "consul-3" {
     bastion_host = "${var.bastion_host}"
     bastion_user = "${var.bastion_user}"
 }
+
+output "consul_address" {
+    value = "${module.consul-3.address}"
+}
