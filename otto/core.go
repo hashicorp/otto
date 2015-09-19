@@ -547,7 +547,19 @@ func (c *Core) Status() error {
 		infraStatus = "[yellow]PARTIAL"
 	}
 
-	c.ui.Header("Status results...")
+	// Get the active infra
+	infra := c.appfile.ActiveInfrastructure()
+
+	c.ui.Header("App Info")
+	c.ui.Message(fmt.Sprintf(
+		"Application:    %s (%s)",
+		c.appfile.Application.Name, c.appfile.Application.Type))
+	c.ui.Message(fmt.Sprintf("Project:        %s", c.appfile.Project.Name))
+	c.ui.Message(fmt.Sprintf(
+		"Infrastructure: %s (%s)",
+		infra.Type, infra.Flavor))
+
+	c.ui.Header("Component Status")
 	c.ui.Message(fmt.Sprintf("Dev environment: %s", devStatus))
 	c.ui.Message(fmt.Sprintf("Infra:           %s", infraStatus))
 	c.ui.Message(fmt.Sprintf("Build:           %s", buildStatus))
