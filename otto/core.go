@@ -748,9 +748,9 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 		CacheDir:    cacheDir,
 		LocalDir:    c.localDir,
 		Tuple:       tuple,
-		Appfile:     f,
 		Application: f.Application,
 		Shared: context.Shared{
+			Appfile:    f,
 			InstallDir: filepath.Join(c.dataDir, "binaries"),
 			Directory:  c.dir,
 			Ui:         c.ui,
@@ -810,6 +810,7 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 		Dir:   outputDir,
 		Infra: config,
 		Shared: context.Shared{
+			Appfile:    c.appfile,
 			InstallDir: filepath.Join(c.dataDir, "binaries"),
 			Directory:  c.dir,
 			Ui:         c.ui,
@@ -864,11 +865,11 @@ func (c *Core) foundations() ([]foundation.Foundation, []*foundation.Context, er
 
 		// Build the context
 		ctx := &foundation.Context{
-			Config:  f.Config,
-			Dir:     outputDir,
-			Tuple:   tuple,
-			Appfile: c.appfile,
+			Config: f.Config,
+			Dir:    outputDir,
+			Tuple:  tuple,
 			Shared: context.Shared{
+				Appfile:    c.appfile,
 				InstallDir: filepath.Join(c.dataDir, "binaries"),
 				Directory:  c.dir,
 				Ui:         c.ui,

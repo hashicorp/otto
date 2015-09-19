@@ -1,6 +1,7 @@
 package context
 
 import (
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/ui"
 )
@@ -28,4 +29,7 @@ type Shared struct {
 	// this directory a cache: Otto may remove it at any point, although
 	// unlikely. And you're responsible to clean up anything in here.
 	InstallDir string
+
+	// Appfile is the full appfile
+	Appfile *appfile.File
 }

@@ -1,7 +1,6 @@
 package foundation
 
 import (
-	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/context"
 )
 
@@ -56,9 +55,6 @@ type Context struct {
 	// cleared. Data that should be persistant across compilations should
 	// be stored in the directory service.
 	Dir string
-
-	// Appfile is the full appfile
-	Appfile *appfile.File
 
 	// Tuple is the tuple used for this foundation.
 	Tuple Tuple
