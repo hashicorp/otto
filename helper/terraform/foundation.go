@@ -48,7 +48,7 @@ func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
 	// Foundations themselves are represented as infrastructure in the
 	// backend. Let's look that up. If it doesn't exist, we have to create
 	// it in order to get our UUID for storing state.
-	lookup := directory.Lookup{Infra: appInfra.Name, Foundation: ctx.Tuple.Type}
+	lookup := directory.Lookup{Infra: appInfra.Type, Foundation: ctx.Tuple.Type}
 	foundationInfra, err := ctx.Directory.GetInfra(&directory.Infra{Lookup: lookup})
 	if err != nil {
 		return fmt.Errorf(
@@ -113,7 +113,8 @@ func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
 		Directory: ctx.Directory,
 		StateId:   foundationInfra.ID,
 	}
-	if err := tf.Execute(args...); err != nil {
+	err = tf.Execute(args...)
+	if err != nil {
 		return fmt.Errorf(
 			"Error running Terraform: %s\n\n"+
 				"Terraform usually has helpful error messages. Please read the error\n"+
@@ -152,5 +153,5 @@ func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
 			err)
 	}
 
-	return nil
+	return err
 }
