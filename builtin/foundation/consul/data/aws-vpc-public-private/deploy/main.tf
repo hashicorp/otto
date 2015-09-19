@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 module "consul-1" {
-    source = "./module"
+    source = "./module-aws"
 
     index = "1"
     private-ip = "10.0.1.8"
@@ -19,7 +19,7 @@ module "consul-1" {
 }
 
 module "consul-2" {
-    source = "./module"
+    source = "./module-aws"
 
     index = "2"
     private-ip = "10.0.1.7"
@@ -33,7 +33,7 @@ module "consul-2" {
 }
 
 module "consul-3" {
-    source = "./module"
+    source = "./module-aws"
 
     index = "3"
     private-ip = "10.0.1.6"
