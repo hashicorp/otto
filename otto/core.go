@@ -169,6 +169,7 @@ func (c *Core) Compile() error {
 		subdirs := []string{"app-dev", "app-dev-dep", "app-deploy"}
 		for i, f := range foundations {
 			fCtx := foundationCtxs[i]
+			fCtx.Dir = ctx.FoundationDirs[i]
 			if result != nil {
 				fCtx.AppConfig = &result.FoundationConfig
 			}
