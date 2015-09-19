@@ -122,5 +122,35 @@ func (f *Foundation) execute(ctx *foundation.Context, args ...string) error {
 			err)
 	}
 
+	ctx.Ui.Header("Terraform execution complete. Saving results...")
+	if err == nil {
+		if ctx.Action == "destroy" {
+			// If we just destroyed successfully, the infra is now empty.
+			foundationInfra.State = directory.InfraStateInvalid
+			foundationInfra.Outputs = map[string]string{}
+		} else {
+			// If an apply was successful, populate the state and outputs.
+			foundationInfra.State = directory.InfraStateReady
+			foundationInfra.Outputs, err = tf.Outputs()
+			if err != nil {
+				err = fmt.Errorf("Error reading Terraform outputs: %s", err)
+				foundationInfra.State = directory.InfraStatePartial
+			}
+		}
+	}
+
+	// Save the infrastructure information
+	if err := ctx.Directory.PutInfra(foundationInfra); err != nil {
+		return fmt.Errorf(
+			"Error storing infrastructure data: %s\n\n"+
+				"This means that Otto won't be able to know that your infrastructure\n"+
+				"was successfully created. Otto tries a few times to save the\n"+
+				"infrastructure. At this point in time, Otto doesn't support gracefully\n"+
+				"recovering from this error. Your infrastructure is now orphaned from\n"+
+				"Otto's management. Please reference the community for help.\n\n"+
+				"A future version of Otto will resolve this.",
+			err)
+	}
+
 	return nil
 }
