@@ -316,7 +316,7 @@ func (c *Core) Deploy(action string, args []string) error {
 	}
 
 	// Update our shared data so we get the creds
-	rootCtx.Shared = infraCtx.Shared
+	rootCtx.Shared.InfraCreds = infraCtx.Shared.InfraCreds
 
 	// Pass through the requested action
 	rootCtx.Action = action
