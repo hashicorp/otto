@@ -159,15 +159,6 @@ func (c *Core) Compile() error {
 			resultLock.Unlock()
 		}
 
-		// Build the contexts for the foundations. We use this
-		// to also compile the list of foundation dirs.
-		ctx.FoundationDirs = make([]string, len(foundations))
-		for i, _ := range foundations {
-			fCtx := foundationCtxs[i]
-			fCtx.Dir = filepath.Join(ctx.Dir, fmt.Sprintf("foundation-%s", fCtx.Tuple.Type))
-			ctx.FoundationDirs[i] = fCtx.Dir
-		}
-
 		// Compile!
 		result, err := app.Compile(ctx)
 		if err != nil {
@@ -178,6 +169,7 @@ func (c *Core) Compile() error {
 		subdirs := []string{"app-dev", "app-dev-dep", "app-deploy"}
 		for i, f := range foundations {
 			fCtx := foundationCtxs[i]
+			fCtx.Dir = ctx.FoundationDirs[i]
 			if result != nil {
 				fCtx.AppConfig = &result.FoundationConfig
 			}
@@ -324,7 +316,7 @@ func (c *Core) Deploy(action string, args []string) error {
 	}
 
 	// Update our shared data so we get the creds
-	rootCtx.Shared = infraCtx.Shared
+	rootCtx.Shared.InfraCreds = infraCtx.Shared.InfraCreds
 
 	// Pass through the requested action
 	rootCtx.Action = action
@@ -743,17 +735,26 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 			cacheDir, err)
 	}
 
+	// Build the contexts for the foundations. We use this
+	// to also compile the list of foundation dirs.
+	foundationDirs := make([]string, len(config.Foundations))
+	for i, f := range config.Foundations {
+		foundationDirs[i] = filepath.Join(
+			outputDir, fmt.Sprintf("foundation-%s", f.Name))
+	}
+
 	return &app.Context{
 		Dir:         outputDir,
 		CacheDir:    cacheDir,
 		LocalDir:    c.localDir,
 		Tuple:       tuple,
-		Appfile:     f,
 		Application: f.Application,
 		Shared: context.Shared{
-			InstallDir: filepath.Join(c.dataDir, "binaries"),
-			Directory:  c.dir,
-			Ui:         c.ui,
+			Appfile:        f,
+			FoundationDirs: foundationDirs,
+			InstallDir:     filepath.Join(c.dataDir, "binaries"),
+			Directory:      c.dir,
+			Ui:             c.ui,
 		},
 	}, nil
 }
@@ -810,6 +811,7 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 		Dir:   outputDir,
 		Infra: config,
 		Shared: context.Shared{
+			Appfile:    c.appfile,
 			InstallDir: filepath.Join(c.dataDir, "binaries"),
 			Directory:  c.dir,
 			Ui:         c.ui,
@@ -864,11 +866,11 @@ func (c *Core) foundations() ([]foundation.Foundation, []*foundation.Context, er
 
 		// Build the context
 		ctx := &foundation.Context{
-			Config:  f.Config,
-			Dir:     outputDir,
-			Tuple:   tuple,
-			Appfile: c.appfile,
+			Config: f.Config,
+			Dir:    outputDir,
+			Tuple:  tuple,
 			Shared: context.Shared{
+				Appfile:    c.appfile,
 				InstallDir: filepath.Join(c.dataDir, "binaries"),
 				Directory:  c.dir,
 				Ui:         c.ui,

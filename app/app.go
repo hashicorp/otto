@@ -95,9 +95,6 @@ type Context struct {
 	// types.
 	Tuple Tuple
 
-	// Appfile is the full appfile
-	Appfile *appfile.File
-
 	// Application is the application configuration itself from the appfile.
 	Application *appfile.Application
 
@@ -105,16 +102,6 @@ type Context struct {
 	// Vagrantfile fragment paths. This will only be available in the Compile
 	// call.
 	DevDepFragments []string
-
-	// FoundationDirs are the directories of the various foundation scripts.
-	//
-	// These directories will contain a "dev" and "deploy" subdirectory
-	// that should be uploaded and used for each of those environments.
-	// Within those folders, a "main.sh" file will exist that should be
-	// called.
-	//
-	// This will only be available in the Compile call.
-	FoundationDirs []string
 }
 
 // RouteName implements the router.Context interface so we can use Router

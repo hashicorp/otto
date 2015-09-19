@@ -1,6 +1,7 @@
 package context
 
 import (
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/ui"
 )
@@ -28,4 +29,15 @@ type Shared struct {
 	// this directory a cache: Otto may remove it at any point, although
 	// unlikely. And you're responsible to clean up anything in here.
 	InstallDir string
+
+	// Appfile is the full appfile
+	Appfile *appfile.File
+
+	// FoundationDirs are the directories of the various foundation scripts.
+	//
+	// These directories will contain a "dev" and "deploy" subdirectory
+	// that should be uploaded and used for each of those environments.
+	// Within those folders, a "main.sh" file will exist that should be
+	// called.
+	FoundationDirs []string
 }
