@@ -31,6 +31,10 @@ func (f *Foundation) Infra(ctx *foundation.Context) error {
 
 		return f.execute(ctx, "apply")
 	case "destroy":
+		if err := f.execute(ctx, "get", "."); err != nil {
+			return err
+		}
+
 		return f.execute(ctx, "destroy", "-force")
 	default:
 		return fmt.Errorf("unknown action: %s", ctx.Action)
