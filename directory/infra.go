@@ -9,7 +9,8 @@ import (
 // Infrastructures.
 type Infra struct {
 	// Lookup information for the Infra. The only required field for
-	// this is Infra. The remainder are ignored.
+	// this is Infra. Optionally you may also specify Foundation to
+	// get the infrastructure data for a foundation.
 	Lookup
 
 	// State is the state of this infrastructure. This is important since
