@@ -34,7 +34,7 @@ func Default(dir string, det *detect.Config) (*File, error) {
 			&Infrastructure{
 				Name:   appName,
 				Type:   "aws",
-				Flavor: "vpc-public-private",
+				Flavor: "simple",
 
 				Foundations: []*Foundation{
 					&Foundation{
