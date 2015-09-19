@@ -54,15 +54,53 @@ resource "aws_instance" "app" {
     Name = "{{ name }}"
   }
 
+  connection {
+    user         = "ubuntu"
+    host         = "${self.private_ip}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+  }
+
   # Wait for cloud-init (ensures instance is fully booted before moving on)
   provisioner "remote-exec" {
     inline = ["while sudo pkill -0 cloud-init 2>/dev/null; do sleep 2; done"]
-    connection {
-      user         = "ubuntu"
-      host         = "${self.private_ip}"
-      bastion_host = "${var.bastion_host}"
-      bastion_user = "${var.bastion_user}"
-    }
+  }
+
+  {% for dir in foundation_dirs.build %}
+  # Foundation {{ forloop.Counter }} (build)
+  provisioner "remote-exec" {
+    inline = ["mkdir -p /tmp/otto/foundation-{{ forloop.Counter }}"]
+  }
+
+  provisioner "file" {
+    source = "{{ dir }}/"
+    destination = "/tmp/otto/foundation-{{ forloop.Counter }}"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["cd /tmp/otto/foundation-{{ forloop.Counter}} && bash ./main.sh"]
+  }
+  {% endfor %}
+
+  {% for dir in foundation_dirs.deploy %}
+  # Foundation {{ forloop.Counter }} (deploy)
+  provisioner "remote-exec" {
+    inline = ["mkdir -p /tmp/otto/foundation-deploy-{{ forloop.Counter }}"]
+  }
+
+  provisioner "file" {
+    source = "{{ dir }}/"
+    destination = "/tmp/otto/foundation-deploy-{{ forloop.Counter }}"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["cd /tmp/otto/foundation-deploy-{{ forloop.Counter}} && bash ./main.sh"]
+  }
+  {% endfor %}
+
+  # Remove any temporary directories we made from foundations (if any)
+  provisioner "remote-exec" {
+    inline = ["rm -rf /tmp/otto"]
   }
 }
 
