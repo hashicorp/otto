@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/router"
 )
 
@@ -98,6 +99,11 @@ func (opts *DeployOptions) actionDeploy(rctx router.Context) error {
 		for k, v := range buildVars {
 			vars[k] = v
 		}
+	}
+
+	// Setup the vars
+	if err := foundation.WriteVars(&ctx.Shared); err != nil {
+		return fmt.Errorf("Error preparing deploy: %s", err)
 	}
 
 	// Get our old deploy to populate the old state data if we have it.
