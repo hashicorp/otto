@@ -1,6 +1,9 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "hashicorp/precise64"
 
+  # Host only network
+  config.vm.network "private_network", ip: "{{ dev_ip_address }}"
+
   # Setup some stuff
   config.vm.provision "shell", inline: $script
 

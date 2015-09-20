@@ -102,6 +102,14 @@ type Context struct {
 	// Vagrantfile fragment paths. This will only be available in the Compile
 	// call.
 	DevDepFragments []string
+
+	// DevIPAddress is a local IP address in the private address space
+	// that can be used for a development environment. Otto core
+	// does its best to ensure this is unused.
+	//
+	// This is only available if this app is the root application being
+	// developed (dependencies don't get an IP).
+	DevIPAddress string
 }
 
 // RouteName implements the router.Context interface so we can use Router

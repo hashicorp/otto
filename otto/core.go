@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/foundation"
+	"github.com/hashicorp/otto/helper/localaddr"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 	"github.com/hashicorp/terraform/dag"
@@ -755,12 +756,24 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 			outputDir, fmt.Sprintf("foundation-%s", f.Name))
 	}
 
+	// Get the dev IP address
+	ipDB := &localaddr.CachedDB{
+		DB:        &localaddr.DB{Path: filepath.Join(c.dataDir, "ip.db")},
+		CachePath: filepath.Join(c.localDir, "dev_ip"),
+	}
+	ip, err := ipDB.IP()
+	if err != nil {
+		return nil, fmt.Errorf(
+			"Error retrieving dev IP address: %s", err)
+	}
+
 	return &app.Context{
-		Dir:         outputDir,
-		CacheDir:    cacheDir,
-		LocalDir:    c.localDir,
-		Tuple:       tuple,
-		Application: f.Application,
+		Dir:          outputDir,
+		CacheDir:     cacheDir,
+		LocalDir:     c.localDir,
+		Tuple:        tuple,
+		Application:  f.Application,
+		DevIPAddress: ip.String(),
 		Shared: context.Shared{
 			Appfile:        f,
 			FoundationDirs: foundationDirs,

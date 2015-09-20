@@ -61,6 +61,7 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 	}
 	data.Context["name"] = ctx.Appfile.Application.Name
 	data.Context["dev_fragments"] = ctx.DevDepFragments
+	data.Context["dev_ip_address"] = ctx.DevIPAddress
 
 	if data.Context["path"] == nil {
 		data.Context["path"] = make(map[string]string)
