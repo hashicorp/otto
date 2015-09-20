@@ -39,7 +39,7 @@ func (c *Core) statusInfo(resultCh chan<- *statusInfo) {
 
 	// Build
 	result.Build, err = c.dir.GetBuild(&directory.Build{Lookup: directory.Lookup{
-		AppID: c.appfile.ID, Infra: infra.Name, InfraFlavor: infra.Flavor}})
+		AppID: c.appfile.ID, Infra: infra.Type, InfraFlavor: infra.Flavor}})
 	if err != nil {
 		result.Err = multierror.Append(result.Err, fmt.Errorf(
 			"Error loading build status: %s", err))
@@ -47,7 +47,7 @@ func (c *Core) statusInfo(resultCh chan<- *statusInfo) {
 
 	// Deploy
 	result.Deploy, err = c.dir.GetDeploy(&directory.Deploy{Lookup: directory.Lookup{
-		AppID: c.appfile.ID, Infra: infra.Name, InfraFlavor: infra.Flavor}})
+		AppID: c.appfile.ID, Infra: infra.Type, InfraFlavor: infra.Flavor}})
 	if err != nil {
 		result.Err = multierror.Append(result.Err, fmt.Errorf(
 			"Error loading deploy status: %s", err))
