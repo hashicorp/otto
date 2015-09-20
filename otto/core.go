@@ -759,7 +759,7 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 	// Get the dev IP address
 	ipDB := &localaddr.CachedDB{
 		DB:        &localaddr.DB{Path: filepath.Join(c.dataDir, "ip.db")},
-		CachePath: filepath.Join(cacheDir, "dev_ip"),
+		CachePath: filepath.Join(c.localDir, "dev_ip"),
 	}
 	ip, err := ipDB.IP()
 	if err != nil {
