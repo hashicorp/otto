@@ -5,5 +5,5 @@ application {
 
 customization "docker" {
     image = "mongo:3.0"
-    run_args = "-p 27017"
+    run_args = "-p 27017:27017"
 }
