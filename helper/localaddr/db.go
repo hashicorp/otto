@@ -165,11 +165,6 @@ func (this *DB) Renew(ip net.IP) error {
 		}
 
 		key := []byte(ip.String())
-		data := bucket.Get(key)
-		if data == nil {
-			return nil
-		}
-
 		return bucket.Put(key, []byte(time.Now().UTC().String()))
 	})
 }
