@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/otto/helper/oneline"
@@ -46,6 +47,11 @@ func (db *CachedDB) IP() (net.IP, error) {
 			db.DB.Renew(ip)
 			return ip, nil
 		}
+	}
+
+	// Make sure the directory to our cache path exists
+	if err := os.MkdirAll(filepath.Dir(db.CachePath), 0755); err != nil {
+		return nil, err
 	}
 
 	// No cached version.
