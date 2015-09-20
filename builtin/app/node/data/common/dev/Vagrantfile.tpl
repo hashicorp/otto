@@ -17,6 +17,13 @@ Vagrant.configure("2") do |config|
   # Enable SSH agent forwarding so getting private dependencies works
   config.ssh.forward_agent = true
 
+  # Foundation configuration (if any)
+  {% for dir in foundation_dirs.dev %}
+  dir = "/otto/foundation-{{ forloop.Counter }}"
+  config.vm.synced_folder "{{ dir }}", dir
+  config.vm.provision "shell", inline: "cd #{dir} && bash #{dir}/main.sh"
+  {% endfor %}
+
   # Load all our fragments here for any dependencies.
   {% for fragment in dev_fragments %}
   {{ fragment|read }}
