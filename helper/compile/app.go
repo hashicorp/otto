@@ -125,6 +125,11 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 		fragmentPath = ""
 	}
 
+	// Set some defaults here
+	if opts.FoundationConfig.ServiceName == "" {
+		opts.FoundationConfig.ServiceName = opts.Ctx.Application.Name
+	}
+
 	return &app.CompileResult{
 		FoundationConfig:   opts.FoundationConfig,
 		DevDepFragmentPath: fragmentPath,
