@@ -7,6 +7,9 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "hashicorp/precise64"
 
+  # Host only network
+  config.vm.network "private_network", ip: "{{ dev_ip_address }}"
+
   # Setup a synced folder from our working directory to /vagrant
   config.vm.synced_folder "{{ path.working }}", "/vagrant",
     owner: "vagrant", group: "vagrant"

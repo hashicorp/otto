@@ -157,8 +157,9 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 
 	// Success, let the user know whats up
 	ctx.Ui.Header("[green]Development environment successfully created!")
+	ctx.Ui.Message(fmt.Sprintf("IP address: %s", ctx.DevIPAddress))
 	if opts.Instructions != "" {
-		ctx.Ui.Message(opts.Instructions)
+		ctx.Ui.Message("\n" + opts.Instructions)
 	}
 
 	return nil
