@@ -51,6 +51,9 @@ if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
   oe sudo service ssh restart
 fi
 
+export DEBIAN_FRONTEND=noninteractive
+oe sudo apt-get update -y
+
 ol "Downloading Node {{ dev_node_version }}..."
 oe wget -q -O /home/vagrant/node.tar.gz https://nodejs.org/dist/v{{ dev_node_version }}/node-v{{ dev_node_version }}-linux-x64.tar.gz
 
@@ -62,7 +65,19 @@ oe sudo ln -s /opt/node-v{{ dev_node_version }}-linux-x64/bin/node /usr/local/bi
 oe sudo ln -s /opt/node-v{{ dev_node_version }}-linux-x64/bin/npm /usr/local/bin/npm
 
 ol "Installing build-essential for native packages..."
-export DEBIAN_FRONTEND=noninteractive
-oe sudo apt-get update -y
 oe sudo apt-get install -y build-essential
+
+ol "Install GCC/G++ 0.8 (required for newer Node versions)..."
+oe sudo apt-get install -y python-software-properties software-properties-common
+oe sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+oe sudo apt-get update -y
+oe sudo update-alternatives --remove-all gcc
+oe sudo update-alternatives --remove-all g++
+oe sudo apt-get install gcc-4.8
+oe sudo apt-get install g++-4.8
+oe sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 20
+oe sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20
+oe sudo update-alternatives --config gcc
+oe sudo update-alternatives --config g++
+
 SCRIPT
