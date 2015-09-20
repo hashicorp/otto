@@ -67,7 +67,7 @@ oe sudo ln -s /opt/node-v{{ dev_node_version }}-linux-x64/bin/npm /usr/local/bin
 ol "Installing build-essential for native packages..."
 oe sudo apt-get install -y build-essential
 
-ol "Install GCC/G++ 0.8 (required for newer Node versions)..."
+ol "Installing GCC/G++ 0.8 (required for newer Node versions)..."
 oe sudo apt-get install -y python-software-properties software-properties-common
 oe sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 oe sudo apt-get update -y
