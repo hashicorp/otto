@@ -41,6 +41,11 @@ var (
 // 256, but these IPs are meant to be local, so they shouldn't overflow
 // (it would mean more than 256 VMs are up... or that each of those VMs
 // has a lot of network interfaces. Both cases are unlikely in Otto).
+//
+// FUTURE TODO:
+//
+//   * Allocate additional subnets once we run out of IP space (vs. LRU)
+//
 type DB struct {
 	// Path is the path to the IP database. This file doesn't need to
 	// exist but needs to be a writable path. The parent directory will
@@ -139,6 +144,33 @@ func (this *DB) Release(ip net.IP) error {
 		}
 
 		return bucket.Delete([]byte(ip.String()))
+	})
+}
+
+// Renew updates the last used time of the given IP to right now.
+//
+// This should be called whenever a DB-given IP is used to make sure
+// it isn't chosen as the LRU if we run out of IPs.
+func (this *DB) Renew(ip net.IP) error {
+	db, err := this.db()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	return db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltLocalAddrBucket).Bucket(boltAddrBucket)
+		if bucket == nil {
+			return nil
+		}
+
+		key := []byte(ip.String())
+		data := bucket.Get(key)
+		if data == nil {
+			return nil
+		}
+
+		return bucket.Put(key, []byte(time.Now().UTC().String()))
 	})
 }
 
