@@ -56,10 +56,11 @@ export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get update -y
 oe sudo apt-get install -y python-software-properties software-properties-common
 oe sudo add-apt-repository -y ppa:ondrej/php5-5.6
+oe sudo apt-get update -y
 oe sudo apt-get install -y curl php5
 
 ol "Installing Composer..."
 cd /tmp
-oe curl -sS https://getcomposer.org/installer | php
+curl -sS https://getcomposer.org/installer | php
 oe sudo mv composer.phar /usr/local/bin/composer
 SCRIPT
