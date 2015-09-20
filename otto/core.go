@@ -587,10 +587,12 @@ func (c *Core) creds(
 	infraCtx *infrastructure.Context) error {
 	// Output to the user some information about what is about to
 	// happen here...
-	infraCtx.Ui.Header("Detecting infrastructure credentials...")
+	infraCtx.Ui.Header(fmt.Sprintf(
+		"Detecting infrastructure credentials for: %s (%s)",
+		infraCtx.Infra.Name, infraCtx.Infra.Type))
 
 	// The path to where we put the encrypted creds
-	path := filepath.Join(c.localDir, "creds")
+	path := filepath.Join(c.dataDir, "cache", "creds", infraCtx.Infra.Name)
 
 	// Determine whether we believe the creds exist already or not
 	var exists bool
