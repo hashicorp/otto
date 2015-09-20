@@ -1,6 +1,6 @@
 package oneline
 
-import(
+import (
 	"bufio"
 	"os"
 	"strings"

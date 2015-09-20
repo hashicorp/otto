@@ -1,8 +1,8 @@
 package phpapp
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/helper/bindata"
