@@ -8,6 +8,7 @@ import (
 	appDockerExt "github.com/hashicorp/otto/builtin/app/docker-external"
 	appGo "github.com/hashicorp/otto/builtin/app/go"
 	appNode "github.com/hashicorp/otto/builtin/app/node"
+	appPHP "github.com/hashicorp/otto/builtin/app/php"
 	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
 	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
@@ -51,6 +52,7 @@ func init() {
 	apps.Add(appCustom.Tuples.Map(app.StructFactory(new(appCustom.App))))
 	apps.Add(appDockerExt.Tuples.Map(app.StructFactory(new(appDockerExt.App))))
 	apps.Add(appNode.Tuples.Map(app.StructFactory(new(appNode.App))))
+	apps.Add(appPHP.Tuples.Map(app.StructFactory(new(appPHP.App))))
 	apps.Add(appRuby.Tuples.Map(app.StructFactory(new(appRuby.App))))
 
 	foundations := foundationConsul.Tuples.Map(foundation.StructFactory(new(foundationConsul.Foundation)))
@@ -74,6 +76,10 @@ func init() {
 		&detect.Detector{
 			Type: "node",
 			File: []string{"package.json"},
+		},
+		&detect.Detector{
+			Type: "php",
+			File: []string{"composer.json", "index.php"},
 		},
 		&detect.Detector{
 			Type: "ruby",
