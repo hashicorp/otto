@@ -27,7 +27,7 @@ oe sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B
 echo 'deb https://oss-binaries.phusionpassenger.com/apt/passenger trusty main' | sudo tee /etc/apt/sources.list.d/passenger.list > /dev/null
 oe sudo apt-get update
 
-ol "Installing Ruby, Passenger, Nginx, and other packages..."
+ol "Installing Node, Passenger, Nginx, and other packages..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get install -y bzr git mercurial build-essential \
   libpq-dev zlib1g-dev software-properties-common \
