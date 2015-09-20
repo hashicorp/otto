@@ -3,6 +3,7 @@ package localaddr
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"strings"
@@ -29,6 +30,8 @@ type CachedDB struct {
 // If it is cached, it will renew and use that address. If it isn't cached,
 // then it will grab a new IP, cache that, and use that.
 func (db *CachedDB) IP() (net.IP, error) {
+	log.Printf("[DEBUG] reading IP, cache path: %s", db.CachePath)
+
 	// Try to read the cached version
 	_, err := os.Stat(db.CachePath)
 	if err == nil {
@@ -39,24 +42,27 @@ func (db *CachedDB) IP() (net.IP, error) {
 
 		ip := net.ParseIP(raw)
 		if ip != nil {
+			log.Printf("[DEBUG] read ip from cache: %s", ip)
 			db.DB.Renew(ip)
 			return ip, nil
 		}
 	}
 
 	// No cached version.
+	log.Printf("[DEBUG] no ip cache found, getting new IP")
 	ip, err := db.DB.Next()
 	if err != nil {
 		return nil, err
 	}
 
-	contents := fmt.Sprintf(strings.TrimSpace(cacheContents), ip.String())
+	contents := fmt.Sprintf(strings.TrimSpace(cacheContents)+"\n", ip.String())
 	err = ioutil.WriteFile(db.CachePath, []byte(contents), 0644)
 	if err != nil {
 		db.DB.Release(ip)
 		return nil, err
 	}
 
+	log.Printf("[DEBUG] new IP cached: %s", ip)
 	return ip, nil
 }
 
