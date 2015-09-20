@@ -73,8 +73,8 @@ oe sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 oe sudo apt-get update -y
 oe sudo update-alternatives --remove-all gcc
 oe sudo update-alternatives --remove-all g++
-oe sudo apt-get install gcc-4.8
-oe sudo apt-get install g++-4.8
+oe sudo apt-get install -y gcc-4.8
+oe sudo apt-get install -y g++-4.8
 oe sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 20
 oe sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20
 oe sudo update-alternatives --config gcc
