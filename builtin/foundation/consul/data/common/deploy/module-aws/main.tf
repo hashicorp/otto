@@ -1,6 +1,6 @@
 resource "aws_instance" "consul" {
     ami = "${var.ami}"
-    instance_type = "t2.small"
+    instance_type = "t2.micro"
     key_name = "${var.key-name}"
     subnet_id = "${var.subnet-id}"
     vpc_security_group_ids = ["${aws_security_group.consul.id}"]

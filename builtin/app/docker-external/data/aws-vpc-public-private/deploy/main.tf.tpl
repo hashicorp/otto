@@ -7,7 +7,7 @@ variable "aws_region" {}
 variable "key_name" {}
 
 variable "ami" { default = "ami-21630d44" }
-variable "instance_type" { default = "t2.small" }
+variable "instance_type" { default = "t2.micro" }
 variable "private_subnet_id" {}
 variable "public_subnet_id" {}
 variable "vpc_cidr" {}
