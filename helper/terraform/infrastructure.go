@@ -2,9 +2,11 @@ package terraform
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
+	"github.com/hashicorp/otto/helper/router"
 	"github.com/hashicorp/otto/infrastructure"
 )
 
@@ -37,14 +39,77 @@ func (i *Infrastructure) Creds(ctx *infrastructure.Context) (map[string]string, 
 }
 
 func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
-	switch ctx.Action {
-	case "destroy":
-		return i.execute(ctx, "destroy")
-	case "":
-		return i.execute(ctx, "apply")
-	default:
-		return nil
+	r := &router.Router{
+		Actions: map[string]router.Action{
+			"": &router.SimpleAction{
+				ExecuteFunc:  i.actionApply,
+				SynopsisText: infraApplySyn,
+				HelpText:     strings.TrimSpace(infraApplyHelp),
+			},
+			"destroy": &router.SimpleAction{
+				ExecuteFunc:  i.actionDestroy,
+				SynopsisText: infraDestroySyn,
+				HelpText:     strings.TrimSpace(infraDestroyHelp),
+			},
+			"info": &router.SimpleAction{
+				ExecuteFunc:  i.actionInfo,
+				SynopsisText: infraInfoSyn,
+				HelpText:     strings.TrimSpace(infraInfoHelp),
+			},
+		},
 	}
+	return r.Route(ctx)
+}
+
+func (i *Infrastructure) actionDestroy(rctx router.Context) error {
+	rctx.UI().Header("Destroying main infrastructure...")
+	ctx := rctx.(*infrastructure.Context)
+	return i.execute(ctx, "destroy")
+}
+
+func (i *Infrastructure) actionApply(rctx router.Context) error {
+	rctx.UI().Header("Building main infrastructure...")
+	ctx := rctx.(*infrastructure.Context)
+	return i.execute(ctx, "apply")
+}
+
+func (i *Infrastructure) actionInfo(rctx router.Context) error {
+	ctx := rctx.(*infrastructure.Context)
+	project, err := Project(&ctx.Shared)
+	if err != nil {
+		return err
+	}
+
+	lookup := directory.Lookup{Infra: ctx.Infra.Name}
+	infra, err := ctx.Directory.GetInfra(&directory.Infra{Lookup: lookup})
+	if err != nil {
+		return fmt.Errorf(
+			"Error looking up existing infrastructure data: %s\n\n"+
+				"These errors are usually transient and can be fixed by retrying\n"+
+				"the command. Additional causes of errors are networking or disk\n"+
+				"issues that can be resolved external to Otto.",
+			err)
+	}
+	if infra == nil {
+		return fmt.Errorf("Infrastructure not created. Nothing to display.")
+	}
+
+	tf := &Terraform{
+		Path:      project.Path(),
+		Dir:       ctx.Dir,
+		Ui:        ctx.Ui,
+		Directory: ctx.Directory,
+		StateId:   infra.ID,
+	}
+
+	// Start the Terraform command
+	args := make([]string, len(ctx.ActionArgs)+1)
+	args[0] = "output"
+	copy(args[1:], ctx.ActionArgs)
+	if err := tf.Execute(args...); err != nil {
+		return fmt.Errorf("Error running Terraform: %s", err)
+	}
+	return nil
 }
 
 func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) error {
@@ -174,3 +239,40 @@ func (i *Infrastructure) Compile(ctx *infrastructure.Context) (*infrastructure.C
 func (i *Infrastructure) Flavors() []string {
 	return nil
 }
+
+// Synopsis text for actions
+const (
+	infraApplySyn   = "Create or update infrastructure resources for this application"
+	infraDestroySyn = "Destroy infrastructure resources for this application"
+	infraInfoSyn    = "Display information about this application's infrastructure"
+)
+
+// Help text for actions
+const infraApplyHelp = `
+Usage: otto infra
+
+  Creates infrastructure for your application.
+
+  This command will create all the resource required to serve as an
+  infrastructure for your application.
+`
+
+const infraDestroyHelp = `
+Usage: otto infra destroy
+
+  Destroys all infrastructure resources.
+
+  This command will remove any previously-created infrastructure resources.
+  Note that any apps with resources deployed into this infrastructure will need
+  to have 'otto deploy destroy' run before this command will succeed.
+`
+
+const infraInfoHelp = `
+Usage: otto infra info [NAME]
+
+  Displays information about this application's infrastructure.
+
+  This command will show any variables the infrastructure has specified as
+  outputs. If no NAME is specified, all outputs will be listed. If NAME is
+  specified, just the contents of that output will be printed.
+`

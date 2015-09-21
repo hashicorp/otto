@@ -420,8 +420,10 @@ func (c *Core) Infra(action string, args []string) error {
 	if err != nil {
 		return err
 	}
-	if err := c.creds(infra, infraCtx); err != nil {
-		return err
+	if action == "" || action == "destroy" {
+		if err := c.creds(infra, infraCtx); err != nil {
+			return err
+		}
 	}
 
 	// Set the action and action args
@@ -441,7 +443,6 @@ func (c *Core) Infra(action string, args []string) error {
 	// If we're doing anything other than destroying, then
 	// run the execution now.
 	if action != "destroy" {
-		c.ui.Header("Building main infrastructure...")
 		if err := infra.Execute(infraCtx); err != nil {
 			return err
 		}
@@ -481,7 +482,6 @@ func (c *Core) Infra(action string, args []string) error {
 	// we need to first destroy all applications and foundations that
 	// are using this infra.
 	if action == "destroy" {
-		c.ui.Header("Destroying main infrastructure...")
 		if err := infra.Execute(infraCtx); err != nil {
 			return err
 		}
