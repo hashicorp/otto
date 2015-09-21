@@ -1,12 +1,13 @@
 package phpapp
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
+	"github.com/hashicorp/otto/helper/packer"
+	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
 
@@ -30,11 +31,21 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 }
 
 func (a *App) Build(ctx *app.Context) error {
-	return fmt.Errorf(strings.TrimSpace(buildErr))
+	return packer.Build(ctx, &packer.BuildOptions{
+		InfraOutputMap: map[string]string{
+			"region": "aws_region",
+		},
+	})
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
-	return fmt.Errorf(strings.TrimSpace(buildErr))
+	return terraform.Deploy(&terraform.DeployOptions{
+		InfraOutputMap: map[string]string{
+			"region":         "aws_region",
+			"subnet-private": "private_subnet_id",
+			"subnet-public":  "public_subnet_id",
+		},
+	}).Route(ctx)
 }
 
 func (a *App) Dev(ctx *app.Context) error {
