@@ -18,25 +18,6 @@ provider "aws" {
   region     = "${var.aws_region}"
 }
 
-resource "aws_security_group" "elb" {
-  name = "{{ name }}-elb-${var.infra_id}"
-  vpc_id = "${var.vpc_id}"
-
-  egress {
-    protocol    = -1
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    protocol    = "tcp"
-    from_port   = 80
-    to_port     = 80
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 resource "aws_security_group" "app" {
   name   = "{{ name }}-${var.infra_id}"
   vpc_id = "${var.vpc_id}"
@@ -45,20 +26,6 @@ resource "aws_security_group" "app" {
     protocol    = -1
     from_port   = 0
     to_port     = 0
-    cidr_blocks = ["${var.vpc_cidr}"]
-  }
-
-  ingress {
-    protocol    = "tcp"
-    from_port   = 22
-    to_port     = 22
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    protocol    = "tcp"
-    from_port   = 80
-    to_port     = 80
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -67,21 +34,6 @@ resource "aws_security_group" "app" {
     from_port   = 0
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_elb" "app" {
-  name            = "{{ name }}-${var.infra_id}"
-  subnets         = ["${var.subnet_public}"]
-  security_groups = ["${aws_security_group.elb.id}"]
-  instances       = ["${aws_instance.app.*.id}"]
-
-  # TODO: make listening ports configurable
-  listener {
-    lb_port           = 80
-    lb_protocol       = "tcp"
-    instance_port     = 80
-    instance_protocol = "tcp"
   }
 }
 
@@ -94,11 +46,9 @@ resource "aws_instance" "app" {
 
   vpc_security_group_ids = ["${aws_security_group.app.id}"]
 
-  tags {
-    Name = "{{ name }}"
-  }
+  tags { Name = "{{ name }}" }
 }
 
 output "url" {
-  value = "http://${aws_elb.app.dns_name}/"
+  value = "http://${aws_instance.app.public_dns}/"
 }
