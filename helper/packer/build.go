@@ -79,6 +79,7 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 		vars[k] = v
 	}
 
+	ctx.Ui.Header("Building deployment archive...")
 	slugPath, err := createAppSlug(filepath.Dir(ctx.Appfile.Path))
 	if err != nil {
 		return err
@@ -173,7 +174,7 @@ func ParseArtifactAmazon(m map[string]string) OutputCallback {
 // TODO: allow customization of the Exclude patterns
 func createAppSlug(path string) (string, error) {
 	archive, err := archive.CreateArchive(path, &archive.ArchiveOpts{
-		Exclude: []string{".otto"},
+		Exclude: []string{".otto", ".vagrant"},
 		VCS:     true,
 	})
 	if err != nil {
