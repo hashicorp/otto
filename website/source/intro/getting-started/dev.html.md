@@ -194,5 +194,5 @@ Otto compilation for the first time and also saw how Otto works with
 _zero configuration_. You hopefully are beginning to sense the power of
 Otto, even if we've only covered development so far.
 
-Next, we'll [deploy this application](/intro/getting-started/deploy.html)
-to a real cloud environment.
+Next, we'll start the process of deploying this application by
+first [building an infrastructure](/intro/getting-started/infra.html)

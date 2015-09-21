@@ -1,222 +1,72 @@
 ---
 layout: "intro"
-page_title: "Deploy Vault"
+page_title: "Deploy"
 sidebar_current: "gettingstarted-deploy"
 description: |-
-  Learn how to deploy Vault into production, how to initialize it, configure it, etc.
+  Deploy an application with Otto in the Otto getting started guide.
 ---
 
-# Deploy Vault
+# Deploy
 
-Up to this point, we've been working with the dev server, which
-automatically authenticated us, setup in-memory storage, etc. Now that
-you know the basics of Vault, it is important to learn how to deploy
-Vault into a real environment.
+In the previous step, we got a development up and running with no
+configuration and a couple simple commands. Now, let's deploy that application.
 
-On this page, we'll cover how to configure Vault, start Vault, the
-seal/unseal process, and scaling Vault.
+We'll deploy the application to [AWS](http://aws.amazon.com) for
+the getting started guide since it is popular and generally well understood, but
+Otto can deploy to many different infrastructure providers.
 
-## Configuring Vault
+If you don't have an AWS account, [create one now](http://aws.amazon.com/free/).
+For the getting started guide, we'll only be using resources which qualify
+under the AWS [free-tier](http://aws.amazon.com/free/), meaning it will be free.
+If you already have an AWS account, you may be charged some amount of money,
+but it shouldn't be more than a few dollars at most.
 
-Vault is configured using [HCL](https://github.com/hashicorp/hcl) files.
-As a reminder, these files are also JSON-compatible. The configuration
-file for Vault is relatively simple. An example is shown below:
+~> **Warning!** If you're not using an account that qualifies under the AWS
+free-tier, you may be charged to run these examples. The most you should be
+charged should only be a few dollars, but we're not responsible for any
+charges that may incur.
 
-```javascript
-backend "consul" {
-  address = "127.0.0.1:8500"
-  path = "vault"
-}
+## Infrastructure
 
-listener "tcp" {
- address = "127.0.0.1:8200"
- tls_disable = 1
-}
-```
+Before we can deploy, we need infrastructure to deploy to. In addition
+to deploying the application itself, Otto also manages the infrastructure.
+We'll see how Otto can share infrastructure between multiple applications
+in a future step.
 
-Within the configuration file, there are two primary configurations:
+"Infrastructure" within Otto refers to the underlying resources necessary
+to run applications. For AWS, this means a VPC, proper routing tables,
+a subnet, etc. If you're not familiar with this, that's okay! The point
+of Otto is to know this, so you don't have to.
 
-  * `backend` - This is the physical backend that Vault uses for
-    storage. Up to this point the dev server has used "inmem" (in memory),
-    but in the example above we're using [Consul](http://www.consul.io),
-    a much more production-ready backend.
+To build the infrastructure, run `otto infra`.
 
-  * `listener` - One or more listeners determine how Vault listens for
-    API requests. In the example above we're listening on localhost port
-    8200 without TLS.
+This step is likely going to ask you for permission to install
+[Terraform](https://terraform.io). Otto uses Terraform under the covers
+to build and manage the infrastructure. If you say yes, Otto will install
+this for you. If you already have Terraform installed, you won't be
+asked.
 
-For now, copy and paste the configuration above to `example.hcl`. It will
-configure Vault to expect an instance of Consul running locally.
+After installing Terraform, Otto will ask you for your AWS access
+credentials. These are available from
+[this page](https://console.aws.amazon.com/iam/home?#security_credential).
 
-Starting a local Consul instance takes only a few minutes. Just follow the
-[Consul Getting Started Guide](https://www.consul.io/intro/getting-started/install.html)
-up to the point where you have installed Consul and started it with this command:
+Next, Otto will go forward and build you an infrastructure. This will
+take a few minutes. During this time, you can attempt to read the output,
+which will be fairly verbose. You'll see Otto creating a VPC, a subnet,
+some routing tables, and even launching a micro EC2 instance.
 
-```shell
-$ consul agent -server -bootstrap-expect 1 -data-dir /tmp/consul
-```
+TODO
 
-## Starting the Server
+## Build
 
-With the configuration in place, starting the server is simple, as
-shown below. Modify the `-config` flag to point to the proper path
-where you saved the configuration above.
-
-```
-$ vault server -config=example.hcl
-==> Vault server configuration:
-
-         Log Level: info
-           Backend: consul
-        Listener 1: tcp (addr: "127.0.0.1:8200", tls: "disabled")
-
-==> Vault server started! Log data will stream in below:
-```
-
-Vault outputs some information about its configuration, and then blocks.
-This process should be run using a resource manager such as systemd or
-upstart.
-
-You'll notice that you can't execute any commands. We don't have any
-auth information! When you first setup a Vault server, you have to start
-by _initializing_ it.
-
-On Linux, Vault may fail to start with the following error:
-
-```shell
-$ vault server -config=example.hcl
-Error initializing core: Failed to lock memory: cannot allocate memory
-
-This usually means that the mlock syscall is not available.
-Vault uses mlock to prevent memory from being swapped to
-disk. This requires root privileges as well as a machine
-that supports mlock. Please enable mlock on your system or
-disable Vault from using it. To disable Vault from using it,
-set the `disable_mlock` configuration option in your configuration
-file.
-```
-
-For guidance on dealing with this issue, see the discussion of
-`disable_mlock` in [Server Configuration](/docs/config/index.html).
-
-## Initializing the Vault
-
-Initialization is the process of first configuring the Vault. This
-only happens once when the server is started against a new backend that
-has never been used with Vault before.
-
-During initialization, the encryption keys are generated, unseal keys
-are created, and the initial root token is setup. To initialize Vault
-use `vault init`. This is an _unauthenticated_ request, but it only works
-on brand new Vaults with no data:
-
-```
-$ vault init
-Key 1: 427cd2c310be3b84fe69372e683a790e01
-Key 2: 0e2b8f3555b42a232f7ace6fe0e68eaf02
-Key 3: 37837e5559b322d0585a6e411614695403
-Key 4: 8dd72fd7d1af254de5f82d1270fd87ab04
-Key 5: b47fdeb7dda82dbe92d88d3c860f605005
-Initial Root Token: eaf5cc32-b48f-7785-5c94-90b5ce300e9b
-
-Vault initialized with 5 keys and a key threshold of 3!
-
-Please securely distribute the above keys. Whenever a Vault server
-is started, it must be unsealed with 3 (the threshold)
-of the keys above (any of the keys, as long as the total number equals
-the threshold).
-
-Vault does not store the original master key. If you lose the keys
-above such that you no longer have the minimum number (the
-threshold), then your Vault will not be able to be unsealed.
-```
-
-Initialization outputs two incredibly important pieces of information:
-the _unseal keys_ and the _initial root token_. This is the
-**only time ever** that all of this data is known by Vault, and also the
-only time that the unseal keys should ever be so close together.
-
-For the purpose of this getting started guide, save all these keys
-somewhere, and continue. In a real deployment scenario, you would never
-save these keys together.
-
-## Seal/Unseal
-
-Every initialized Vault server starts in the _sealed_ state. From
-the configuration, Vault can access the physical storage, but it can't
-read any of it because it doesn't know how to decrypt it. The process
-of teaching Vault how to decrypt the data is known as _unsealing_ the
-Vault.
-
-Unsealing has to happen every time Vault starts. It can be done via
-the API and via the command line. To unseal the Vault, you
-must have the _threshold_ number of unseal keys. In the output above,
-notice that the "key threshold" is 3. This means that to unseal
-the Vault, you need 3 of the 5 keys that were generated.
-
--> **Note:** Vault does not store any of the unseal key shards. Vault
-uses an algorithm known as
-[Shamir's Secret Sharing](http://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing)
-to split the master key into shards. Only with the threshold number of keys
-can it be reconstructed and your data finally accessed.
-
-Begin unsealing the Vault with `vault unseal`:
-
-```
-$ vault unseal
-Key (will be hidden):
-Sealed: true
-Key Shares: 5
-Key Threshold: 3
-Unseal Progress: 1
-```
-
-After pasting in a valid key and confirming, you'll see that the Vault
-is still sealed, but progress is made. Vault knows it has 1 key out of 3.
-Due to the nature of the algorithm, Vault doesn't know if it has the
-_correct_ key until the threshold is reached.
-
-Also notice that the unseal process is stateful. You can go to another
-computer, use `vault unseal`, and as long as it's pointing to the same server,
-that other computer can continue the unseal process. This is incredibly
-important to the design of the unseal process: multiple people with multiple
-keys are required to unseal the Vault. The Vault can be unsealed from
-multiple computers and the keys should never be together. A single malicious
-operator does not have enough keys to be malicious.
-
-Continue with `vault unseal` to complete unsealing the Vault. Note that
-all 3 keys must be different, but they can be any other keys. As long as
-they're correct, you should soon see output like this:
-
-```
-$ vault unseal
-Key (will be hidden):
-Sealed: false
-Key Shares: 5
-Key Threshold: 3
-Unseal Progress: 0
-```
-
-The `Sealed: false` means the Vault is unsealed!
-
-Feel free to play around with entering invalid keys, keys in different
-orders, etc. in order to understand the unseal process. It is very important.
-Once you're ready to move on, use `vault auth` to authenticate with
-the root token.
-
-As a root user, you can reseal the Vault with `vault seal`. A single
-operator is allowed to do this. This lets a single operator lock down
-the Vault in an emergency without consulting other operators.
-
-When the Vault is sealed again, it clears all of its state (including
-the encryption key) from memory. The Vault is secure and locked down
-from access.
+## Deploy
 
 ## Next
 
-You now know how to configure, initialize, and unseal/seal Vault.
-This is the basic knowledge necessary to deploy Vault into a real
-environment. Once the Vault is unsealed, you access it as you have
-throughout this getting started guide (which worked with an unsealed Vault).
+In this step, you learned how easy it is to use Otto. You experienced
+Otto compilation for the first time and also saw how Otto works with
+_zero configuration_. You hopefully are beginning to sense the power of
+Otto, even if we've only covered development so far.
 
-Next, we have a [short tutorial](/intro/getting-started/apis.html) on using the HTTP APIs to authenticate and access secrets.
+Next, we'll [deploy this application](/intro/getting-started/deploy.html)
+to a real cloud environment.
