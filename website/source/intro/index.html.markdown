@@ -3,73 +3,78 @@ layout: "intro"
 page_title: "Introduction"
 sidebar_current: "what"
 description: |-
-  Welcome to the intro guide to Vault! This guide is the best place to start with Vault. We cover what Vault is, what problems it can solve, how it compares to existing software, and contains a quick start for using Vault.
+  TODO
 ---
 
-# Introduction to Vault
+# What is Otto?
 
-Welcome to the intro guide to Vault! This guide is the best
-place to start with Vault. We cover what Vault is, what
-problems it can solve, how it compares to existing software,
-and contains a quick start for using Vault.
+Otto knows how to develop and deploy any application.
 
-If you are already familiar with the basics of Vault, the
-[documentation](/docs/index.html) provides a better reference
-guide for all available features as well as internals.
+Otto automatically builds development environments tailored to your specific
+application. When you're ready to deploy, Otto can create the infrastructure
+and launch the application along with all of its dependencies. It is a single
+tool to develop and deploy any application.
 
-## What is Vault?
+Deploying a relatively simple application today requires an
+immense amount of domain knowledge: launching cloud servers, configuring
+those servers, securing the servers, deploying new versions of your
+application, etc. The solution to each of these problems usually requires
+another tool you must learn and master if you intend to solve it properly.
+And new trends such as microservices make all of this even more complicated.
 
-Vault is a tool for securely accessing _secrets_. A secret is anything
-that you want to tightly control access to, such as API keys, passwords,
-certificates, and more. Vault provides a unified interface to any
-secret, while providing tight access control and recording a detailed
-audit log.
+Due to this complexity, many developers either completely ignore best practices
+or turn to expensive completely managed solutions that often have limited
+scalability and flexiblity.
 
-A modern system requires access to a multitude of secrets: database
-credentials, API keys for external services, credentials for
-service-oriented architecture communication, etc. Understanding who is
-accessing what secrets is already very difficult and platform-specific.
-Adding on key rolling, secure storage, and detailed audit logs is almost
-impossible without a custom solution. This is where Vault steps in.
+Otto gives developers simple single commands to develop and deploy
+their application while using industry-standard tooling and best practices
+under the covers.
 
-Examples work best to showcase Vault. Please see the
-[use cases](/intro/use-cases.html).
+Otto has built-in knowledge of many application types and infrastructure
+architectures, and automatically generates the configuration necessary to
+manage the entire lifecycle of that application. If you're a PHP developer,
+for example, Otto knows how to install and configure Apache and PHP. If you
+depend on a database, Otto can setup that database and configure firewalls
+so that it is only accessible from your application. As time goes on, Otto
+will get smarter, and will generate more and more advanced deployments,
+all behind a single, simple deploy command from the developer.
 
-The key features of Vault are:
+TODO: This is not good.
 
-* **Secure Secret Storage**: Arbitrary key/value secrets can be stored
-  in Vault. Vault encrypts these secrets prior to writing them to persistent
-  storage, so gaining access to the raw storage isn't enough to access
-  your secrets. Vault can write to disk, [Consul](http://www.consul.io),
-  and more.
+## Key Features
 
-* **Dynamic Secrets**: Vault can generate secrets on-demand for some
-  systems, such as AWS or SQL databases. For example, when an application
-  needs to access an S3 bucket, it asks Vault for credentials, and Vault
-  will generate an AWS keypair with valid permissions on demand. After
-  creating these dynamic secrets, Vault will also automatically revoke them
-  after the lease is up.
+The key features of Otto are:
 
-* **Data Encryption**: Vault can encrypt and decrypt data without storing
-  it. This allows security teams to define encryption parameters and
-  developers to store encrypted data in a location such as SQL without
-  having to design their own encryption methods.
+* **Automatic development environments**: Otto detects your application
+  type and builds a development environment tailored specifically for that
+  application, with zero or minimal configuration. If your application depends
+  on other services (such as a database), it'll automatically configure and
+  start those services in your development environment for you.
 
-* **Leasing and Renewal**: All secrets in Vault have a _lease_ associated
-  with it. At the end of the lease, Vault will automatically revoke that
-  secret. Clients are able to renew leases via built-in renew APIs.
+* **Built for Microservices**: Otto understands dependencies and versioning
+  and can automatically deploy and configure an application and all
+  of its dependencies for any environment. An application only needs to
+  tell Otto its immediate dependencies; dependencies of dependencies are
+  automatically detected and configured.
 
-* **Revocation**: Vault has built-in support for secret revocation. Vault
-  can revoke not only single secrets, but a tree of secrets, for example
-  all secrets read by a specific user, or all secrets of a particular type.
-  Revocation assists in key rolling as well as locking down systems in the
-  case of an intrusion.
+* **Deployment**: Otto knows how to deploy applications as well develop
+  them. Whether your application is a Docker container or a legacy
+  monolithic PHP application, Otto can deploy your application to any
+  environment.
+
+* **Battle-hardened tooling**: Otto uses battle-hardened tooling to
+  build development environments ([Vagrant](https://vagrantup.com)),
+  launch servers ([Terraform](https://terraform.io)), configure
+  services ([Consul](https://consul.io)), and more. Each of the tools
+  Otto builds on top of is in use by some of the world's largest websites.
+  Otto automatically installs and manages all of this tooling, so you don't
+  have to.
 
 ## Next Steps
 
-See the page on [Vault use cases](/intro/use-cases.html) to see the
-multiple ways Vault can be used. Then see
-[how Vault compares to other software](/intro/vs/index.html)
-to see how it fits into your existing infrastructure. Finally, continue onwards with
+See the page on [Otto use cases](/intro/use-cases.html) to see the
+multiple ways Otto can be used. Then see
+[how Otto compares to other software](/intro/vs/index.html)
+to see how it fits with your other tooling. Finally, continue onwards with
 the [getting started guide](/intro/getting-started/install.html) to use
-Vault to read, write, and create real secrets and see how it works in practice.
+Otto to develop and deploy a real application and see how it works in practice.

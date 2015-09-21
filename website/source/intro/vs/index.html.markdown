@@ -1,22 +1,22 @@
 ---
 layout: "intro"
-page_title: "Vault vs. Other Software"
+page_title: "Otto vs. Other Software"
 sidebar_current: "vs-other"
 description: |-
-  Comparisons between Vault and other software that claim to store secrets in some capacity.
+  Comparisons between Otto and other software that may seem similar to Otto.
 ---
 
-# Vault vs. Other Software
+# Otto vs. Other Software
 
-There are a number of other options in the market currently that claim
-to store secrets in some capacity. This section compares Vault to these
-other software choices.
+Otto does a lot, and there are other tools in the market currently
+that claim to do what Otto does. This section compares Otto to
+these other software choices.
 
-Due to the bias of the comparisons being on the Vault website, we attempt
+Due to the bias of the comparisons being on the Otto website, we attempt
 to only use facts. If you find something that is invalid or out of date
 in the comparisons, please
-[open an issue](https://github.com/hashicorp/vault/issues) and we'll
+[open an issue](https://github.com/hashicorp/otto/issues) and we'll
 address it as soon as possible.
 
-Use the navigation on the left to read comparisons of Vault versus other
-systems.
+Use the navigation on the left to read comparisons of Otto versus other
+software.
