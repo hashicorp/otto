@@ -72,9 +72,6 @@ The key features of Otto are:
 
 ## Next Steps
 
-See the page on [Otto use cases](/intro/use-cases.html) to see the
-multiple ways Otto can be used. Then see
-[how Otto compares to other software](/intro/vs/index.html)
-to see how it fits with your other tooling. Finally, continue onwards with
-the [getting started guide](/intro/getting-started/install.html) to use
-Otto to develop and deploy a real application and see how it works in practice.
+Continue onwards with the [getting started guide](/intro/getting-started/install.html)
+to see how easy Otto makes it to develop and deploy a real application.
+
