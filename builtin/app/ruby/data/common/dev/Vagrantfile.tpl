@@ -34,7 +34,15 @@ Vagrant.configure("2") do |config|
 end
 
 $script_ruby = <<SCRIPT
-set -e
+set -o nounset -o errexit -o pipefail -o errtrace
+
+error() {
+   local sourcefile=$1
+   local lineno=$2
+   echo "ERROR at ${sourcefile}:${lineno}; Last logs:"
+   grep otto /var/log/syslog | tail -n 20
+}
+trap 'error "${BASH_SOURCE}" "${LINENO}"' ERR
 
 # otto-exec: execute command with output logged but not displayed
 oe() { $@ 2>&1 | logger -t otto > /dev/null; }
@@ -55,11 +63,9 @@ export DEBIAN_FRONTEND=noninteractive
 
 ol "Adding apt respositories and updating..."
 oe sudo apt-get update
-oe sudo apt-get install -y software-properties-common
+oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
 oe sudo add-apt-repository -y ppa:chris-lea/node.js
 oe sudo apt-add-repository -y ppa:brightbox/ruby-ng
-oe sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7
-echo 'deb https://oss-binaries.phusionpassenger.com/apt/passenger trusty main' | sudo tee /etc/apt/sources.list.d/passenger.list > /dev/null
 oe sudo apt-get update
 
 # TODO: parameterize ruby version as input
@@ -69,7 +75,6 @@ ol "Installing Ruby ${RUBY_VERSION} and supporting packages..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get install -y bzr git mercurial build-essential \
   libpq-dev zlib1g-dev software-properties-common \
-  apt-transport-https \
   nodejs \
   ruby$RUBY_VERSION ruby$RUBY_VERSION-dev
 
