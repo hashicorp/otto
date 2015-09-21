@@ -1,63 +1,35 @@
 ---
 layout: "docs"
-page_title: "Install Vault"
+page_title: "Install Otto"
 sidebar_current: "docs-install"
 description: |-
-  Learn how to install Vault.
+  Learn how to install Otto.
 ---
 
-# Install Vault
+# Install Otto
 
-Installing Vault is simple. There are two approaches to installing Vault:
-downloading a precompiled binary for your system, or installing from source.
+Installing Otto is simple.
 
-Downloading a precompiled binary is easiest, and we provide downloads over
-TLS along with SHA256 sums to verify the binary is what we say it is. We
-also distribute a PGP signature with the SHA256 sums that can be verified.
-However, we use a 3rd party storage host, and some people feel that
-due to the importance of security with Vault, they'd rather compile it
-from source.
-
-For this reason, we also document on this page how to compile Vault
-from source, from the same versions of all dependent libraries that
-we used for the official builds.
-
-## Precompiled Binaries
-
-To install the precompiled binary,
-[download](/downloads.html) the appropriate package for your system.
-Vault is currently packaged as a zip file. We don't have any near term
-plans to provide system packages.
+Otto is packaged as a zip and pre-built for various platforms.
+Go to the [download page](/downloads.html) and download the appropriate package
+for your system.
 
 Once the zip is downloaded, unzip it into any directory. The
-`vault` binary inside is all that is necessary to run Vault (or
-`vault.exe` for Windows). Any additional files, if any, aren't
-required to run Vault.
+`otto` binary inside is all that is necessary to run Otto (or
+`otto.exe` for Windows). Any additional files, if any, aren't
+required to run Otto.
 
-Copy the binary to anywhere on your system. If you intend to access it
-from the command-line, make sure to place it somewhere on your `PATH`.
-
-## Compiling from Source
-
-To compile from source, you'll need [Go](https://golang.org) installed
-and configured properly. You'll also need Git.
-
-  1. Clone the Vault repository into your GOPATH: https://github.com/hashicorp/vault
-
-  1. Verify that the file `$GOPATH/src/github.com/hashicorp/vault/main.go`
-     exists. If it doesn't, then you didn't clone Vault into the proper
-     path.
-
-  1. Run `make dev`. This will build Vault for your current system
-     and put the binary in `bin` (relative to the git checkout).
-
-~> **Note:** All the dependencies of Vault are vendored and the command
-above will use these vendored binaries. This is to avoid malicious
-upstream dependencies if possible.
+The final step is to make sure that `otto` is available on the PATH.
+See [this page](http://stackoverflow.com/questions/14637979/how-to-permanently-set-path-on-linux)
+for instructions on setting the PATH on Linux and Mac.
+[This page](http://stackoverflow.com/questions/1618280/where-can-i-set-path-to-make-exe-on-windows)
+contains instructions for setting the PATH on Windows.
 
 ## Verifying the Installation
 
-To verify Vault is properly installed, execute the `vault` binary on
-your system. You should see help output. If you are executing it from
-the command line, make sure it is on your PATH or you may get an error
-about `vault` not being found.
+To verify Otto is properly installed, execute the `otto` binary on
+your system. You should see help output.
+If you get an error that Otto could not be found, then your PATH environment
+variable was not setup properly. Please go back and ensure that your PATH
+variable contains the directory where Otto was installed.
+
