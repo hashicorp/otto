@@ -3,74 +3,42 @@ layout: "docs"
 page_title: "Commands: status"
 sidebar_current: "docs-commands-status"
 description: >
-  Display information and status of jobs.
+  The status command displays information about the state of your application's
+  development environment, infrastructure, builds, and deploys.
 ---
 
 # Command: status
 
-The `status` command displays status information for jobs.
+The `status` command displays status information about the state of your
+application's development environment, infrastructure, builds, and deploys. It
+is a quick way to see what has been built for a given application.
 
 ## Usage
 
 ```
-nomad status [options] [job]
+otto status
 ```
 
-This command accepts an option job ID as the sole argument. If the job ID is
-provided, information about the specific job is queried and displayed. If the ID
-is omitted, the command lists out all of the existing jobs and a few of the most
-useful status fields for each.
+Otto maintains the information displayed in the status command in a local
+cache. This makes the command very fast, but it means that the output may not
+reflect the true state of the world in cases where changes are made externally.
 
-## General Options
+In case this happens, you can re-run Otto's command to manage the out-of-sync
+component to get it to update. For example, if the development environment has
+been shut down externally, but `otto status` reports it as up, just rerun `otto
+dev` or `otto dev destroy` to refresh the status.
 
-<%= general_options_usage %>
-
-## Status Options
-
-* `-short`: Display short output. Used only when a single node is being queried.
-  Drops verbose node allocation data from the output.
-
-## Examples
-
-List of all jobs:
+## Example
 
 ```
-$ nomad status
-ID     Type     Priority  Status
-job1   service  3         pending
-job2   service  3         running
-job3   service  2         pending
-job4   service  1         complete
-```
-
-Short view of a specific job:
-
-```
-$ nomad status -short job1
-ID          = job1
-Name        = Test Job
-Type        = service
-Priority    = 3
-Datacenters = dc1,dc2,dc3
-Status      = pending
-```
-
-Full status information of a job:
-
-```
-$ nomad status job1
-ID          = job1
-Name        = Test Job
-Type        = service
-Priority    = 3
-Datacenters = dc1,dc2,dc3
-Status      = pending
-
-### Evaluations
-ID                                    Priority  Type     TriggeredBy   NodeID  Status
-193229c4-aa02-bbe6-f996-fd7d6974a309  3         service  job-register  node2   complete
-
-### Allocations
-ID                                    EvalID                                NodeID  TaskGroup  DesiredStatus  ClientStatus
-678c51dc-6c55-0ac8-d92d-675a1e8ea6b0  193229c4-aa02-bbe6-f996-fd7d6974a309  node2   grp8       failed         failed
+❯ otto status
+==> App Info
+    Application:    website (ruby)
+    Project:        website
+    Infrastructure: aws (simple)
+==> Component Status
+    Dev environment: CREATED
+    Infra:           NOT CREATED
+    Build:           NOT BUILT
+    Deploy:          NOT DEPLOYED
 ```
