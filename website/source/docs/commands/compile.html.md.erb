@@ -1,0 +1,37 @@
+---
+layout: "docs"
+page_title: "Commands: compile"
+sidebar_current: "docs-commands-compile"
+description: >
+  The compile command prepares Otto to manage your application.
+---
+
+# Command: compile
+
+The `compile` command tells Otto to prepare to manage your application. Otto
+configures itself with smart defaults by detecting what kind of application
+exists in the current directory. Using the optional
+[Appfile](/docs/appfile/index.html), you can also add specific config to
+override or modify Otto's default.
+
+Otto then generates all the [Vagrant](https://vagrantup.com),
+[Packer](https://packer.io), and [Terraform](https://terraform.io) config
+necessary to develop, build, and deploy your application. These generated
+configs are stored under the `.otto` directory for easy inspection. (Otto only
+stores local data in the `.otto` - it is not meant to be checked it to revision
+control.)
+
+During compilation, Otto also generates unique identifier for your app and
+stores this in `.ottoid`. This helps ensure that multiple applications deployed
+into the same infrastructure will not collide or be duplicated. This file
+should be checked in to version control.
+
+## Usage
+
+```
+otto compile
+```
+
+This is meant to be the first command you run in your application's root
+directory. Otto's other commands will detect if `otto compile` still needs to
+be run and let you know.

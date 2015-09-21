@@ -1,0 +1,31 @@
+---
+layout: "docs"
+page_title: "Commands: build"
+sidebar_current: "docs-commands-build"
+description: >
+  The build command tells Otto to build your application for deployment. Otto
+  uses Packer to perform its builds.
+---
+
+# Command: build
+
+The `build` command tells Otto to build your application in preparation for
+deployment. Otto uses [Packer](https://packer.io) internally to accomplish
+this. Depending on your configured [infrastructure](/docs/appfile/infra.html),
+this could involve booting a Vagrant VM, an EC2 instance, or some other
+environment where the build can be performed.
+
+The Infrastructure also determines what kind of __artifact__ is created by the
+build. For example, in AWS-based infrastructures, Otto builds yield Amazon
+Machine Images (AMIs). The result of a successful deploy is made available for
+the [deploy command](/docs/commands/deploy.html).
+
+## Usage
+
+```
+otto build
+```
+
+Because Otto uses your infrastructure to perform builds, the [infra
+command](/docs/commands/infra.html) must be run before `otto build`. Otto will
+tell you to do this if it does not detect any infrastructure.
