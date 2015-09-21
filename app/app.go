@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/foundation"
+	"github.com/hashicorp/otto/ui"
 )
 
 // App is the interface that must be implemented by each
@@ -120,6 +121,11 @@ func (c *Context) RouteName() string {
 // RouteArgs implements the router.Context interface so we can use Router
 func (c *Context) RouteArgs() []string {
 	return c.ActionArgs
+}
+
+// UI implements router.Context so we can use this in router.Router
+func (c *Context) UI() ui.Ui {
+	return c.Ui
 }
 
 // CompileResult is the structure containing compilation result values.

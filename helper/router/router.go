@@ -6,6 +6,8 @@ import (
 	"log"
 	"sort"
 	"strings"
+
+	"github.com/hashicorp/otto/ui"
 )
 
 // Router is a helper to route subcommands to specific callbacks.
@@ -36,6 +38,7 @@ type Action interface {
 type Context interface {
 	RouteName() string
 	RouteArgs() []string
+	UI() ui.Ui
 }
 
 // Route will route the given Context to the proper Action.
@@ -57,19 +60,26 @@ func (r *Router) Route(ctx Context) error {
 }
 
 func (r *Router) help(ctx Context) error {
+	badAction := false
+	var message bytes.Buffer
+
 	// If this is the help command we've been given a specific subcommand
 	// to look up, then do that.
 	if ctx.RouteName() == "help" && len(ctx.RouteArgs()) > 0 {
 		if a, ok := r.Actions[ctx.RouteArgs()[0]]; ok {
-			return fmt.Errorf(a.Help())
+			ctx.UI().Raw(a.Help())
+			return nil
 		}
+		message.WriteString(fmt.Sprintf(
+			"Unsupported action: %s\n\n", ctx.RouteArgs()[0]))
+		badAction = true
 	}
 
 	// Normal help output...
-	var message bytes.Buffer
 	if ctx.RouteName() != "" && ctx.RouteName() != "help" {
 		message.WriteString(fmt.Sprintf(
 			"Unsupported action: %s\n\n", ctx.RouteName()))
+		badAction = true
 	}
 
 	message.WriteString(fmt.Sprintf(
@@ -100,6 +110,11 @@ func (r *Router) help(ctx Context) error {
 
 	sort.Strings(actionLines)
 	message.WriteString(strings.Join(actionLines, ""))
+
+	if !badAction {
+		ctx.UI().Raw(message.String())
+		return nil
+	}
 
 	return fmt.Errorf(message.String())
 }
