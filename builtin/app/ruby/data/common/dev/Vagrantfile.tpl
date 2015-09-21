@@ -53,24 +53,28 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 
+ol "Adding apt respositories and updating..."
 oe sudo apt-get update
-
-ol "Installing Ruby {{ dev_ruby_version }}..."
-
-oe sudo apt-get install -y python-software-properties
+oe sudo apt-get install -y software-properties-common
+oe sudo add-apt-repository -y ppa:chris-lea/node.js
 oe sudo apt-add-repository -y ppa:brightbox/ruby-ng
+oe sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7
+echo 'deb https://oss-binaries.phusionpassenger.com/apt/passenger trusty main' | sudo tee /etc/apt/sources.list.d/passenger.list > /dev/null
 oe sudo apt-get update
-oe sudo apt-get install -y ruby{{ dev_ruby_version }} ruby{{ dev_ruby_version }}-dev
+
+# TODO: parameterize ruby version as input
+export RUBY_VERSION="{{ dev_ruby_version }}"
+
+ol "Installing Ruby ${RUBY_VERSION} and supporting packages..."
+export DEBIAN_FRONTEND=noninteractive
+oe sudo apt-get install -y bzr git mercurial build-essential \
+  libpq-dev zlib1g-dev software-properties-common \
+  apt-transport-https \
+  nodejs \
+  ruby$RUBY_VERSION ruby$RUBY_VERSION-dev
 
 ol "Installing Bundler..."
-
 oe gem install bundler --no-ri --no-rdoc
-
-ol "Installing VCSs for bundle install..."
-oe sudo apt-get install -y git bzr mercurial
-
-ol "Installing build-essential for native gem builds..."
-oe sudo apt-get install -y build-essential
 
 ol "Configuring Git to use SSH instead of HTTP so we can agent-forward private repo auth..."
 oe git config --global url."git@github.com:".insteadOf "https://github.com/"
