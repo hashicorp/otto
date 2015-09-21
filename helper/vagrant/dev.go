@@ -37,6 +37,12 @@ func Dev(opts *DevOptions) *router.Router {
 				HelpText:     strings.TrimSpace(actionUpHelp),
 			},
 
+			"address": &router.SimpleAction{
+				ExecuteFunc:  opts.actionAddress,
+				SynopsisText: actionAddressSyn,
+				HelpText:     strings.TrimSpace(actionAddressHelp),
+			},
+
 			"destroy": &router.SimpleAction{
 				ExecuteFunc:  opts.actionDestroy,
 				SynopsisText: actionDestroySyn,
@@ -56,6 +62,12 @@ func Dev(opts *DevOptions) *router.Router {
 			},
 		},
 	}
+}
+
+func (opts *DevOptions) actionAddress(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
+	ctx.Ui.Raw(ctx.DevIPAddress + "\n")
+	return nil
 }
 
 func (opts *DevOptions) actionDestroy(rctx router.Context) error {
@@ -190,6 +202,7 @@ func (opts *DevOptions) sshCache(ctx *app.Context) *SSHCache {
 
 // Synopsis text for actions
 const (
+	actionAddressSyn = "Shows the address to reach the development environment"
 	actionUpSyn      = "Starts the development environment"
 	actionDestroySyn = "Destroy the development environment"
 	actionSSHSyn     = "SSH into the development environment"
@@ -230,6 +243,18 @@ Usage: otto dev ssh
   The development environment typically is headless, meaning that the
   preferred way to access it is SSH. This command will automatically SSH
   you into the development environment.
+
+`
+
+const actionAddressHelp = `
+Usage: otto dev address
+
+  Output the address to connect to the development environment.
+
+  The development environment is configured with a static IP address.
+  This command outputs that address so you can reach it. If you want to
+  SSH into the development environment, use 'otto dev ssh'. This address
+  is meant for reaching running services such as in a web browser.
 
 `
 
