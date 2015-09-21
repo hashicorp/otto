@@ -35,3 +35,35 @@ otto compile
 This is meant to be the first command you run in your application's root
 directory. Otto's other commands will detect if `otto compile` still needs to
 be run and let you know.
+
+## Example
+
+Here is an example run from a Ruby project with no `Appfile` present:
+
+```
+❯ otto compile
+==> Loading Appfile...
+==> No Appfile found! Detecting project information...
+    No Appfile was found. If there is no Appfile, Otto will do its best
+    to detect the type of application this is and set reasonable defaults.
+    This is a good way to get started with Otto, but over time we recommend
+    writing a real Appfile since this will allow more complex customizations,
+    the ability to reference dependencies, versioning, and more.
+==> Fetching all Appfile dependencies...
+==> Compiling...
+    Application:    website (ruby)
+    Project:        website
+    Infrastructure: aws (simple)
+
+    Compiling infra...
+    Compiling foundation: consul
+==> Compiling main application...
+==> Compilation success!
+    This means that Otto is now ready to start a development environment,
+    deploy this application, build the supporting infastructure, and
+    more. See the help for more information.
+
+    Supporting files to enable Otto to manage your application from
+    development to deployment have been placed in the output directory.
+    These files can be manually inspected to determine what Otto will do.
+```
