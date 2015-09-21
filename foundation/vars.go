@@ -31,6 +31,9 @@ func WriteVars(ctx *context.Shared) error {
 		panic("no active infra")
 	}
 
+	log.Printf("[DEBUG] infra.Foundations: %#v", infra.Foundations)
+	log.Printf("[DEBUG] ctx.FoundationDirs: %#v", ctx.FoundationDirs)
+
 	if len(ctx.FoundationDirs) < len(infra.Foundations) {
 		panic("foundationDirs is missing entries")
 	}
