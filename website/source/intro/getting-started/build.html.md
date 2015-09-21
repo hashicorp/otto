@@ -15,8 +15,6 @@ a Docker container, etc.
 
 For our simple example, Otto will create an AMI to launch.
 
-## Build
-
 To build the application, run `otto build`.
 
 This step is likely going to ask you for permission to install

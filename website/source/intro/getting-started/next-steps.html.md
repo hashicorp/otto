@@ -3,18 +3,15 @@ layout: "intro"
 page_title: "Next Steps"
 sidebar_current: "gettingstarted-nextsteps"
 description: |-
-  After completing the getting started guide, learn about what to do next with Vault.
+  After completing the getting started guide, learn about what to do next with Otto.
 ---
 
 # Next Steps
 
-That concludes the getting started guide for Vault. Hopefully you're
-excited about the possibilities of Vault and ready to put this knowledge
-to use to improve your environment.
+That concludes the getting started guide for Otto. Hopefully you're
+excited about the possibilities of Otto and ready to begin using Otto
+with your applications.
 
-We've covered the basics of all the core features of Vault in this guide.
-Due to the importance of securing secrets, we recommend reading the following
-as next steps.
-
-  * [Documentation](/docs/index.html) - The documentation is an in-depth
-    reference guide to all the features of Vault.
+We've covered the basics of Otto in this guide. We recommend moving on
+to the [documentation](/docs/index.html) next, which serves as a complete
+reference to all the features of Otto.
