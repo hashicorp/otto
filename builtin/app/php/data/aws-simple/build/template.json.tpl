@@ -9,6 +9,21 @@
     },
 
     "provisioners": [
+      {% for dir in foundation_dirs.build %}
+      {
+        "type": "shell",
+        "inline": ["mkdir -p /tmp/otto/foundation-{{ forloop.Counter }}"]
+      },
+      {
+        "type": "file",
+        "source": "{{ dir }}/",
+        "destination": "/tmp/otto/foundation-{{ forloop.Counter }}"
+      },
+      {
+        "type": "shell",
+        "inline": ["cd /tmp/otto/foundation-{{ forloop.Counter}} && bash ./main.sh"]
+      },
+      {% endfor %}
       {
         "type": "file",
         "source": "{% verbatim %}{{ user `slug_path` }}{% endverbatim %}",

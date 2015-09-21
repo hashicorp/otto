@@ -167,7 +167,7 @@ func (c *Core) Compile() error {
 		}
 
 		// Compile the foundations for this app
-		subdirs := []string{"app-dev", "app-dev-dep", "app-deploy"}
+		subdirs := []string{"app-dev", "app-dev-dep", "app-build", "app-deploy"}
 		for i, f := range foundations {
 			fCtx := foundationCtxs[i]
 			fCtx.Dir = ctx.FoundationDirs[i]
@@ -274,7 +274,7 @@ func (c *Core) Build() error {
 	}
 
 	// Just update our shared data so we get the creds
-	rootCtx.Shared = infraCtx.Shared
+	rootCtx.Shared.InfraCreds = infraCtx.Shared.InfraCreds
 
 	return rootApp.Build(rootCtx)
 }

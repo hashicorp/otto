@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/foundation"
 )
 
 type BuildOptions struct {
@@ -77,6 +78,11 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 	}
 	for k, v := range ctx.InfraCreds {
 		vars[k] = v
+	}
+
+	// Setup the vars
+	if err := foundation.WriteVars(&ctx.Shared); err != nil {
+		return fmt.Errorf("Error preparing build: %s", err)
 	}
 
 	ctx.Ui.Header("Building deployment archive...")
