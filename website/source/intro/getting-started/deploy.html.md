@@ -50,5 +50,7 @@ encoded into Otto and Otto will roll out these change for you. For example,
 if cheaper or more optimized hardware becomes available in AWS, then
 Otto can begin to use those instead.
 
-Next, we'll show how Otto can be used to develop and deploy
-an application [with dependencies](/intro/getting-started/deps.html).
+Up to this point, we've done everything with _zero configuration_
+(other than the credentials to access AWS). Next, we'll introduce
+the [Appfile](/intro/getting-started/appfile.html) as a way to configure
+Otto.
