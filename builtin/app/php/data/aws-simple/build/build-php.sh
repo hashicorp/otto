@@ -34,7 +34,7 @@ ol "Installing PHP VCSs, Apache, and other packages..."
 oe sudo apt-get install -y apache2 php5 libapache2-mod-php5 \
   bzr git mercurial build-essential \
   curl \
-  php5-mcrypt php5-mysql php5-fpm php5--gd php5-readline php5-pgsql
+  php5-mcrypt php5-mysql php5-fpm php5-gd php5-readline php5-pgsql
 
 ol "Extracting app..."
 sudo mkdir -p /srv/otto-app
