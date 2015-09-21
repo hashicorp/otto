@@ -26,7 +26,7 @@
       "access_key": "{% verbatim %}{{ user `aws_access_key` }}{% endverbatim %}",
       "secret_key": "{% verbatim %}{{ user `aws_secret_key` }}{% endverbatim %}",
       "region": "{% verbatim %}{{ user `aws_region` }}{% endverbatim %}",
-      "source_ami": "ami-76b2a71e",
+      "source_ami": "ami-21630d44",
       "instance_type": "c3.large",
       "ssh_username": "ubuntu",
       "ami_name": "{{name}} {% verbatim %}{{timestamp}}{% endverbatim %}"

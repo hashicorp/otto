@@ -11,7 +11,7 @@
       "access_key": "{{ user `access_key` }}",
       "secret_key": "{{ user `secret_key` }}",
       "region": "us-east-1",
-      "source_ami": "ami-76b2a71e",
+      "source_ami": "ami-21630d44",
       "instance_type": "{{ user `instance` }}",
       "ssh_username": "ubuntu",
       "ami_users": ["209146746714", "762203914556"],
