@@ -1,0 +1,35 @@
+<% wrap_layout :inner do %>
+	<% content_for :sidebar do %>
+		<div class="docs-sidebar hidden-print affix-top" role="complementary">
+			<ul class="nav docs-sidenav">
+				<li<%= sidebar_current("docs-home") %>>
+					<a href="/docs/apps/index.html">&laquo; Documentation Home</a>
+				</li>
+
+				<li<%= sidebar_current("docs-ruby-index") %>>
+					<a href="/docs/apps/ruby/index.html">Ruby App Type</a>
+				</li>
+
+				<hr>
+
+				<li<%= sidebar_current("docs-ruby-detect") %>>
+					<a href="/docs/apps/ruby/detect.html">Detection</a>
+				</li>
+
+				<li<%= sidebar_current("docs-ruby-dev") %>>
+					<a href="/docs/apps/ruby/dev.html">Development</a>
+				</li>
+
+				<li<%= sidebar_current("docs-ruby-deploy") %>>
+					<a href="/docs/apps/ruby/deploy.html">Build & Deploy</a>
+				</li>
+
+				<li<%= sidebar_current("docs-ruby-customization") %>>
+					<a href="/docs/apps/ruby/customization.html">Customization</a>
+				</li>
+			</ul>
+		</div>
+	<% end %>
+
+	<%= yield %>
+<% end %>
