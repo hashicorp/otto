@@ -42,6 +42,14 @@ func (c *DeployCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Destroy action gets an extra double-check
+	if action == "destroy" {
+		msg := "Otto will delete all resources associated with the deploy."
+		if !c.confirmDestroy(msg, execArgs) {
+			return 1
+		}
+	}
+
 	// Deploy the artifact
 	if err := core.Deploy(action, execArgs); err != nil {
 		// Display errors without prefix, we expect them to be formatted in a way

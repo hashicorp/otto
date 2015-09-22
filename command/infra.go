@@ -43,6 +43,14 @@ func (c *InfraCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Destroy action gets an extra double-check
+	if action == "destroy" {
+		msg := "Otto will delete all your managed infrastructure."
+		if !c.confirmDestroy(msg, execArgs) {
+			return 1
+		}
+	}
+
 	// Execute the task
 	err = core.Infra(action, execArgs)
 	if err != nil {
