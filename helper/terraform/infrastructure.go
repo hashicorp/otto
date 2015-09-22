@@ -64,7 +64,7 @@ func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
 func (i *Infrastructure) actionDestroy(rctx router.Context) error {
 	rctx.UI().Header("Destroying main infrastructure...")
 	ctx := rctx.(*infrastructure.Context)
-	return i.execute(ctx, "destroy")
+	return i.execute(ctx, "destroy", "-force")
 }
 
 func (i *Infrastructure) actionApply(rctx router.Context) error {
@@ -112,7 +112,7 @@ func (i *Infrastructure) actionInfo(rctx router.Context) error {
 	return nil
 }
 
-func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) error {
+func (i *Infrastructure) execute(ctx *infrastructure.Context, command ...string) error {
 	project, err := Project(&ctx.Shared)
 	if err != nil {
 		return err
@@ -176,7 +176,7 @@ func (i *Infrastructure) execute(ctx *infrastructure.Context, command string) er
 			"\n\n")
 
 	// Start the Terraform command
-	err = tf.Execute(command)
+	err = tf.Execute(command...)
 	if err != nil {
 		err = fmt.Errorf("Error running Terraform: %s", err)
 		infra.State = directory.InfraStatePartial
@@ -258,13 +258,16 @@ Usage: otto infra
 `
 
 const infraDestroyHelp = `
-Usage: otto infra destroy
+Usage: otto infra destroy [-force]
 
   Destroys all infrastructure resources.
 
   This command will remove any previously-created infrastructure resources.
   Note that any apps with resources deployed into this infrastructure will need
   to have 'otto deploy destroy' run before this command will succeed.
+
+	Otto will ask for confirmation to protect against an accidental destroy. You
+	can provide the -force flag to skip this check.
 `
 
 const infraInfoHelp = `

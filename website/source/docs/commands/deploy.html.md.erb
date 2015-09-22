@@ -27,8 +27,9 @@ The available subcommands are:
  * `info` - Displays information about the deployed application. Otto outputs
    this information in `key = value` format. If you provide a key name as an
    additional argument, Otto will only print the value of that key.
- * `destroy` - Destroys the resources used to deploy this application. Each
-   application deployed to an infrastructure must be destroyed before the
-   [infra destroy command](/docs/commands/infra.html) will work.
+ * `destroy [-force]` - Destroys the resources used to deploy this application.
+   Each application deployed to an infrastructure must be destroyed before the
+   [infra destroy command](/docs/commands/infra.html) will work. Otto will ask
+   for confirmation unless the `-force` flag is specified.
 
 A list of these subcommands are also available via `otto deploy help`.

@@ -195,7 +195,7 @@ func (opts *DeployOptions) actionDestroy(rctx router.Context) error {
 		Directory: ctx.Directory,
 		StateId:   deploy.ID,
 	}
-	if err := tf.Execute("destroy"); err != nil {
+	if err := tf.Execute("destroy", "-force"); err != nil {
 		deploy.MarkFailed()
 		if putErr := ctx.Directory.PutDeploy(deploy); putErr != nil {
 			return fmt.Errorf("The destroy failed with err: %s\n\n"+
@@ -391,13 +391,16 @@ Usage: otto deploy
 `
 
 const actionDestroyHelp = `
-Usage: otto deploy destroy
+Usage: otto deploy destroy [-force]
 
   Destroys any deployed resources associated with this application.
 
   This command will remove any previously-deployed resources from your
   infrastructure. This must be run for all of apps in an infrastructure before
   'otto infra destroy' will work.
+
+	Otto will ask for confirmation to protect against an accidental destroy. You
+	can provide the -force flag to skip this check.
 `
 
 const actionInfoHelp = `

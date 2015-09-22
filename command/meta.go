@@ -175,3 +175,35 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 func (m *Meta) OttoUi() ui.Ui {
 	return NewUi(m.Ui)
 }
+
+// confirmDestroy is a little helper that will ask the user to confirm a
+// destroy action using the provided msg, unless -force is included in args it
+// returns true if the destroy should be considered confirmed, and false if
+// the destroy should be aborted.
+func (m *Meta) confirmDestroy(msg string, args []string) bool {
+	destroyForce := false
+	for _, arg := range args {
+		if arg == "-force" {
+			destroyForce = true
+		}
+	}
+
+	if !destroyForce {
+		v, err := m.OttoUi().Input(&ui.InputOpts{
+			Id:    "destroy",
+			Query: "Do you really want to destroy?",
+			Description: fmt.Sprintf("%s\n"+
+				"There is no undo. Only 'yes' will be accepted to confirm.", msg),
+		})
+		if err != nil {
+			m.Ui.Error(fmt.Sprintf("Error asking for confirmation: %s", err))
+			return false
+		}
+		if v != "yes" {
+			m.Ui.Output("Destroy cancelled.")
+			return false
+		}
+	}
+
+	return true
+}
