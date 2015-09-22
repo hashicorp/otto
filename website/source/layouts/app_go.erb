@@ -1,0 +1,40 @@
+<% wrap_layout :inner do %>
+	<% content_for :sidebar do %>
+		<div class="docs-sidebar hidden-print affix-top" role="complementary">
+			<ul class="nav docs-sidenav">
+				<li<%= sidebar_current("docs-home") %>>
+					<a href="/docs/apps/index.html">&laquo; Documentation Home</a>
+				</li>
+
+				<li<%= sidebar_current("docs-go-index") %>>
+					<a href="/docs/apps/go/index.html">Go App Type</a>
+				</li>
+
+				<hr>
+
+				<li<%= sidebar_current("docs-go-detect") %>>
+					<a href="/docs/apps/go/detect.html">Detection</a>
+				</li>
+
+				<li<%= sidebar_current("docs-go-dev") %>>
+					<a href="/docs/apps/go/dev.html">Development</a>
+				</li>
+
+				<li<%= sidebar_current("docs-go-deploy") %>>
+					<a href="/docs/apps/go/deploy/index.html">Build & Deploy</a>
+					<ul class="nav">
+						<li<%= sidebar_current("docs-go-deploy-aws") %>>
+							<a href="/docs/apps/go/deploy/aws.html">AWS</a>
+						</li>
+					</ul>
+				</li>
+
+				<li<%= sidebar_current("docs-go-customization") %>>
+					<a href="/docs/apps/go/customization.html">Customization</a>
+				</li>
+			</ul>
+		</div>
+	<% end %>
+
+	<%= yield %>
+<% end %>
