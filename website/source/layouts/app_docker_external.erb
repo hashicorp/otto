@@ -1,0 +1,40 @@
+<% wrap_layout :inner do %>
+	<% content_for :sidebar do %>
+		<div class="docs-sidebar hidden-print affix-top" role="complementary">
+			<ul class="nav docs-sidenav">
+				<li<%= sidebar_current("docs-home") %>>
+					<a href="/docs/apps/index.html">&laquo; Documentation Home</a>
+				</li>
+
+				<li<%= sidebar_current("docs-docker-index") %>>
+					<a href="/docs/apps/docker-external/index.html">Docker (External) App Type</a>
+				</li>
+
+				<hr>
+
+				<li<%= sidebar_current("docs-docker-detect") %>>
+					<a href="/docs/apps/docker-external/detect.html">Detection</a>
+				</li>
+
+				<li<%= sidebar_current("docs-docker-dev") %>>
+					<a href="/docs/apps/docker-external/dev.html">Development</a>
+				</li>
+
+				<li<%= sidebar_current("docs-docker-deploy") %>>
+					<a href="/docs/apps/docker-external/deploy/index.html">Build & Deploy</a>
+					<ul class="nav">
+						<li<%= sidebar_current("docs-docker-deploy-aws") %>>
+							<a href="/docs/apps/docker-external/deploy/aws.html">AWS</a>
+						</li>
+					</ul>
+				</li>
+
+				<li<%= sidebar_current("docs-docker-customization") %>>
+					<a href="/docs/apps/docker-external/customization.html">Customization</a>
+				</li>
+			</ul>
+		</div>
+	<% end %>
+
+	<%= yield %>
+<% end %>
