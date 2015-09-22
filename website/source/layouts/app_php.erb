@@ -1,0 +1,40 @@
+<% wrap_layout :inner do %>
+	<% content_for :sidebar do %>
+		<div class="docs-sidebar hidden-print affix-top" role="complementary">
+			<ul class="nav docs-sidenav">
+				<li<%= sidebar_current("docs-home") %>>
+					<a href="/docs/apps/index.html">&laquo; Documentation Home</a>
+				</li>
+
+				<li<%= sidebar_current("docs-php-index") %>>
+					<a href="/docs/apps/php/index.html">php App Type</a>
+				</li>
+
+				<hr>
+
+				<li<%= sidebar_current("docs-php-detect") %>>
+					<a href="/docs/apps/php/detect.html">Detection</a>
+				</li>
+
+				<li<%= sidebar_current("docs-php-dev") %>>
+					<a href="/docs/apps/php/dev.html">Development</a>
+				</li>
+
+				<li<%= sidebar_current("docs-php-deploy") %>>
+					<a href="/docs/apps/php/deploy/index.html">Build & Deploy</a>
+					<ul class="nav">
+						<li<%= sidebar_current("docs-php-deploy-aws") %>>
+							<a href="/docs/apps/php/deploy/aws.html">AWS</a>
+						</li>
+					</ul>
+				</li>
+
+				<li<%= sidebar_current("docs-php-customization") %>>
+					<a href="/docs/apps/php/customization.html">Customization</a>
+				</li>
+			</ul>
+		</div>
+	<% end %>
+
+	<%= yield %>
+<% end %>

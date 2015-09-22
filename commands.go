@@ -79,7 +79,7 @@ func init() {
 		},
 		&detect.Detector{
 			Type: "php",
-			File: []string{"composer.json", "index.php"},
+			File: []string{"*.php", "composer.json"},
 		},
 		&detect.Detector{
 			Type: "ruby",

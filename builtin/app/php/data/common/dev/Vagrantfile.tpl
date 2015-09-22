@@ -34,12 +34,19 @@ Vagrant.configure("2") do |config|
 end
 
 $script_app = <<SCRIPT
-set -e
+#!/bin/bash
 
-# otto-exec: execute command with output logged but not displayed
-oe() { $@ 2>&1 | logger -t otto > /dev/null; }
+set -o nounset -o errexit -o pipefail -o errtrace
 
-# otto-log: output a prefixed message
+error() {
+   local sourcefile=$1
+   local lineno=$2
+   echo "ERROR at ${sourcefile}:${lineno}; Last logs:"
+   grep otto /var/log/syslog | tail -n 20
+}
+trap 'error "${BASH_SOURCE}" "${LINENO}"' ERR
+
+oe() { "$@" 2>&1 | logger -t otto > /dev/null; }
 ol() { echo "[otto] $@"; }
 
 # Make it so that `vagrant ssh` goes directly to the correct dir
@@ -51,13 +58,21 @@ if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
   oe sudo service ssh restart
 fi
 
-ol "Installing PHP..."
+ol "Adding apt respositories and updating..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get update -y
-oe sudo apt-get install -y python-software-properties software-properties-common
+oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
 oe sudo add-apt-repository -y ppa:ondrej/php5-5.6
+# Seems to be required to prevent "unauthenticated packages"
+# errors out of apt-get install.
+oe sudo apt-key update
 oe sudo apt-get update -y
-oe sudo apt-get install -y curl php5
+
+ol "Installing PHP and supporting packages..."
+oe sudo apt-get install -y php5 \
+  bzr git mercurial build-essential \
+  curl \
+  php5-mcrypt php5-mysql php5-fpm php5-gd php5-readline php5-pgsql
 
 ol "Installing Composer..."
 cd /tmp
