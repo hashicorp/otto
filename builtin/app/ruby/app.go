@@ -29,8 +29,8 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		},
 		Customizations: []*compile.Customization{
 			&compile.Customization{
-				Type:     "dev",
-				Callback: custom.processDev,
+				Type:     "ruby",
+				Callback: custom.processRuby,
 				Schema: map[string]*schema.FieldSchema{
 					"ruby_version": &schema.FieldSchema{
 						Type:        schema.TypeString,

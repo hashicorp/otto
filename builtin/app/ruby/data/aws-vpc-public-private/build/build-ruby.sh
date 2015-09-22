@@ -29,7 +29,7 @@ echo 'deb https://oss-binaries.phusionpassenger.com/apt/passenger trusty main' |
 oe sudo apt-get update
 
 # TODO: parameterize ruby version as input
-export RUBY_VERSION="2.2"
+export RUBY_VERSION="{{ ruby_version }}"
 
 ol "Installing Ruby, Passenger, Nginx, and other packages..."
 export DEBIAN_FRONTEND=noninteractive

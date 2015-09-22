@@ -28,8 +28,7 @@ oe sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B
 echo 'deb https://oss-binaries.phusionpassenger.com/apt/passenger trusty main' | sudo tee /etc/apt/sources.list.d/passenger.list > /dev/null
 oe sudo apt-get update
 
-# TODO: parameterize ruby version as input
-export RUBY_VERSION="2.2"
+export RUBY_VERSION="{{ ruby_version }}"
 
 ol "Installing Ruby, Passenger, Nginx, and other packages..."
 export DEBIAN_FRONTEND=noninteractive

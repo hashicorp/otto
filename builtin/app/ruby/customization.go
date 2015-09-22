@@ -9,7 +9,7 @@ type customizations struct {
 	Opts *compile.AppOptions
 }
 
-func (c *customizations) processDev(d *schema.FieldData) error {
-	c.Opts.Bindata.Context["dev_ruby_version"] = d.Get("ruby_version")
+func (c *customizations) processRuby(d *schema.FieldData) error {
+	c.Opts.Bindata.Context["ruby_version"] = d.Get("ruby_version")
 	return nil
 }

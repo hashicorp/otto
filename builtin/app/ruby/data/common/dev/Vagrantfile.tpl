@@ -69,7 +69,7 @@ oe sudo apt-add-repository -y ppa:brightbox/ruby-ng
 oe sudo apt-get update
 
 # TODO: parameterize ruby version as input
-export RUBY_VERSION="{{ dev_ruby_version }}"
+export RUBY_VERSION="{{ ruby_version }}"
 
 ol "Installing Ruby ${RUBY_VERSION} and supporting packages..."
 export DEBIAN_FRONTEND=noninteractive
