@@ -405,7 +405,7 @@ Usage: otto deploy info [NAME]
 
   Displays information about this application's deploy.
 
-	This command will show any variables the deploy has specified as outputs. If
-	no NAME is specified, all outputs will be listed. If NAME is specified, just
-	the contents of that output will be printed.
+  This command will show any variables the deploy has specified as outputs. If
+  no NAME is specified, all outputs will be listed. If NAME is specified, just
+  the contents of that output will be printed.
 `
