@@ -3,7 +3,9 @@ layout: "docs"
 page_title: "Appfile Compilation"
 sidebar_current: "docs-concepts-compile"
 description: |-
-  Before performing any operation with Vault, the connecting client must be authenticated.
+  The compilation step in Otto takes the [Appfile](/docs/concepts/appfile.html),
+  validates it, fetches any dependencies, and generates dozens of output
+  files that are used by subsequent Otto operations.
 ---
 
 # Compilation
