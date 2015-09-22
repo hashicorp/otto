@@ -3,7 +3,9 @@ layout: "docs"
 page_title: "Appfile"
 sidebar_current: "docs-concepts-appfile"
 description: |-
-  Before performing any operation with Vault, the connecting client must be authenticated.
+  The "Appfile" is the file that Otto uses as a source of configuration
+  for an application. It tells Otto just enough information for Otto to
+  manage the application from development to deployment.
 ---
 
 # Appfile
