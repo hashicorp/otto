@@ -8,9 +8,8 @@ description: |-
 
 # Otto vs. Other Software
 
-Otto does a lot, and there are other tools in the market currently
-that claim to do what Otto does. This section compares Otto to
-these other software choices.
+This section compares Otto to other software choices that seem similar
+or may overlap with the use cases of Otto.
 
 Due to the bias of the comparisons being on the Otto website, we attempt
 to only use facts. If you find something that is invalid or out of date
