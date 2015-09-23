@@ -25,7 +25,7 @@ add a new section:
 
 ```
 customization "ruby" {
-    ruby_version = "2.1"
+  ruby_version = "2.1"
 }
 ```
 

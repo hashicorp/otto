@@ -22,7 +22,7 @@ Now imagine every project being this easy to get started with.
 
 If you inspect the repository you cloned, you'll notice that there
 isn't any configuration for Otto. For simple cases, Otto doesn't need
-any configuration. Otto detected the application is a Ruby application,
+any configuration. Otto detected the application is a Ruby application
 and automatically built us an environment tailored to Ruby development.
 
 Before we explain in more detail what happened, let's start the application.
@@ -154,8 +154,8 @@ Use `bundle show [gemname]` to see where a bundled gem is installed.
 [2042-01-01 12:55:28] INFO  WEBrick::HTTPServer#start: pid=12965 port=9292
 ```
 
-If this environment were a PHP environment, we'd have PHP installed.
-If it were Node, we'd have Node and NPM installed. And so on. Otto
+If this environment were a PHP environment, we'd have PHP installed,
+if it were Node, we'd have Node and NPM installed, and so on. Otto
 automatically builds a development environment for your application.
 
 ## Development Environment Address
