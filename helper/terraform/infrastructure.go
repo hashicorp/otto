@@ -25,6 +25,10 @@ type Infrastructure struct {
 	// for nice helpers for implementing this function.
 	CredsFunc func(*infrastructure.Context) (map[string]string, error)
 
+	// VerifyCreds is a function that verifies credentials are in good
+	// working order.
+	VerifyCredsFunc func(*infrastructure.Context) error
+
 	// Bindata is the bindata.Data structure where assets can be found
 	// for compilation. The data for the various flavors is expected to
 	// live in "data/#{flavor}"
@@ -36,6 +40,10 @@ type Infrastructure struct {
 
 func (i *Infrastructure) Creds(ctx *infrastructure.Context) (map[string]string, error) {
 	return i.CredsFunc(ctx)
+}
+
+func (i *Infrastructure) VerifyCreds(ctx *infrastructure.Context) error {
+	return i.VerifyCredsFunc(ctx)
 }
 
 func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
