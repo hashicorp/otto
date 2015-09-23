@@ -10,8 +10,8 @@ description: >
 
 The `deploy` command tells Otto to deploy a build of your application to your
 infrastructure. Otto uses [Terraform](https://terraform.io) internally to take
-the artifact produced by a successful [build](/docs/commands/build.html) up and
-running in your infrastructure.
+the artifact produced by a successful [build](/docs/commands/build.html) and
+deploy it into your infrastructure.
 
 ## Usage
 
@@ -19,7 +19,7 @@ running in your infrastructure.
 otto deploy [subcommand]
 ```
 
-Without any subcommand, Otto deploys the artifact from the last successful
+Without any subcommands, Otto deploys the artifact from the last successful
 build into your infrastructure.
 
 The available subcommands are:

@@ -26,7 +26,7 @@ Due to this complexity, many developers either completely ignore best practices
 or turn to expensive completely managed solutions that often have limited
 scalability and flexiblity.
 
-Otto gives developers simple single commands to develop and deploy
+Otto gives developers simple, single commands to develop and deploy
 their application while using industry-standard tooling and best practices
 under the covers.
 

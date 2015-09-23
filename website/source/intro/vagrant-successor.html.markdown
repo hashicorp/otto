@@ -59,8 +59,8 @@ improve for Otto as time goes on.
 
 Vagrant is a mature, battle-hardened piece of technology. It has been
 in use by millions of users for many years. We don't want to reinvent the
-wheel so we've taken the best parts of Vagrant used that within Otto to manage
-development environments automatically for the user.
+wheel, so we've taken the best parts of Vagrant and used them within Otto to
+manage development environments automatically for the user.
 
 Otto builds on top of Vagrant to make operations such as SSH take
 milliseconds, automatically assign static addresses (and soon DNS names),
@@ -69,9 +69,9 @@ lot more to enable deployment.
 
 In addition to Otto using Vagrant, Vagrant will continue to be the best
 tool for managing highly customized virtualized or containerized environments.
-Vagrant is a great way to test configuration management, obsure operating
+Vagrant is a great way to test configuration management, obscure operating
 systems, etc. These use cases will not go away.
 
-Due to the above, we're committed to continue improving Vagrant and releasing
+Due to the above, we're committed to continuing to improve Vagrant and releasing
 new versions of Vagrant for years to come. But for the everyday developer,
 Otto should replace Vagrant over time.

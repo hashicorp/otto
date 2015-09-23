@@ -86,7 +86,7 @@ The ".ottoid" file is generated one time per application and contains
 a unique identifier for that application. This UUID is used to track the
 application deployment in the [directory](/docs/concepts/directory.html).
 It is a critical piece of information that Otto uses to ensure an application
-is only deployed once (unless explicitly requested othewise), to maintain
+is only deployed once (unless explicitly requested otherwise), to maintain
 state history, etc.
 
 This file should be committed to version control.

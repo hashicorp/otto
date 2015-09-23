@@ -18,12 +18,12 @@ An example Appfile is shown below. This Appfile is completely valid.
 
 ```
 application {
-    name = "example"
-    type = "ruby"
+  name = "example"
+  type = "ruby"
 }
 
 customization "ruby" {
-    ruby_version = "2.0"
+  ruby_version = "2.0"
 }
 ```
 
