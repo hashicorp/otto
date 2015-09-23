@@ -20,8 +20,8 @@ To build the application, run `otto build`.
 This step is likely going to ask you for permission to install
 [Packer](https://packer.io). Otto uses Packer under the covers
 to build deployable artifacts. If you say yes, Otto will install
-this for you. If you already have Packer installed, you won't be
-asked.
+this for you. If you already have the latest version of Packer
+installed, you won't be asked.
 
 After installing Packer, Otto will once again ask you for your credentials.
 This time, however, just enter the password you used to encrypt them

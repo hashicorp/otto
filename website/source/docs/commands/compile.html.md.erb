@@ -18,10 +18,10 @@ Otto then generates all the [Vagrant](https://vagrantup.com),
 [Packer](https://packer.io), and [Terraform](https://terraform.io) config
 necessary to develop, build, and deploy your application. These generated
 configs are stored under the `.otto` directory for easy inspection. (Otto only
-stores local data in the `.otto` - it is not meant to be checked it to revision
+stores local data in the `.otto` - it is not meant to be checked in to version
 control.)
 
-During compilation, Otto also generates unique identifier for your app and
+During compilation, Otto also generates a unique identifier for your app and
 stores this in `.ottoid`. This helps ensure that multiple applications deployed
 into the same infrastructure will not collide or be duplicated. This file
 should be checked in to version control.

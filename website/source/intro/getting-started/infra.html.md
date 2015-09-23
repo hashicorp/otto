@@ -8,7 +8,7 @@ description: |-
 
 # Infrastructure
 
-In the previous step, we got a development up and running with no
+In the previous step, we got a development environment up and running with no
 configuration and a couple simple commands. Now, let's deploy that application.
 
 To deploy an application, Otto has three steps: start an infrastructure,
@@ -37,13 +37,13 @@ infrastructure to deploy to. Within Otto, "infrastructure" refers to
 a target cloud platform and the minimum resources necessary to run
 applications.
 
-For example, for AWS, Otto creates a VPC, subnets, proper routing tables,
+Using AWS as an example, Otto creates a VPC, subnets, proper routing tables,
 an internet gateway, and more. If you're not familiar with this, that's okay!
 That is the point of Otto: to codify infrastructure best practices so
 you don't have to know them on day one.
 
 For each cloud platform, Otto knows multiple "flavors" of that
-infrastructure. These flavors target different goals and users. For AWS for
+infrastructure. These flavors target different goals and users. In our AWS
 example, a couple available flavors are "simple" and "vpc-public-private."
 The "simple" flavor uses a minimal number of resources, sacrificing
 scalability and fault tolerance for simplicity and cost. But
@@ -62,8 +62,8 @@ To launch the infrastructure, run `otto infra`.
 This step is likely going to ask you for permission to install
 [Terraform](https://terraform.io). Otto uses Terraform under the covers
 to build and manage the infrastructure. If you say yes, Otto will install
-this for you. If you already have Terraform installed, you won't be
-asked.
+this for you. If you already have the latest version of Terraform installed,
+you won't be asked.
 
 After installing Terraform, Otto will ask you for your AWS access
 credentials. These are available from
@@ -80,7 +80,7 @@ The types and number of resources created are determined by the infrastructure
 flavor, as mentioned above. For flavors such as "vpc-public-private," the
 initial `infra` can take several minutes.
 
-**Congratulations!** You've just launched an infrastructure, with all the
+**Congratulations!** You've just launched an infrastructure with the
 minimum necessary number of components to deploy one or many applications.
 
 If you've never used AWS before, or you don't consider yourself an operator,
@@ -108,11 +108,11 @@ $ otto status
 You can see that the "Infra" is "READY." This means that step is complete.
 
 Note that even if an infrastructure is ready, you can always run `otto infra`
-multiple times. Otto will only create infrastructures that don't exist.
+multiple times. Otto will only create infrastructure resources that don't exist.
 
 ## Next
 
-In this step, you learned about how Otto manages infrastructure
+In this step, you learned about how Otto manages infrastructures
 and built a simple infrastructure that we can deploy applications to.
 
 The goal of Otto is build real, production quality infrastructures

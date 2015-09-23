@@ -17,7 +17,7 @@ The file Otto uses for configuration is the `Appfile`. The Appfile is
 meant to describe everything required to develop and deploy an application.
 
 On this page, we'll write a simple Appfile that mimics the behavior that Otto
-automatically gave us with zero configuration. And in the following
+automatically gave us with zero configuration. Then, in the following
 getting started pages, we'll augment the Appfile to add new behavior
 to our environment.
 
@@ -29,18 +29,18 @@ root of the example application in a file named "Appfile":
 
 ```
 application {
-    name = "otto-getting-started"
-    type = "ruby"
+  name = "otto-getting-started"
+  type = "ruby"
 }
 
 project {
-    name = "otto-getting-started"
-    infrastructure = "otto-getting-started"
+  name = "otto-getting-started"
+  infrastructure = "otto-getting-started"
 }
 
 infrastructure "otto-getting-started" {
-	type = "aws"
-	flavor = "simple"
+  type = "aws"
+  flavor = "simple"
 }
 ```
 
@@ -134,19 +134,7 @@ without an Appfile. This is what we're going to learn next!
 
 ## Next
 
-We've deployed the example application!
+We've added an Appfile and re-compiled!
 
-With a few simple steps, anybody could've deployed this application,
-whether or not they know anything about operations, Ruby runtimes, etc.
-Otto exposes unified workflow from development to deployment for any
-application type.
-
-And as technology improves or best practices changes, these will be
-encoded into Otto and Otto will roll out these change for you. For example,
-if cheaper or more optimized hardware becomes available in AWS, then
-Otto can begin to use those instead.
-
-Up to this point, we've done everything with _zero configuration_
-(other than the credentials to access AWS). Next, we'll introduce
-the [Appfile](/intro/getting-started/appfile.html) as a way to configure
-Otto.
+Now that we have an Appfile that mimics our _zero configuration_ setup,
+we can change how Otto behaves by [customizing our Appfile](/intro/getting-started/customization.html).
