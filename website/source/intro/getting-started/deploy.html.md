@@ -24,15 +24,14 @@ deployed!
 
 TODO: SCREENSHOT
 
-If you ever want to know about a deploy that has been done, you can use
-`otto deploy info` to see information about the deploy. This will include
-information such as the address of the deployed application.
+If you ever want to know more about a deploy, you can use `otto deploy info`.
+This will include information such as the address of the deployed application.
 
 For our simple application, Otto launched a single server. If the
 infrastructure flavor (covered in the
 [infrastructure page](/intro/getting-started/infra.html)) was
 something other than "simple", Otto would launch multiple servers
-behind a load balancer. And this is another example of the power of
+behind a load balancer. This is another example of the power of
 Otto: it has built-in knowledge of different ways to deploy an application
 depending on your needs.
 
@@ -45,12 +44,11 @@ whether or not they know anything about operations, Ruby runtimes, etc.
 Otto exposes unified workflow from development to deployment for any
 application type.
 
-And as technology improves or best practices changes, these will be
+As technology improves or best practices changes, these will be
 encoded into Otto and Otto will roll out these change for you. For example,
 if cheaper or more optimized hardware becomes available in AWS, then
 Otto can begin to use those instead.
 
 Up to this point, we've done everything with _zero configuration_
 (other than the credentials to access AWS). Next, we'll introduce
-the [Appfile](/intro/getting-started/appfile.html) as a way to configure
-Otto.
+a way to configure Otto using the [Appfile](/intro/getting-started/appfile.html).
