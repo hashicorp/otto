@@ -134,7 +134,7 @@ without an Appfile. This is what we're going to learn next!
 
 ## Next
 
-We've now added an Appfile and re-compiled.
+We've added an Appfile and re-compiled!
 
 Now that we have an Appfile that mimics our _zero configuration_ setup,
 we can change how Otto behaves by [customizing our Appfile](/intro/getting-started/customization.html).
