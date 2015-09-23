@@ -82,3 +82,6 @@ For example, our example above with MongoDB can be reached at
 ports. A future version of Otto will do automatic port assignment
 and expose that information via environment variables to the
 application.
+
+For more information on how Otto automatically sets this up, see
+the [concepts page on "foundations"](/docs/concepts/foundations.html).
