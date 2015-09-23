@@ -74,7 +74,36 @@ take a few minutes. During this time, you can attempt to read the output,
 which will be fairly verbose. You'll see Otto creating a lot of cloud
 resources.
 
-TODO
+```
+$ otto infra
+...
+
+==> Building main infrastructure...
+==> Executing Terraform to manage infrastructure...
+    Raw Terraform output will begin streaming in below. Otto
+    does not create this output. It is mirrored directly from
+    Terraform while the infrastructure is being created.
+
+    Terraform may ask for input. For infrastructure provider
+    credentials, be sure to enter the same credentials
+    consistently within the same Otto environment.
+
+aws_vpc.main: Creating...
+  cidr_block:                "" => "10.0.0.0/16"
+  default_network_acl_id:    "" => "<computed>"
+  default_security_group_id: "" => "<computed>"
+  dhcp_options_id:           "" => "<computed>"
+  enable_dns_hostnames:      "" => "1"
+  enable_dns_support:        "" => "1"
+  main_route_table_id:       "" => "<computed>"
+  tags.#:                    "" => "1"
+  tags.Name:                 "" => "otto"
+aws_vpc.main: Creation complete
+aws_internet_gateway.public: Creating...
+  vpc_id: "" => "vpc-ac8f5ac8"
+
+...
+```
 
 The types and number of resources created are determined by the infrastructure
 flavor, as mentioned above. For flavors such as "vpc-public-private," the

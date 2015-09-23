@@ -20,6 +20,17 @@ $ otto dev
 
 Now imagine every project being this easy to get started with.
 
+If this is your first time running this command, Otto may have asked for
+permission to install [Vagrant](https://vagrantup.com), which it uses
+under the covers. In this case, it probably also downloaded a fairly
+large (~350 MB) base image for your environment. This is a one time cost.
+
+The whole process to go from nothing to development environment probably
+took about 5 minutes. You'll only periodically run this command to start
+an environment, so performance here isn't critically important, but a future
+version of Otto will speed this up dramatically, down to less than a
+minute.
+
 If you inspect the repository you cloned, you'll notice that there
 isn't any configuration for Otto. For simple cases, Otto doesn't need
 any configuration. Otto detected the application is a Ruby application
@@ -29,16 +40,18 @@ Before we explain in more detail what happened, let's start the application.
 
 ```
 $ otto dev ssh
-> bundle && rackup
+> bundle && rackup --host 0.0.0.0
 ...
 ```
 
 Then, in another terminal, run `otto dev address` to get the address
 of your development environment. Visit port 9292 of that address in your
-browser. At the time of writing this, mine is "172.16.1.215:9292".
+browser. At the time of writing this, mine is "172.16.1.137:9292".
 You should see the application running!
 
-TODO SCREENSHOT
+<center>
+<img src="/assets/images/getting-started/dev-screenshot.png">
+</center>
 
 Let's go over what just happened, step-by-step.
 
@@ -85,6 +98,8 @@ This is the beauty of Otto: with a simple input and workflow, Otto manages
 tried and true software under the covers to develop and deploy your
 application using industry best practices. You only need to learn how to
 use Otto, then Otto does the rest.
+
+For more information, see the [compilation concepts page](/docs/concepts/compile.html).
 
 -> **NOTE:** You never need to use the ".otto" directory manually. It is an
 internal directory that Otto uses. However, you can always inspect the
@@ -142,7 +157,7 @@ downloaded the dependencies for our application (using `bundle`)
 and started the application (with `rackup`):
 
 ```
-$ bundle && rackup
+$ bundle && rackup --host 0.0.0.0
 Using rack 1.6.4
 Using rack-protection 1.5.3
 Using tilt 2.0.1
@@ -166,7 +181,7 @@ this address easily with `otto dev address`:
 
 ```
 $ otto dev address
-172.16.1.215
+172.16.1.137
 ```
 
 Your address output will likely be different.
@@ -175,7 +190,9 @@ With the web server running from the previous step, you can use this
 address and port 9292 (the default listening port for this application)
 and view the running application.
 
-TODO SCREENSHOT
+<center>
+<img src="/assets/images/getting-started/dev-screenshot.png">
+</center>
 
 ## Other Commands
 

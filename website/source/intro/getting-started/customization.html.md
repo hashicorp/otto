@@ -61,7 +61,7 @@ You can verify this by going into the development environment:
 ```
 $ otto dev ssh
 > ruby -v
-TODO
+ruby 2.1.7p400 (2015-08-18 revision 51632) [x86_64-linux-gnu]
 ```
 
 It'll be left as an exercise to you to deploy the new Ruby version,

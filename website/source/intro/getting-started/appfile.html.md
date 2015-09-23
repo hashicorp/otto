@@ -111,7 +111,7 @@ Once you've saved the Appfile, run `otto compile` again followed by
 ==> Component Status
     Dev environment: CREATED
     Infra:           READY
-    Build:           BUILT
+    Build:           BUILD READY
     Deploy:          DEPLOYED
 ```
 

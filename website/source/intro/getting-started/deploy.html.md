@@ -22,7 +22,9 @@ Once the deploy is done, you'll see the IP address of the application.
 Open this address in your browser and you'll see that the application is
 deployed!
 
-TODO: SCREENSHOT
+<center>
+<img src="/assets/images/getting-started/deploy-screenshot.png">
+</center>
 
 If you ever want to know more about a deploy, you can use `otto deploy info`.
 This will include information such as the address of the deployed application.

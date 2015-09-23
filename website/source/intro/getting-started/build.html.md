@@ -33,7 +33,31 @@ This will take a few minutes. Within the AMI, Otto installs Ruby, configures Pas
 application server), and more. Again, depending on your application type,
 Otto will install different things here.
 
-TODO: output
+```
+$ otto build
+...
+
+==> otto: Creating the AMI: otto-getting-started 1442990619
+    otto: AMI: ami-4b19662e
+==> otto: Waiting for AMI to become ready...
+==> otto: Terminating the source AWS instance...
+==> otto: Cleaning up any extra volumes...
+==> otto: No volumes to clean up, skipping
+==> otto: Deleting temporary security group...
+==> otto: Deleting temporary keypair...
+Build 'otto' finished.
+
+==> Builds finished. The artifacts of successful builds are:
+--> otto: AMIs were created:
+
+us-east-1: ami-4b19662e
+==> Storing build data in directory...
+==> Build success!
+    The build was completed successfully and stored within
+    the directory service, meaning other members of your team
+    don't need to rebuild this same version and can deploy it
+    immediately.
+```
 
 **Congratulations!** You've just build an AMI that can be launched!
 
@@ -46,7 +70,7 @@ pre-configured the server with safe best practices.
 
 You can see the status of your build at any point by running
 `otto status`. Since the prior step, you can see that the build status
-is now "BUILT":
+is now "BUILD READY":
 
 ```
 $ otto status
@@ -57,7 +81,7 @@ $ otto status
 ==> Component Status
     Dev environment: CREATED
     Infra:           READY
-    Build:           BUILT
+    Build:           BUILD READY
     Deploy:          NOT DEPLOYED
 ```
 
