@@ -8,38 +8,49 @@ description: |-
 
 # What is Otto?
 
-Otto knows how to develop and deploy any application.
+Otto knows how to develop and deploy any application on any cloud
+platform, all controlled with a single consistent workflow to maximize
+the productivity of you and your team.
 
-Otto automatically builds development environments tailored to your specific
-application. When you're ready to deploy, Otto can create the infrastructure
-and launch the application along with all of its dependencies. It is a single
-tool to develop and deploy any application.
+## A Developer's Dream
 
-Deploying a relatively simple application today requires an
-immense amount of domain knowledge: launching cloud servers, configuring
-those servers, securing the servers, deploying new versions of your
-application, etc. The solution to each of these problems usually requires
-another tool you must learn and master if you intend to solve it properly.
-And new trends such as microservices make all of this even more complicated.
+Otto automatically builds a development environment tailored specifically
+for your application, with zero or minimal configuration.
 
-Due to this complexity, many developers either completely ignore best practices
-or turn to expensive completely managed solutions that often have limited
-scalability and flexiblity.
+Otto isolates all your applications into their own local virtualized
+development environments. It detects the type of application you're developing and
+configures that development environment for you. For example, if you're
+developing a PHP application, Otto will automatically install PHP and
+other related tools for you.
 
-Otto gives developers simple single commands to develop and deploy
-their application while using industry-standard tooling and best practices
-under the covers.
+Otto supports application dependencies as a first class feature. This makes
+microservice development a breeze. Otto automatically downloads, installs,
+configures, and starts dependencies in your development environments for you.
 
-Otto has built-in knowledge of many application types and infrastructure
-architectures, and automatically generates the configuration necessary to
-manage the entire lifecycle of that application. If you're a PHP developer,
-for example, Otto knows how to install and configure Apache and PHP. If you
-depend on a database, Otto can setup that database and configure firewalls
-so that it is only accessible from your application. As time goes on, Otto
-will get smarter, and will generate more and more advanced deployments,
-all behind a single, simple deploy command from the developer.
+Developers that are new to a team or are context switching to a new
+project can get up and running in a single command with minimal friction:
+`otto dev`.
 
-TODO: This is not good.
+## Best-in-Class Quality Infrastructure, Automatically
+
+Otto automatically builds an infrastructure and deploys your application
+using industry standard tooling and best practices, so you don't have to.
+
+There are hundreds of how-to guides to deploy applications. Unfortunatelly,
+all of these how-to guides are usually copying and pasting outdated information
+onto a server to barely get your application running.
+
+Deploying an application properly with industry best practices in security,
+scalability, monitoring, and more requires an immense amount of domain
+knowledge. The solution to each of these problems usually requires
+mastering a new tool.
+
+Due to this complexity, many developers completely ignore best practices
+and stick to the simple how-to guides.
+
+Otto solves all these problems and automatically manages all of the
+various software solutions for you to have a best-in-class quality
+infrastructure. You only need to learn Otto, and Otto does the rest.
 
 ## Key Features
 
@@ -74,4 +85,3 @@ The key features of Otto are:
 
 Continue onwards with the [getting started guide](/intro/getting-started/install.html)
 to see how easy Otto makes it to develop and deploy a real application.
-
