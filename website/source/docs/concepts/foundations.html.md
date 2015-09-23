@@ -36,6 +36,7 @@ This is available both in development and production. In development,
 to access a dependency, you use DNS the same way.
 
 ## Future Foundations
+<a id="future-foundations"></a>
 
 In the future, Otto will add more foundations to enable more features:
 
