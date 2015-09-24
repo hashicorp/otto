@@ -29,7 +29,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		},
 		Customizations: []*compile.Customization{
 			&compile.Customization{
-				Type:     "dev",
+				Type:     "node",
 				Callback: custom.processDev,
 				Schema: map[string]*schema.FieldSchema{
 					"node_version": &schema.FieldSchema{

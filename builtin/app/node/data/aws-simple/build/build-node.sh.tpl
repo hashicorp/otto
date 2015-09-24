@@ -22,17 +22,25 @@ done
 ol "Adding apt respositories and updating..."
 oe sudo apt-get update -y
 oe sudo apt-get install -y software-properties-common
-oe sudo add-apt-repository -y ppa:chris-lea/node.js
 oe sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7
 echo 'deb https://oss-binaries.phusionpassenger.com/apt/passenger trusty main' | sudo tee /etc/apt/sources.list.d/passenger.list > /dev/null
 oe sudo apt-get update
 
-ol "Installing Node, Passenger, Nginx, and other packages..."
+ol "Downloading Node {{ node_version }}..."
+oe wget -q -O /home/vagrant/node.tar.gz https://nodejs.org/dist/v{{ node_version }}/node-v{{ node_version }}-linux-x64.tar.gz
+
+ol "Untarring Node..."
+oe sudo tar -C /opt -xzf /home/vagrant/node.tar.gz
+
+ol "Setting up PATH..."
+oe sudo ln -s /opt/node-v{{ node_version }}-linux-x64/bin/node /usr/local/bin/node
+oe sudo ln -s /opt/node-v{{ node_version }}-linux-x64/bin/npm /usr/local/bin/npm
+
+ol "Installing Passenger, Nginx, and other supporting packages..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get install -y bzr git mercurial build-essential \
   libpq-dev zlib1g-dev software-properties-common \
   apt-transport-https \
-  nodejs \
   nginx-extras passenger
 
 ol "Extracting app..."
