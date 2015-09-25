@@ -58,6 +58,35 @@ pre {
 	margin-bottom: 0;
 }
 
+.bg-black{
+    background-color: $black;
+    color: $white;
+}
+.bg-orange{
+    background-color: $orange;
+}
+.bg-light-orange{
+    background-color: $light-orange;
+}
+.bg-gray{
+    background-color: $gray;
+}
+
+.section{
+    @include clearfix();
+    padding: 120px 0;
+
+    &.section-50{
+        padding:0;
+
+        .r50{
+            float: left;
+            width: 50%;
+            padding: 120px 0;
+        }
+    }
+}
+
 
 //fixed grid below 992 to prevent smaller responsive sizes
 @media (max-width: 992px) {

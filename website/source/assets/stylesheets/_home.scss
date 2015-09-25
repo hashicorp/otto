@@ -2,6 +2,11 @@
 // Home
 // --------------------------------------------------
 
+.use-case{
+	border-top: 3px solid $black;
+	@include clearfix();
+}
+
 #hero{
 	@include translate3d(0, -10px, 0);
 	text-align: center;
