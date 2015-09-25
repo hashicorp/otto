@@ -19,7 +19,7 @@ until [[ -f /var/lib/cloud/instance/boot-finished ]]; do
   sleep 0.5
 done
 
-ol "Adding apt respositories and updating..."
+ol "Adding apt repositories and updating..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get update -y
 oe sudo apt-get install -y software-properties-common

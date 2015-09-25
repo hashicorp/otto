@@ -19,7 +19,7 @@ until [[ -f /var/lib/cloud/instance/boot-finished ]]; do
   sleep 0.5
 done
 
-ol "Adding apt respositories and updating..."
+ol "Adding apt repositories and updating..."
 oe sudo apt-get update -y
 oe sudo apt-get install -y software-properties-common
 oe sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7

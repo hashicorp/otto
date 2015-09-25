@@ -58,7 +58,7 @@ if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
   oe sudo service ssh restart
 fi
 
-ol "Adding apt respositories and updating..."
+ol "Adding apt repositories and updating..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get update -y
 oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
