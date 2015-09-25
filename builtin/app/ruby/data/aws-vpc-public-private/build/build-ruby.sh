@@ -19,7 +19,7 @@ until [[ -f /var/lib/cloud/instance/boot-finished ]]; do
   sleep 0.5
 done
 
-ol "Adding apt respositories and updating..."
+ol "Adding apt repositories and updating..."
 oe sudo apt-get update
 oe sudo apt-get install -y software-properties-common
 oe sudo add-apt-repository -y ppa:chris-lea/node.js

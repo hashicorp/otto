@@ -61,7 +61,7 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 
-ol "Adding apt respositories and updating..."
+ol "Adding apt repositories and updating..."
 oe sudo apt-get update
 oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
 oe sudo add-apt-repository -y ppa:chris-lea/node.js
