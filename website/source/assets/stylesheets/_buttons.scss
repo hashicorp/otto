@@ -12,13 +12,24 @@
 	text-transform: uppercase;
 	border-radius: 3px;
 
-	&.has-caret{
-		span.h-caret{
-			display: inline-block;
-			width: 8px;
-			height: 12px;
-			margin-left: 10px;
-			@include transition(all 300ms ease-in);
+	span.h-caret{
+		display: inline-block;
+		width: 11px;
+		height: 9px;
+		margin-left: 12px;
+		@include transition(all 300ms ease-in);
+	}
+
+	&.minimal{
+		text-transform: none;
+		background-color: transparent !important;
+
+		&.orange{
+			color: $orange;
+		}
+
+		&.white{
+			color: $white;
 		}
 	}
 
@@ -65,8 +76,8 @@
 		}
 
 		span.h-caret{
-			background: image-url('../images/caret-green.png') 0 0 no-repeat;
-			@include img-retina("../images/caret-green.png", "../images/caret-green@2x.png", 8px, 12px);
+			background: image-url('../images/arrow-orange.png') 0 0 no-repeat;
+			@include img-retina("../images/arrow-orange.png", "../images/arrow-orange@2x.png", 11px, 9px);
 		}
 	}
 

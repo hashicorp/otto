@@ -58,6 +58,18 @@ pre {
 	margin-bottom: 0;
 }
 
+.mono-block{
+    background-color: $black;
+	color: $white;
+	font-size: 15px;
+	font-weight: normal;
+	font-family: $font-family-bitstream;
+	border: none;
+	padding: 8px 12px;
+	margin-bottom: 0;
+    border-radius: 3px;
+}
+
 .bg-black{
     background-color: $black;
     color: $white;

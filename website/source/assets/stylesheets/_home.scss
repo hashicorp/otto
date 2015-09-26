@@ -46,7 +46,7 @@
 				display: inline-block;
 				width: 122px;
 				height: 33px;
-				margin-bottom: -10px;
+				margin-bottom: -11px;
 				margin-left: 4px;
 				text-indent: 100%;
 				white-space: nowrap;
@@ -112,225 +112,110 @@
 	}
 }
 
-#content{
-	overflow: hidden;
-	margin-top: 120px;
 
-	h2{
-		margin-bottom: 120px;
+.feature{
+	.feature-header{
 		text-align: center;
-		font-size: $font-size-m;
-		font-family: $font-family-roboto;
-		color: $green;
-		text-transform: uppercase;
-	}
 
-	.feature{
-		position: relative;
-		margin-bottom: 150px;
-		padding-bottom: 80px;
-		border-bottom: 1px solid $blue-faint;
-
-		&:last-child{
-			border-bottom: none;
-		}
-
-		&#deploy{
-			padding-bottom: 835px;
-			width: 1161px;
-			height: 735px;
-			background: image-url('../images/feature-deploy.png') 0 0 no-repeat;
-			@include img-retina("../images/feature-deploy.png", "../images/feature-deploy@2x.png", 1161px, 735px);
-		}
-
-		&#maintain{
-			.feature-graphic{
-				margin-top: -50px;
-				width: 1113px;
-				height: 689px;
-				background: image-url('../images/feature-manage.png') 0 0 no-repeat;
-				@include img-retina("../images/feature-manage.png", "../images/feature-manage@2x.png", 1113px, 689px);
-			}
-		}
-
-		&#healing{
-			.feature-graphic{
-				margin-top: 80px;
-				width: 1009px;
-				height: 309px;
-				background: image-url('../images/feature-healing.png') 0 0 no-repeat;
-				@include img-retina("../images/feature-healing.png", "../images/feature-healing@2x.png", 1009px, 309px);
-			}
-		}
-
-		&#density{
-			.feature-graphic{
-				margin-top: 80px;
-				width: 1040px;
-				height: 409px;
-				background: image-url('../images/feature-density.png') 0 0 no-repeat;
-				@include img-retina("../images/feature-density.png", "../images/feature-density@2x.png", 1040px, 409px);
-			}
-		}
-
-		&#partners{
-			.partner-logos{
-				.docker-wrap{
-					border-right: 1px solid $blue-faint;
-
-					.partner-logo{
-						display: inline-block;
-						width: 120px;
-						height: 180px;
-
-						&.docker-logo{
-			    			background: image-url('../images/partner-docker.png') center center no-repeat;
-			   				@include img-retina("../images/partner-docker.png", "../images/partner-docker@2x.png", 100px, 84px);
-						}
-					}
-				}
-
-				.cloud-wrap{
-					.partner-logo{
-						float: left;
-						width: 25%;
-						height: 180px;
-
-						&.aws-logo{
-			    			background: image-url('../images/partner-amazon.png') center center no-repeat;
-			   				@include img-retina("../images/partner-amazon.png", "../images/partner-amazon@2x.png", 153px, 56px);
-						}
-						&.google-logo{
-			    			background: image-url('../images/partner-google.png') center center no-repeat;
-			   				@include img-retina("../images/partner-google.png", "../images/partner-google@2x.png", 135px, 87px);
-						}
-						&.microsoft-logo{
-			    			background: image-url('../images/partner-microsoft.png') center center no-repeat;
-			   				@include img-retina("../images/partner-microsoft.png", "../images/partner-microsoft@2x.png", 188px, 84px);
-						}
-						&.engineyard-logo{
-			    			background: image-url('../images/partner-engineyard.png') center center no-repeat;
-			   				@include img-retina("../images/partner-engineyard.png", "../images/partner-engineyard@2x.png", 178px, 37px);
-						}
-
-					}
-				}
-			}
-		}
-
-		&#audit{
-			.graphic{
-				width: 491px;
-				height: 129px;
-			    background: image-url('../images/graphic-audit.png') 0 0 no-repeat;
-			   	@include img-retina("../images/graphic-audit.png", "../images/graphic-audit@2x.png", 491px, 129px);
-			}
-		}
-
-		.feature-graphic{
-			margin: 0 auto;
-		}
-
-		.feature-header{
-
-			&.right{
-				h3, p{
-					text-align: right;
-					display: block;
-					float: right;
-				}
-			}
-
-			h3{
-				margin: 30px 0 20px 0;
-				color: $blue-dark;
-				letter-spacing: 1px;
-				font-size: $font-size-l;
-				font-family: $font-family-roboto;
-				line-height: 1.25em;
-				max-width: 640px;
-			}
-
-			p{
-				margin-bottom: 30px;
-				color: $blue-light;
-				font-size: $font-size-reg+2;
-				font-family: $font-family-roboto;
-				font-weight: $font-weight-reg;
-				line-height: 1.75em;
-				max-width: 480px;
-			}
-		}
-
-		.feature-footer{
-			position: absolute;
-			bottom: 0;
-			left: 0;
-			padding-bottom: 80px;
-
-			p{
-				display: inline-block;
-				color: $blue-dark;
-				font-size: $font-size-reg;
-				font-family: $font-family-roboto;
-				line-height: 1.75em;
-				max-width: 320px;
-				padding-left: 20px;
-				border-left: 1px solid $blue-faint;
-			}
-
-			.docker-outline-logo{
-				display: inline-block;
-				width: 125px;
-				height: 80px;
-				margin-right: 20px;
-			    background: image-url('../images/icon-docker-outline.png') 0 0 no-repeat;
-			   	@include img-retina("../images/icon-docker-outline.png", "../images/icon-docker-outline@2x.png", 125px, 80px);
-			}
-
-			a{
-				margin-bottom: 15px;
-				margin-left: 15px;
-
-				&:first-child{
-					margin-left: 0;
-				}
-			}
-		}
-	}
-
-	#cta {
-		position: relative;
-		padding: 160px 0;
-		background: image-url('../images/bg-iconscrud.png') center center no-repeat;
-		@include img-retina("../images/bg-icons.png", "../images/bg-icons@2x.png", 669px, 260px);
-		background-position: center center;
-		border-top: 1px solid $faint-gray;
-		border-bottom: 1px solid $faint-gray;
-
-		a{
-			margin-bottom: 5px;
+		h3{
+			margin-bottom: $xsmall-pad;
+			font-size: $font-size-m;
+			line-height: $font-size-m + 6;
 		}
 
 		p{
-			margin-top: 10px;
-			color: $black;
-			font-size: 14px;
-			font-weight: 600;
-	    	line-height: 1.5esm;
+			margin-bottom: $small-pad;
+		}
+	}
 
-	    	&.cta-gray{
-	    		color: $gray;
-	    		font-weight: 300;
-	    	}
+	.feature-footer{
+		text-align: center;
+	}
+
+	&#automate{
+		.feature-graphic{
+			width: 307px;
+			height: 307px;
+			background: image-url('../images/graphic-automate.png') 0 0 no-repeat;
+			@include img-retina("../images/graphic-automate.png", "../images/graphic-automate@2x.png", 305px, 307px);
 		}
 
-		.outline-btn {
-			padding: 16px 40px;
-			display: inline-block;
-			&:focus {
-		    	outline: 0;
+		.feature-content{
+			margin-top: $med-pad;
+		}
+
+		.feature-terminal{
+			text-align: center;
+			margin-top: $large-pad;
+
+			.terminal-graphic{
+				margin-bottom: $xsmall-pad;
+
+				a{
+					display: inline-block;
+					margin: 0 auto;
+					width: 165px;
+					height: 135px;
+					background: image-url('../images/graphic-terminal-play.png') 0 0 no-repeat;
+					@include img-retina("../images/graphic-terminal-play.png", "../images/graphic-terminal-play@2x.png",  165px, 135px);
+				}
 			}
+
+			p{
+				font-size: $font-size-sm;
+				padding: 0 $small-pad;
+			}
+
+			.h-btn.minimal{
+				font-size: $font-size-m;
+				margin-bottom: $xsmall-pad;
+
+				.mono-block{
+					position: relative;
+					top: -5px;
+					margin-left: 10px;
+				}
+
+				span.h-caret{
+					position: relative;
+					top: -4px;
+				}
+			}
+		}
+	}
+}
+
+#cta {
+	position: relative;
+	padding: 160px 0;
+	background: image-url('../images/bg-iconscrud.png') center center no-repeat;
+	@include img-retina("../images/bg-icons.png", "../images/bg-icons@2x.png", 669px, 260px);
+	background-position: center center;
+	border-top: 1px solid $faint-gray;
+	border-bottom: 1px solid $faint-gray;
+
+	a{
+		margin-bottom: 5px;
+	}
+
+	p{
+		margin-top: 10px;
+		color: $black;
+		font-size: 14px;
+		font-weight: 600;
+    	line-height: 1.5esm;
+
+    	&.cta-gray{
+    		color: $gray;
+    		font-weight: 300;
+    	}
+	}
+
+	.outline-btn {
+		padding: 16px 40px;
+		display: inline-block;
+		&:focus {
+	    	outline: 0;
 		}
 	}
 }

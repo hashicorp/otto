@@ -52,6 +52,7 @@ $link-hover-color:      	darken($link-color, 15%);
 // Typography
 // -------------------------
 $font-family-open-sans:		'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-family-bitstream:     'Bitstream Monobold', 'Courier New', Monaco, Menlo, Consolas, monospace;
 $font-family-roboto: 	    'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $font-weight-xl:  		    300;
 $font-weight-reg:  	        400;
@@ -62,6 +63,7 @@ $font-size-xl:              44px;
 $font-size-l:               36px;
 $font-size-m:               28px;
 $font-size-reg:             16px;
+$font-size-sm:              12px;
 
 $text-shadow: 				1px 1px 1px #000;
 $shadow: 					$text-shadow;
