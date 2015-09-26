@@ -23,17 +23,18 @@
 		margin-top: 60px;
 
 		h1{
-			margin-bottom: $xsmall-pad;
-			color: $blue-dark;
+			margin-bottom: 8px;
+			color: $black;
 			font-size: $font-size-l;
 		}
 
 		h3{
 			margin-top: 6px;
-			color: $blue-light;
-			font-size: $font-size-reg;
+			color: $blue-dark;
+			font-size: 19px;
+			font-weight: $font-weight-light;
 			line-height: 34px;
-			text-transform: uppercase;
+			//text-transform: uppercase;
 
 			span{
 				display: inline-block;

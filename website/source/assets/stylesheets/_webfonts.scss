@@ -1,3 +1,15 @@
+// @font-face {
+//     font-family: 'Bitstream';
+//     src: url('veramono-webfont.eot');
+//     src: url('veramono-webfont.eot?#iefix') format('embedded-opentype'),
+//          url('veramono-webfont.woff2') format('woff2'),
+//          url('veramono-webfont.woff') format('woff'),
+//          url('veramono-webfont.ttf') format('truetype'),
+//          url('veramono-webfont.svg#bitstream_vera_sans_monoroman') format('svg');
+//     font-weight: normal;
+//     font-style: normal;
+// }
+
 @font-face {
     font-family: 'Bitstream Monobold';
     src: url('../webfonts/veramobd-webfont.eot');
@@ -8,5 +20,4 @@
          url('../webfonts/veramobd-webfont.svg#bitstream_vera_sans_monobold') format('svg');
     font-weight: normal;
     font-style: normal;
-
 }
