@@ -24,7 +24,7 @@ $green-faint:               #E3F5E3;
 $blue-dark:					#4e5859;
 $blue-light:                #89999A;
 $blue:                  	#00BFE0;
-$blue-faint:                #E0E8E8;
+$blue-faint:                #C0C9CA;
 $light-black: 				#242424;
 $orange:               		#FF6D38;
 $light-orange:              #FFF4EC;
@@ -38,6 +38,7 @@ $purple:   				    #822ff7;
 $light-purple:				#f7f3f9;
 $btn-color:  				#4592C5;
 
+//C0C9CA
 
 // Scaffolding
 // -------------------------
@@ -54,7 +55,7 @@ $link-hover-color:      	darken($link-color, 15%);
 $font-family-open-sans:		'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $font-family-bitstream:     'Bitstream Monobold', 'Courier New', Monaco, Menlo, Consolas, monospace;
 $font-family-roboto: 	    'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-$font-weight-xl:  		    300;
+$font-weight-light:  		300;
 $font-weight-reg:  	        400;
 $font-weight-md:  	        500;
 $font-weight-sb:            600;
@@ -64,6 +65,7 @@ $font-size-l:               36px;
 $font-size-m:               28px;
 $font-size-reg:             16px;
 $font-size-sm:              12px;
+$line-height-factor:        12px;
 
 $text-shadow: 				1px 1px 1px #000;
 $shadow: 					$text-shadow;

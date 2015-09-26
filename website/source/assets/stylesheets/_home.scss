@@ -28,10 +28,9 @@
 		margin-top: 60px;
 
 		h1{
-			margin-bottom: 0;
+			margin-bottom: $xsmall-pad;
 			color: $blue-dark;
-			font-size: $font-size-m;
-			font-family: $font-family-roboto;
+			font-size: $font-size-l;
 		}
 
 		h3{
@@ -39,7 +38,6 @@
 			color: $blue-light;
 			font-size: $font-size-reg;
 			line-height: 34px;
-			font-family: $font-family-roboto;
 			text-transform: uppercase;
 
 			span{
@@ -98,12 +96,15 @@
 	}
 
 	h2{
-		font-size: $font-size-l;
 		margin-bottom: $xsmall-pad;
 	}
 
 	p{
+		//color: $blue-faint;
+		opacity: .8;
 		font-size: $font-size-reg;
+		font-weight: $font-weight-light;
+		line-height: $font-size-reg + $line-height-factor;
 		margin-bottom: $small-pad;
 	}
 
@@ -124,6 +125,10 @@
 			display: inline-block;
 			height: 279px;
 			margin-bottom: $small-pad;
+		}
+
+		p{
+			opacity: .8;
 		}
 	}
 }
@@ -225,6 +230,10 @@
 				border: 3px solid $black;
 				padding: 20px;
 				border-radius: 5px;
+
+				p{
+					opacity: .8;
+				}
 			}
 
 			.feature-graphic{

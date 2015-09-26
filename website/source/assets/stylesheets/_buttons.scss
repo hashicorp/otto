@@ -23,13 +23,22 @@
 	&.minimal{
 		text-transform: none;
 		background-color: transparent !important;
+		padding: 0 !important;
 
 		&.orange{
 			color: $orange;
+
+			// &:hover{
+			// 	color: $white;
+			// }
 		}
 
-		&.white{
+		&.light{
 			color: $white;
+
+			// &:hover{
+			// 	color: $orange;
+			// }
 		}
 	}
 
@@ -53,17 +62,15 @@
 	}
 
 	&.light{
-		color: $green-light;
+		color: $white;
 
 		&.has-border{
 			border: 2px solid $green-light;
 		}
 
-		&.has-caret{
-			span.h-caret{
-				background: image-url('../images/caret-light.png') 0 0 no-repeat;
-				@include img-retina("../images/caret-light.png", "../images/caret-light@2x.png", 8px, 12px);
-			}
+		span.h-caret{
+			background: image-url('../images/arrow-light.png') 0 0 no-repeat;
+			@include img-retina("../images/arrow-light.png", "../images/arrow-light@2x.png", 11px, 9px);
 		}
 	}
 
@@ -81,24 +88,6 @@
 		}
 	}
 
-	&.gray{
-		color: $blue-light;
-
-		&.border{
-			border: 2px solid $blue-light;
-		}
-
-		&.fill{
-			background-color: $blue-light;
-			color: $white;
-
-			span.h-caret{
-				background: image-url('../images/caret-white.png') 0 0 no-repeat;
-				@include img-retina("../images/caret-white.png", "../images/caret-white@2x.png", 8px, 12px);
-			}
-		}
-	}
-
 	&.dark{
 		color: $green-dark;
 
@@ -111,11 +100,9 @@
 		text-decoration: none;
 		@include transition(color 200ms ease-in);
 
-		&.has-caret{
-			span.h-caret{
-				@include translate(4px, 0);
-				@include transition(all 200ms ease-in);
-			}
+		span.h-caret{
+			@include translate(4px, 0);
+			@include transition(all 200ms ease-in);
 		}
 	}
 }
