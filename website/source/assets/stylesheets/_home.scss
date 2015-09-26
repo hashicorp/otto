@@ -264,8 +264,72 @@
 		border-top: 3px solid $black;
 		@include clearfix();
 
-		.use-subtitle{
-			color: $orange;
+		.use-overview{
+
+			h2{
+				margin-bottom: $small-pad;
+			}
+			.use-subtitle{
+				font-weight: $font-weight-light;
+				color: $orange;
+			}
+
+			.use-icons{
+				margin-bottom: $xsmall-pad;
+
+				ul{
+					list-style-type: none;
+				}
+
+				li{
+					display: inline-block;
+					height: 58px;
+					margin-right: 12px;
+				}
+
+				.icon{
+					display: inline-block;
+					height: 100%;
+					text-indent: 100%;
+					white-space: nowrap;
+					overflow: hidden;
+
+					&.rails{
+						width: 47px;
+						background: image-url('../images/icon-rails.png') center center no-repeat;
+						@include img-retina("../images/icon-rails.png", "../images/icon-rails@2x.png", 47px, 58px);
+					}
+					&.aws{
+						width: 112px;
+						background: image-url('../images/icon-aws.png') center center no-repeat;
+						@include img-retina("../images/icon-aws.png", "../images/icon-aws@2x.png", 112px, 44px);
+					}
+				}
+			}
+		}
+
+		.use-steps{
+			.use-step{
+				margin-bottom: $small-pad;
+
+				h3{
+					color: $orange;
+					margin-bottom: $small-pad;
+
+					.use-count{
+						border-bottom: 3px solid $orange;
+					}
+				}
+
+				p{
+					margin-bottom: $xsmall-pad;
+				}
+
+				.prettyprint{
+					margin-bottom: $xsmall-pad;
+					font-family: $font-family-bitstream;
+				}
+			}
 		}
 	}
 }
