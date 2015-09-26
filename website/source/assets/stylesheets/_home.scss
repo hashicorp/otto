@@ -112,6 +112,9 @@
 	}
 }
 
+#features-split{
+	display: flex;
+}
 
 .feature{
 	.feature-header{
@@ -186,6 +189,7 @@
 
 	&.r50{
 		text-align: center;
+		flex: 1;
 
 		.feature-graphic{
 			display: inline-block;
