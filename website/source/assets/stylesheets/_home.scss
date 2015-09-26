@@ -183,6 +183,32 @@
 			}
 		}
 	}
+
+	&.r50{
+		text-align: center;
+
+		.feature-graphic{
+			display: inline-block;
+			height: 279px;
+			margin-bottom: $small-pad;
+		}
+	}
+
+	&#focus{
+		.feature-graphic{
+			width: 290px;
+			background: image-url('../images/graphic-focus.png') 0 0 no-repeat;
+			@include img-retina("../images/graphic-focus.png", "../images/graphic-focus@2x.png", 290px, 261px);
+		}
+	}
+
+	&#deployment{
+		.feature-graphic{
+			width: 346px;
+			background: image-url('../images/graphic-deploy.png') 0 0 no-repeat;
+			@include img-retina("../images/graphic-deploy.png", "../images/graphic-deploy@2x.png", 346px, 279px);
+		}
+	}
 }
 
 #cta {
