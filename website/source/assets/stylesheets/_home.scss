@@ -2,11 +2,6 @@
 // Home
 // --------------------------------------------------
 
-.use-case{
-	border-top: 3px solid $black;
-	@include clearfix();
-}
-
 #hero{
 	text-align: center;
 	padding-bottom: 60px;
@@ -255,9 +250,20 @@
 	padding: 80px;
 	background-color: $orange;
 	color: $white;
-	
+
 	p{
 		margin-bottom: $xsmall-pad;
+	}
+}
+
+#use-cases{
+	.use-case{
+		border-top: 3px solid $black;
+		@include clearfix();
+
+		.use-subtitle{
+			color: $orange;
+		}
 	}
 }
 
