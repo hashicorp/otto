@@ -8,78 +8,50 @@
 }
 
 #hero{
-	@include translate3d(0, -10px, 0);
 	text-align: center;
+	padding-bottom: 40px;
 
 	#hero-graphic{
 		position: relative;
 		display: inline-block;
-		width: 499px;
-		height: 340px;
-		margin: 120px auto;
-
-		#hero-logotype{
-			position: absolute;
-			display: inline-block;
-		    top: 75px;
-		    left: 187px;
-			width: 115px;
-			height: 155px;
-			background: image-url('../images/hero-logotype.png') 0 0 no-repeat;
-			@include img-retina("../images/hero-logotype.png", "../images/hero-logotype@2x.png", 115px, 155px);
-		}
-
-		#cubes{
-			.cube{
-				position: absolute;
-			  	top: 300px;
-			  	left: 248px;
-				opacity: 0.01;
-				@include transform( translate(0, 150px) );
-				@include transition( all 1.5s $easeInOutBack );
-
-				&.in{
-				  	@include transform( translate(0, 0) );
-				  	opacity: 1;
-				}
-
-				.face {
-				  	@include transform-origin(0 0);
-				  	position: absolute;
-				  	height: 44px;
-				  	width: 44px;
-
-					&.top{
-						background-color: $green;
-						@include transform(rotate(210deg) skewX(-30deg) scaleY(0.864) );
-					}
-					&.left{
-						background-color: $green-dark;
-						@include transform(rotate(90deg) skewX(-30deg) scaleY(0.864) );
-					}
-					&.right{
-						background-color: $green-light;
-						@include transform(rotate(-30deg) skewX(-30deg) scaleY(0.864) );
-					}
-				}
-			}
-		}
+		width: 1016px;
+		height: 357px;
+		margin: 0 auto 40px;
+		//@include translate3d(30px, 0, 0);
+		background: image-url('../images/graphic-hero.png') 6px 0 no-repeat;
+		@include img-retina("../images/graphic-hero.png", "../images/graphic-hero@2x.png", 1010px, 357px);
 	}
 
 	#hero-text{
 		position: relative;
 		text: center;
+		margin-top: 60px;
 
 		h1{
+			margin-bottom: 0;
 			color: $blue-dark;
-			font-size: $font-size-xl;
-			font-family: $font-family-blanc;
+			font-size: $font-size-m;
+			font-family: $font-family-roboto;
 		}
 
 		h3{
+			margin-top: 6px;
 			color: $blue-light;
-			font-size: $font-size-m;
-			font-family: $font-family-blanc;
+			font-size: $font-size-reg;
+			line-height: 34px;
+			font-family: $font-family-roboto;
+			text-transform: uppercase;
+
+			span{
+				display: inline-block;
+				width: 122px;
+				height: 33px;
+				margin-left: 4px;
+				text-indent: 100%;
+				white-space: nowrap;
+				background: image-url('../images/vagrant-logo.png') 0 0 no-repeat;
+				@include img-retina("../images/vagrant-logo.png", "../images/vagrant-logo@2x.png", 122px, 33px);
+			}
 		}
 
 		#hero-btns{
@@ -153,7 +125,8 @@
 		margin-right: 30px;
 		font-size: $font-size-reg;
 		line-height: $font-size-reg;
-		font-family: $font-family-blanc-reg;
+		font-family: $font-family-roboto;
+		font-weight: $font-weight-reg;
 	}
 
 	p, a{
@@ -169,7 +142,7 @@
 		margin-bottom: 120px;
 		text-align: center;
 		font-size: $font-size-m;
-		font-family: $font-family-blanc;
+		font-family: $font-family-roboto;
 		color: $green;
 		text-transform: uppercase;
 	}
@@ -295,7 +268,7 @@
 				color: $blue-dark;
 				letter-spacing: 1px;
 				font-size: $font-size-l;
-				font-family: $font-family-blanc;
+				font-family: $font-family-roboto;
 				line-height: 1.25em;
 				max-width: 640px;
 			}
@@ -304,7 +277,8 @@
 				margin-bottom: 30px;
 				color: $blue-light;
 				font-size: $font-size-reg+2;
-				font-family: $font-family-blanc-reg;
+				font-family: $font-family-roboto;
+				font-weight: $font-weight-reg;
 				line-height: 1.75em;
 				max-width: 480px;
 			}
@@ -320,7 +294,7 @@
 				display: inline-block;
 				color: $blue-dark;
 				font-size: $font-size-reg;
-				font-family: $font-family-blanc;
+				font-family: $font-family-roboto;
 				line-height: 1.75em;
 				max-width: 320px;
 				padding-left: 20px;

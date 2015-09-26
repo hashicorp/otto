@@ -7,8 +7,8 @@
 	background-color: $white;
 	color: $black;
 	@include transition(color .3s ease-in-out);
-	//@include btn-shadow();
-	font-family: $font-family-blanc-reg;
+	font-family: $font-family-roboto;
+	font-weight: $font-weight-md;
 	text-transform: uppercase;
 	border-radius: 3px;
 
@@ -24,7 +24,7 @@
 
 	&.lrg{
 		font-size: $font-size-reg;
-		padding: 10px 24px;
+		padding: 8px 36px;
 	}
 
 	&.sml{
@@ -56,26 +56,17 @@
 		}
 	}
 
-	&.green{
-		color: $green;
+	&.orange{
+		background-color: $orange;
+		color: $black;
 
 		&.has-border{
-			border: 2px solid $green;
+			border: 3px solid $black;
 		}
 
 		span.h-caret{
 			background: image-url('../images/caret-green.png') 0 0 no-repeat;
 			@include img-retina("../images/caret-green.png", "../images/caret-green@2x.png", 8px, 12px);
-		}
-
-		&.fill{
-			background-color: $green;
-			color: $white;
-
-			span.h-caret{
-				background: image-url('../images/caret-white.png') 0 0 no-repeat;
-				@include img-retina("../images/caret-white.png", "../images/caret-white@2x.png", 8px, 12px);
-			}
 		}
 	}
 
