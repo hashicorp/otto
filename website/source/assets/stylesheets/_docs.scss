@@ -80,9 +80,9 @@ body.layout-intro{
 
 			&.active {
 				>a{
-					color: $green-dark;
+					color: $orange;
 					font-weight: 600;
-					border-right: 1px solid $green-faint;
+					border-right: 1px solid lighten($orange, 30%);;
 
 					&:hover{
 						&:before{
@@ -118,9 +118,9 @@ body.layout-intro{
 					top: 15px;
 					left: $parent-default-state;
 					overflow: hidden;
-					background: url(../images/caret-green.png) 0 0 no-repeat;
 					opacity: .3;
-					@include img-retina("../images/caret-light.png", "../images/caret-light@2x.png", 6px, 9px);
+					//background: url(../images/caret-green.png) 0 0 no-repeat;
+					//@include img-retina("../images/caret-light.png", "../images/caret-light@2x.png", 6px, 9px);
 				}
 			}
 		}
@@ -131,15 +131,15 @@ body.layout-intro{
 			padding-top: 10px;
 			padding-bottom: 10px;
 			margin-bottom: 15px;
-			border-right: 1px solid $green-faint;
-		    border-bottom: 1px solid $green-faint;
+			border-right: 1px solid lighten($orange, 30%); //$green-faint;
+		    border-bottom: 1px solid lighten($orange, 30%); // $green-faint;
 
 			> li{
 				margin-left: 10px;
 
 				&.active{
 					> a{
-		            	color: $green-dark;
+		            	color: $orange;
 						font-weight: 600;
 
 						&:hover{
@@ -216,13 +216,13 @@ body.layout-intro{
     }
 
 	a{
-		color: $green-dark;
-		border-bottom: 1px solid $green-dark;
+		color: $orange;
+		border-bottom: 1px solid $orange;
 		@include transition(all 300ms ease-in);
 
 		&:hover{
-			color: $blue-dark;
-			border-bottom: 2px solid $blue-dark;
+			color: $black;
+			border-bottom: 2px solid $black;
 			text-decoration: none;
 			@include transition(all 300ms ease-in);
 		}
@@ -235,7 +235,7 @@ body.layout-intro{
     }
 
 	h1, .h1, h2, .h2, h3, .h3, h4, .h4{
-		color: $gray-dark;
+		color: $black;
 		margin-top: 54px;
 		margin-bottom: 18px;
     	@include open-sb();
