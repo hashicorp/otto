@@ -15,18 +15,6 @@ body.page-sub{
     .footer-links{
         margin-bottom: 20px;
 
-        .li-under a:hover::after,
-        .li-under a:focus::after {
-            opacity: 1;
-            -webkit-transform: skewY(15deg) translateY(8px);
-            -moz-transform: skewY(15deg) translateY(8px);
-            transform: skewY(15deg) translateY(8px);
-        }
-
-        .li-under a::after {
-            background-color: $purple;
-        }
-
         li{
             a{
                 @include v-nav-style();
@@ -41,8 +29,10 @@ body.page-sub{
     .footer-hashi{
         font-size: 14px;
 
+            color: $gray-dark;
+
         a{
-            color: black;
+            color: $gray-dark;
             font-weight: 600;
         }
 
@@ -56,10 +46,10 @@ body.page-sub{
             i{
                 display: inline-block;
                 margin-top: -2px;
-                width: 27px;
-                height: 28px;
+                width: 29px;
+                height: 30px;
                 background: image-url('../images/hashi-logo.png') 0 0 no-repeat;
-                @include img-retina('../images/hashi-logo.png', '../images/hashi-logo@2x.png', 27px, 28px);
+                @include img-retina('../images/hashi-logo.png', '../images/hashi-logo@2x.png', 29px, 30px);
             }
         }
     }

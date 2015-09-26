@@ -250,38 +250,14 @@
 	}
 }
 
-#cta {
-	position: relative;
-	padding: 160px 0;
-	background: image-url('../images/bg-iconscrud.png') center center no-repeat;
-	@include img-retina("../images/bg-icons.png", "../images/bg-icons@2x.png", 669px, 260px);
-	background-position: center center;
-	border-top: 1px solid $faint-gray;
-	border-bottom: 1px solid $faint-gray;
-
-	a{
-		margin-bottom: 5px;
-	}
-
+#cta-banner{
+	text-align: center;
+	padding: 80px;
+	background-color: $orange;
+	color: $white;
+	
 	p{
-		margin-top: 10px;
-		color: $black;
-		font-size: 14px;
-		font-weight: 600;
-    	line-height: 1.5esm;
-
-    	&.cta-gray{
-    		color: $gray;
-    		font-weight: 300;
-    	}
-	}
-
-	.outline-btn {
-		padding: 16px 40px;
-		display: inline-block;
-		&:focus {
-	    	outline: 0;
-		}
+		margin-bottom: $xsmall-pad;
 	}
 }
 
