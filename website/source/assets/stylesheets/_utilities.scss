@@ -39,10 +39,10 @@
 }
 
 @mixin v-nav-style-core{
-    color: $gray-darker;
-    font-family: $font-family-blanc-reg;
+    color: $blue-light;
+    font-family: $font-family-roboto;
+    font-weight: $font-weight-md;
     font-size: 13px;
-    text-transform: uppercase;
     letter-spacing: 0.0625em;
 }
 
@@ -54,7 +54,7 @@
     @include transition( color 0.3s ease );
 
     &:hover{
-        color: $green-dark;
+        color: $orange;
         @include transition( color 0.3s ease );
         background-color: transparent;
     }

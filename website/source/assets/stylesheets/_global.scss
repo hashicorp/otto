@@ -11,28 +11,33 @@ body {
     -webkit-font-smoothing: antialiased;
     color: $black;
     background-color: $white;
-    font-size: 15px;
-    font-family: $font-family-open-sans;
-    font-weight: 500;
+    font-size: $font-size-reg;;
+    font-family: $font-family-roboto;
+    font-weight: $font-weight-reg;
 }
 
 
 h1, h2, h3, h4, h5 {
     -webkit-font-smoothing: antialiased;
 }
+
 h1{
-	font-size: 42px;
-	line-height: 42px;
-	font-family: $font-family-open-sans;
-	font-weight: $font-weight-reg;
+	font-size: $font-size-xl;
+	line-height: $font-size-xl;
+    font-weight: $font-weight-reg;
+	//font-family: $font-family-open-sans;
 	margin-bottom: 24px;
 }
 
-h3{
-	font-size: 28px;
-	line-height: 28px;
-	font-family: $font-family-open-sans;
+h2{
+	font-size: $font-size-l;
 	font-weight: $font-weight-reg;
+}
+
+h3{
+	font-size: $font-size-m;
+	font-weight: $font-weight-md;
+	//font-family: $font-family-open-sans;
 }
 
 //an alternative color for buttons in the doc body
@@ -58,12 +63,45 @@ pre {
 	margin-bottom: 0;
 }
 
+.mono-block{
+    background-color: $black;
+	color: $white;
+	font-size: 15px;
+	font-weight: normal;
+	font-family: $font-family-bitstream;
+	border: none;
+	padding: 8px 12px;
+	margin-bottom: 0;
+    border-radius: 3px;
+}
 
-//fixed grid below 992 to prevent smaller responsive sizes
-@media (max-width: 992px) {
-	.container{
-		max-width: 970px;
-	}
+.bg-black{
+    background-color: $black;
+    color: $white;
+}
+.bg-orange{
+    background-color: $orange;
+}
+.bg-light-orange{
+    background-color: $light-orange;
+}
+.bg-gray{
+    background-color: $gray;
+}
+
+.section{
+    @include clearfix();
+    padding: 120px 0;
+
+    &.section-50{
+        padding:0;
+
+        .r50{
+            float: left;
+            width: 50%;
+            padding: 120px 0;
+        }
+    }
 }
 
 //all below styles are overriding corrections for below (min-width: 992px)
@@ -87,4 +125,47 @@ pre {
 
 .center {
     text-align: center;
+}
+
+//fixed grid below 992 to prevent smaller responsive sizes
+@media (max-width: 992px) {
+	.container{
+		max-width: 970px;
+	}
+}
+
+@media (max-width: 1200px) {
+
+}
+
+@media (max-width: 992px) {
+
+}
+
+@media (max-width: 768px) {
+
+    body {
+        font-size: 14px;
+    }
+
+    
+    h1{
+    	font-size: $font-size-m !important;
+    	line-height: $font-size-m;
+        font-weight: $font-weight-reg;
+    	margin-bottom: 24px;
+    }
+
+    h2{
+    	font-size: $font-size-m !important;
+    	font-weight: $font-weight-reg;
+    }
+}
+
+@media (max-width: 480px) {
+
+}
+
+@media (max-width: 320px) {
+
 }

@@ -23,7 +23,6 @@
     }
 
     .navbar-header{
-
         .navbar-toggle{
             padding-right: 15px;
             margin-top: 26px;
@@ -46,19 +45,19 @@
 
         .logo{
             display: inline-block;
-            height: 56px;
+            height: 62px;
             padding: 0;
-            color: $gray-darker;
-            font-family: $font-family-blanc;
+            color: $black;
+            font-family: $font-family-bitstream;
             font-size: 28px;
-            line-height: 56px;
-            padding-left: 60px;
+            line-height: 58px;
+            padding-left: 74px;
             background: image-url('../images/logo-header.png') 0 0 no-repeat;
-            @include img-retina("../images/logo-header.png", "../images/logo-header@2x.png", 49px, 56px);
+            @include img-retina("../images/logo-header.png", "../images/logo-header@2x.png", 62px, 62px);
 
             &:hover{
 				@include transition(all 300ms ease-in);
-				color: $green-dark;
+				color: $orange;
 				text-decoration: none;
 			}
         }
@@ -111,6 +110,18 @@
 }
 
 @media (max-width: 992px) {
+
+    #header{
+        .buttons{
+            ul.navbar-nav{
+                li {
+                      &.download{
+                        margin-right: 8px;
+                    }
+                }
+            }
+        }
+    }
 
 }
 

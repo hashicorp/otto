@@ -1,29 +1,23 @@
-/**
- * @license
- * MyFonts Webfont Build ID 3078913, 2015-08-21T01:21:30-0400
- *
- * The fonts listed in this notice are subject to the End User License
- * Agreement(s) entered into by the website owner. All other parties are
- * explicitly restricted from using the Licensed Webfonts(s).
- *
- * You may obtain a valid license at the URLs below.
- *
- * Webfont: Blanc-Light by Latinotype
- * URL: http://www.myfonts.com/fonts/latinotype/blanc/light/
- * Copyright: Jorge Cisterna
- * Licensed pageviews: 10,000
- *
- *
- * License: http://www.myfonts.com/viewlicense?type=web&buildid=3078913
- *
- * © 2015 MyFonts Inc
-*/
+// @font-face {
+//     font-family: 'Bitstream';
+//     src: url('veramono-webfont.eot');
+//     src: url('veramono-webfont.eot?#iefix') format('embedded-opentype'),
+//          url('veramono-webfont.woff2') format('woff2'),
+//          url('veramono-webfont.woff') format('woff'),
+//          url('veramono-webfont.ttf') format('truetype'),
+//          url('veramono-webfont.svg#bitstream_vera_sans_monoroman') format('svg');
+//     font-weight: normal;
+//     font-style: normal;
+// }
 
-
-/* @import must be at top of file, otherwise CSS will not work */
-//@import url("//hello.myfonts.net/count/2efc68");
-@import url("//hello.myfonts.net/count/2efb01");
-
-
-@font-face {font-family: 'Blanc-Light';src: url('../webfonts/2EFB01_0_0.eot');src: url('../webfonts/2EFB01_0_0.eot?#iefix') format('embedded-opentype'),url('../webfonts/2EFB01_0_0.woff2') format('woff2'),url('../webfonts/2EFB01_0_0.woff') format('woff'),url('../webfonts/2EFB01_0_0.ttf') format('truetype');}
-@font-face {font-family: 'Blanc-Regular';src: url('../webfonts/2EFC68_0_0.eot');src: url('../webfonts/2EFC68_0_0.eot?#iefix') format('embedded-opentype'),url('../webfonts/2EFC68_0_0.woff2') format('woff2'),url('../webfonts/2EFC68_0_0.woff') format('woff'),url('../webfonts/2EFC68_0_0.ttf') format('truetype');}
+@font-face {
+    font-family: 'Bitstream Monobold';
+    src: url('../webfonts/veramobd-webfont.eot');
+    src: url('../webfonts/veramobd-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../webfonts/veramobd-webfont.woff2') format('woff2'),
+         url('../webfonts/veramobd-webfont.woff') format('woff'),
+         url('../webfonts/veramobd-webfont.ttf') format('truetype'),
+         url('../webfonts/veramobd-webfont.svg#bitstream_vera_sans_monobold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
