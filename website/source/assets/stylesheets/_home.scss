@@ -9,14 +9,14 @@
 
 #hero{
 	text-align: center;
-	padding-bottom: 40px;
+	padding-bottom: 60px;
 
 	#hero-graphic{
 		position: relative;
 		display: inline-block;
 		width: 1016px;
 		height: 357px;
-		margin: 0 auto 40px;
+		margin: 0 auto 10px;
 		//@include translate3d(30px, 0, 0);
 		background: image-url('../images/graphic-hero.png') 6px 0 no-repeat;
 		@include img-retina("../images/graphic-hero.png", "../images/graphic-hero@2x.png", 1010px, 357px);
@@ -46,9 +46,11 @@
 				display: inline-block;
 				width: 122px;
 				height: 33px;
+				margin-bottom: -10px;
 				margin-left: 4px;
 				text-indent: 100%;
 				white-space: nowrap;
+				overflow: hidden;
 				background: image-url('../images/vagrant-logo.png') 0 0 no-repeat;
 				@include img-retina("../images/vagrant-logo.png", "../images/vagrant-logo@2x.png", 122px, 33px);
 			}
@@ -82,55 +84,31 @@
 	}
 }
 
-.banner{
-	margin-top: 120px;
-
-	&.gray-banner{
-		.col{
-			border: 1px solid $blue-faint;
-		}
-
-		p{
-			color: $blue-light;
-		}
+#subhero-banner{
+	.otto-lrg-white{
+		margin-top: $small-pad;
+		width: 235px;
+		height: 191px;
+		background: image-url('../images/otto-subhero.png') 0 0 no-repeat;
+		@include img-retina("../images/otto-subhero.png", "../images/otto-subhero@2x.png", 235px, 191px);
 	}
 
-	&.green-banner{
-		.col{
-			border: 1px solid $blue-faint;
-		}
-
-		p{
-			color: $blue-dark;
-		}
+	h2,p{
+		text-align: left;
 	}
 
-	&#cta-banner{
-		margin-top: 0;
-		margin-bottom: 80px;
-
-		.col{
-			padding: 60px 20px;
-		}
-	}
-
-	.col{
-		padding: 20px;
-		text-align: center;
-		border-radius: 3px;
+	h2{
+		font-size: $font-size-l;
+		margin-bottom: $xsmall-pad;
 	}
 
 	p{
-		margin-bottom: 0px;
-		margin-right: 30px;
 		font-size: $font-size-reg;
-		line-height: $font-size-reg;
-		font-family: $font-family-roboto;
-		font-weight: $font-weight-reg;
+		margin-bottom: $small-pad;
 	}
 
-	p, a{
-		display: inline-block;
+	a{
+		float: left;
 	}
 }
 
