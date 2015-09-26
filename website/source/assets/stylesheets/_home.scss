@@ -113,7 +113,19 @@
 }
 
 #features-split{
+	border-top: 3px solid $black;
 	display: flex;
+
+	.r50{
+		text-align: center;
+		flex: 1;
+
+		.feature-graphic{
+			display: inline-block;
+			height: 279px;
+			margin-bottom: $small-pad;
+		}
+	}
 }
 
 .feature{
@@ -187,17 +199,6 @@
 		}
 	}
 
-	&.r50{
-		text-align: center;
-		flex: 1;
-
-		.feature-graphic{
-			display: inline-block;
-			height: 279px;
-			margin-bottom: $small-pad;
-		}
-	}
-
 	&#focus{
 		.feature-graphic{
 			width: 290px;
@@ -211,6 +212,31 @@
 			width: 346px;
 			background: image-url('../images/graphic-deploy.png') 0 0 no-repeat;
 			@include img-retina("../images/graphic-deploy.png", "../images/graphic-deploy@2x.png", 346px, 279px);
+		}
+	}
+
+	&#microservices{
+		border-top: 3px solid $black;
+
+		.container{
+			height: 450px; //?
+
+			.feature-content{
+				border: 3px solid $black;
+				padding: 20px;
+				border-radius: 5px;
+			}
+
+			.feature-graphic{
+				position: absolute;
+				right: 40%;
+				width: 824px;
+				height: 525px;
+				background: image-url('../images/graphic-micro.jpg') 0 0 no-repeat;
+				@include img-retina("../images/graphic-micro.jpg", "../images/graphic-micro@2x.jpg", 824px, 525px);
+				background-size: 824px 525px;
+				background-position: 0 0;
+			}
 		}
 	}
 }
