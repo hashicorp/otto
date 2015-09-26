@@ -291,7 +291,13 @@
 }
 
 @media (max-width: 992px) {
-
+    .section.section-50{
+		flex-direction: column;
+		.r50{
+        	width: 100%;
+        	//padding-bottom: 120px;
+    	}
+	}
 }
 
 @media (max-width: 768px) {
