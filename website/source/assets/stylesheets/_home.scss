@@ -543,6 +543,22 @@
 			margin-left: 0 !important;
 		}
 	}
+
+	.feature{
+		&#microservices{
+			.container{
+				.feature-content{
+					border: none;
+				}
+
+				.feature-graphic{
+					height: 213px;
+					background: image-url('../images/graphic-micro-2.jpg') center center no-repeat;
+					@include img-retina("../images/graphic-micro-2.jpg", "../images/graphic-micro-2@2x.jpg", 280px, 213px);
+				}
+			}
+		}
+	}
 }
 
 
