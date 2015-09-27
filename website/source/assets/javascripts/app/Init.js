@@ -29,7 +29,17 @@ var Init = {
 	},
 
 	initializeHomepage: function(){
-		new CubeDraw();
+		$('#use-case-nav a').click(function (e) {
+		  e.preventDefault()
+			console.log($(this)[0])
+			console.log($(this).tab())
+		  $(this).tab('show')
+		})
+
+		$('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+		  console.log('show new active tab', e.target) // newly activated tab
+		  console.log(e.relatedTarget);
+		})
 	},
 
 	Pages: {

@@ -7,5 +7,4 @@
 //= require lib/Base
 
 //= require app/Sidebar
-//= require app/CubeDraw
 //= require app/Init

@@ -221,12 +221,22 @@
 
 		.container{
 			position: relative;
-			height: 450px; //?
+			height: 507px;
 
 			.feature-content{
 				border: 3px solid $black;
 				padding: 20px;
 				border-radius: 5px;
+				text-align: center;
+
+				.micro-docker{
+					display: inline-block;
+					width: 249px;
+					height: 65px;
+					margin-bottom: $small-pad;
+					background: image-url('../images/graphic-micro-docker.png') 0 0 no-repeat;
+					@include img-retina("../images/graphic-micro-docker.png", "../images/graphic-micro-docker@2x.png", 249px, 65px);
+				}
 
 				p{
 					opacity: .8;
@@ -237,11 +247,10 @@
 				position: absolute;
 				top: 0;
 				right: 40%;
-				width: 824px;
-				height: 525px;
-				background: image-url('../images/graphic-micro.jpg') 0 0 no-repeat;
-				@include img-retina("../images/graphic-micro.jpg", "../images/graphic-micro@2x.jpg", 824px, 525px);
-				background-size: 824px 525px;
+				width: 665px;
+				height: 507px;
+				background: image-url('../images/graphic-micro-2.jpg') 0 0 no-repeat;
+				@include img-retina("../images/graphic-micro-2.jpg", "../images/graphic-micro-2@2x.jpg", 665px, 507px);
 				background-position: 0 0;
 			}
 		}
@@ -250,7 +259,7 @@
 
 #cta-banner{
 	text-align: center;
-	padding: 80px;
+	padding: 80px 0;
 	background-color: $orange;
 	color: $white;
 
@@ -260,12 +269,46 @@
 }
 
 #use-cases{
+
+	.r50 {
+		padding-top: $small-pad;
+	}
+
+	>h2{
+		background-color: $black;
+		color: $white;
+		padding: $med-pad;
+		margin-bottom: 0;
+	}
+
+	#use-case-nav{
+		background-color: $black;
+
+			a{
+				color: $white;
+				opacity: .4;
+				border-radius: 0;
+				border: none;
+
+				&:hover{
+					background-color: $black;
+					opacity: .1;
+					color: $white;
+				}
+			}
+
+			> li.active > a{
+				color: $orange;
+				opacity: 1;
+				background-color: $black;
+				border-bottom: 3px solid $orange;
+			}
+	}
+
 	.use-case{
-		border-top: 3px solid $black;
 		@include clearfix();
 
 		.use-overview{
-
 			h2{
 				margin-bottom: $small-pad;
 			}
@@ -413,12 +456,6 @@
 					position: absolute;
 					margin-top: 300px;
 					right: 5%;
-					width: 824px;
-					height: 525px;
-					background: image-url('../images/graphic-micro.jpg') 0 0 no-repeat;
-					@include img-retina("../images/graphic-micro.jpg", "../images/graphic-micro@2x.jpg", 824px, 525px);
-					background-size: 824px 525px;
-					background-position: 0 0;
 				}
 			}
 		}
@@ -510,11 +547,11 @@
 				.feature-graphic{
 					position: relative;
 					margin-top: 30px;
-					right: 5%;
+					right: auto;
 					width: 100%;
-					height: 400px;
-					background: image-url('../images/graphic-micro.jpg') top right no-repeat;
-					@include img-retina("../images/graphic-micro.jpg", "../images/graphic-micro@2x.jpg", 628px, 400px);
+					height: 450px;
+					background: image-url('../images/graphic-micro-2.jpg') center center no-repeat;
+					@include img-retina("../images/graphic-micro-2.jpg", "../images/graphic-micro-2@2x.jpg", 450px, 343px);
 					background-size: 824px 525px;
 				}
 			}
@@ -538,6 +575,22 @@
 		a{
 			margin-bottom: 15px;
 			margin-left: 0 !important;
+		}
+	}
+
+	.feature{
+		&#microservices{
+			.container{
+				.feature-content{
+					border: none;
+				}
+
+				.feature-graphic{
+					height: 213px;
+					background: image-url('../images/graphic-micro-2.jpg') center center no-repeat;
+					@include img-retina("../images/graphic-micro-2.jpg", "../images/graphic-micro-2@2x.jpg", 280px, 213px);
+				}
+			}
 		}
 	}
 }
