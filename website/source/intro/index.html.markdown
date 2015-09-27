@@ -24,14 +24,14 @@ developing a PHP application, Otto will automatically install PHP and
 other related tools for you.
 
 Otto supports application dependencies as a first class feature. This makes
-microservice development a breeze. Otto automatically downloads, installs,
+developing microservices a breeze. Otto automatically downloads, installs,
 configures, and starts dependencies in your development environments for you.
 
 Developers that are new to a team or are context switching to a new
 project can get up and running in a single command with minimal friction:
 `otto dev`.
 
-## Best-in-Class Quality Infrastructure, Automatically
+## Best-in-Class Infrastructure, Automatically
 
 Otto automatically builds an infrastructure and deploys your application
 using industry standard tooling and best practices, so you don't have to.
@@ -49,7 +49,7 @@ Due to this complexity, many developers completely ignore best practices
 and stick to the simple how-to guides.
 
 Otto solves all these problems and automatically manages all of the
-various software solutions for you to have a best-in-class quality
+various software solutions for you to have a best-in-class
 infrastructure. You only need to learn Otto, and Otto does the rest.
 
 ## Key Features
@@ -69,15 +69,20 @@ The key features of Otto are:
   automatically detected and configured.
 
 * **Deployment**: Otto knows how to deploy applications as well develop
-  them. Whether your application is a Docker container or a legacy
-  monolithic PHP application, Otto can deploy your application to any
+  them. Whether your application is a modern microservice, a legacy
+  monolith, or something in between, Otto can deploy your application to any
   environment.
 
-* **Battle-hardened tooling**: Otto uses battle-hardened tooling to
+* **Docker**: Otto can use Docker to download and start dependencies
+  for development to simplify microservices. Applications can be containerized
+  automatically to make deployments easier without changing the developer
+  workflow.
+
+* **Production-hardened tooling**: Otto uses production-hardened tooling to
   build development environments ([Vagrant](https://vagrantup.com)),
   launch servers ([Terraform](https://terraform.io)), configure
-  services ([Consul](https://consul.io)), and more. Each of the tools
-  Otto builds on top of is in use by some of the world's largest websites.
+  services ([Consul](https://consul.io)), and more. Otto builds on
+  tools that powers the world's largest websites.
   Otto automatically installs and manages all of this tooling, so you don't
   have to.
 

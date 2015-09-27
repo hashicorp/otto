@@ -23,9 +23,8 @@ piece of software for you.
 
 The Otto workflow is not bound by the underlying technology: it supports
 a containerized workload as easily as a completely virtualized workload.
-More importantly, it easily supports hybrid environments. Docker tooling
-is tied directly to Docker containers, Docker hosts, etc. Otto is built
-to support any underlying technology paradigms: virtualization, containerization,
+Docker tooling is tied directly to Docker containers, Docker hosts, etc. Otto is built
+to support multiple underlying technology paradigms: virtualization, containerization,
 etc.
 
 In addition to this: the Docker tools on their own aren't enough to build

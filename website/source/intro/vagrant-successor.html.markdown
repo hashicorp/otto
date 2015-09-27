@@ -17,8 +17,8 @@ fill an important role for some users, but for the majority of developers,
 Otto will replace Vagrant over time.
 
 While we believe Otto is a successor to Vagrant, Vagrant development will
-continue for years to come. Otto is actually built on top of Vagrant in
-many cases and improvements in Vagrant benefit Otto users as well.
+continue for years to come. Otto is built on Vagrant, so improvements to
+ Vagrant will benefit Otto users as well.
 
 ### Improvements Over Vagrant
 
@@ -48,12 +48,9 @@ build a proper production environment with industry best practices. An
 Appfile is made to encode this knowledge, and deployment is a single
 command away.
 
-**Performance**. Vagrant suffers from being slow for a lot of really
-common operations, such as `vagrant ssh`. During testing, one of the Otto
-developers found `vagrant ssh` to consistently be about 3.5 seconds, whereas
-`otto dev ssh` was around 0.1 seconds. `vagrant status` was around 3 seconds,
-and `otto status` was around 0.05 seconds. Performance across the board will
-improve for Otto as time goes on.
+**Performance**. We took what we learned from Vagrant, and optimized the most common
+operations. For example, `vagrant status` is an operation that takes
+several seconds. `otto status` finishes in milliseconds.
 
 ### The Future of Vagrant
 
@@ -63,7 +60,7 @@ wheel, so we've taken the best parts of Vagrant and used them within Otto to
 manage development environments automatically for the user.
 
 Otto builds on top of Vagrant to make operations such as SSH take
-milliseconds, automatically assign static addresses (and soon DNS names),
+milliseconds, automatically assign addresses,
 and more. In addition to all the development environment features, Otto does a
 lot more to enable deployment.
 
