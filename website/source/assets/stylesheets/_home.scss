@@ -269,12 +269,46 @@
 }
 
 #use-cases{
+
+	.r50 {
+		padding-top: $small-pad;
+	}
+
+	>h2{
+		background-color: $black;
+		color: $white;
+		padding: $med-pad;
+		margin-bottom: 0;
+	}
+
+	#use-case-nav{
+		background-color: $black;
+
+			a{
+				color: $white;
+				opacity: .4;
+				border-radius: 0;
+				border: none;
+
+				&:hover{
+					background-color: $black;
+					opacity: .1;
+					color: $white;
+				}
+			}
+
+			> li.active > a{
+				color: $orange;
+				opacity: 1;
+				background-color: $black;
+				border-bottom: 3px solid $orange;
+			}
+	}
+
 	.use-case{
-		border-top: 3px solid $black;
 		@include clearfix();
 
 		.use-overview{
-
 			h2{
 				margin-bottom: $small-pad;
 			}
