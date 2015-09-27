@@ -18,7 +18,7 @@
     } */
 
     &.navbar-static-top{
-        height:70px;
+        height: 70px;
         z-index: 1000;
     }
 
@@ -41,7 +41,7 @@
     .navbar-brand {
         display: inline-block;
         padding: 0;
-        margin: 30px 10px 0 0 ;
+        margin: 20px 10px 0 0 ;
 
         .logo{
             display: inline-block;
@@ -64,7 +64,7 @@
     }
 
     .main-links.navbar-nav{
-        margin-top: 50px;
+        margin-top: 40px;
         margin-left: 120px;
 
         li > a {
@@ -74,7 +74,7 @@
 
     .buttons{
         ul.navbar-nav{
-            margin-top: 50px;
+            margin-top: 40px;
             li {
               padding-left: 12px;
 

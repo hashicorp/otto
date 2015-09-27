@@ -4,7 +4,7 @@
 
 #hero{
 	text-align: center;
-	padding-bottom: 60px;
+	padding-bottom: $med-pad;
 
 	#hero-graphic{
 		position: relative;
@@ -19,8 +19,8 @@
 
 	#hero-text{
 		position: relative;
-		text: center;
-		margin-top: 60px;
+		text-align: center;
+		margin-top: 44px;
 
 		h1{
 			margin-bottom: 8px;
@@ -481,18 +481,23 @@
 		#hero-text{
 			position: relative;
 			text: center;
-			margin-top: 60px;
 
 			h1{
 				margin-bottom: 8px;
 				color: $black;
-				font-size: $font-size-l;
+				font-size: 24px;
 			}
 
 			h3{
+				text-align: center;
 				margin-top: 6px;
 				color: $blue-dark;
 				font-size: $font-size-reg;
+
+				span{
+					display: block;
+					margin: 0 auto;
+				}
 
 			}
 		}
