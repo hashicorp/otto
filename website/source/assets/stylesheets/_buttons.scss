@@ -43,8 +43,8 @@
 	}
 
 	&.lrg{
-		font-size: $font-size-reg;
-		padding: 8px 36px;
+		font-size: 13px;
+		padding: 12px 36px;
 	}
 
 	&.sml{
@@ -89,10 +89,16 @@
 	}
 
 	&.dark{
-		color: $green-dark;
+		color: $white;
+		background-color: $black;
 
 		&.border{
 			border: 2px solid $green-dark;
+		}
+
+		span.h-caret{
+			background: image-url('../images/arrow-light.png') 0 0 no-repeat;
+			@include img-retina("../images/arrow-light.png", "../images/arrow-light@2x.png", 11px, 9px);
 		}
 	}
 
