@@ -112,10 +112,12 @@
 #features-split{
 	border-top: 3px solid $black;
 	display: flex;
+	display: -webkit-flex;
 
 	.r50{
 		text-align: center;
 		flex: 1;
+		-webkit-flex: 1;
 
 		.feature-graphic{
 			display: inline-block;
@@ -411,6 +413,8 @@
 
 	.section.section-50{
 		flex-direction: column;
+		-webkit-flex-direction: column;
+
 		.r50{
 			width: 100%;
 			//padding-bottom: 120px;
