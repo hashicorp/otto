@@ -227,6 +227,16 @@
 				border: 3px solid $black;
 				padding: 20px;
 				border-radius: 5px;
+				text-align: center;
+
+				.micro-docker{
+					display: inline-block;
+					width: 249px;
+					height: 65px;
+					margin-bottom: $small-pad;
+					background: image-url('../images/graphic-micro-docker.png') 0 0 no-repeat;
+					@include img-retina("../images/graphic-micro-docker.png", "../images/graphic-micro-docker@2x.png", 249px, 65px);
+				}
 
 				p{
 					opacity: .8;
