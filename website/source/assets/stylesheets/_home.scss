@@ -221,7 +221,7 @@
 
 		.container{
 			position: relative;
-			height: 450px; //?
+			height: 507px;
 
 			.feature-content{
 				border: 3px solid $black;
@@ -237,11 +237,10 @@
 				position: absolute;
 				top: 0;
 				right: 40%;
-				width: 824px;
-				height: 525px;
-				background: image-url('../images/graphic-micro.jpg') 0 0 no-repeat;
-				@include img-retina("../images/graphic-micro.jpg", "../images/graphic-micro@2x.jpg", 824px, 525px);
-				background-size: 824px 525px;
+				width: 665px;
+				height: 507px;
+				background: image-url('../images/graphic-micro-2.jpg') 0 0 no-repeat;
+				@include img-retina("../images/graphic-micro-2.jpg", "../images/graphic-micro-2@2x.jpg", 665px, 507px);
 				background-position: 0 0;
 			}
 		}
@@ -413,12 +412,6 @@
 					position: absolute;
 					margin-top: 300px;
 					right: 5%;
-					width: 824px;
-					height: 525px;
-					background: image-url('../images/graphic-micro.jpg') 0 0 no-repeat;
-					@include img-retina("../images/graphic-micro.jpg", "../images/graphic-micro@2x.jpg", 824px, 525px);
-					background-size: 824px 525px;
-					background-position: 0 0;
 				}
 			}
 		}
@@ -510,11 +503,11 @@
 				.feature-graphic{
 					position: relative;
 					margin-top: 30px;
-					right: 5%;
+					right: auto;
 					width: 100%;
-					height: 400px;
-					background: image-url('../images/graphic-micro.jpg') top right no-repeat;
-					@include img-retina("../images/graphic-micro.jpg", "../images/graphic-micro@2x.jpg", 628px, 400px);
+					height: 450px;
+					background: image-url('../images/graphic-micro-2.jpg') center center no-repeat;
+					@include img-retina("../images/graphic-micro-2.jpg", "../images/graphic-micro-2@2x.jpg", 450px, 343px);
 					background-size: 824px 525px;
 				}
 			}
