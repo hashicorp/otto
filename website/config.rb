@@ -2,7 +2,14 @@
 # Configure Middleman
 #-------------------------------------------------------------------------
 
-set :base_url, "https://www.vaultproject.io/"
+helpers do
+  def livestream_active?
+    # Must set key for date
+    ENV["LIVESTREAM_ACTIVE"].present?
+  end
+end
+
+set :base_url, "https://www.ottoproject.io/"
 
 activate :hashicorp do |h|
   h.version         = ENV["VAULT_VERSION"]
