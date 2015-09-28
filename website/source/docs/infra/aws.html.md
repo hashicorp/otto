@@ -67,5 +67,5 @@ It has the following resources:
    network connectivity from the private subnet.
  * A Bastion host launched into the public subnet, so private instances can be
    accessed via SSH.
- * By default, it also includes a prouduction cluster from the ["Consul"
+ * By default, it also includes a production cluster from the ["Consul"
    foundation](/docs/foundations/consul.html).
