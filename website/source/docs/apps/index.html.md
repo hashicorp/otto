@@ -22,7 +22,7 @@ developer, for example, you should read the [Ruby](/docs/apps/ruby/index.html)
 section.
 
 In addition to the built-in types, Otto makes it possible to create your
-own [custom types](/docs/apps/custom-plugin).
+own [custom types](/docs/apps/custom).
 
 Use the navigation to the left to read about the available application types.
 
