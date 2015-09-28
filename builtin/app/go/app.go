@@ -9,9 +9,7 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
-	"github.com/hashicorp/otto/helper/packer"
 	"github.com/hashicorp/otto/helper/schema"
-	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
 
@@ -78,15 +76,11 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 }
 
 func (a *App) Build(ctx *app.Context) error {
-	return packer.Build(ctx, &packer.BuildOptions{
-		InfraOutputMap: map[string]string{
-			"region": "aws_region",
-		},
-	})
+	return fmt.Errorf(strings.TrimSpace(buildErr))
 }
 
 func (a *App) Deploy(ctx *app.Context) error {
-	return terraform.Deploy(&terraform.DeployOptions{}).Route(ctx)
+	return fmt.Errorf(strings.TrimSpace(buildErr))
 }
 
 func (a *App) Dev(ctx *app.Context) error {
@@ -113,4 +107,13 @@ When you're ready to build your project, run 'otto dev ssh' to enter
 the development environment. You'll be placed directly into the working
 directory where you can run 'go get' and 'go build' as you normally would.
 The GOPATH is already completely setup.
+`
+
+const buildErr = `
+Build isn't supported yet for Go!
+
+Early versions of Otto are focusing on creating a fantastic development
+experience. Because of this, build/deploy are still lacking for many
+application types. These will be fixed very soon in upcoming versions of
+Otto. Sorry!
 `
