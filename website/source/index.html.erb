@@ -123,6 +123,75 @@
 	</div> <!-- /container -->
 </div> <!-- #microservices -->
 
+<div id="use-cases" class="section section-50">
+    <h2>Use Case</h2>
+
+    <div class="tab-content">
+        <div id="case-1" class="use-case tab-pane active" role="tabpanel">
+            <div class="use-overview r50">
+                <div class="col-lg-offset-1 col-md-offset-2 col-sm-offset-3 col-lg-10 col-md-8 col-sm-6 col-xs-12">
+                    <h2>Otto Use Case: <span class="use-subtitle">Rails on AWS</span></h2>
+                    <div class="use-icons">
+                        <ul>
+                            <li><span class="rails icon">rails</span></li>
+                            <li><span class="aws icon">aws</span></li>
+                        </ul>
+                    </div>
+                    <p>A story of the development and deployment of a fully functional Rails application onto
+                        AWS with Otto.</p>
+                </div><!-- .col -->
+            </div><!-- .use-overview .r50-->
+
+            <div class="use-steps r50 bg-gray">
+                <div class="col-lg-offset-1 col-md-offset-2 col-sm-offset-3 col-lg-10 col-md-8 col-sm-6 col-xs-12">
+
+                    <div class="use-step">
+                        <h3><span class="use-count">01.</span> Start your Rails project</h3>
+                        <p>Initialize a new Rails application with out-of-the-box
+                            defaults.</p>
+                        <pre class="prettyprint">$ rails new</pre>
+                    </div><!-- .use-step -->
+
+                    <div class="use-step">
+                        <h3><span class="use-count">02.</span> Run Otto Compile</h3>
+                        <p>Otto's compile step automatically detects the type
+                            of application as Rails and prepares Otto to manage
+                            your app's lifecycle. (You can also customize nearly every
+                            aspect of Otto's behavior by writing an Appfile.)</p>
+                        <pre class="prettyprint">$ otto compile</pre>
+                    </div><!-- .use-step -->
+                    <div class="use-step">
+                        <h3><span class="use-count">03.</span> Develop Locally</h3>
+                        <p>Otto builds and runs a local development
+                            environment, so you can easily test and make changes
+                            to your application.</p>
+                        <pre class="prettyprint">$ otto dev</pre>
+                    </div><!-- .use-step -->
+                    <div class="use-step">
+                        <h3><span class="use-count">04.</span> Construct Infrastructure</h3>
+                        <p>Otto creates a base infrastructure according to
+                            industry best practices.</p>
+                        <pre class="prettyprint">$ otto infra</pre>
+                    </div><!-- .use-step -->
+                    <div class="use-step">
+                        <h3><span class="use-count">05.</span> Build Your Application</h3>
+                        <p>Otto packages your application and prepares it
+                            for deployment onto your infrastructure.</p>
+                        <pre class="prettyprint">$ otto build</pre>
+                    </div><!-- .use-step -->
+                    <div class="use-step">
+                        <h3><span class="use-count">06.</span> Deploy</h3>
+                        <p>Your Rails application is converted to running
+                            infrastructure. Your app is now available
+                            to the world!</p>
+                        <pre class="prettyprint">$ otto deploy</pre>
+                    </div><!-- .use-step -->
+
+                </div><!-- .col -->
+            </div><!-- .use-steps .r50 -->
+        </div><!-- .use-case -->
+    </div><!-- .tab-content -->
+</div><!-- #use-cases -->
 <div id="cta-banner" class="banner dark-banner">
 	<div class="container">
 		<div class="row">
