@@ -18,11 +18,11 @@ Example:
 
 ```
 customization "node" {
-    node_version = "1.4.0"
+    node_version = "4.1.0"
 }
 ```
 
 Availabile options:
 
   * `node_version` (string) - The Node.js version to install
-    and deployment. This defaults to 1.4.0.
+    and deployment. This defaults to 4.1.0.
