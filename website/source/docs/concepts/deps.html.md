@@ -48,7 +48,7 @@ application {
 
 The "source" string can be local path, HTTP URL, Git URL, and many more.
 The full reference so dependency sources can be seen in the
-[dependency sources](#)
+[dependency sources](/docs/appfile/dep-sources.html)
 page.
 
 ## Compiling Dependencies
