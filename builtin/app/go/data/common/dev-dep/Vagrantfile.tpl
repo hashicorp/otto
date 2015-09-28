@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "hashicorp/precise64"
 
   # Setup a synced folder from our working directory to /vagrant
-  config.vm.synced_folder "{{ path.working }}", "{{ shared_folder_path }}",
+  config.vm.synced_folder '{{ path.working }}', "{{ shared_folder_path }}",
     owner: "vagrant", group: "vagrant"
 
   {% if import_path != "" %}
@@ -22,10 +22,10 @@ Vagrant.configure("2") do |config|
 
   # Setup a synced folder from where our compiled data is to
   # /otto. We do this to access the build script.
-  config.vm.synced_folder "{{ path.compiled }}/dev-dep", "/otto"
+  config.vm.synced_folder File.join('{{ path.compiled }}', 'dev-dep'), "/otto"
 
   # Setup a synced folder from where the cache dir is
-  config.vm.synced_folder "{{ path.cache }}", "/otto-cache"
+  config.vm.synced_folder '{{ path.cache }}', "/otto-cache"
 
   # Install Go build environment
   config.vm.provision "shell", inline: $script_golang

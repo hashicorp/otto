@@ -11,12 +11,12 @@ config.vm.provision "docker" do |d|
 end
 
 # Sync our own dep folder in there
-config.vm.synced_folder "{{ path.working }}", "{{ path.guest_working }}"
+config.vm.synced_folder '{{ path.working }}', "{{ path.guest_working }}"
 
 # Foundation configuration for dev dep
 {% for dir in foundation_dirs.dev_dep %}
 dir = "/otto/foundation-{{ name }}-{{ forloop.Counter }}"
-config.vm.synced_folder "{{ dir }}", dir
+config.vm.synced_folder '{{ dir }}', dir
 config.vm.provision "shell", inline: "cd #{dir} && bash #{dir}/main.sh"
 {% endfor %}
 
