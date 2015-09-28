@@ -1,6 +1,6 @@
-# Nomad Website
+# Otto Website
 
-This subdirectory contains the entire source for the [Nomad Website](https://nomadproject.io/).
+This subdirectory contains the entire source for the [Otto Website](https://ottoproject.io/).
 This is a [Middleman](http://middlemanapp.com) project, which builds a static
 site from these source files.
 
