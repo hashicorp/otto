@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "hashicorp/precise64"
 
   # Setup a synced folder from our working directory to /vagrant
-  config.vm.synced_folder "{{ path.working }}", "{{ shared_folder_path }}",
+  config.vm.synced_folder '{{ path.working }}', "{{ shared_folder_path }}",
     owner: "vagrant", group: "vagrant"
 
   {% if import_path != "" %}
@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
   # Foundation configuration (if any)
   {% for dir in foundation_dirs.dev %}
   dir = "/otto/foundation-{{ forloop.Counter }}"
-  config.vm.synced_folder "{{ dir }}", dir
+  config.vm.synced_folder '{{ dir }}', dir
   config.vm.provision "shell", inline: "cd #{dir} && bash #{dir}/main.sh"
   {% endfor %}
 
