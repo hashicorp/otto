@@ -12,7 +12,7 @@ end
 set :base_url, "https://www.ottoproject.io/"
 
 activate :hashicorp do |h|
-  h.version         = ENV["VAULT_VERSION"]
+  h.version         = ENV["OTTO_VERSION"]
   h.bintray_enabled = ENV["BINTRAY_ENABLED"]
   h.bintray_repo    = "mitchellh/otto"
   h.bintray_user    = "mitchellh"
