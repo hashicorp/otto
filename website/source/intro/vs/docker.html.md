@@ -8,86 +8,66 @@ description: |-
 
 # Otto vs. Docker
 
-The Docker ecosystem is comprised of multiple separate tools. Otto doesn't
-overlap with most of these, so we're going to name specific tools that Otto
-may be confused with.
+Docker is an ecosystem of tools including the Docker runtime, Compose,
+Machine and Swarm. Each of these tools solves a different problem, but
+they are all specific to Docker.
 
-## Single Workflow
+To develop using Docker, users must either develop on Linux or start a
+virtual machine running Linux. Then a `docker-compose.yml` is constructed
+with all the containers needed to run the full set of dependencies for your application.
+This is used by Docker Compose to manage the lifecycle of development
+containers.
 
-Docker is distributed as multiple tools, each of which needs to be learned
-separately, configured separately, and run separately.
+Once ready for deployment, you must build the application, create
+a Docker container, and upload it to Docker Hub or another registry.
+To build your application you create a `Dockerfile` which contains
+the compilation depedencies and emits a binary or compile artifact.
+Another `Dockerfile` is used to create a minimal deployment container
+with just this artifact, unless you want to deploy the container
+that includes all the compilation dependencies.
 
-Otto exposes a single simple workflow: `otto dev`, `otto deploy`, etc.
-that orchestrates all the configuration and execution of every other
-piece of software for you.
+Servers are provisioned with Docker Machine, which creates a server
+that has the Docker runtime installed. Machine does not have
+configuration file to specify all the machines needed, so it should
+be invoked by a provisioning script.
 
-The Otto workflow is not bound by the underlying technology: it supports
-a containerized workload as easily as a completely virtualized workload.
-Docker tooling is tied directly to Docker containers, Docker hosts, etc. Otto is built
-to support multiple underlying technology paradigms: virtualization, containerization,
-etc.
+If more than a single server is required, Docker Swarm is used to
+cluster the servers together. This allows containers to be scheduled
+to the cluster as if it were a single large machine. Docker Swarm
+can be configured by Machine during server provisioning.
 
-In addition to this: the Docker tools on their own aren't enough to build
-a complete infrastructure. Issues such as scheduling, service discovery,
-security, etc. still require external solutions that you have to learn
-and deploy yourself. Otto automates the installation of all of this.
+Once setup, containers must be provisioned on the cluster. This
+can be done with the `docker` CLI pointing at the Swarm cluster.
+For applications with dependencies, this should be wrapped in
+a deployment script to ensure those are launched along with the
+application.
 
-## Development
+Otto is a single tool and is much simpler to use. Otto uses an `Appfile`
+to describe the application and any upstream dependencies. Otto
+uses this same `Appfile` to setup development environments,
+building, launch infrastructure, and deployment.
 
-For **development**, Otto can be compared with running Docker directly
-in addition to Docker Compose. Otto has a number of differences when compared to
-these with just development in mind.
+To create a development environment, `otto dev` is run. This
+uses the `Appfile` to setup a virtual machine and downloads
+any compilation or upstream dependencies.
 
-With Docker Compose, you must list the full list of dependencies an
-application has, including dependencies of dependencies. With Otto, you
-list only your [immediate dependencies](/docs/concepts/deps.html). Otto
-parses the dependencies to find their dependencies automatically, and so on.
-This makes it much easier to work in microservice environments since
-dependencies may change often and changing the dependencies of your application
-won't negatively impact downstream consumers.
+Once ready, you can create the infrastructure for your application
+by running `otto infra`. This provisions the servers needed to
+run your application. This only needs to be done once to create
+the infrastructure.
 
-For development, Docker Compose recommends you use the "build" option
-to build a Dockerfile and run that Dockerfile. This makes for a slow
-feedback cycle: edit files then rebuild the compose environment. Otto
-recognizes this and creates a mutable environment designed for fast updates.
-For example, if you're working on a PHP project, just save the PHP page,
-refresh your browser, and the change is visible.
+To build the application you run `otto build`. This packages
+the application to be deployed. This can use Docker, but this
+is a detail that developers do not need to worry about. The
+`Appfile` already encodes what is needed and no `Dockerfile`
+is necessary.
 
-Otto uses a single virtual machine for the development environment.
-Multiple dependencies are automatically installed onto this single
-virtual machine. When working with Docker, you're also likely using
-a virtual machine to run Docker, so this is similar. The only time this
-isn't true is if you're developing on Linux directly.
+Lastly, `otto deploy` is used to deploy the application.
+This will use the infrastructure setup by `otto infra` and
+the build artifacts from `otto build`.
 
-## Deployment
-
-For **deployment**, Otto can be compared with Docker Machine, perhaps with
-Docker Swarm.
-
-Docker Machine only spins up compute resources for Docker. Otto is able
-to spin up a complete production-ready infrastructure: VPC, routing tables,
-security groups, networking rules, etc. Otto can add compute resources
-to this for Docker as well as non-Docker resources. Under the covers,
-Otto uses [Terraform](https://terraform.io) to manage infrastructure,
-a technology in use by many large companies and proven at large scale.
-
-Docker Machine can also intall a Docker Swarm cluster. Otto will install
-and bootstrap a [Consul](https://consul.io) cluster for service discovery
-and configuration, and future versions of Otto will automatically install
-[Vault](https://vaultproject.io) for security and [Nomad](https://nomadproject.io)
-for deployment and cluster management. The benefit of the stack setup by Otto
-is that it supports Docker containers as a first class
-deployment mechanism, but also supports any other application from
-custom server images to standalone JARs, executables, and more.
-
-Docker Swarm clusters multiple Docker hosts together. Otto will use
-[Nomad](https://nomadproject.io) to achieve the same thing. Nomad is able
-to deploy Docker containers as well as other applications. The benefit to
-using Otto is that the user doesn't need to make this decision: the deploy
-will just work. The distributed system that handles this is automatically
-bootstrapped, configured, secured, and scaled by Otto.
-
-In addition to the above, we'll repeat that Otto is a single tool and workflow.
-It uses other software under the covers, but Otto hides that complexity
-from the end user behind a [simple configuration](/docs/appfile) and
-a [simple workflow](/docs/concepts/workflow.html).
+Otto is designed to be a single tool that manages the workflow
+from development to production and requires only the `Appfile`.
+It is meant to simply the complex state of development today,
+while using production hardened tools and industry best practices
+automatically.
