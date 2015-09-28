@@ -59,7 +59,7 @@ us-east-1: ami-4b19662e
     immediately.
 ```
 
-**Congratulations!** You've just build an AMI that can be launched!
+**Congratulations!** You've just built an AMI that can be launched!
 
 Imagine you're a developer that doesn't know how to properly configure
 a server to serve an application you've built. In one command, Otto has
