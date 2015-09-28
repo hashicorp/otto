@@ -44,6 +44,12 @@ func TestCompile(t *testing.T) {
 		},
 
 		{
+			"compile-multi-dep",
+			testCompileMultiDepStr,
+			false,
+		},
+
+		{
 			"compile-invalid",
 			"",
 			true,
@@ -358,4 +364,15 @@ Dep Graph:
 bar
 foo
   bar
+`
+
+const testCompileMultiDepStr = `
+Compiled Appfile: %s
+
+Dep Graph:
+bar
+baz
+foo
+  bar
+  baz
 `

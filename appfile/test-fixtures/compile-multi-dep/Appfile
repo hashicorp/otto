@@ -1,0 +1,18 @@
+application {
+    name = "foo"
+    type = "bar"
+
+    dependency {
+        source = "./childone"
+    }
+    dependency {
+        source = "./childtwo"
+    }
+}
+
+project {
+    name = "foo"
+    infrastructure = "aws"
+}
+
+infrastructure "aws" {}
