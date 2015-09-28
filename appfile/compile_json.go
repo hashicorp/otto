@@ -15,7 +15,7 @@ import (
 func (c *Compiled) MarshalJSON() ([]byte, error) {
 	raw := &compiledJSON{
 		File:  c.File,
-		Edges: make(map[string]string),
+		Edges: make([]map[string]string, 0, len(c.Graph.Edges())),
 	}
 
 	// Compile the list of vertices, keeping track of their position
@@ -28,7 +28,10 @@ func (c *Compiled) MarshalJSON() ([]byte, error) {
 
 	// Map the edges by position
 	for _, e := range c.Graph.Edges() {
-		raw.Edges[set[e.Source()]] = set[e.Target()]
+		raw.Edges = append(raw.Edges,
+			map[string]string{
+				set[e.Source()]: set[e.Target()],
+			})
 	}
 
 	return json.Marshal(raw)
@@ -45,18 +48,20 @@ func (c *Compiled) UnmarshalJSON(data []byte) error {
 	for _, v := range raw.Vertices {
 		c.Graph.Add(v)
 	}
-	for a, b := range raw.Edges {
-		ai, err := strconv.ParseInt(a, 0, 0)
-		if err != nil {
-			return err
-		}
+	for _, e := range raw.Edges {
+		for a, b := range e {
+			ai, err := strconv.ParseInt(a, 0, 0)
+			if err != nil {
+				return err
+			}
 
-		bi, err := strconv.ParseInt(b, 0, 0)
-		if err != nil {
-			return err
-		}
+			bi, err := strconv.ParseInt(b, 0, 0)
+			if err != nil {
+				return err
+			}
 
-		c.Graph.Connect(dag.BasicEdge(raw.Vertices[ai], raw.Vertices[bi]))
+			c.Graph.Connect(dag.BasicEdge(raw.Vertices[ai], raw.Vertices[bi]))
+		}
 	}
 
 	return nil
@@ -65,5 +70,5 @@ func (c *Compiled) UnmarshalJSON(data []byte) error {
 type compiledJSON struct {
 	File     *File
 	Vertices []*CompiledGraphVertex
-	Edges    map[string]string
+	Edges    []map[string]string
 }
