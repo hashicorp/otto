@@ -10,6 +10,6 @@ type customizations struct {
 }
 
 func (c *customizations) processDev(d *schema.FieldData) error {
-	c.Opts.Bindata.Context["dev_node_version"] = d.Get("node_version")
+	c.Opts.Bindata.Context["node_version"] = d.Get("node_version")
 	return nil
 }
