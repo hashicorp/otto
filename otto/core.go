@@ -687,6 +687,13 @@ func (c *Core) creds(
 
 	// Set the credentials
 	infraCtx.InfraCreds = creds
+
+	// Let the infrastructure do whatever it likes to verify that the credentials
+	// are good, so we can fail fast in case there's a problem.
+	if err := infra.VerifyCreds(infraCtx); err != nil {
+		return err
+	}
+
 	return nil
 }
 

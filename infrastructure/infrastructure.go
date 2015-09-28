@@ -15,6 +15,12 @@ type Infrastructure interface {
 	// handle encrypting, storing, and retrieving the credentials.
 	Creds(*Context) (map[string]string, error)
 
+	// VerifyCreds is called with the result of either prompting or
+	// retrieving cached credentials. This gives Infrastructure
+	// implementations a chance to check that credentials are good before
+	// continuing to perform any operations.
+	VerifyCreds(*Context) error
+
 	Execute(*Context) error
 	Compile(*Context) (*CompileResult, error)
 	Flavors() []string
