@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="<%= current_page.data.description %>">
 
+
+    <% unless livestream_active? %>
     <link rel="shortcut icon" href="<%= image_path('favicon.png') %>">
 
     <title><%= [current_page.data.page_title, "Otto by HashiCorp"].compact.join(" - ") %></title>
+    <% end %>
 
     <%= stylesheet_link_tag "application" %>
 
