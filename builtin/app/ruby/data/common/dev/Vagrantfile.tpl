@@ -31,6 +31,10 @@ Vagrant.configure("2") do |config|
 
   # Install Ruby build environment
   config.vm.provision "shell", inline: $script_ruby
+
+  config.vm.provider :parallels do |p, o|
+    o.vm.box = "parallels/ubuntu-12.04"
+  end
 end
 
 $script_ruby = <<SCRIPT
