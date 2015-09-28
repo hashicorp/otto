@@ -2,6 +2,8 @@ package router
 
 import (
 	"testing"
+
+	"github.com/hashicorp/otto/ui"
 )
 
 func TestRouter_default(t *testing.T) {
@@ -61,6 +63,7 @@ func TestSimpleAction_impl(t *testing.T) {
 type stubContext struct {
 	routeName string
 	routeArgs []string
+	ui        ui.Ui
 }
 
 func (mc *stubContext) RouteName() string {
@@ -69,4 +72,8 @@ func (mc *stubContext) RouteName() string {
 
 func (mc *stubContext) RouteArgs() []string {
 	return mc.routeArgs
+}
+
+func (mc *stubContext) UI() ui.Ui {
+	return mc.ui
 }
