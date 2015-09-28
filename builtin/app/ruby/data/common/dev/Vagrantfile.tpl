@@ -75,6 +75,7 @@ ol "Installing Ruby ${RUBY_VERSION} and supporting packages..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get install -y bzr git mercurial build-essential \
   libpq-dev zlib1g-dev software-properties-common \
+  libsqlite3-dev \
   nodejs \
   ruby$RUBY_VERSION ruby$RUBY_VERSION-dev
 

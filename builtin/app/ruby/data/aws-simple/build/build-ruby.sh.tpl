@@ -35,6 +35,7 @@ export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get install -y bzr git mercurial build-essential \
   libpq-dev zlib1g-dev software-properties-common \
   nodejs \
+  libsqlite3-dev \
   ruby$RUBY_VERSION ruby$RUBY_VERSION-dev \
   nginx-extras passenger
 
