@@ -244,11 +244,13 @@ Otto does its best without an Appfile to detect what kind of project this is
 automatically, but sometimes this fails if the project is in a structure
 Otto doesn't recognize or its a project type that Otto doesn't yet support.
 
-Please create an Appfile and specify at a minimum the project type. Below
-is an example minimal Appfile specifying the "go" project type:
+Please create an Appfile and specify at a minimum the project name and type. Below
+is an example minimal Appfile specifying the "my-app" application name and "go" 
+project type:
 
     application {
-        type = "go"
+	name = "my-app"
+	type = "go"
     }
 
 If you believe Otto should've been able to automatically detect your
