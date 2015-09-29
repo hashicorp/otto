@@ -92,7 +92,7 @@ creates an AMI (for AWS). In the very near future, the build step will
 build a container that is deployed using [Nomad](https://nomadproject.io).
 
 When this change comes, the build and deploy steps should become much
-faster, creating a much tigher feedback loop to deploying applications.
+faster, creating a much tighter feedback loop to deploying applications.
 
 This again shows the strength of Otto: as tooling and technology improve,
 Otto can adopt these new best practices and manage them for you automatically.
