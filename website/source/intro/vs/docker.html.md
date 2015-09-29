@@ -68,6 +68,6 @@ the build artifacts from `otto build`.
 
 Otto is designed to be a single tool that manages the workflow
 from development to production and requires only the `Appfile`.
-It is meant to simply the complex state of development today,
+It is meant to simplify the complex state of development today,
 while using production hardened tools and industry best practices
 automatically.
