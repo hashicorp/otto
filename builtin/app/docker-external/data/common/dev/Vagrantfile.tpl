@@ -22,6 +22,10 @@ Vagrant.configure("2") do |config|
       p.enable_vmrun_ip_lookup = false
     end
   end
+
+  config.vm.provider :parallels do |p, o|
+    o.vm.box = "parallels/ubuntu-12.04"
+  end
 end
 
 $script = <<SCRIPT
