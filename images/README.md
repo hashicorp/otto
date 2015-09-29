@@ -10,7 +10,7 @@ images will be built by Packer, but other image types may exist as well.
 
 To run the Packer templates, the templates should be executed from this
 directory (containing the README). The templates themselves are setup to
-expect thie pwd to be set to this directory for paths.
+expect the pwd to be set to this directory for paths.
 
 Example:
 
