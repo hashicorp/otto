@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
   {% endfor %}
 
   # Install Ruby build environment
-  config.vm.provision "shell", inline: $script_ruby
+  config.vm.provision "shell", inline: $script_ruby, privileged: false
 
   config.vm.provider :parallels do |p, o|
     o.vm.box = "parallels/ubuntu-12.04"
@@ -82,6 +82,11 @@ oe sudo apt-get install -y bzr git mercurial build-essential \
   libsqlite3-dev \
   nodejs \
   ruby$RUBY_VERSION ruby$RUBY_VERSION-dev
+
+ol "Configuring Ruby..."
+echo 'export GEM_HOME=$HOME/.gem\nexport PATH=$HOME/.gem/bin:$PATH' >> $HOME/.ruby_env
+echo 'source $HOME/.ruby_env' >> $HOME/.bashrc
+source $HOME/.ruby_env
 
 ol "Installing Bundler..."
 oe gem install bundler --no-document
