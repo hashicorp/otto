@@ -66,7 +66,7 @@ ol "Adding apt repositories and updating..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get update -y
 oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
-oe sudo add-apt-repository -y ppa:ondrej/php5-5.6
+oe sudo add-apt-repository -y ppa:ondrej/php5-{{ php_version }}
 # Seems to be required to prevent "unauthenticated packages"
 # errors out of apt-get install.
 oe sudo apt-key update
