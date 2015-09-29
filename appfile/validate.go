@@ -55,7 +55,7 @@ func (f *File) Validate() error {
 			}
 			if !found {
 				result = multierror.Append(result, fmt.Errorf(
-					"project: infra '%s' has no corresponding infrastruture stanza",
+					"project: infra '%s' has no corresponding infrastructure stanza",
 					f.Project.Infrastructure))
 			}
 		}
