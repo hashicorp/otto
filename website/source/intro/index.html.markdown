@@ -36,7 +36,7 @@ project can get up and running in a single command with minimal friction:
 Otto automatically builds an infrastructure and deploys your application
 using industry standard tooling and best practices, so you don't have to.
 
-There are hundreds of how-to guides to deploy applications. Unfortunatelly,
+There are hundreds of how-to guides to deploy applications. Unfortunately,
 all of these how-to guides are usually copying and pasting outdated information
 onto a server to barely get your application running.
 
@@ -82,7 +82,7 @@ The key features of Otto are:
   build development environments ([Vagrant](https://vagrantup.com)),
   launch servers ([Terraform](https://terraform.io)), configure
   services ([Consul](https://consul.io)), and more. Otto builds on
-  tools that powers the world's largest websites.
+  tools that power the world's largest websites.
   Otto automatically installs and manages all of this tooling, so you don't
   have to.
 
