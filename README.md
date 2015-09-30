@@ -1,15 +1,18 @@
 Otto
 =========
 
--   Website: https://www.ottoproject.io
--   IRC: `#otto-tool` on Freenode
--   Mailing list: [Google Groups](https://groups.google.com/group/otto-tool)
+- Website: https://www.ottoproject.io
+- IRC: `#otto-tool` on Freenode
+- Mailing list: [Google Groups](https://groups.google.com/group/otto-tool)
 
 ![Otto](https://cloud.githubusercontent.com/assets/37534/10147078/d400509e-65e0-11e5-9d66-c419914cbcf4.png)
 
-Otto knows how to develop and deploy any application on any cloud platform, all controlled with a single consistent workflow to maximize the productivity of you and your team.
+Otto knows how to develop and deploy any application on any cloud platform,
+all controlled with a single consistent workflow to maximize the productivity
+of you and your team.
 
-For more information, see the [introduction section](https://www.ottoproject.io/intro)
+For more information, see the
+[introduction section](https://www.ottoproject.io/intro)
 of the Otto website.
 
 ## Key Features
@@ -50,3 +53,42 @@ The key features of Otto are:
 
 All documentation is available on the [Otto website](https://www.ottoproject.io).
 
+## Developing Otto
+
+If you wish to work on Otto itself or any of its built-in systems,
+you'll first need [Go](https://www.golang.org) installed on your
+machine (version 1.4+ is *required*).
+
+For local dev first make sure Go is properly installed, including setting up a
+[GOPATH](https://golang.org/doc/code.html#GOPATH).
+
+Next, clone this repository into `$GOPATH/src/github.com/hashicorp/otto`.
+Then use `make` to get the dependencies and run the tests.
+If this exits with exit status 0,
+then everything is working!
+
+```sh
+$ make updatedeps
+...
+$ make
+...
+```
+
+To compile a development version of Otto, run `make dev`. This will put the
+Otto binary in the `bin` and `$GOPATH/bin` folders:
+
+```sh
+$ make dev
+...
+$ bin/otto
+...
+```
+
+If you're developing a specific package, you can run tests for just that
+package by specifying the `TEST` variable. For example below, only
+`otto` package tests will be run.
+
+```sh
+$ make test TEST=./otto
+...
+```
