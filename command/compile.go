@@ -218,7 +218,7 @@ func findAppfile(flag string) (string, error) {
 		}
 
 		if fi.IsDir() {
-			return findAppfileInDir(path), nil
+			return findAppfileInDir(flag), nil
 		} else {
 			return flag, nil
 		}
