@@ -14,9 +14,10 @@ supported platforms and architectures.
 
 ## Supported Platforms
 - Linux
-- Mac
+- MacOS
 - Windows 
-  - 8, 8.1, 10
+  On Windows, otto relies on Hyper-V, which is available in the following editions:
+  - 8, 8.1, 10 (Professional or Enterprise Editions)
   - Server 2008, Server 2012
 
 ## Installing Otto
