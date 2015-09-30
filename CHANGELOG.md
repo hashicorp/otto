@@ -3,6 +3,7 @@
 IMPROVEMENTS:
 
  * builtin/app/ruby: use --no-document when installing bundler in dev [GH-130]
+ * builtin/app/php: support customizing PHP version [GH-105]
  * builtin/app: support Vagrant parallels provider in dev [GH-85]
 
 BUG FIXES:
