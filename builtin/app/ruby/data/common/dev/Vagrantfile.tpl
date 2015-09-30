@@ -130,6 +130,9 @@ fi
 ol "Installing Bundler..."
 oe gem install bundler --no-document
 
+ol "Bundling gem dependencies..."
+oe bundle
+
 ol "Configuring Git to use SSH instead of HTTP so we can agent-forward private repo auth..."
 oe git config --global url."git@github.com:".insteadOf "https://github.com/"
 SCRIPT
