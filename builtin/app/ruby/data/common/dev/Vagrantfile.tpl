@@ -103,24 +103,29 @@ has_gem() {
   return 1
 }
 
-gem_deps() {
-  gem_name=$1
-  apt_deps=$2
+gem_deps_queue=()
+
+detect_gem_deps() {
+  gem_name=$1; apt_deps=$2
 
   if has_gem $gem_name; then
-    ol "Installing dependencies for the $gem_name gem..."
-    oe sudo apt-get install -y $apt_deps
+    ol "Detected the $gem_name gem..."
+    gem_deps_queue+=($apt_deps)
   fi
 }
 
 cd /vagrant
-gem_deps curb "libcurl3 libcurl3-gnutls libcurl4-openssl-dev"
-gem_deps capybara-webkit "libqt4-dev"
-gem_deps mysql2 "libmysqlclient-dev"
-gem_deps nokogiri "zlib1g-dev"
-gem_deps pg "libpq-dev"
-gem_deps rmagick "libmagickwand-dev"
-gem_deps sqlite3 "libsqlite3-dev"
+detect_gem_deps curb "libcurl3 libcurl3-gnutls libcurl4-openssl-dev"
+detect_gem_deps capybara-webkit "libqt4-dev"
+detect_gem_deps mysql2 "libmysqlclient-dev"
+detect_gem_deps nokogiri "zlib1g-dev"
+detect_gem_deps pg "libpq-dev"
+detect_gem_deps rmagick "libmagickwand-dev"
+detect_gem_deps sqlite3 "libsqlite3-dev"
+if [ -n "$gem_deps_queue" ]; then
+  ol "Installing native gem system dependencies..."
+  oe sudo apt-get install -y "${gem_deps_queue[@]}"
+fi
 
 ol "Installing Bundler..."
 oe gem install bundler --no-document
