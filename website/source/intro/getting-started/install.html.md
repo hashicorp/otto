@@ -12,6 +12,13 @@ To get started with Otto, Otto must first be installed on your machine.
 Otto is distributed as a [binary package](/downloads.html) for all
 supported platforms and architectures.
 
+## Supported Platforms
+- Linux
+- Mac
+- Windows 
+  - 8, 8.1, 10
+  - Server 2008, Server 2012
+
 ## Installing Otto
 
 To install Otto, find the [appropriate package](/downloads.html) for
