@@ -25,6 +25,25 @@ import (
 // Commands is the mapping of all the available Otto commands.
 var Commands map[string]cli.CommandFactory
 
+var Detectors = []*detect.Detector{
+	&detect.Detector{
+		Type: "go",
+		File: []string{"*.go"},
+	},
+	&detect.Detector{
+		Type: "node",
+		File: []string{"package.json"},
+	},
+	&detect.Detector{
+		Type: "php",
+		File: []string{"*.php", "composer.json"},
+	},
+	&detect.Detector{
+		Type: "ruby",
+		File: []string{"*.rb", "Gemfile", "config.ru"},
+	},
+}
+
 // Ui is the cli.Ui used for communicating to the outside world.
 var Ui cli.Ui
 
@@ -68,30 +87,11 @@ func init() {
 		Ui: Ui,
 	}
 
-	detectors := []*detect.Detector{
-		&detect.Detector{
-			Type: "go",
-			File: []string{"*.go"},
-		},
-		&detect.Detector{
-			Type: "node",
-			File: []string{"package.json"},
-		},
-		&detect.Detector{
-			Type: "php",
-			File: []string{"*.php", "composer.json"},
-		},
-		&detect.Detector{
-			Type: "ruby",
-			File: []string{"*.rb", "Gemfile", "config.ru"},
-		},
-	}
-
 	Commands = map[string]cli.CommandFactory{
 		"compile": func() (cli.Command, error) {
 			return &command.CompileCommand{
 				Meta:      meta,
-				Detectors: detectors,
+				Detectors: Detectors,
 			}, nil
 		},
 
