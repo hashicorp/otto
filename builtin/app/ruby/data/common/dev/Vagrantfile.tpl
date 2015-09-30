@@ -82,7 +82,7 @@ oe sudo apt-get install -y bzr git mercurial build-essential \
   nodejs \
   ruby$RUBY_VERSION ruby$RUBY_VERSION-dev
 
-ol "Configuring Ruby..."
+ol "Configuring Ruby environment..."
 echo 'export GEM_HOME=$HOME/.gem\nexport PATH=$HOME/.gem/bin:$PATH' >> $HOME/.ruby_env
 echo 'source $HOME/.ruby_env' >> $HOME/.bashrc
 source $HOME/.ruby_env
