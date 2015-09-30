@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/packer"
+	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
@@ -18,12 +19,26 @@ type App struct{}
 
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	var opts compile.AppOptions
+	custom := &customizations{Opts: &opts}
 	opts = compile.AppOptions{
 		Ctx: ctx,
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
+		},
+		Customizations: []*compile.Customization{
+			&compile.Customization{
+				Type:     "php",
+				Callback: custom.processPhp,
+				Schema: map[string]*schema.FieldSchema{
+					"php_version": &schema.FieldSchema{
+						Type:        schema.TypeString,
+						Default:     "5.6",
+						Description: "PHP version to install",
+					},
+				},
+			},
 		},
 	}
 
