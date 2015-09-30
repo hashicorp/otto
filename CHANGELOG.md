@@ -7,7 +7,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
- * builtin/app/node: fix node download directroy in build [GH-125]
+ * builtin/app/node: fix node download directory in build [GH-125]
+ * builtin/app/ruby: allow `gem install` to work as `vagrant` user in dev [GH-129]
  * builtin/app: fix Vagrant warning about box name [GH-110]
 
 ## 0.1.1 (September 28, 2015)
