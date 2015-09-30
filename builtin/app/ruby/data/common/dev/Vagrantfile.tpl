@@ -84,7 +84,7 @@ oe sudo apt-get install -y bzr git mercurial build-essential \
   ruby$RUBY_VERSION ruby$RUBY_VERSION-dev
 
 ol "Installing Bundler..."
-oe gem install bundler --no-ri --no-rdoc
+oe gem install bundler --no-document
 
 ol "Configuring Git to use SSH instead of HTTP so we can agent-forward private repo auth..."
 oe git config --global url."git@github.com:".insteadOf "https://github.com/"
