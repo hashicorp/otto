@@ -31,7 +31,7 @@ EOF
     oe sudo mv /tmp/consul_flags /etc/service/consul
 
     # Setup Consul service and start it
-    oe sudo mv ${dir}/upstart.conf /etc/init/consul.conf
+    oe sudo cp ${dir}/upstart.conf /etc/init/consul.conf
 
     # Setup DNS
     ol "Installing dnsmasq for Consul..."
