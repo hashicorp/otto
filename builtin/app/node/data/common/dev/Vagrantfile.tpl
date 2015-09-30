@@ -59,7 +59,7 @@ export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get update -y
 
 ol "Downloading Node {{ node_version }}..."
-oe wget -q -O /home/vagrant/node.tar.gz https://nodejs.org/dist/v{{ node_version }}/node-v{{ node_version }}-linux-x64.tar.gz
+oe sudo wget -q -O /home/vagrant/node.tar.gz https://nodejs.org/dist/v{{ node_version }}/node-v{{ node_version }}-linux-x64.tar.gz
 
 ol "Untarring Node..."
 oe sudo tar -C /opt -xzf /home/vagrant/node.tar.gz
