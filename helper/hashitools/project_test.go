@@ -1,6 +1,8 @@
 package hashitools
 
 import (
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/hashicorp/go-version"
@@ -18,6 +20,45 @@ func TestProjectLatestVersion(t *testing.T) {
 	max := version.Must(version.NewVersion("2.0.0"))
 	if vsn.LessThan(min) || vsn.GreaterThan(max) {
 		t.Fatalf("bad: %s", vsn)
+	}
+}
+
+type stubInstaller struct {
+	path string
+}
+
+func (t *stubInstaller) InstallAsk(installed, required, latest *version.Version) (bool, error) {
+	return false, nil
+}
+func (t *stubInstaller) Install(*version.Version) error { return nil }
+func (t *stubInstaller) Path() string                   { return t.path }
+
+// https://github.com/hashicorp/otto/issues/70
+func TestVersion_vagrantStdErrWarning(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Test uses a bash script; skipping on Windows")
+	}
+
+	path, err := filepath.Abs(filepath.Join(
+		"./test-fixtures", "vagrant-version-stderr", "vagrant"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := &Project{
+		Name: "vagrant",
+		Installer: &stubInstaller{
+			path: path,
+		},
+	}
+
+	v, err := p.Version()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if v == nil || v.String() != "1.2.3" {
+		t.Fatalf("expected: 1.2.3, got: %s", v)
 	}
 }
 
