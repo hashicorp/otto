@@ -4,6 +4,7 @@ IMPROVEMENTS:
 
  * app/ruby: Use --no-document when installing bundler in dev [GH-130]
  * app/ruby: Install apt deps based on detected gems [GH-137]
+ * app/ruby: Bundle automatically [GH-156]
  * app/php: support customizing PHP version [GH-105]
  * app: support Vagrant parallels provider in dev [GH-85]
 
