@@ -34,56 +34,10 @@ func (c *CompileCommand) Run(args []string) int {
 	ui := c.OttoUi()
 	ui.Header("Loading Appfile...")
 
-	// Determine all the Appfile paths
-	//
-	// First, if an Appfile was specified on the command-line, it must
-	// exist so we validate that it exists.
-	if flagAppfile != "" {
-		fi, err := os.Stat(flagAppfile)
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf(
-				"Error loading Appfile: %s", err))
-			return 1
-		}
-
-		if fi.IsDir() {
-			flagAppfile = filepath.Join(flagAppfile, DefaultAppfile)
-		}
-	}
-
-	// If the Appfile is still blank, just use our current directory
-	if flagAppfile == "" {
-		var err error
-		flagAppfile, err = os.Getwd()
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf(
-				"Error loading working directory: %s", err))
-			return 1
-		}
-
-		flagAppfile = filepath.Join(flagAppfile, DefaultAppfile)
-	}
-
-	// If we have the Appfile, then make sure it is an absoute path
-	if flagAppfile != "" {
-		var err error
-		flagAppfile, err = filepath.Abs(flagAppfile)
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf(
-				"Error getting Appfile path: %s", err))
-			return 1
-		}
-	}
-
-	// Load the appfile. This is the only time we ever load the
-	// raw Appfile. All other commands load the compiled Appfile.
-	var app *appfile.File
-	if fi, err := os.Stat(flagAppfile); err == nil && !fi.IsDir() {
-		app, err = appfile.ParseFile(flagAppfile)
-		if err != nil {
-			c.Ui.Error(err.Error())
-			return 1
-		}
+	app, err := loadAppfile(flagAppfile)
+	if err != nil {
+		c.Ui.Error(err.Error())
+		return 1
 	}
 
 	// Tell the user what is happening if they have no Appfile
@@ -236,6 +190,61 @@ func (c *CompileCommand) compileCallback(ui ui.Ui) func(appfile.CompileEvent) {
 				"Fetching import: %s", e.Source))
 		}
 	}
+}
+
+// Returns a loaded copy of any appfile.File we find, otherwise returns nil,
+// which is valid, since Otto can detect app type and calculate defaults.
+func loadAppfile(flagAppfile string) (*appfile.File, error) {
+	appfilePath, err := findAppfile(flagAppfile)
+	if err != nil {
+		return nil, err
+	}
+	if appfilePath == "" {
+		return nil, nil
+	}
+	return appfile.ParseFile(appfilePath)
+}
+
+// findAppfile returns the path to an existing Appfile by checking the optional
+// flag value and the current directory. It returns blank if it does not find
+// any Appfiles
+func findAppfile(flag string) (string, error) {
+	// First, if an Appfile was specified on the command-line, it must
+	// exist so we validate that it exists.
+	if flag != "" {
+		fi, err := os.Stat(flag)
+		if err != nil {
+			return "", fmt.Errorf("Error loading Appfile: %s", err)
+		}
+
+		if fi.IsDir() {
+			return findAppfileInDir(path), nil
+		} else {
+			return flag, nil
+		}
+	}
+
+	// Otherwise we search through our current directory
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("Error loading working directory: %s", err)
+	}
+	return findAppfileInDir(wd), nil
+}
+
+// findAppfileInDir takes a path to a directory returns the path to the first
+// existing Appfile by first looking for the DefaultAppfile and then looking
+// for any AltAppfiles in the dir
+func findAppfileInDir(path string) string {
+	if _, err := os.Stat(filepath.Join(path, DefaultAppfile)); err == nil {
+		return filepath.Join(path, DefaultAppfile)
+	}
+	for _, aaf := range AltAppfiles {
+		if _, err := os.Stat(filepath.Join(path, aaf)); err == nil {
+			return filepath.Join(path, aaf)
+		}
+	}
+	return ""
 }
 
 const errCantDetectType = `
