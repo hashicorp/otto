@@ -31,16 +31,16 @@ var Detectors = []*detect.Detector{
 		File: []string{"*.go"},
 	},
 	&detect.Detector{
-		Type: "node",
-		File: []string{"package.json"},
-	},
-	&detect.Detector{
 		Type: "php",
 		File: []string{"*.php", "composer.json"},
 	},
 	&detect.Detector{
 		Type: "ruby",
 		File: []string{"*.rb", "Gemfile", "config.ru"},
+	},
+	&detect.Detector{
+		Type: "node",
+		File: []string{"package.json"},
 	},
 }
 
