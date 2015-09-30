@@ -58,6 +58,44 @@ func TestCompile_pathFile(t *testing.T) {
 	}
 }
 
+func TestCompile_pathDir(t *testing.T) {
+	ui := new(cli.MockUi)
+	c := &CompileCommand{
+		Meta: Meta{
+			CoreConfig: otto.TestCoreConfig(t),
+			Ui:         ui,
+		},
+	}
+
+	dir := fixtureDir("compile-dir")
+	defer os.Remove(filepath.Join(dir, ".ottoid"))
+	defer testChdir(t, dir)()
+
+	args := []string{"-appfile", "dir"}
+	if code := c.Run(args); code != 0 {
+		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
+	}
+}
+
+func TestCompile_altFile(t *testing.T) {
+	ui := new(cli.MockUi)
+	c := &CompileCommand{
+		Meta: Meta{
+			CoreConfig: otto.TestCoreConfig(t),
+			Ui:         ui,
+		},
+	}
+
+	dir := fixtureDir("compile-alt")
+	defer os.Remove(filepath.Join(dir, ".ottoid"))
+	defer testChdir(t, dir)()
+
+	args := []string{}
+	if code := c.Run(args); code != 0 {
+		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
+	}
+}
+
 func testChdir(t *testing.T, dir string) func() {
 	wd, err := os.Getwd()
 	if err != nil {

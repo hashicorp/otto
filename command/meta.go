@@ -36,6 +36,12 @@ const (
 	DefaultDataDir = "otto-data"
 )
 
+var (
+	// AltAppfiles is the list of alternative names for an Appfile that Otto can
+	// detect and load automatically
+	AltAppfiles = []string{"appfile.hcl"}
+)
+
 // FlagSetFlags is an enum to define what flags are present in the
 // default FlagSet returned by Meta.FlagSet
 type FlagSetFlags uint
