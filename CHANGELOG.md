@@ -5,13 +5,10 @@ IMPROVEMENTS:
  * builtin/app/ruby: use --no-document when installing bundler in dev [GH-130]
  * builtin/app: support Vagrant parallels provider in dev [GH-85]
 
-
 BUG FIXES:
 
  * builtin/app/node: fix node download directroy in build [GH-125]
  * builtin/app: fix Vagrant warning about box name [GH-110]
-
-BUG FIXES: 
 
 ## 0.1.1 (September 28, 2015)
 
