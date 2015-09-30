@@ -78,7 +78,7 @@ export RUBY_VERSION="{{ ruby_version }}"
 ol "Installing Ruby ${RUBY_VERSION} and supporting packages..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get install -y bzr git mercurial build-essential \
-  zlib1g-dev software-properties-common \
+  software-properties-common \
   nodejs \
   ruby$RUBY_VERSION ruby$RUBY_VERSION-dev
 
@@ -116,6 +116,7 @@ gem_deps() {
 cd /vagrant
 gem_deps curb "libcurl3 libcurl3-gnutls libcurl4-openssl-dev"
 gem_deps mysql2 "libmysqlclient-dev"
+gem_deps nokogiri "zlib1g-dev"
 gem_deps pg "libpq-dev"
 gem_deps rmagick "libmagickwand-dev"
 gem_deps sqlite3 "libsqlite3-dev"
