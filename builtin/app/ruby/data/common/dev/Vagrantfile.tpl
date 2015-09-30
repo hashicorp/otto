@@ -78,6 +78,7 @@ export RUBY_VERSION="{{ ruby_version }}"
 ol "Installing Ruby ${RUBY_VERSION} and supporting packages..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get install -y bzr git mercurial build-essential \
+  libcurl3 libcurl3-gnutls libcurl4-openssl-dev \
   libpq-dev zlib1g-dev software-properties-common \
   libsqlite3-dev \
   nodejs \
