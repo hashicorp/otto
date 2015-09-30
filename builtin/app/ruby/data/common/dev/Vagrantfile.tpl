@@ -117,6 +117,7 @@ cd /vagrant
 gem_deps curb "libcurl3 libcurl3-gnutls libcurl4-openssl-dev"
 gem_deps mysql2 "libmysqlclient-dev"
 gem_deps pg "libpq-dev"
+gem_deps rmagick "libmagickwand-dev"
 
 ol "Installing Bundler..."
 oe gem install bundler --no-document
