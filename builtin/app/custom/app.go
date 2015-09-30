@@ -270,7 +270,7 @@ refer to the documentation for more details.
 Example:
 
     customization "dev" {
-        vagrant = "path/to/Vagrantfile"
+        vagrantfile = "path/to/Vagrantfile"
     }
 
 `
