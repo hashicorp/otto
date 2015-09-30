@@ -68,7 +68,7 @@ func TestCompile_pathDir(t *testing.T) {
 	}
 
 	dir := fixtureDir("compile-dir")
-	defer os.Remove(filepath.Join(dir, ".ottoid"))
+	defer os.Remove(filepath.Join(dir, "dir", ".ottoid"))
 	defer testChdir(t, dir)()
 
 	args := []string{"-appfile", "dir"}
