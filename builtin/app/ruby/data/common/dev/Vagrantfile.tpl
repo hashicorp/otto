@@ -115,6 +115,7 @@ gem_deps() {
 
 cd /vagrant
 gem_deps curb "libcurl3 libcurl3-gnutls libcurl4-openssl-dev"
+gem_deps mysql2 "libmysqlclient-dev"
 gem_deps pg "libpq-dev"
 
 ol "Installing Bundler..."
