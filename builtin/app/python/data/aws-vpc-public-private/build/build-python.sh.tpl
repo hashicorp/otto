@@ -1,0 +1,1 @@
+../../aws-simple/build/build-python.sh.tpl
