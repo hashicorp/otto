@@ -78,8 +78,7 @@ export RUBY_VERSION="{{ ruby_version }}"
 ol "Installing Ruby ${RUBY_VERSION} and supporting packages..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get install -y bzr git mercurial build-essential \
-  libpq-dev zlib1g-dev software-properties-common \
-  libsqlite3-dev \
+  zlib1g-dev software-properties-common \
   nodejs \
   ruby$RUBY_VERSION ruby$RUBY_VERSION-dev
 
@@ -87,6 +86,36 @@ ol "Configuring Ruby..."
 echo 'export GEM_HOME=$HOME/.gem\nexport PATH=$HOME/.gem/bin:$PATH' >> $HOME/.ruby_env
 echo 'source $HOME/.ruby_env' >> $HOME/.bashrc
 source $HOME/.ruby_env
+
+has_gem() {
+  gem_name=$1
+
+  if [ -f Gemfile.lock ]; then
+    grep -e " $gem_name \(" Gemfile.lock > /dev/null
+    return $?
+  fi
+
+  if [ -f Gemfile ]; then
+    grep -e "gem .$gem_name." Gemfile > /dev/null
+    return $?
+  fi
+
+  return 1
+}
+
+gem_deps() {
+  gem_name=$1
+  apt_deps=$2
+
+  if has_gem $gem_name; then
+    ol "Installing dependencies for the $gem_name gem..."
+    oe sudo apt-get install -y $apt_deps
+  fi
+}
+
+cd /vagrant
+gem_deps curb "libcurl3 libcurl3-gnutls libcurl4-openssl-dev"
+gem_deps pg "libpq-dev"
 
 ol "Installing Bundler..."
 oe gem install bundler --no-document
