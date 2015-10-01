@@ -72,6 +72,9 @@ func (c *customizations) compileCustomDeploy(d *schema.FieldData) compile.Compil
 
 func (c *customizations) compileCustomDev(d *schema.FieldData) compile.CompileCallback {
 	return func() error {
+		c.Opts.Bindata.RenderReal(
+			filepath.Join(c.Opts.Ctx.Dir, "dev", "Vagrantfile"),
+			c.Opts.Bindata.Context["dev_vagrant_path"].(string))
 		return c.Opts.Bindata.RenderAsset(
 			filepath.Join(c.Opts.Ctx.Dir, "dev", "vagrantfile_path"),
 			"data/sentinels/vagrant_path.tpl")
