@@ -122,7 +122,8 @@ detect_gem_deps nokogiri "zlib1g-dev"
 detect_gem_deps pg "libpq-dev"
 detect_gem_deps rmagick "libmagickwand-dev"
 detect_gem_deps sqlite3 "libsqlite3-dev"
-if [ -n "$gem_deps_queue" ]; then
+
+if [ -n "${gem_deps_queue-}" ]; then
   ol "Installing native gem system dependencies..."
   oe sudo apt-get install -y "${gem_deps_queue[@]}"
 fi
