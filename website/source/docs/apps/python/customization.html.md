@@ -14,12 +14,21 @@ that are availabile to change the behavior of Python applications with Otto.
 
 ## Type: "python"
 
-Example:
+Flask Example:
 
 ```
 customization "python" {
     python_version = "2.6"
     python_entrypoint = "mypackage:app"
+}
+```
+
+Django Example:
+
+```
+customization "python" {
+    python_version = "3.4"
+    python_entrypoint = "mypackage.wsgi:app"
 }
 ```
 

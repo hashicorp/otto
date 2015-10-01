@@ -83,7 +83,7 @@ oe python$PYTHON_VERSION <(wget -q -O - https://bootstrap.pypa.io/get-pip.py)
 oe pip install virtualenv
 
 ol "Setting up virtualenv in /home/vagrant/virtualenv..."
-oe virtualenv-$PYTHON_VERSION "/home/vagrant/virtualenv"
+oe virtualenv "/home/vagrant/virtualenv"
 oe chown -R vagrant:vagrant "/home/vagrant/virtualenv"
 
 ol "Configuring Git to use SSH instead of HTTP so we can agent-forward private repo auth..."
