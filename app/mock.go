@@ -6,6 +6,7 @@ type Mock struct {
 	CompileContext *Context
 	CompileResult  *CompileResult
 	CompileErr     error
+	CompileFunc    func(ctx *Context) (*CompileResult, error)
 
 	BuildCalled  bool
 	BuildContext *Context
@@ -29,6 +30,9 @@ type Mock struct {
 func (m *Mock) Compile(ctx *Context) (*CompileResult, error) {
 	m.CompileCalled = true
 	m.CompileContext = ctx
+	if m.CompileFunc != nil {
+		return m.CompileFunc(ctx)
+	}
 	return m.CompileResult, m.CompileErr
 }
 

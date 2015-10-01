@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 )
@@ -44,6 +45,20 @@ func TestApp(t *testing.T, tuple app.Tuple, c *CoreConfig) *app.Mock {
 
 	result := new(app.Mock)
 	c.Apps[tuple] = func() (app.App, error) {
+		return result, nil
+	}
+
+	return result
+}
+
+// TestFoundation adds a mock foundation with the given tuple to the core config.
+func TestFoundation(t *testing.T, tuple foundation.Tuple, c *CoreConfig) *foundation.Mock {
+	if c.Foundations == nil {
+		c.Foundations = make(map[foundation.Tuple]foundation.Factory)
+	}
+
+	result := new(foundation.Mock)
+	c.Foundations[tuple] = func() (foundation.Foundation, error) {
 		return result, nil
 	}
 

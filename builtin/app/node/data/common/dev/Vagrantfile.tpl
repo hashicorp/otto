@@ -31,6 +31,10 @@ Vagrant.configure("2") do |config|
 
   # Install build environment
   config.vm.provision "shell", inline: $script_app
+
+  config.vm.provider :parallels do |p, o|
+    o.vm.box = "parallels/ubuntu-12.04"
+  end
 end
 
 $script_app = <<SCRIPT
@@ -79,5 +83,8 @@ oe sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 20
 oe sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20
 oe sudo update-alternatives --config gcc
 oe sudo update-alternatives --config g++
+
+ol "Installing Git..."
+oe sudo apt-get install -y git
 
 SCRIPT

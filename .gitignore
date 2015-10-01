@@ -2,6 +2,7 @@
 *.dll
 *.exe
 bin/
+builtin/**/bindata.go
 images/packer_cache
 pkg/
 scratch/

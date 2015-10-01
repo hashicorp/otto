@@ -31,6 +31,10 @@ Vagrant.configure("2") do |config|
 
   # Install build environment
   config.vm.provision "shell", inline: $script_app
+
+  config.vm.provider :parallels do |p, o|
+    o.vm.box = "parallels/ubuntu-12.04"
+  end
 end
 
 $script_app = <<SCRIPT
@@ -62,7 +66,7 @@ ol "Adding apt repositories and updating..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get update -y
 oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
-oe sudo add-apt-repository -y ppa:ondrej/php5-5.6
+oe sudo add-apt-repository -y ppa:ondrej/php5-{{ php_version }}
 # Seems to be required to prevent "unauthenticated packages"
 # errors out of apt-get install.
 oe sudo apt-key update

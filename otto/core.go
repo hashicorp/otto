@@ -827,7 +827,7 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 	if !ok {
 		return nil, nil, fmt.Errorf(
 			"infrastructure type not supported: %s",
-			c.appfile.Project.Infrastructure)
+			config.Type)
 	}
 
 	// Start the infrastructure implementation

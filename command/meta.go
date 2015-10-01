@@ -36,6 +36,12 @@ const (
 	DefaultDataDir = "otto-data"
 )
 
+var (
+	// AltAppfiles is the list of alternative names for an Appfile that Otto can
+	// detect and load automatically
+	AltAppfiles = []string{"appfile.hcl"}
+)
+
 // FlagSetFlags is an enum to define what flags are present in the
 // default FlagSet returned by Meta.FlagSet
 type FlagSetFlags uint
@@ -54,7 +60,11 @@ type Meta struct {
 // then an error will be returned.
 func (m *Meta) Appfile() (*appfile.Compiled, error) {
 	// Find the root directory
-	rootDir, err := m.RootDir()
+	startDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	rootDir, err := m.RootDir(startDir)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +78,11 @@ func (m *Meta) Appfile() (*appfile.Compiled, error) {
 // root appfile path will be used as the default output directory
 // for Otto.
 func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
-	rootDir, err := m.RootDir()
+	if f.File == nil || f.File.Path == "" {
+		return nil, fmt.Errorf("Could not determine Appfile dir")
+	}
+
+	rootDir, err := m.RootDir(filepath.Dir(f.File.Path))
 	if err != nil {
 		return nil, err
 	}
@@ -109,12 +123,8 @@ func (m *Meta) DataDir() (string, error) {
 // the Appfile and Otto itself. To find the root directory, we traverse
 // upwards until we find the ".otto" directory and assume that is where
 // it is.
-func (m *Meta) RootDir() (string, error) {
-	// First, get our current directory
-	current, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
+func (m *Meta) RootDir(startDir string) (string, error) {
+	current := startDir
 
 	// Traverse upwards until we find the directory. We also protect this
 	// loop with a basic infinite loop guard.
