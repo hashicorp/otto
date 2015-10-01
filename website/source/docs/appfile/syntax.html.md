@@ -20,7 +20,7 @@ application {
     name = "otto"
     type = "go"
 
-    dependency { source = "github.com/hashicorp/examples/mongodb" }
+    dependency { source = "github.com/hashicorp/otto/examples/mongodb" }
 }
 
 /*

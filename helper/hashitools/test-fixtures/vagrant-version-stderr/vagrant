@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# See https://github.com/hashicorp/otto/issues/70
+echo -n "Vagrant 1.2.3"
+>&2 echo "/lib/vagrant/pre-rubygems.rb:31: warning: Insecure world writable dir /usr/local/bin in PATH, mode 040777"

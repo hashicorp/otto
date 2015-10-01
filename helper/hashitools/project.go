@@ -133,7 +133,6 @@ func (p *Project) Version() (*version.Version, error) {
 	var buf bytes.Buffer
 	cmd := exec.Command(path, "--version")
 	cmd.Stdout = &buf
-	cmd.Stderr = &buf
 	runErr := cmd.Run()
 
 	// Match the version out before we check for a run error, since some `project

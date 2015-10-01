@@ -26,7 +26,7 @@ func (u *Styled) prefix(prefix, msg string) string {
 	var buf bytes.Buffer
 
 	// We first write the color sequence (if any) of our message.
-	// This makes it so that our prefix inherits the color properly
+	// This makes it so that our prefix inherits the color property
 	// of any message.
 	buf.WriteString(colorstring.ColorPrefix(msg))
 
