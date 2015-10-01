@@ -34,7 +34,8 @@ func (c *customizations) processDeploy(d *schema.FieldData) error {
 }
 
 func (c *customizations) processDev(d *schema.FieldData) error {
-	p, ok := d.GetOk("vagrant")
+	p, ok := d.GetOk("vagrantfile")
+
 	if !ok {
 		return nil
 	}
