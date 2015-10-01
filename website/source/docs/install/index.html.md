@@ -33,3 +33,8 @@ If you get an error that Otto could not be found, then your PATH environment
 variable was not setup properly. Please go back and ensure that your PATH
 variable contains the directory where Otto was installed.
 
+## Next
+
+In this step, you learned how easy it is to install Otto, and you should have it working on your system.
+
+Next, we'll learn how to [develop an application](/intro/getting-started/install.html) with Otto!
