@@ -34,7 +34,7 @@ func (c *CompileCommand) Run(args []string) int {
 	ui := c.OttoUi()
 	ui.Header("Loading Appfile...")
 
-	app, err := loadAppfile(flagAppfile)
+	app, appPath, err := loadAppfile(flagAppfile)
 	if err != nil {
 		c.Ui.Error(err.Error())
 		return 1
@@ -75,7 +75,7 @@ func (c *CompileCommand) Run(args []string) int {
 
 	// Load the default Appfile so we can merge in any defaults into
 	// the loaded Appfile (if there is one).
-	appDef, err := appfile.Default(filepath.Dir(flagAppfile), detectConfig)
+	appDef, err := appfile.Default(appPath, detectConfig)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf(
 			"Error loading Appfile: %s", err))
@@ -194,15 +194,25 @@ func (c *CompileCommand) compileCallback(ui ui.Ui) func(appfile.CompileEvent) {
 
 // Returns a loaded copy of any appfile.File we find, otherwise returns nil,
 // which is valid, since Otto can detect app type and calculate defaults.
-func loadAppfile(flagAppfile string) (*appfile.File, error) {
+// Also returns the base dir of the appfile, which is the current WD in the
+// case of a nil appfile.
+func loadAppfile(flagAppfile string) (*appfile.File, string, error) {
 	appfilePath, err := findAppfile(flagAppfile)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if appfilePath == "" {
-		return nil, nil
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, "", err
+		}
+		return nil, wd, nil
 	}
-	return appfile.ParseFile(appfilePath)
+	app, err := appfile.ParseFile(appfilePath)
+	if err != nil {
+		return nil, "", err
+	}
+	return app, app.Path, nil
 }
 
 // findAppfile returns the path to an existing Appfile by checking the optional
@@ -254,7 +264,7 @@ automatically, but sometimes this fails if the project is in a structure
 Otto doesn't recognize or its a project type that Otto doesn't yet support.
 
 Please create an Appfile and specify at a minimum the project name and type. Below
-is an example minimal Appfile specifying the "my-app" application name and "go" 
+is an example minimal Appfile specifying the "my-app" application name and "go"
 project type:
 
     application {
