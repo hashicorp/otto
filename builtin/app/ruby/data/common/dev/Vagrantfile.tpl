@@ -29,6 +29,9 @@ Vagrant.configure("2") do |config|
   {{ fragment|read }}
   {% endfor %}
 
+  # Set locale to en_US.UTF-8
+  config.vm.provision "shell", inline: $script_locale
+
   # Install Ruby build environment
   config.vm.provision "shell", inline: $script_ruby, privileged: false
 
@@ -36,6 +39,15 @@ Vagrant.configure("2") do |config|
     o.vm.box = "parallels/ubuntu-12.04"
   end
 end
+
+$script_locale = <<SCRIPT
+  oe() { $@ 2>&1 | logger -t otto > /dev/null; }
+  ol() { echo "[otto] $@"; }
+
+  ol "Setting locale to en_US.UTF-8..."
+  oe locale-gen en_US.UTF-8
+  oe update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+SCRIPT
 
 $script_ruby = <<SCRIPT
 set -o nounset -o errexit -o pipefail -o errtrace
