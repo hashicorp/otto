@@ -11,12 +11,17 @@ func TestDetectors_ordering(t *testing.T) {
 
 	// PHP projects frequently have a package.json
 	if !isBefore(types, "php", "node") {
-		t.Errorf("node is before php")
+		t.Errorf("php is not before node")
+	}
+
+	// Rails projects are also Ruby projects
+	if !isBefore(types, "rails", "ruby") {
+		t.Errorf("ruby is not before rails")
 	}
 
 	// Ruby projects frequently have a package.json
 	if !isBefore(types, "ruby", "node") {
-		t.Errorf("node is before ruby")
+		t.Errorf("ruby is not before node")
 	}
 }
 

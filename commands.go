@@ -35,6 +35,10 @@ var Detectors = []*detect.Detector{
 		File: []string{"*.php", "composer.json"},
 	},
 	&detect.Detector{
+		Type: "rails",
+		File: []string{"config/application.rb"},
+	},
+	&detect.Detector{
 		Type: "ruby",
 		File: []string{"*.rb", "Gemfile", "config.ru"},
 	},
