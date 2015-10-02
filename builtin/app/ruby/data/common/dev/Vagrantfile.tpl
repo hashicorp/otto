@@ -149,6 +149,13 @@ oe bundle
 {% if app_type == "rails" %}
   ol "Detected Rails application"
 
+  if has_gem pg; then
+    ol "Detected the pg gem, installing PostgreSQL..."
+    . /etc/default/locale
+    oe sudo apt-get install -y postgresql-9.1
+    oe sudo -u postgres createuser --superuser vagrant
+  fi
+
   ol "Preparing the database..."
   oe "bundle exec rake db:setup || bundle exec rake db:migrate"
 {% endif %}
