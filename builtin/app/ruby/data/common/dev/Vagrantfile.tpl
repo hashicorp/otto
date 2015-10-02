@@ -41,7 +41,7 @@ Vagrant.configure("2") do |config|
 end
 
 $script_locale = <<SCRIPT
-  oe() { $@ 2>&1 | logger -t otto > /dev/null; }
+  oe() { eval "$@" 2>&1 | logger -t otto > /dev/null; }
   ol() { echo "[otto] $@"; }
 
   ol "Setting locale to en_US.UTF-8..."
@@ -61,7 +61,7 @@ error() {
 trap 'error "${BASH_SOURCE}" "${LINENO}"' ERR
 
 # otto-exec: execute command with output logged but not displayed
-oe() { $@ 2>&1 | logger -t otto > /dev/null; }
+oe() { eval "$@" 2>&1 | logger -t otto > /dev/null; }
 
 # otto-log: output a prefixed message
 ol() { echo "[otto] $@"; }
