@@ -43,7 +43,7 @@ oe sudo bash -c "python$PYTHON_VERSION <(wget -q -O - https://bootstrap.pypa.io/
 oe sudo -H pip install virtualenv
 
 ol "Creating virtualenv..."
-sudo virtualenv /srv/otto-app/venv
+sudo virtualenv --python=/usr/bin/python$PYTHON_VERSION /srv/otto-app/venv
 
 ol "Install gunicorn..."
 # we install using pip to support alternate python versions
