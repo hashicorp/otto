@@ -43,11 +43,11 @@ oe sudo bash -c "python$PYTHON_VERSION <(wget -q -O - https://bootstrap.pypa.io/
 oe sudo -H pip install virtualenv
 
 ol "Creating virtualenv..."
-sudo virtualenv /srv/otto-app/venv
+sudo virtualenv /srv/otto-app/virtualenv
 
 ol "Install gunicorn..."
 # we install using pip to support alternate python versions
-oe sudo /srv/otto-app/venv/bin/pip -H install gunicorn
+oe sudo /srv/otto-app/virtualenv/bin/pip -H install gunicorn
 
 ol "Extracting app..."
 sudo mkdir -p /srv/otto-app/src
@@ -71,7 +71,7 @@ setuid otto-app
 setgid otto-app
 chdir /srv/otto-app/src
 
-exec /srv/otto-app/venv/bin/gunicorn -w 4 $PYTHON_ENTRYPOINT
+exec /srv/otto-app/virtualenv/bin/gunicorn -w 4 $PYTHON_ENTRYPOINT
 
 GUNICORN
 
@@ -96,11 +96,11 @@ ol "Installing the app..."
 if [[ -f /srv/otto-app/src/setup.py ]]; then
     (
         cd /src/otto-app/src
-        oe sudo -u otto-app /srv/otto-app/venv/bin/python setup.py install
+        oe sudo -u otto-app /srv/otto-app/virtualenv/bin/python setup.py install
     )
 fi
 if [[ -f /srv/otto-app/src/requirements.txt ]]; then
-    oe sudo -H -u otto-app /srv/otto-app/venv/bin/pip install -r /srv/otto-app/src/requirements.txt
+    oe sudo -H -u otto-app /srv/otto-app/virtualenv/bin/pip install -r /srv/otto-app/src/requirements.txt
 fi
 
 ol "...done!"
