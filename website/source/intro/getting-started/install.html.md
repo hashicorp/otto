@@ -27,7 +27,7 @@ for instructions on setting the PATH on Linux and Mac.
 [This page](http://stackoverflow.com/questions/1618280/where-can-i-set-path-to-make-exe-on-windows)
 contains instructions for setting the PATH on Windows.
 
-Also, if you don't already, please install [VirtualBox](http://virtualbox.org).
+Also, if you have not already done so, please install [VirtualBox](http://virtualbox.org).
 The development environment for Otto will use this. A future version of
 Otto will do this for you automatically.
 
