@@ -121,7 +121,7 @@ detect_gem_deps() {
   gem_name=$1; apt_deps=$2
 
   if has_gem $gem_name; then
-    ol "Detected the $gem_name gem..."
+    ol "Detected the $gem_name gem"
     gem_deps_queue+=($apt_deps)
   fi
 }
@@ -145,6 +145,13 @@ oe gem install bundler --no-document
 
 ol "Bundling gem dependencies..."
 oe bundle
+
+{% if app_type == "rails" %}
+  ol "Detected Rails application"
+
+  ol "Preparing the database..."
+  oe "bundle exec rake db:setup || bundle exec rake db:migrate"
+{% endif %}
 
 ol "Configuring Git to use SSH instead of HTTP so we can agent-forward private repo auth..."
 oe git config --global url."git@github.com:".insteadOf "https://github.com/"
