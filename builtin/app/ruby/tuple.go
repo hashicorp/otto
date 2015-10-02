@@ -10,4 +10,5 @@ var Tuples = app.TupleSlice([]app.Tuple{
 	{"rails", "aws", "simple"},
 	{"ruby", "aws", "simple"},
 	{"ruby", "aws", "vpc-public-private"},
+	{"ruby", "openstack", "simple"},
 })

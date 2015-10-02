@@ -126,7 +126,7 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 		Ui:        ctx.Ui,
 		Variables: vars,
 		Callbacks: map[string]OutputCallback{
-			"artifact": ParseArtifactAmazon(build.Artifact),
+			"artifact": ParseArtifact(ctx, build.Artifact),
 		},
 	}
 	if err := p.Execute("build", templatePath); err != nil {
@@ -155,11 +155,8 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 	return nil
 }
 
-// ParseArtifactAmazon parses AMIs out of the output.
-//
-// The map will be populated where the key is the region and the value is
-// the AMI ID.
-func ParseArtifactAmazon(m map[string]string) OutputCallback {
+// ParseArtifact parses images out of the output.
+func ParseArtifact(ctx *app.Context, m map[string]string) OutputCallback {
 	return func(o *Output) {
 		// We're looking for ID events.
 		//
@@ -170,7 +167,27 @@ func ParseArtifactAmazon(m map[string]string) OutputCallback {
 
 		// TODO: multiple AMIs
 		parts := strings.Split(o.Data[2], ":")
-		m[parts[0]] = parts[1]
+
+		infra := ctx.Tuple.Infra
+
+		if infra == "aws" {
+			//
+			// The map will be populated where the key is the region and the value is
+			// the AMI ID.
+			//
+			// We're looking for ID events.
+			//
+			// Example: 1440649959,amazon-ebs,artifact,0,id,us-east-1:ami-9d66def6
+			if len(o.Data) < 3 || o.Data[1] != "id" {
+				return
+			}
+
+			// TODO: multiple AMIs
+			parts := strings.Split(o.Data[2], ":")
+			m[parts[0]] = parts[1]
+		} else if infra == "openstack" {
+			m[ctx.InfraCreds["openstack_region_name"]] = parts[0]
+		}
 	}
 }
 
