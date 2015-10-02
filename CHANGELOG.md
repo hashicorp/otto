@@ -12,6 +12,7 @@ BUG FIXES:
 
  * app/node: fix node download directory in build [GH-125]
  * app/ruby: allow `gem install` to work as `vagrant` user in dev [GH-129]
+ * app/ruby, app/php: Fix `package.json` causing apps to be detected as Node.js [GH-149]
  * app: fix Vagrant warning about box name [GH-110]
 
 ## 0.1.1 (September 28, 2015)
