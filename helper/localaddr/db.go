@@ -1,7 +1,12 @@
 package localaddr
 
 import (
+	"bytes"
+	"container/heap"
+	"encoding/binary"
+	"encoding/gob"
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"os"
@@ -13,15 +18,30 @@ import (
 
 var (
 	boltLocalAddrBucket = []byte("localaddr")
-	boltAddrBucket      = []byte("addrs")
 	boltBuckets         = [][]byte{
 		boltLocalAddrBucket,
 	}
+
+	boltVersionKey  = []byte("version")
+	boltAddrMapKey  = []byte("addr_map")
+	boltAddrHeapKey = []byte("addr_heap")
+	boltSubnetKey   = []byte("subnet")
 )
 
 var (
-	boltDataVersion byte = 1
+	boltDataVersion byte = 2
 )
+
+var boltCidr *net.IPNet
+
+func init() {
+	_, cidr, err := net.ParseCIDR("100.64.0.0/10")
+	if err != nil {
+		panic(err)
+	}
+
+	boltCidr = cidr
+}
 
 // DB is a database of local addresses, and provides operations to find
 // the next available address, release an address, etc.
@@ -64,66 +84,59 @@ func (this *DB) Next() (net.IP, error) {
 	var result net.IP
 	err = db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(boltLocalAddrBucket)
-		data := bucket.Get([]byte("subnet"))
+		data := bucket.Get(boltSubnetKey)
 		if data == nil {
 			panic("no subnet")
 		}
 
-		// Get the bucket with addresses
-		addrBucket, err := bucket.CreateBucketIfNotExists(boltAddrBucket)
+		// Get the existing IP addresses that we've mapped
+		addrMap, addrQ, err := this.getData(bucket)
 		if err != nil {
 			return err
 		}
 
 		// Parse the subnet
-		ip, _, err := net.ParseCIDR(string(data))
+		ip, ipnet, err := net.ParseCIDR(string(data))
 		if err != nil {
 			return err
 		}
+		ip = ip.To4()
 
-		// Start the IP at a random number in the range. We add 2 to
-		// avoid ".1" which is usually used by the gateway.
-		var start byte = byte(rand.Int31n(253) + 2)
-		ipKey := len(ip) - 1
-		ip[ipKey] = start
-
-		// Increment the IP until we find one we don't have
-		var oldestIP net.IP
-		var oldestTime string
+		// Generate a random IP in our subnet and try to use it
+		found := false
 		for {
-			key := []byte(ip.String())
-			data := addrBucket.Get(key)
-			if data != nil {
-				// We can just use a lexical comparison of time because
-				// the formatting allows it.
-				if dataStr := string(data); oldestTime == "" || dataStr < oldestTime {
-					oldestIP = ip
-					oldestTime = dataStr
-				}
-
-				// Increment the IP
-				ip[ipKey]++
-				if ip[ipKey] == 0 {
-					ip[ipKey] = 2
-				}
-				if ip[ipKey] != start {
-					continue
-				}
-
-				// Return the oldest one if we're out
-				ip = oldestIP
-				key = []byte(ip.String())
+			// Create a random address in the subnet
+			ipRaw := make([]byte, 4)
+			binary.LittleEndian.PutUint32(ipRaw, rand.Uint32())
+			for i, v := range ipRaw {
+				ip[i] = ip[i] + (v &^ ipnet.Mask[i])
 			}
 
-			// Found one! Insert it and return it
-			err := addrBucket.Put(key, []byte(time.Now().UTC().String()))
-			if err != nil {
-				return err
+			// If this IP exists, then try again
+			if _, ok := addrMap[ip.String()]; ok {
+				continue
 			}
 
-			result = ip
-			return nil
+			// We found an IP!
+			found = true
+			break
 		}
+
+		// If we didn't find an IP, we just use the oldest one available
+		if !found {
+			result = heap.Pop(&addrQ).(*ipEntry).Value
+		}
+
+		// Set the result
+		result = ip
+
+		// Add the IP to the map
+		entry := &ipEntry{LeaseTime: time.Now().UTC(), Value: ip}
+		heap.Push(&addrQ, entry)
+		addrMap[ip.String()] = entry.Index
+
+		// Store the data
+		return this.putData(bucket, addrMap, addrQ)
 	})
 
 	return result, err
@@ -138,12 +151,26 @@ func (this *DB) Release(ip net.IP) error {
 	defer db.Close()
 
 	return db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(boltLocalAddrBucket).Bucket(boltAddrBucket)
-		if bucket == nil {
+		bucket := tx.Bucket(boltLocalAddrBucket)
+
+		// Get the existing IP addresses that we've mapped
+		addrMap, addrQ, err := this.getData(bucket)
+		if err != nil {
+			return err
+		}
+
+		// If it isn't in there, we're done
+		idx, ok := addrMap[ip.String()]
+		if !ok {
 			return nil
 		}
 
-		return bucket.Delete([]byte(ip.String()))
+		// Delete and save
+		delete(addrMap, ip.String())
+		addrQ, addrQ[len(addrQ)-1] = append(addrQ[:idx], addrQ[idx+1:]...), nil
+		heap.Init(&addrQ)
+
+		return this.putData(bucket, addrMap, addrQ)
 	})
 }
 
@@ -159,13 +186,25 @@ func (this *DB) Renew(ip net.IP) error {
 	defer db.Close()
 
 	return db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(boltLocalAddrBucket).Bucket(boltAddrBucket)
-		if bucket == nil {
+		bucket := tx.Bucket(boltLocalAddrBucket)
+
+		// Get the existing IP addresses that we've mapped
+		addrMap, addrQ, err := this.getData(bucket)
+		if err != nil {
+			return err
+		}
+
+		// If it isn't in there, we're done
+		idx, ok := addrMap[ip.String()]
+		if !ok {
 			return nil
 		}
 
-		key := []byte(ip.String())
-		return bucket.Put(key, []byte(time.Now().UTC().String()))
+		entry := addrQ[idx]
+		entry.LeaseTime = time.Now().UTC()
+		addrQ.Update(entry)
+
+		return nil
 	})
 }
 
@@ -199,11 +238,13 @@ func (this *DB) db() (*bolt.DB, error) {
 
 	// Check the DB version
 	var version byte
+	bootstrap := false
 	err = db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(boltLocalAddrBucket)
 		data := bucket.Get([]byte("version"))
 		if data == nil || len(data) == 0 {
 			version = boltDataVersion
+			bootstrap = true
 			return bucket.Put([]byte("version"), []byte{boltDataVersion})
 		}
 
@@ -224,24 +265,102 @@ func (this *DB) db() (*bolt.DB, error) {
 			boltDataVersion, version)
 	}
 
-	// Init the subnet
-	err = db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(boltLocalAddrBucket)
-		data := bucket.Get([]byte("subnet"))
-
-		// If we already have a subnet, bail
-		if data != nil {
-			return nil
+	// Map of update functions
+	updateMap := map[byte]func(*bolt.DB) error{
+		1: this.v1_to_v2,
+	}
+	for version < boltDataVersion {
+		log.Printf(
+			"[INFO] upgrading lease DB from v%d to v%d", version, version+1)
+		err := updateMap[version](db)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Error upgrading data from v%d to v%d: %s",
+				version, version+1, err)
 		}
 
-		// No subnet, allocate one and save it
-		ipnet, err := UsableSubnet()
+		version++
+	}
+
+	// Bootstrap if we have to
+	if bootstrap {
+		if err := this.v1_to_v2(db); err != nil {
+			return nil, err
+		}
+	}
+
+	// Just call the upgrade to init
+	return db, nil
+}
+
+func (this *DB) v1_to_v2(db *bolt.DB) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltLocalAddrBucket)
+
+		// Replace the subnet with the fixed CIDR we're using. The old CIDR
+		// doesn't matter...
+		err := bucket.Put(boltSubnetKey, []byte(boltCidr.String()))
 		if err != nil {
 			return err
 		}
 
-		return bucket.Put([]byte("subnet"), []byte(ipnet.String()))
-	})
+		boltAddrBucket := []byte("addrs")
+		if b := bucket.Bucket(boltAddrBucket); b != nil {
+			// And delete all the addresses, we start over
+			err = bucket.DeleteBucket(boltAddrBucket)
+			if err != nil {
+				return err
+			}
+		}
 
-	return db, nil
+		return bucket.Put(boltVersionKey, []byte{byte(2)})
+	})
+}
+
+func (this *DB) putData(
+	bucket *bolt.Bucket,
+	addrMap map[string]int,
+	addrQ ipQueue) error {
+	var buf, buf2 bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(addrMap); err != nil {
+		return err
+	}
+	if err := bucket.Put(boltAddrMapKey, buf.Bytes()); err != nil {
+		return err
+	}
+
+	if err := gob.NewEncoder(&buf2).Encode(addrQ); err != nil {
+		return err
+	}
+	if err := bucket.Put(boltAddrHeapKey, buf2.Bytes()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (this *DB) getData(bucket *bolt.Bucket) (map[string]int, ipQueue, error) {
+	var addrQ ipQueue
+	heapRaw := bucket.Get(boltAddrHeapKey)
+	if heapRaw == nil {
+		addrQ = ipQueue(make([]*ipEntry, 0, 1))
+	} else {
+		dec := gob.NewDecoder(bytes.NewReader(heapRaw))
+		if err := dec.Decode(&addrQ); err != nil {
+			return nil, nil, err
+		}
+	}
+
+	var addrMap map[string]int
+	mapRaw := bucket.Get(boltAddrMapKey)
+	if mapRaw == nil {
+		addrMap = make(map[string]int)
+	} else {
+		dec := gob.NewDecoder(bytes.NewReader(mapRaw))
+		if err := dec.Decode(&addrMap); err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return addrMap, addrQ, nil
 }
