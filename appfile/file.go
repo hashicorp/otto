@@ -108,7 +108,7 @@ func (f *File) Merge(other *File) error {
 		f.Application = other.Application
 	} else if other.Application != nil {
 		// Note this won't copy dependencies properly
-		*f.Application = *other.Application
+		f.Application.Merge(other.Application)
 	}
 
 	// Project
@@ -143,6 +143,18 @@ func (f *File) Merge(other *File) error {
 	f.Customization = other.Customization
 
 	return nil
+}
+
+func (app *Application) Merge(other *Application) {
+	if other.Name != "" {
+		app.Name = other.Name
+	}
+	if other.Type != "" {
+		app.Type = other.Type
+	}
+	if len(other.Dependencies) > 0 {
+		app.Dependencies = other.Dependencies
+	}
 }
 
 //-------------------------------------------------------------------
