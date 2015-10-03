@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"os"
@@ -269,6 +270,8 @@ func (this *DB) db() (*bolt.DB, error) {
 		1: this.v1_to_v2,
 	}
 	for version < boltDataVersion {
+		log.Printf(
+			"[INFO] upgrading lease DB from v%d to v%d", version, version+1)
 		err := updateMap[version](db)
 		if err != nil {
 			return nil, fmt.Errorf(
