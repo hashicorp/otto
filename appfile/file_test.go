@@ -73,6 +73,7 @@ func TestFileMerge(t *testing.T) {
 			},
 			Three: &File{
 				Application: &Application{
+					Name: "foo",
 					Type: "foo",
 				},
 			},
