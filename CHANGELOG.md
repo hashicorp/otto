@@ -2,6 +2,7 @@
 
 IMPROVEMENTS:
 
+ * core: IP addresses for dev environments are now in the RFC 6598 space [GH-113]
  * app/ruby: Use --no-document when installing bundler in dev [GH-130]
  * app/ruby: Install apt deps based on detected gems [GH-137]
  * app/ruby: Bundle automatically [GH-156]
