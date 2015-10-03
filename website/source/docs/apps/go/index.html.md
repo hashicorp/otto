@@ -28,3 +28,13 @@ environment variable. If it is found, it determines the subdirectory (if any)
 that your application is in and uses that for the import path. If any
 of this fails, then Otto will put your application at a default location
 outside of the GOPATH. It is highly likely that this result in broken builds.
+
+## Godep
+
+If you're using [Godep](https://github.com/tools/godep), then this will
+continue to work well with Otto. No special changes are necessary. The
+workflow for development is the same as outside: use `godep go` instead of
+`go`.
+
+Otto will detect if you're using Godep by seeing the `Godep` folder and will
+automatically install it for you, so it should be available on the PATH.
