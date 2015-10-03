@@ -49,6 +49,12 @@ func Dev(opts *DevOptions) *router.Router {
 				HelpText:     strings.TrimSpace(actionDestroyHelp),
 			},
 
+			"halt": &router.SimpleAction{
+				ExecuteFunc:  opts.actionHalt,
+				SynopsisText: actionHaltSyn,
+				HelpText:     strings.TrimSpace(actionHaltHelp),
+			},
+
 			"ssh": &router.SimpleAction{
 				ExecuteFunc:  opts.actionSSH,
 				SynopsisText: actionSSHSyn,
@@ -100,6 +106,24 @@ func (opts *DevOptions) actionDestroy(rctx router.Context) error {
 	}
 
 	ctx.Ui.Header("[green]Development environment has been destroyed!")
+	return nil
+}
+
+func (opts *DevOptions) actionHalt(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
+	project := Project(&ctx.Shared)
+	if err := project.InstallIfNeeded(); err != nil {
+		return err
+	}
+
+	ctx.Ui.Header("Halting the the local development environment...")
+
+	if err := opts.vagrant(ctx).Execute("halt"); err != nil {
+		return err
+	}
+
+	ctx.Ui.Header("[green]Development environment halted!")
+
 	return nil
 }
 
@@ -205,6 +229,7 @@ const (
 	actionAddressSyn = "Shows the address to reach the development environment"
 	actionUpSyn      = "Starts the development environment"
 	actionDestroySyn = "Destroy the development environment"
+	actionHaltSyn    = "Halts the development environment"
 	actionSSHSyn     = "SSH into the development environment"
 	actionVagrantSyn = "Run arbitrary Vagrant commands"
 )
@@ -232,6 +257,16 @@ Usage: otto dev destroy
   Any data that was put onto the development environment will be deleted,
   except for your own project's code (the directory and any subdirectories
   where the Appfile exists).
+
+`
+
+const actionHaltHelp = `
+Usage: otto dev halt
+
+  Halts the development environment.
+
+  This command will stop the development environment. The environment can then
+  be started again with 'otto dev'.
 
 `
 
