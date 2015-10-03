@@ -318,7 +318,7 @@ func (this *DB) putData(
 	bucket *bolt.Bucket,
 	addrMap map[string]int,
 	addrQ ipQueue) error {
-	var buf bytes.Buffer
+	var buf, buf2 bytes.Buffer
 	if err := gob.NewEncoder(&buf).Encode(addrMap); err != nil {
 		return err
 	}
@@ -326,11 +326,10 @@ func (this *DB) putData(
 		return err
 	}
 
-	buf.Reset()
-	if err := gob.NewEncoder(&buf).Encode(addrQ); err != nil {
+	if err := gob.NewEncoder(&buf2).Encode(addrQ); err != nil {
 		return err
 	}
-	if err := bucket.Put(boltAddrHeapKey, buf.Bytes()); err != nil {
+	if err := bucket.Put(boltAddrHeapKey, buf2.Bytes()); err != nil {
 		return err
 	}
 
