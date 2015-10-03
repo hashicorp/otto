@@ -83,6 +83,11 @@ func TestVersionRe(t *testing.T) {
 		},
 
 		{
+			"Packer v0.5.0.dev\n",
+			"0.5.0.dev",
+		},
+
+		{
 			"Vagrant 1.7.4",
 			"1.7.4",
 		},
