@@ -3,6 +3,7 @@ package hashitools
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os/exec"
 	"path/filepath"
@@ -130,14 +131,15 @@ func (p *Project) Version() (*version.Version, error) {
 	}
 
 	// Grab the version
-	var buf bytes.Buffer
+	var stdout, buf bytes.Buffer
 	cmd := exec.Command(path, "--version")
-	cmd.Stdout = &buf
+	cmd.Stdout = io.MultiWriter(&stdout, &buf)
+	cmd.Stderr = &buf
 	runErr := cmd.Run()
 
 	// Match the version out before we check for a run error, since some `project
 	// --version` commands can return a non-zero exit code.
-	matches := versionRe.FindStringSubmatch(buf.String())
+	matches := versionRe.FindStringSubmatch(stdout.String())
 	if len(matches) == 0 {
 		if runErr != nil {
 			return nil, fmt.Errorf(
