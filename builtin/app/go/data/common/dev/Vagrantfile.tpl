@@ -81,6 +81,11 @@ ol "Installing VCSs for go get..."
 oe sudo apt-get update -y
 oe sudo apt-get install -y git bzr mercurial
 
+{% if godeps %}
+ol "Installing Godep..."
+oe sudo -H -u vagrant bash -l -c 'go get github.com/tools/godep'
+{% endif %}
+
 ol "Configuring Go to use SSH instead of HTTP..."
 git config --global url."git@github.com:".insteadOf "https://github.com/"
 SCRIPT
