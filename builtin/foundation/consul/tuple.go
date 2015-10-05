@@ -9,4 +9,5 @@ import (
 var Tuples = foundation.TupleSlice([]foundation.Tuple{
 	{"consul", "aws", "simple"},
 	{"consul", "aws", "vpc-public-private"},
+	{"consul", "digitalocean", "simple"},
 })
