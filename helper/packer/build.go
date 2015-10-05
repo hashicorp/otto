@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strings"
-
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"
@@ -126,7 +125,7 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 		Ui:        ctx.Ui,
 		Variables: vars,
 		Callbacks: map[string]OutputCallback{
-			"artifact": ParseArtifactAmazon(build.Artifact),
+			"artifact": ParseArtifact(build.Artifact),
 		},
 	}
 	if err := p.Execute("build", templatePath); err != nil {
@@ -155,11 +154,11 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 	return nil
 }
 
-// ParseArtifactAmazon parses AMIs out of the output.
+// ParseArtifact parses images id out of the output.
 //
 // The map will be populated where the key is the region and the value is
-// the AMI ID.
-func ParseArtifactAmazon(m map[string]string) OutputCallback {
+// the IMAGE ID.
+func ParseArtifact(m map[string]string) OutputCallback {
 	return func(o *Output) {
 		// We're looking for ID events.
 		//
@@ -170,7 +169,14 @@ func ParseArtifactAmazon(m map[string]string) OutputCallback {
 
 		// TODO: multiple AMIs
 		parts := strings.Split(o.Data[2], ":")
-		m[parts[0]] = parts[1]
+		if len(parts) > 1 {
+			m[parts[0]] = parts[1]	
+		} else {
+			// Digitalocean
+			// TODO: to get Digitalocean region dynamically.
+			m["sfo1"] = o.Data[2]
+		}
+		
 	}
 }
 
