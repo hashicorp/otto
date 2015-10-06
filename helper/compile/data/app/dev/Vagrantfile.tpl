@@ -10,6 +10,9 @@ Vagrant.configure("2") do |config|
     o.vm.box = "parallels/ubuntu-12.04"
   end
 
+  # Host only network
+  config.vm.network "private_network", ip: "{{ dev_ip_address }}"
+
   {% block default_shared_folder %}
   # Setup a synced folder from our working directory to /vagrant
   config.vm.synced_folder '{{ path.working }}', "/vagrant",
