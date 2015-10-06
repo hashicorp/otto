@@ -84,6 +84,15 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 	}
 	data.Context["foundation_dirs"] = foundationDirsContext
 
+	// Setup the shared data
+	if data.SharedExtends == nil {
+		data.SharedExtends = make(map[string]*bindata.Data)
+	}
+	data.SharedExtends["compile"] = &bindata.Data{
+		Asset:    Asset,
+		AssetDir: AssetDir,
+	}
+
 	// Process the customizations!
 	err := processCustomizations(&processOpts{
 		Customizations: opts.Customizations,

@@ -1,0 +1,3 @@
+package compile
+
+//go:generate go-bindata -o=bindata.go -pkg=compile -nomemcopy -nometadata ./data/...
