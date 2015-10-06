@@ -212,7 +212,7 @@ func loadAppfile(flagAppfile string) (*appfile.File, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	return app, app.Path, nil
+	return app, filepath.Dir(app.Path), nil
 }
 
 // findAppfile returns the path to an existing Appfile by checking the optional
