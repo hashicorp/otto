@@ -3,7 +3,7 @@ package pongo2_ext
 import (
 	"io/ioutil"
 
-	"gopkg.in/flosch/pongo2.v3"
+	"github.com/flosch/pongo2"
 )
 
 func init() {

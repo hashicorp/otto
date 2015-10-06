@@ -1,1 +1,1 @@
-Current Year: {% now "2006" %}
+Current Year: {{ value }}

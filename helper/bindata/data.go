@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gopkg.in/flosch/pongo2.v3"
+	"github.com/flosch/pongo2"
 
 	// Template helpers
 	_ "github.com/hashicorp/otto/helper/pongo2"
@@ -29,12 +29,77 @@ type Data struct {
 
 	// Context is the template context that is given when rendering
 	Context map[string]interface{}
+
+	// SharedExtends is a mapping of share prefixes and files that can be
+	// accessed using {% extends %} in templates. Example:
+	// {% extends "foo:bar/baz.tpl" %} would find the "bar/baz.tpl" in the
+	// "foo" share.
+	SharedExtends map[string]*Data
 }
 
 // CopyDir copies all the assets from the given prefix to the destination
 // directory. It will automatically set file permissions, create folders,
 // etc.
 func (d *Data) CopyDir(dst, prefix string) error {
+	return d.copyDir(dst, prefix)
+}
+
+// RenderAsset renders a single bindata asset. This file
+// will be processed as a template if it ends in ".tpl".
+func (d *Data) RenderAsset(dst, src string) error {
+	data, err := d.Asset(src)
+	if err != nil {
+		return err
+	}
+
+	return d.renderLowLevel(dst, src, "", bytes.NewReader(data))
+}
+
+// RenderReal renders a real file (not a bindata'd file). This file
+// will be processed as a template if it ends in ".tpl".
+func (d *Data) RenderReal(dst, src string) error {
+	f, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return d.renderLowLevel(dst, src, "", f)
+}
+
+// RenderString renders a string.
+func (d *Data) RenderString(tpl string) (string, error) {
+	// Make a temporary file for the contents. This is kind of silly we
+	// need to do this but we can make this render in-memory later.
+	tf, err := ioutil.TempFile("", "otto")
+	if err != nil {
+		return "", err
+	}
+	tf.Close()
+	defer os.Remove(tf.Name())
+
+	// Render
+	err = d.renderLowLevel(tf.Name(), "dummy.tpl", "", strings.NewReader(tpl))
+	if err != nil {
+		return "", err
+	}
+
+	// Copy the file contents back into memory
+	var result bytes.Buffer
+	f, err := os.Open(tf.Name())
+	if err != nil {
+		return "", err
+	}
+	_, err = io.Copy(&result, f)
+	f.Close()
+	if err != nil {
+		return "", err
+	}
+
+	return result.String(), nil
+}
+
+func (d *Data) copyDir(dst, prefix string) error {
 	log.Printf("[DEBUG] Copying all assets: %s => %s", prefix, dst)
 
 	// Get all the assets in the directory
@@ -62,14 +127,14 @@ func (d *Data) CopyDir(dst, prefix string) error {
 				return fmt.Errorf("error loading asset %s: %s", asset, err)
 			}
 
-			if err := d.CopyDir(filepath.Join(dst, asset), assetFull); err != nil {
+			if err := d.copyDir(filepath.Join(dst, asset), assetFull); err != nil {
 				return err
 			}
 
 			continue
 		}
 
-		err = d.renderLowLevel(filepath.Join(dst, asset), asset, bytes.NewReader(data))
+		err = d.renderLowLevel(filepath.Join(dst, asset), asset, prefix, bytes.NewReader(data))
 		if err != nil {
 			return err
 		}
@@ -78,62 +143,7 @@ func (d *Data) CopyDir(dst, prefix string) error {
 	return nil
 }
 
-// RenderAsset renders a single bindata asset. This file
-// will be processed as a template if it ends in ".tpl".
-func (d *Data) RenderAsset(dst, src string) error {
-	data, err := d.Asset(src)
-	if err != nil {
-		return err
-	}
-
-	return d.renderLowLevel(dst, src, bytes.NewReader(data))
-}
-
-// RenderReal renders a real file (not a bindata'd file). This file
-// will be processed as a template if it ends in ".tpl".
-func (d *Data) RenderReal(dst, src string) error {
-	f, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	return d.renderLowLevel(dst, src, f)
-}
-
-// RenderString renders a string.
-func (d *Data) RenderString(tpl string) (string, error) {
-	// Make a temporary file for the contents. This is kind of silly we
-	// need to do this but we can make this render in-memory later.
-	tf, err := ioutil.TempFile("", "otto")
-	if err != nil {
-		return "", err
-	}
-	tf.Close()
-	defer os.Remove(tf.Name())
-
-	// Render
-	err = d.renderLowLevel(tf.Name(), "dummy.tpl", strings.NewReader(tpl))
-	if err != nil {
-		return "", err
-	}
-
-	// Copy the file contents back into memory
-	var result bytes.Buffer
-	f, err := os.Open(tf.Name())
-	if err != nil {
-		return "", err
-	}
-	_, err = io.Copy(&result, f)
-	f.Close()
-	if err != nil {
-		return "", err
-	}
-
-	return result.String(), nil
-}
-
-func (d *Data) renderLowLevel(dst string, src string, r io.Reader) error {
+func (d *Data) renderLowLevel(dst string, src string, prefix string, r io.Reader) error {
 	var err error
 
 	// Determine the filename and whether we're dealing with a template
@@ -145,8 +155,20 @@ func (d *Data) renderLowLevel(dst string, src string, r io.Reader) error {
 			return err
 		}
 
+		base := filepath.Dir(filename)
+		if prefix != "" {
+			base = filepath.Join(prefix, base)
+		}
+
+		// Create the template set so we can control loading
+		tplSet := pongo2.NewSet("otto", &tplLoader{
+			Data: d,
+			Base: base,
+		})
+
+		// Parse the template
 		dst = strings.TrimSuffix(dst, ".tpl")
-		tpl, err = pongo2.FromString(buf.String())
+		tpl, err = tplSet.FromString(buf.String())
 		if err != nil {
 			return err
 		}

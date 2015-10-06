@@ -1,0 +1,4 @@
+Hello
+
+{% include "b" %}
+Foo
