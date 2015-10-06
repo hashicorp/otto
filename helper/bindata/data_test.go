@@ -12,35 +12,32 @@ import (
 )
 
 func TestDataCopyDir(t *testing.T) {
-	d := testData()
-
-	td, err := ioutil.TempDir("", "otto")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.RemoveAll(td)
-
-	if err := d.CopyDir(td, "test-data/copy-dir-basic"); err != nil {
-		t.Fatalf("err: %s", err)
+	cases := []struct {
+		Dir string
+	}{
+		{"copy-dir-basic"},
+		{"copy-dir-extends"},
+		{"copy-dir-extends-var"},
 	}
 
-	testCompareDir(t, td, "test-data/copy-dir-basic-expected")
-}
+	for _, tc := range cases {
+		d := testData()
 
-func TestDataCopyDir_extends(t *testing.T) {
-	d := testData()
+		func() {
+			td, err := ioutil.TempDir("", "otto")
+			if err != nil {
+				t.Fatalf("err: %s", err)
+			}
+			defer os.RemoveAll(td)
 
-	td, err := ioutil.TempDir("", "otto")
-	if err != nil {
-		t.Fatalf("err: %s", err)
+			dir := filepath.Join("test-data", tc.Dir)
+			if err := d.CopyDir(td, dir); err != nil {
+				t.Fatalf("err: %s", err)
+			}
+
+			testCompareDir(t, td, dir+"-expected")
+		}()
 	}
-	defer os.RemoveAll(td)
-
-	if err := d.CopyDir(td, "test-data/copy-dir-extends"); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	testCompareDir(t, td, "test-data/copy-dir-extends-expected")
 }
 
 func testData() *Data {
