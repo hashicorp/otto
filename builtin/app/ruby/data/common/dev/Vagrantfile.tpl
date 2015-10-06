@@ -117,7 +117,7 @@ detect_gem_deps() {
 cd /vagrant
 detect_gem_deps curb "libcurl3 libcurl3-gnutls libcurl4-openssl-dev"
 detect_gem_deps capybara-webkit "libqt4-dev"
-detect_gem_deps mysql2 "libmysqlclient-dev"
+detect_gem_deps mysql2 "libmysqld-dev"
 detect_gem_deps nokogiri "zlib1g-dev"
 detect_gem_deps pg "libpq-dev"
 detect_gem_deps rmagick "libmagickwand-dev"
