@@ -1,0 +1,3 @@
+application {
+  name = "compile-no-explicit-type"
+}
