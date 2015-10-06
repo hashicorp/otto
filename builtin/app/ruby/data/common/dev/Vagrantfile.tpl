@@ -29,6 +29,9 @@ Vagrant.configure("2") do |config|
   {{ fragment|read }}
   {% endfor %}
 
+  # Set locale to en_US.UTF-8
+  config.vm.provision "shell", inline: $script_locale
+
   # Install Ruby build environment
   config.vm.provision "shell", inline: $script_ruby, privileged: false
 
@@ -36,6 +39,15 @@ Vagrant.configure("2") do |config|
     o.vm.box = "parallels/ubuntu-12.04"
   end
 end
+
+$script_locale = <<SCRIPT
+  oe() { eval "$@" 2>&1 | logger -t otto > /dev/null; }
+  ol() { echo "[otto] $@"; }
+
+  ol "Setting locale to en_US.UTF-8..."
+  oe locale-gen en_US.UTF-8
+  oe update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+SCRIPT
 
 $script_ruby = <<SCRIPT
 set -o nounset -o errexit -o pipefail -o errtrace
@@ -49,7 +61,7 @@ error() {
 trap 'error "${BASH_SOURCE}" "${LINENO}"' ERR
 
 # otto-exec: execute command with output logged but not displayed
-oe() { $@ 2>&1 | logger -t otto > /dev/null; }
+oe() { eval "$@" 2>&1 | logger -t otto > /dev/null; }
 
 # otto-log: output a prefixed message
 ol() { echo "[otto] $@"; }
@@ -109,7 +121,7 @@ detect_gem_deps() {
   gem_name=$1; apt_deps=$2
 
   if has_gem $gem_name; then
-    ol "Detected the $gem_name gem..."
+    ol "Detected the $gem_name gem"
     gem_deps_queue+=($apt_deps)
   fi
 }
@@ -134,6 +146,20 @@ oe gem install bundler --no-document
 
 ol "Bundling gem dependencies..."
 oe bundle
+
+{% if app_type == "rails" %}
+  ol "Detected Rails application"
+
+  if has_gem pg; then
+    ol "Detected the pg gem, installing PostgreSQL..."
+    . /etc/default/locale
+    oe sudo apt-get install -y postgresql-9.1
+    oe sudo -u postgres createuser --superuser vagrant
+  fi
+
+  ol "Preparing the database..."
+  oe "bundle exec rake db:setup || bundle exec rake db:migrate"
+{% endif %}
 
 ol "Configuring Git to use SSH instead of HTTP so we can agent-forward private repo auth..."
 oe git config --global url."git@github.com:".insteadOf "https://github.com/"

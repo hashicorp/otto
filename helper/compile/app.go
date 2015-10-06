@@ -59,6 +59,8 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 		data.Context = make(map[string]interface{})
 		opts.Bindata = data
 	}
+
+	data.Context["app_type"] = ctx.Appfile.Application.Type
 	data.Context["name"] = ctx.Appfile.Application.Name
 	data.Context["dev_fragments"] = ctx.DevDepFragments
 	data.Context["dev_ip_address"] = ctx.DevIPAddress
