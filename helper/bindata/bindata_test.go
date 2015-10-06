@@ -8,6 +8,11 @@
 // test-data/copy-dir-basic-expected/b.txt
 // test-data/copy-dir-basic-expected/dir/c.txt
 // test-data/copy-dir-basic-expected/t
+// test-data/copy-dir-extends/a.tpl
+// test-data/copy-dir-extends/base
+// test-data/copy-dir-extends/base.tpl
+// test-data/copy-dir-extends-expected/a
+// test-data/copy-dir-extends-expected/base
 // DO NOT EDIT!
 
 package bindata
@@ -235,6 +240,106 @@ func testDataCopyDirBasicExpectedT() (*asset, error) {
 	return a, nil
 }
 
+var _testDataCopyDirExtendsATpl = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xaa\x56\x55\x48\xad\x28\x49\xcd\x4b\x29\x56\x50\x4a\x4a\x2c\x4e\xd5\x2b\x29\xc8\x51\x52\x50\xad\xe5\x02\x04\x00\x00\xff\xff\x23\xb9\xd9\xe8\x19\x00\x00\x00"
+
+func testDataCopyDirExtendsATplBytes() ([]byte, error) {
+	return bindataRead(
+		_testDataCopyDirExtendsATpl,
+		"test-data/copy-dir-extends/a.tpl",
+	)
+}
+
+func testDataCopyDirExtendsATpl() (*asset, error) {
+	bytes, err := testDataCopyDirExtendsATplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test-data/copy-dir-extends/a.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
+var _testDataCopyDirExtendsBase = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xf2\x70\xf5\xf1\xf1\x57\xe4\x02\x04\x00\x00\xff\xff\x72\x1b\x50\xee\x07\x00\x00\x00"
+
+func testDataCopyDirExtendsBaseBytes() ([]byte, error) {
+	return bindataRead(
+		_testDataCopyDirExtendsBase,
+		"test-data/copy-dir-extends/base",
+	)
+}
+
+func testDataCopyDirExtendsBase() (*asset, error) {
+	bytes, err := testDataCopyDirExtendsBaseBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test-data/copy-dir-extends/base", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
+var _testDataCopyDirExtendsBaseTpl = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xf2\x70\xf5\xf1\xf1\x57\xe4\x02\x04\x00\x00\xff\xff\x72\x1b\x50\xee\x07\x00\x00\x00"
+
+func testDataCopyDirExtendsBaseTplBytes() ([]byte, error) {
+	return bindataRead(
+		_testDataCopyDirExtendsBaseTpl,
+		"test-data/copy-dir-extends/base.tpl",
+	)
+}
+
+func testDataCopyDirExtendsBaseTpl() (*asset, error) {
+	bytes, err := testDataCopyDirExtendsBaseTplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test-data/copy-dir-extends/base.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
+var _testDataCopyDirExtendsExpectedA = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xf2\x70\xf5\xf1\xf1\x57\xe4\x02\x04\x00\x00\xff\xff\x72\x1b\x50\xee\x07\x00\x00\x00"
+
+func testDataCopyDirExtendsExpectedABytes() ([]byte, error) {
+	return bindataRead(
+		_testDataCopyDirExtendsExpectedA,
+		"test-data/copy-dir-extends-expected/a",
+	)
+}
+
+func testDataCopyDirExtendsExpectedA() (*asset, error) {
+	bytes, err := testDataCopyDirExtendsExpectedABytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test-data/copy-dir-extends-expected/a", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
+var _testDataCopyDirExtendsExpectedBase = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xf2\x70\xf5\xf1\xf1\x57\xe4\x02\x04\x00\x00\xff\xff\x72\x1b\x50\xee\x07\x00\x00\x00"
+
+func testDataCopyDirExtendsExpectedBaseBytes() ([]byte, error) {
+	return bindataRead(
+		_testDataCopyDirExtendsExpectedBase,
+		"test-data/copy-dir-extends-expected/base",
+	)
+}
+
+func testDataCopyDirExtendsExpectedBase() (*asset, error) {
+	bytes, err := testDataCopyDirExtendsExpectedBaseBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test-data/copy-dir-extends-expected/base", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -295,6 +400,11 @@ var _bindata = map[string]func() (*asset, error){
 	"test-data/copy-dir-basic-expected/b.txt": testDataCopyDirBasicExpectedBTxt,
 	"test-data/copy-dir-basic-expected/dir/c.txt": testDataCopyDirBasicExpectedDirCTxt,
 	"test-data/copy-dir-basic-expected/t": testDataCopyDirBasicExpectedT,
+	"test-data/copy-dir-extends/a.tpl": testDataCopyDirExtendsATpl,
+	"test-data/copy-dir-extends/base": testDataCopyDirExtendsBase,
+	"test-data/copy-dir-extends/base.tpl": testDataCopyDirExtendsBaseTpl,
+	"test-data/copy-dir-extends-expected/a": testDataCopyDirExtendsExpectedA,
+	"test-data/copy-dir-extends-expected/base": testDataCopyDirExtendsExpectedBase,
 }
 
 // AssetDir returns the file names below a certain
@@ -360,6 +470,20 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				}},
 			}},
 			"t": &bintree{testDataCopyDirBasicExpectedT, map[string]*bintree{
+			}},
+		}},
+		"copy-dir-extends": &bintree{nil, map[string]*bintree{
+			"a.tpl": &bintree{testDataCopyDirExtendsATpl, map[string]*bintree{
+			}},
+			"base": &bintree{testDataCopyDirExtendsBase, map[string]*bintree{
+			}},
+			"base.tpl": &bintree{testDataCopyDirExtendsBaseTpl, map[string]*bintree{
+			}},
+		}},
+		"copy-dir-extends-expected": &bintree{nil, map[string]*bintree{
+			"a": &bintree{testDataCopyDirExtendsExpectedA, map[string]*bintree{
+			}},
+			"base": &bintree{testDataCopyDirExtendsExpectedBase, map[string]*bintree{
 			}},
 		}},
 	}},
