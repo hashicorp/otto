@@ -27,3 +27,7 @@ resource "digitalocean_droplet" "app" {
     "${digitalocean_ssh_key.default.id}"
   ]
 }
+
+output "url" {
+  value = "http://${digitalocean_droplet.app.ipv4_address}/"
+}
