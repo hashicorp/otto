@@ -25,4 +25,5 @@ customization "ruby" {
 Availabile options:
 
   * `ruby_version` (string) - The Ruby version to install for development
-    and deployment. This defaults to 2.2.
+    and deployment. This defaults to 2.2. Note that for Ruby 1.9.3, you
+    need to specify "1.9.1". This is a strange quirk due to upstream dependencies.
