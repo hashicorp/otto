@@ -29,6 +29,12 @@ type Data struct {
 
 	// Context is the template context that is given when rendering
 	Context map[string]interface{}
+
+	// SharedExtends is a mapping of share prefixes and files that can be
+	// accessed using {% extends %} in templates. Example:
+	// {% extends "foo:bar/baz.tpl" %} would find the "bar/baz.tpl" in the
+	// "foo" share.
+	SharedExtends map[string]*Data
 }
 
 // CopyDir copies all the assets from the given prefix to the destination

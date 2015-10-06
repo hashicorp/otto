@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/otto/helper/bindata/test-pkg"
 )
 
 func TestDataCopyDir(t *testing.T) {
@@ -18,6 +20,7 @@ func TestDataCopyDir(t *testing.T) {
 		{"copy-dir-basic"},
 		{"copy-dir-extends"},
 		{"copy-dir-extends-var"},
+		{"copy-dir-shared"},
 	}
 
 	for _, tc := range cases {
@@ -46,6 +49,12 @@ func testData() *Data {
 		AssetDir: AssetDir,
 		Context: map[string]interface{}{
 			"value": "foo",
+		},
+		SharedExtends: map[string]*Data{
+			"foo": &Data{
+				Asset:    testpkg.Asset,
+				AssetDir: testpkg.AssetDir,
+			},
 		},
 	}
 }

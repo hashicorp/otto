@@ -17,6 +17,8 @@
 // test-data/copy-dir-extends-var/base.tpl
 // test-data/copy-dir-extends-var-expected/a
 // test-data/copy-dir-extends-var-expected/base
+// test-data/copy-dir-shared/a.tpl
+// test-data/copy-dir-shared-expected/a
 // DO NOT EDIT!
 
 package bindata
@@ -424,6 +426,46 @@ func testDataCopyDirExtendsVarExpectedBase() (*asset, error) {
 	return a, nil
 }
 
+var _testDataCopyDirSharedATpl = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xaa\x56\x55\x48\xad\x28\x49\xcd\x4b\x29\x56\x50\x4a\xcb\xcf\xb7\x4a\x49\x2c\x49\xd4\x4f\x4a\x2c\x4e\xd5\x2b\x29\xc8\x51\x52\x50\xad\xe5\x02\x04\x00\x00\xff\xff\x50\xc2\x51\x17\x22\x00\x00\x00"
+
+func testDataCopyDirSharedATplBytes() ([]byte, error) {
+	return bindataRead(
+		_testDataCopyDirSharedATpl,
+		"test-data/copy-dir-shared/a.tpl",
+	)
+}
+
+func testDataCopyDirSharedATpl() (*asset, error) {
+	bytes, err := testDataCopyDirSharedATplBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test-data/copy-dir-shared/a.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
+var _testDataCopyDirSharedExpectedA = "\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xf2\x48\xcd\xc9\xc9\x57\x48\x2b\xca\xcf\x55\x28\x49\x2d\x2e\xe1\x02\x04\x00\x00\xff\xff\x3c\x1f\x65\x35\x10\x00\x00\x00"
+
+func testDataCopyDirSharedExpectedABytes() ([]byte, error) {
+	return bindataRead(
+		_testDataCopyDirSharedExpectedA,
+		"test-data/copy-dir-shared-expected/a",
+	)
+}
+
+func testDataCopyDirSharedExpectedA() (*asset, error) {
+	bytes, err := testDataCopyDirSharedExpectedABytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test-data/copy-dir-shared-expected/a", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -493,6 +535,8 @@ var _bindata = map[string]func() (*asset, error){
 	"test-data/copy-dir-extends-var/base.tpl": testDataCopyDirExtendsVarBaseTpl,
 	"test-data/copy-dir-extends-var-expected/a": testDataCopyDirExtendsVarExpectedA,
 	"test-data/copy-dir-extends-var-expected/base": testDataCopyDirExtendsVarExpectedBase,
+	"test-data/copy-dir-shared/a.tpl": testDataCopyDirSharedATpl,
+	"test-data/copy-dir-shared-expected/a": testDataCopyDirSharedExpectedA,
 }
 
 // AssetDir returns the file names below a certain
@@ -584,6 +628,14 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"a": &bintree{testDataCopyDirExtendsVarExpectedA, map[string]*bintree{
 			}},
 			"base": &bintree{testDataCopyDirExtendsVarExpectedBase, map[string]*bintree{
+			}},
+		}},
+		"copy-dir-shared": &bintree{nil, map[string]*bintree{
+			"a.tpl": &bintree{testDataCopyDirSharedATpl, map[string]*bintree{
+			}},
+		}},
+		"copy-dir-shared-expected": &bintree{nil, map[string]*bintree{
+			"a": &bintree{testDataCopyDirSharedExpectedA, map[string]*bintree{
 			}},
 		}},
 	}},
