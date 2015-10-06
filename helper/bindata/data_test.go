@@ -20,6 +20,7 @@ func TestDataCopyDir(t *testing.T) {
 		{"copy-dir-basic"},
 		{"copy-dir-extends"},
 		{"copy-dir-extends-var"},
+		{"copy-dir-include"},
 		{"copy-dir-shared"},
 	}
 
