@@ -19,14 +19,21 @@ BUG FIXES:
  * app/ruby, app/php: Fix `package.json` causing apps to be detected as Node.js [GH-149]
  * app: fix Vagrant warning about box name [GH-110]
 
+PLUGIN DEV CHANGES:
+
+ * Template `extends` and `include` support: you can now include/extend
+     templates for better reusability.
+ * Template shares: there are now shared templates to include/extend from
+     that contain common behavior (such as Vagrantfiles).
+
 ## 0.1.1 (September 28, 2015)
 
 BUG FIXES:
 
-* core: Fix marshalling format problem preventing successful parsing of an Appfile with multiple dependencies declared [GH-83]
-* app: Fix string escaping issues affecting `otto dev` on Windows hosts [GH-79]
-* app/node: Fix issue preventing `node` apps from interpolating configs properly [GH-73]
+ * core: Fix marshalling format problem preventing successful parsing of an Appfile with multiple dependencies declared [GH-83]
+ * app: Fix string escaping issues affecting `otto dev` on Windows hosts [GH-79]
+ * app/node: Fix issue preventing `node` apps from interpolating configs properly [GH-73]
 
 ## 0.1.0 (September 28, 2015)
 
-* Initial release
+ * Initial release
