@@ -4,13 +4,13 @@ page_title: "Customization - Go App Type"
 sidebar_current: "docs-go-customization"
 description: |-
   This page documents the customizations
-  that are availabile to change the behavior of Go applications with Otto.
+  that are available to change the behavior of Go applications with Otto.
 ---
 
 # Customization
 
 This page documents the [customizations](/docs/appfile/customization.html)
-that are availabile to change the behavior of Go applications with Otto.
+that are available to change the behavior of Go applications with Otto.
 
 ## Type: "go"
 
@@ -22,7 +22,7 @@ customization "go" {
 }
 ```
 
-Availabile options:
+Available options:
 
   * `go_version` (string) - The Go version to install for development
     and for building the application for deployment. This defaulits to 1.5.1.

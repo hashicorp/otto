@@ -4,7 +4,7 @@ page_title: "Customization - PHP App Type"
 sidebar_current: "docs-php-customization"
 description: |-
   This page documents the [Customizations](/docs/appfile/customization.html)
-  that are availabile to change the behavior of PHP applications with Otto.
+  that are available to change the behavior of PHP applications with Otto.
 ---
 
 # Customization
