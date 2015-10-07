@@ -4,13 +4,13 @@ page_title: "Customization - Custom App Type"
 sidebar_current: "docs-custom-customization"
 description: |-
   This page documents the customizations
-  that are availabile to change the behavior of custom applications with Otto.
+  that are available to change the behavior of custom applications with Otto.
 ---
 
 # Customization
 
 This page documents the [customizations](/docs/appfile/customization.html)
-that are availabile to change the behavior of the "custom" application
+that are available to change the behavior of the "custom" application
 type with Otto.
 
 ## Type: "dev"
@@ -23,7 +23,7 @@ customization "dev" {
 }
 ```
 
-Availabile options:
+Available options:
 
   * `vagrantfile` (string) - Path to a Vagrantfile to use for development.
     If this isn't specified, `otto dev` will not work for this application.
@@ -38,7 +38,7 @@ customization "dev-dep" {
 }
 ```
 
-Availabile options:
+Available options:
 
   * `vagrantfile` (string) - Path to a Vagrantfile to use as a fragment
     that is embedded in other application's Vagrantfiles when this application
@@ -54,7 +54,7 @@ customization "build" {
 }
 ```
 
-Availabile options:
+Available options:
 
   * `packer` (string) - Path to a Packer template to execute.
 
@@ -68,7 +68,7 @@ customization "deploy" {
 }
 ```
 
-Availabile options:
+Available options:
 
   * `terraform` (string) - Path to a Terraform module (directory) to use
     for deployment.

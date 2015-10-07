@@ -4,13 +4,13 @@ page_title: "Customization - Docker (External) App Type"
 sidebar_current: "docs-docker-customization"
 description: |-
   This page documents the [customizations](/docs/appfile/customization.html)
-  that are availabile to change the behavior of Docker applications with Otto.
+  that are available to change the behavior of Docker applications with Otto.
 ---
 
 # Customization
 
 This page documents the [customizations](/docs/appfile/customization.html)
-that are availabile to change the behavior of Docker applications with Otto.
+that are available to change the behavior of Docker applications with Otto.
 
 ## Type: "docker"
 
@@ -22,7 +22,7 @@ customization "docker" {
 }
 ```
 
-Availabile options:
+Available options:
 
   * `image` (string) - The Docker image to run (along with any tags).
     This will defaulit to the application name.
