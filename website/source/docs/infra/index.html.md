@@ -12,7 +12,7 @@ description: |-
 The infrastructure type in the [Appfile](/docs/concepts/appfile.html)
 tells Otto what kind of infrastructure you'd like to use to deploy your
 application. Otto uses this information to create a base infrastructure, to
-build your application for that infrastructrue, and finally to deploy your
+build your application for that infrastructure, and finally to deploy your
 application into that infrastructure.
 
 This section documents the infrastructure types that Otto supports by default
