@@ -20,7 +20,7 @@ page for details on how to customize some of the behavior on this page.
   * **Go**
   * **Git, Mercurial, Bazaar** - For `go get`
 
-In addition to the above, Otto automatically creatse and configures
+In addition to the above, Otto automatically creates and configures
 the `GOPATH` environment variable and syncs your project into the
 proper import path.
 
