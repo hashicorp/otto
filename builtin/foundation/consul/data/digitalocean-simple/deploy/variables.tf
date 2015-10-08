@@ -2,8 +2,8 @@
 # Access Info
 #--------------------------------------------------------------------
 
-variable "api_token" {
-    description = "Access key for AWS"
+variable "do_token" {
+	description = "API Token for DigitalOcean"
 }
 
 variable "region" {
@@ -15,7 +15,7 @@ variable "region" {
 #--------------------------------------------------------------
 
 variable "image" {
-    description = "AMI to launch with Consul"
+    description = "Droplet to launch with Consul"
     default = "ubuntu-14-04-x64"
 }
 
