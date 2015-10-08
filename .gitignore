@@ -22,3 +22,4 @@ website/node_modules
 .otto/
 /.ottoid
 otto-data/
+helper/compile/bindata.go
