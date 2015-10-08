@@ -47,7 +47,7 @@ application {
 ```
 
 The "source" string can be local path, HTTP URL, Git URL, and many more.
-The full reference so dependency sources can be seen in the
+The full reference to dependency sources can be seen in the
 [dependency sources](#)
 page.
 
