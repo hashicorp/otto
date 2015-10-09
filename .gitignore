@@ -3,7 +3,7 @@
 *.exe
 bin/
 builtin/**/bindata.go
-helper/compile/bindata.go
+helper/**/bindata.go
 images/packer_cache
 pkg/
 scratch/
