@@ -12,6 +12,15 @@ To get started with Otto, Otto must first be installed on your machine.
 Otto is distributed as a [binary package](/downloads.html) for all
 supported platforms and architectures.
 
+## Supported Platforms
+- Linux
+- MacOS
+- Windows 
+  
+  On Windows, otto relies on Hyper-V, which is available in the following editions:
+  - 8, 8.1, 10 (Professional or Enterprise Editions only)
+  - Server 2008, Server 2012
+
 ## Installing Otto
 
 To install Otto, find the [appropriate package](/downloads.html) for
