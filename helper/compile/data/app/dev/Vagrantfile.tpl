@@ -5,10 +5,12 @@
 # Vagrantfile, use the Appfile.
 
 Vagrant.configure("2") do |config|
+  {% block vagrant_box %}
   config.vm.box = "hashicorp/precise64"
   config.vm.provider :parallels do |p, o|
     o.vm.box = "parallels/ubuntu-12.04"
   end
+  {% endblock %}
 
   # Host only network
   config.vm.network "private_network", ip: "{{ dev_ip_address }}"

@@ -22,6 +22,13 @@ type DevOptions struct {
 	// Defaults to `#{ctx.LocalDir/vagrant}` if empty.
 	DataDir string
 
+	// Layer, if non-nil, will be the set of layers that this environment
+	// builds on top of. If this is set, then the layers will be managed
+	// automatically by this.
+	//
+	// If this is nil, then layers won't be used.
+	Layer *Layered
+
 	// Instructions are help text that is shown after creating the
 	// development environment.
 	Instructions string

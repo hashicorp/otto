@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
+	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
@@ -84,8 +85,24 @@ func (a *App) Deploy(ctx *app.Context) error {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
+	// Read the go version, since we use that for our layer
+	goVersion, err := oneline.Read(filepath.Join(ctx.Dir, "dev", "go_version"))
+	if err != nil {
+		return err
+	}
+
+	// Build the actual development environment
 	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
+		Layer: &vagrant.Layered{
+			DataDir: vagrant.LayeredDir(ctx),
+			Layers: []*vagrant.Layer{
+				&vagrant.Layer{
+					ID:          fmt.Sprintf("go%s", goVersion),
+					Vagrantfile: filepath.Join(ctx.Dir, "dev", "layer-base", "Vagrantfile"),
+				},
+			},
+		},
 	}).Route(ctx)
 }
 
