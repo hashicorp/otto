@@ -36,6 +36,11 @@ Vagrant.configure("2") do |config|
   {{ fragment|read }}
   {% endfor %}
 
+  # Use linked clones if possible
+  config.vm.provider "virtualbox" do |p|
+    p.linked_clone = true
+  end
+
   # This is to work around some bugs right now
   ["vmware_fusion", "vmware_workstation"].each do |name|
     config.vm.provider(name) do |p|
