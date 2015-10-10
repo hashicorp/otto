@@ -7,10 +7,15 @@
 Vagrant.configure("2") do |config|
   {% block vagrant_box %}
   config.vm.box = "hashicorp/precise64"
-  config.vm.provider :parallels do |p, o|
+  config.vm.provider "parallels" do |p, o|
     o.vm.box = "parallels/ubuntu-12.04"
   end
   {% endblock %}
+
+  # Use a linked clone if we can
+  config.vm.provider "virtualbox" do |v|
+    v.linked_clone = true
+  end
 
   # Disable the default synced folder
   config.vm.synced_folder ".", "/vagrant", disabled: true
