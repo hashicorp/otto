@@ -69,7 +69,7 @@ func (l *Layered) Build(ctx *context.Shared) error {
 	if err != nil {
 		return err
 	}
-	_, err = l.init(db)
+	vs, err := l.init(db)
 	db.Close()
 	if err != nil {
 		return err
@@ -77,10 +77,8 @@ func (l *Layered) Build(ctx *context.Shared) error {
 
 	// Go through each layer and build it. This will be a no-op if the
 	// layer is already built.
-	paths := l.LayerPaths()
-	for _, layer := range l.Layers {
-		path := paths[layer.ID]
-		if err := l.buildLayer(layer, path, ctx); err != nil {
+	for _, v := range vs {
+		if err := l.buildLayer(v, ctx); err != nil {
 			return err
 		}
 	}
@@ -122,8 +120,7 @@ func (l *Layered) Prune(ctx *context.Shared) error {
 	// Go through the remaining roots, these are the environments
 	// that must be destroyed.
 	for _, root := range roots {
-		layer := root.(*layerVertex).Layer
-		if err := l.pruneLayer(db, layer, ctx); err != nil {
+		if err := l.pruneLayer(db, root.(*layerVertex), ctx); err != nil {
 			return err
 		}
 	}
@@ -207,7 +204,10 @@ func (l *Layered) Pending() ([]string, error) {
 	return result, nil
 }
 
-func (l *Layered) buildLayer(layer *Layer, path string, ctx *context.Shared) error {
+func (l *Layered) buildLayer(v *layerVertex, ctx *context.Shared) error {
+	layer := v.Layer
+	path := v.Path
+
 	// Layer isn't ready, so grab the lock on the layer and build it
 	// TODO: multi-process lock
 
@@ -254,7 +254,7 @@ func (l *Layered) buildLayer(layer *Layer, path string, ctx *context.Shared) err
 	// destroy it in case there is another prior instance here.
 	vagrant := &Vagrant{
 		Dir:     path,
-		DataDir: path,
+		DataDir: filepath.Join(path, ".vagrant"),
 		Ui:      ctx.Ui,
 	}
 	if err := vagrant.Execute("destroy", "-f"); err != nil {
@@ -279,7 +279,10 @@ func (l *Layered) buildLayer(layer *Layer, path string, ctx *context.Shared) err
 	})
 }
 
-func (l *Layered) pruneLayer(db *bolt.DB, layer *Layer, ctx *context.Shared) error {
+func (l *Layered) pruneLayer(db *bolt.DB, v *layerVertex, ctx *context.Shared) error {
+	layer := v.Layer
+	path := v.Path
+
 	ctx.Ui.Header(fmt.Sprintf(
 		"Deleting layer '%s'...", layer.ID))
 
@@ -293,7 +296,6 @@ func (l *Layered) pruneLayer(db *bolt.DB, layer *Layer, ctx *context.Shared) err
 
 	// Check the path. If the path doesn't exist, then it is already destroyed.
 	// If the path does exist, then we do an actual vagrant destroy
-	path := l.layerPath(layer)
 	_, err = os.Stat(path)
 	if err != nil && !os.IsNotExist(err) {
 		return err
@@ -301,7 +303,7 @@ func (l *Layered) pruneLayer(db *bolt.DB, layer *Layer, ctx *context.Shared) err
 	if err == nil {
 		vagrant := &Vagrant{
 			Dir:     path,
-			DataDir: path,
+			DataDir: filepath.Join(path, ".vagrant"),
 			Ui:      ctx.Ui,
 		}
 		if err := vagrant.Execute("destroy", "-f"); err != nil {
@@ -427,7 +429,11 @@ func (l *Layered) initLayer(db *bolt.DB, layer *Layer) (*layerVertex, error) {
 		}
 
 		// Vertex doesn't exist. Create it and save it
-		result = layerVertex{Layer: layer, State: layerStatePending}
+		result = layerVertex{
+			Layer: layer,
+			State: layerStatePending,
+			Path:  l.layerPath(layer),
+		}
 		data, err := l.structData(&result)
 		if err != nil {
 			return err
@@ -579,6 +585,7 @@ const layerPathEnv = "OTTO_VAGRANT_LAYER_PATH"
 type layerVertex struct {
 	Layer *Layer     `json:"layer"`
 	State layerState `json:"state"`
+	Path  string     `json:"path"`
 }
 
 func (v *layerVertex) Hashcode() string {
