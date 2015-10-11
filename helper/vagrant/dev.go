@@ -204,6 +204,7 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 	// If we are layered, then let the user know we're going to use
 	// a layer development environment...
 	if opts.Layer != nil {
+		return opts.Layer.Prune(&ctx.Shared)
 		pending, err := opts.Layer.Pending()
 		if err != nil {
 			return fmt.Errorf("Error checking dev layer status: %s", err)

@@ -11,6 +11,7 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/context"
+	"github.com/hashicorp/terraform/dag"
 )
 
 // LayeredDir returns the directory where layered data is stored globally.
@@ -80,6 +81,49 @@ func (l *Layered) Build(ctx *context.Shared) error {
 	for _, layer := range l.Layers {
 		path := paths[layer.ID]
 		if err := l.buildLayer(layer, path, ctx); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Prune will destroy all layers that haven't been used in a certain
+// amount of time.
+//
+// TODO: "certain amount of time" for now we just prune any orphans
+func (l *Layered) Prune(ctx *context.Shared) error {
+	db, err := l.db()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	graph, err := l.graph(db)
+	if err != nil {
+		return err
+	}
+
+	// Get all the bad roots. These are anything without something depending
+	// on it except for the main "root"
+	roots := make([]dag.Vertex, 0)
+	for _, v := range graph.Vertices() {
+		if v == "root" {
+			continue
+		}
+		if graph.UpEdges(v).Len() == 0 {
+			roots = append(roots, v)
+		}
+	}
+	if len(roots) == 0 {
+		return nil
+	}
+
+	// Go through the remaining roots, these are the environments
+	// that must be destroyed.
+	for _, root := range roots {
+		layer := root.(*layerVertex).Layer
+		if err := l.pruneLayer(db, layer, ctx); err != nil {
 			return err
 		}
 	}
@@ -235,6 +279,40 @@ func (l *Layered) buildLayer(layer *Layer, path string, ctx *context.Shared) err
 	})
 }
 
+func (l *Layered) pruneLayer(db *bolt.DB, layer *Layer, ctx *context.Shared) error {
+	ctx.Ui.Header(fmt.Sprintf(
+		"Deleting layer '%s'...", layer.ID))
+
+	// First, note that the layer is no longer ready
+	err := l.updateLayer(db, layer, func(v *layerVertex) {
+		v.State = layerStatePending
+	})
+	if err != nil {
+		return err
+	}
+
+	// Check the path. If the path doesn't exist, then it is already destroyed.
+	// If the path does exist, then we do an actual vagrant destroy
+	path := l.layerPath(layer)
+	_, err = os.Stat(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if err == nil {
+		vagrant := &Vagrant{
+			Dir:     path,
+			DataDir: path,
+			Ui:      ctx.Ui,
+		}
+		if err := vagrant.Execute("destroy", "-f"); err != nil {
+			return err
+		}
+	}
+
+	// Delete the layer
+	return l.deleteLayer(db, layer)
+}
+
 // LayerPaths will return a mapping of all the paths that the Vagrantfiles
 // should clone from. The key of the returned map is the ID of the layer
 // and the value is the path.
@@ -243,10 +321,14 @@ func (l *Layered) buildLayer(layer *Layer, path string, ctx *context.Shared) err
 func (l *Layered) LayerPaths() map[string]string {
 	result := make(map[string]string)
 	for _, layer := range l.Layers {
-		result[layer.ID] = filepath.Join(l.DataDir, "layers", layer.ID)
+		result[layer.ID] = l.layerPath(layer)
 	}
 
 	return result
+}
+
+func (l *Layered) layerPath(layer *Layer) string {
+	return filepath.Join(l.DataDir, "layers", layer.ID)
 }
 
 // db returns the database handle, and sets up the DB if it has never been created.
@@ -400,6 +482,68 @@ func (l *Layered) updateLayer(db *bolt.DB, layer *Layer, f func(*layerVertex)) e
 	})
 }
 
+func (l *Layered) deleteLayer(db *bolt.DB, layer *Layer) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltLayersBucket)
+		key := []byte(layer.ID)
+		return bucket.Delete(key)
+	})
+}
+
+func (l *Layered) graph(db *bolt.DB) (*dag.AcyclicGraph, error) {
+	graph := new(dag.AcyclicGraph)
+	graph.Add("root")
+
+	// First, add all the layers
+	err := db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltLayersBucket)
+		return bucket.ForEach(func(k, data []byte) error {
+			var v layerVertex
+			if err := l.structRead(&v, data); err != nil {
+				return err
+			}
+
+			graph.Add(&v)
+			return nil
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Next, connect the layers
+	err = db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltEdgesBucket)
+		return bucket.ForEach(func(k, data []byte) error {
+			from := &layerVertex{Layer: &Layer{ID: string(k)}}
+			to := &layerVertex{Layer: &Layer{ID: string(data)}}
+			graph.Connect(dag.BasicEdge(from, to))
+			return nil
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Finally, add and connect all the envs
+	err = db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltEnvsBucket)
+		return bucket.ForEach(func(k, data []byte) error {
+			key := fmt.Sprintf("env-%s", string(k))
+			graph.Add(key)
+
+			to := &layerVertex{Layer: &Layer{ID: string(data)}}
+			graph.Connect(dag.BasicEdge(key, to))
+			return nil
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return graph, nil
+}
+
 func (l *Layered) structData(d interface{}) ([]byte, error) {
 	// Let's just output it in human-readable format to make it easy
 	// for debugging. Disk space won't matter that much for this data.
@@ -435,6 +579,14 @@ const layerPathEnv = "OTTO_VAGRANT_LAYER_PATH"
 type layerVertex struct {
 	Layer *Layer     `json:"layer"`
 	State layerState `json:"state"`
+}
+
+func (v *layerVertex) Hashcode() string {
+	return fmt.Sprintf("layer-%s", v.Layer.ID)
+}
+
+func (v *layerVertex) Name() string {
+	return v.Layer.ID
 }
 
 type layerState byte
