@@ -95,6 +95,13 @@ func (opts *DevOptions) actionDestroy(rctx router.Context) error {
 	ctx.Ui.Header("Destroying the local development environment...")
 	vagrant := opts.vagrant(ctx)
 
+	if opts.Layer != nil {
+		if err := opts.Layer.RemoveEnv(vagrant); err != nil {
+			return fmt.Errorf(
+				"Error preparing dev environment: %s", err)
+		}
+	}
+
 	// If the Vagrant directory doesn't exist, then we're already deleted.
 	// So we just verify here that it exists and then call destroy only
 	// if it does.

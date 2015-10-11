@@ -122,6 +122,21 @@ func (l *Layered) AddEnv(v *Vagrant) error {
 	return nil
 }
 
+// RemoveEnv will remove the environment from the tracked layers.
+func (l *Layered) RemoveEnv(v *Vagrant) error {
+	db, err := l.db()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	return db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltEnvsBucket)
+		key := []byte(v.DataDir)
+		return bucket.Delete(key)
+	})
+}
+
 // Pending returns a list of layers that are pending creation.
 // Note that between calling this and calling something like Build(),
 // this state may be different.
