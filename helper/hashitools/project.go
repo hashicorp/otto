@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/go-checkpoint"
 	"github.com/hashicorp/go-version"
@@ -149,6 +150,11 @@ func (p *Project) Version() (*version.Version, error) {
 		return nil, fmt.Errorf(
 			"unable to find %s version in output: %q", p.Name, buf.String())
 	}
+
+	// This is a weird quirk: our version lib follows semver strictly
+	// but Vagrant in particular uses ".dev" instead "-dev" to end the
+	// version for Rubygems. Fix that up with duct tape.
+	matches[1] = strings.Replace(matches[1], ".dev", "-dev", 1)
 
 	return version.NewVersion(matches[1])
 }
