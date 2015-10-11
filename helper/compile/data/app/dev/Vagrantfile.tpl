@@ -6,9 +6,13 @@
 
 Vagrant.configure("2") do |config|
   {% block vagrant_box %}
-  config.vm.box = "hashicorp/precise64"
-  config.vm.provider :parallels do |p, o|
-    o.vm.box = "parallels/ubuntu-12.04"
+  if ENV["OTTO_VAGRANT_LAYER_PATH"]
+    config.vm.clone = ENV["OTTO_VAGRANT_LAYER_PATH"]
+  else
+    config.vm.box = "hashicorp/precise64"
+    config.vm.provider :parallels do |p, o|
+      o.vm.box = "parallels/ubuntu-12.04"
+    end
   end
   {% endblock %}
 
