@@ -87,6 +87,41 @@ func (l *Layered) Build(ctx *context.Shared) error {
 	return nil
 }
 
+// AddEnv will store the given environment as a user of this layer set,
+// preventing the pruning of the layers here.
+//
+// This will also modify the argument to set the environment variable
+// to point to the proper layer.
+func (l *Layered) AddEnv(v *Vagrant) error {
+	// Get the final layer
+	layer := l.Layers[len(l.Layers)-1]
+
+	// Update the DB with our environment
+	db, err := l.db()
+	if err != nil {
+		return err
+	}
+	err = db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltEnvsBucket)
+		key := []byte(v.DataDir)
+		return bucket.Put(key, []byte(layer.ID))
+	})
+	db.Close()
+	if err != nil {
+		return err
+	}
+
+	// Get the path for the final layer and add it to the environment
+	paths := l.LayerPaths()
+	path := filepath.Join(paths[layer.ID], "Vagrantfile")
+	if v.Env == nil {
+		v.Env = make(map[string]string)
+	}
+	v.Env[layerPathEnv] = path
+
+	return nil
+}
+
 // Pending returns a list of layers that are pending creation.
 // Note that between calling this and calling something like Build(),
 // this state may be different.
@@ -156,11 +191,15 @@ func (l *Layered) buildLayer(layer *Layer, path string, ctx *context.Shared) err
 	}
 
 	// Build the Vagrant instance. We bring it up, and then immediately
-	// shut it down since we don't need it running.
+	// shut it down since we don't need it running. We start by trying to
+	// destroy it in case there is another prior instance here.
 	vagrant := &Vagrant{
 		Dir:     path,
 		DataDir: path,
 		Ui:      ctx.Ui,
+	}
+	if err := vagrant.Execute("destroy", "-f"); err != nil {
+		return err
 	}
 	if err := vagrant.Execute("up"); err != nil {
 		return err
@@ -373,6 +412,8 @@ var (
 var (
 	boltDataVersion byte = 1
 )
+
+const layerPathEnv = "OTTO_VAGRANT_LAYER_PATH"
 
 // layerVertex is the type of vertex in the graph that is used to track
 // layer usage throughout Otto.

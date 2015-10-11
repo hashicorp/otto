@@ -218,18 +218,9 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 		}
 	}
 
-	return nil
-
-	// TODO: try the build process of layers here
-	// the layers build step probably needs some UI love
-
 	// Output some info the user prior to running
 	ctx.Ui.Header(
 		"Creating local development environment with Vagrant if it doesn't exist...")
-	ctx.Ui.Message(
-		"Raw Vagrant output will begin streaming in below. Otto does\n" +
-			"not create this output. It is mirrored directly from Vagrant\n" +
-			"while the development environment is being created.\n\n")
 
 	// Store the dev status into the directory. We just do this before
 	// since there are a lot of cases where Vagrant fails but still imported.
@@ -242,7 +233,14 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 	}
 
 	// Run it!
-	if err := opts.vagrant(ctx).Execute("up"); err != nil {
+	vagrant := opts.vagrant(ctx)
+	if opts.Layer != nil {
+		if err := opts.Layer.AddEnv(vagrant); err != nil {
+			return fmt.Errorf(
+				"Error preparing dev environment: %s", err)
+		}
+	}
+	if err := vagrant.Execute("up"); err != nil {
 		return err
 	}
 
