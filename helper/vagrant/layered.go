@@ -153,8 +153,7 @@ func (l *Layered) AddEnv(v *Vagrant) error {
 	}
 
 	// Get the path for the final layer and add it to the environment
-	paths := l.LayerPaths()
-	path := filepath.Join(paths[layer.ID], "Vagrantfile")
+	path := filepath.Join(l.layerPath(layer), "Vagrantfile")
 	if v.Env == nil {
 		v.Env = make(map[string]string)
 	}
@@ -313,20 +312,6 @@ func (l *Layered) pruneLayer(db *bolt.DB, v *layerVertex, ctx *context.Shared) e
 
 	// Delete the layer
 	return l.deleteLayer(db, layer)
-}
-
-// LayerPaths will return a mapping of all the paths that the Vagrantfiles
-// should clone from. The key of the returned map is the ID of the layer
-// and the value is the path.
-//
-// This can be used during the compilation process to setup proper paths.
-func (l *Layered) LayerPaths() map[string]string {
-	result := make(map[string]string)
-	for _, layer := range l.Layers {
-		result[layer.ID] = l.layerPath(layer)
-	}
-
-	return result
 }
 
 func (l *Layered) layerPath(layer *Layer) string {
