@@ -37,6 +37,11 @@ type Vagrant struct {
 	// DataDir is the directory where Vagrant commands should store data.
 	DataDir string
 
+	// Env is extra environment variables to set when executing Vagrant.
+	// This will be on top of the environment variables that are in this
+	// process.
+	Env map[string]string
+
 	// Ui, if given, will be used to stream output from the Vagrant
 	// commands. If this is nil, then the output will be logged but
 	// won't be visible to the user.
@@ -55,16 +60,25 @@ func (v *Vagrant) Execute(command ...string) error {
 	vagrantMutex.Lock()
 	defer vagrantMutex.Unlock()
 
-	// Build the command to execute
-	cmd := exec.Command("vagrant", command...)
-	cmd.Dir = v.Dir
-
 	// Tell vagrant where to store data
 	origDataDir := os.Getenv(vagrantDataDirEnvVar)
 	defer os.Setenv(vagrantDataDirEnvVar, origDataDir)
 	if err := os.Setenv(vagrantDataDirEnvVar, v.DataDir); err != nil {
 		return err
 	}
+
+	// Build up the environment
+	env := os.Environ()
+	if len(v.Env) > 0 {
+		for k, v := range v.Env {
+			env = append(env, fmt.Sprintf("%s=%s", k, v))
+		}
+	}
+
+	// Build the command to execute
+	cmd := exec.Command("vagrant", command...)
+	cmd.Dir = v.Dir
+	cmd.Env = env
 
 	// Run it with the execHelper
 	if err := execHelper.Run(v.Ui, cmd); err != nil {
