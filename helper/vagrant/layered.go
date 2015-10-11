@@ -68,31 +68,11 @@ func (l *Layered) Build(ctx *context.Shared) error {
 	if err != nil {
 		return err
 	}
-
-	// We record the vertices so we can make use of them later
-	layerVertices := make([]*layerVertex, len(l.Layers))
-	for i, layer := range l.Layers {
-		layerVertex, err := l.initLayer(db, layer)
-		if err != nil {
-			db.Close()
-			return err
-		}
-
-		layerVertices[i] = layerVertex
-		if i > 0 {
-			// We have a prior layer, so setup the edge pointer
-			err = db.Update(func(tx *bolt.Tx) error {
-				bucket := tx.Bucket(boltEdgesBucket)
-				return bucket.Put(
-					[]byte(layer.ID),
-					[]byte(layerVertices[i-1].Layer.ID))
-			})
-			if err != nil {
-				return err
-			}
-		}
-	}
+	_, err = l.init(db)
 	db.Close()
+	if err != nil {
+		return err
+	}
 
 	// Go through each layer and build it. This will be a no-op if the
 	// layer is already built.
@@ -105,6 +85,32 @@ func (l *Layered) Build(ctx *context.Shared) error {
 	}
 
 	return nil
+}
+
+// Pending returns a list of layers that are pending creation.
+// Note that between calling this and calling something like Build(),
+// this state may be different.
+func (l *Layered) Pending() ([]string, error) {
+	// Grab the DB and initialize all the layers. This just inserts a
+	// pending layer if it doesn't exist, as well as sets up the edges.
+	db, err := l.db()
+	if err != nil {
+		return nil, err
+	}
+	vs, err := l.init(db)
+	db.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0, len(vs))
+	for _, v := range vs {
+		if v.State != layerStateReady {
+			result = append(result, v.Layer.ID)
+		}
+	}
+
+	return result, nil
 }
 
 func (l *Layered) buildLayer(layer *Layer, path string, ctx *context.Shared) error {
@@ -126,6 +132,9 @@ func (l *Layered) buildLayer(layer *Layer, path string, ctx *context.Shared) err
 		return nil
 	}
 
+	// Tell the user things are happening
+	ctx.Ui.Header(fmt.Sprintf("Creating layer: %s", layer.ID))
+
 	// Prepare the build directory
 	if err := os.MkdirAll(path, 0755); err != nil {
 		return err
@@ -146,13 +155,17 @@ func (l *Layered) buildLayer(layer *Layer, path string, ctx *context.Shared) err
 		return err
 	}
 
-	// Build the Vagrant instance
+	// Build the Vagrant instance. We bring it up, and then immediately
+	// shut it down since we don't need it running.
 	vagrant := &Vagrant{
 		Dir:     path,
 		DataDir: path,
 		Ui:      ctx.Ui,
 	}
 	if err := vagrant.Execute("up"); err != nil {
+		return err
+	}
+	if err := vagrant.Execute("halt"); err != nil {
 		return err
 	}
 
@@ -237,6 +250,33 @@ func (l *Layered) db() (*bolt.DB, error) {
 	}
 
 	return db, nil
+}
+
+// init initializes the database for this layer setup.
+func (l *Layered) init(db *bolt.DB) ([]*layerVertex, error) {
+	layerVertices := make([]*layerVertex, len(l.Layers))
+	for i, layer := range l.Layers {
+		layerVertex, err := l.initLayer(db, layer)
+		if err != nil {
+			return nil, err
+		}
+
+		layerVertices[i] = layerVertex
+		if i > 0 {
+			// We have a prior layer, so setup the edge pointer
+			err = db.Update(func(tx *bolt.Tx) error {
+				bucket := tx.Bucket(boltEdgesBucket)
+				return bucket.Put(
+					[]byte(layer.ID),
+					[]byte(layerVertices[i-1].Layer.ID))
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return layerVertices, nil
 }
 
 // initLayer sets up the layer in the database

@@ -194,6 +194,35 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 		return err
 	}
 
+	// If we are layered, then let the user know we're going to use
+	// a layer development environment...
+	if opts.Layer != nil {
+		pending, err := opts.Layer.Pending()
+		if err != nil {
+			return fmt.Errorf("Error checking dev layer status: %s", err)
+		}
+
+		if len(pending) > 0 {
+			ctx.Ui.Header("Creating development environment layers...")
+			ctx.Ui.Message(
+				"Otto uses layers to speed up building development environments.\n" +
+					"Each layer only needs to be built once. We've detected that the\n" +
+					"layers below aren't created yet. These will be built this time.\n" +
+					"Future development envirionments will use the cached versions\n" +
+					"to be much, much faster.")
+		}
+
+		if err := opts.Layer.Build(&ctx.Shared); err != nil {
+			return fmt.Errorf(
+				"Error building dev environment layers: %s", err)
+		}
+	}
+
+	return nil
+
+	// TODO: try the build process of layers here
+	// the layers build step probably needs some UI love
+
 	// Output some info the user prior to running
 	ctx.Ui.Header(
 		"Creating local development environment with Vagrant if it doesn't exist...")
