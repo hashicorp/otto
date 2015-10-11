@@ -69,7 +69,7 @@ func (p *Project) InstallIfNeeded() error {
 	select {
 	case latest = <-latestCh:
 	case err := <-errCh:
-		return err
+		log.Printf("[ERROR] error checking latest version: %s", err)
 	}
 	log.Printf("[DEBUG] installIfNeeded: %s latest: %s", p.Name, latest)
 	log.Printf("[DEBUG] installIfNeeded: %s min: %s", p.Name, p.MinVersion)
