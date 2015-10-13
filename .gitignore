@@ -4,6 +4,7 @@
 bin/
 builtin/**/bindata.go
 helper/**/bindata.go
+!helper/bindata/**/bindata.go
 images/packer_cache
 pkg/
 scratch/
