@@ -1,10 +1,15 @@
+.PHONY: init
+
 all: build
 
-init:
-	bundle
+build: init
+	bundle exec middleman build
 
 dev: init
 	bundle exec middleman server
 
-build: init
-	bundle exec middleman build
+init:
+ifeq ($(shell gem list \^bundler\$$ -i), false)
+	gem install bundler --no-document
+endif
+	bundle check || bundle
