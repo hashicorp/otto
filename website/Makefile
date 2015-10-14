@@ -1,4 +1,4 @@
-.PHONY: init
+.PHONY: init, build, dev
 
 all: build
 
