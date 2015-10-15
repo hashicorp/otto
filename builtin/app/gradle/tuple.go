@@ -1,4 +1,4 @@
-package goapp
+package gradleapp
 
 import (
 	"github.com/hashicorp/otto/app"
