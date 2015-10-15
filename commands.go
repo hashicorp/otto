@@ -46,6 +46,10 @@ var Detectors = []*detect.Detector{
 		Type: "node",
 		File: []string{"package.json"},
 	},
+	&detect.Detector{
+		Type: "gradle",
+		File: []string{"build.gradle"},
+	},
 }
 
 // Ui is the cli.Ui used for communicating to the outside world.
