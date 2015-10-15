@@ -17,7 +17,7 @@ import (
 // App is an implementation of app.App
 type App struct{}
 
-//
+// Compile ...
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	var opts compile.AppOptions
 	custom := &customizations{Opts: &opts}
@@ -46,6 +46,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	return compile.App(&opts)
 }
 
+// Build ...
 func (a *App) Build(ctx *app.Context) error {
 	return packer.Build(ctx, &packer.BuildOptions{
 		InfraOutputMap: map[string]string{
@@ -54,6 +55,7 @@ func (a *App) Build(ctx *app.Context) error {
 	})
 }
 
+// Deploy ...
 func (a *App) Deploy(ctx *app.Context) error {
 	return terraform.Deploy(&terraform.DeployOptions{
 		InfraOutputMap: map[string]string{
@@ -64,12 +66,14 @@ func (a *App) Deploy(ctx *app.Context) error {
 	}).Route(ctx)
 }
 
+// Dev ...
 func (a *App) Dev(ctx *app.Context) error {
 	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
 	}).Route(ctx)
 }
 
+// DevDep ...
 func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 	return vagrant.DevDep(dst, src, &vagrant.DevDepOptions{})
 }
