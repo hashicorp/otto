@@ -13,6 +13,8 @@ IMPROVEMENTS:
   * app/ruby: Bundle automatically [GH-156]
   * app/php: support customizing PHP version [GH-105]
   * app: support Vagrant parallels provider in dev [GH-85]
+  * command/help: A "help" command was introduced which does nothing except
+      guide people to the proper way to ask for help. [GH-74]
 
 BUG FIXES:
 
