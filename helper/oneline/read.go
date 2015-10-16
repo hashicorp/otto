@@ -2,6 +2,7 @@ package oneline
 
 import (
 	"bufio"
+	"io"
 	"os"
 	"strings"
 )
@@ -16,7 +17,7 @@ func Read(path string) (string, error) {
 	defer f.Close()
 
 	result, err := bufio.NewReader(f).ReadString('\n')
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return "", err
 	}
 
