@@ -197,7 +197,7 @@ func appFoundations(opts *AppOptions) error {
 
 		// Setup the data for this render
 		data.Context["foundation_id"] = id
-		data.Context["foundation_dir"] = dir
+		data.Context["foundation_dir"] = devDir
 
 		// Create the directory where this will be stored
 		renderDir := filepath.Join(

@@ -226,7 +226,6 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 
 	// Tell the user things are happening
 	ctx.Ui.Header(fmt.Sprintf("Creating layer: %s", layer.ID))
-	return nil
 
 	// Prepare the build directory
 	if err := os.MkdirAll(path, 0755); err != nil {
@@ -255,6 +254,11 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 		Dir:     path,
 		DataDir: filepath.Join(path, ".vagrant"),
 		Ui:      ctx.Ui,
+	}
+	if lastV != nil {
+		vagrant.Env = map[string]string{
+			layerPathEnv: filepath.Join(lastV.Path, "Vagrantfile"),
+		}
 	}
 	if err := vagrant.Execute("destroy", "-f"); err != nil {
 		return err
