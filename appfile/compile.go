@@ -328,14 +328,36 @@ func compileDependencies(
 						"Error detecting defaults in %s: %s", key, err)
 				}
 
-				// Parse the Appfile
-				f, err := ParseFile(filepath.Join(dir, "Appfile"))
-				if err != nil {
+				// Parse the Appfile if it exists
+				var f *File
+				appfilePath := filepath.Join(dir, "Appfile")
+				_, err = os.Stat(appfilePath)
+				if err != nil && !os.IsNotExist(err) {
 					return fmt.Errorf(
 						"Error parsing Appfile in %s: %s", key, err)
 				}
+				if err == nil {
+					f, err = ParseFile(appfilePath)
+					if err != nil {
+						return fmt.Errorf(
+							"Error parsing Appfile in %s: %s", key, err)
+					}
+
+					// Realize all the imports for this file
+					if err := compileImports(f, importOpts, opts); err != nil {
+						return err
+					}
+
+					// Merge the files
+					if err := fDef.Merge(f); err != nil {
+						return fmt.Errorf(
+							"Error merging default Appfile for dependency %s: %s",
+							key, err)
+					}
+				}
 
 				// Set the source
+				f = fDef
 				f.Source = key
 
 				// If it doesn't have an otto ID then we can't do anything
@@ -357,21 +379,6 @@ func compileDependencies(
 							"again.",
 						key)
 				}
-
-				// Realize all the imports for this file
-				if err := compileImports(f, importOpts, opts); err != nil {
-					return err
-				}
-
-				// Merge the files
-				log.Printf("DEF: %#v", fDef)
-				log.Printf("WHAT: %#v", f)
-				if err := fDef.Merge(f); err != nil {
-					return fmt.Errorf(
-						"Error merging default Appfile for dependency %s: %s",
-						key, err)
-				}
-				f = fDef
 
 				// We merge the root infrastructure choice upwards to
 				// all dependencies.

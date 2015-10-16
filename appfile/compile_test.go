@@ -53,6 +53,12 @@ func TestCompile(t *testing.T) {
 		},
 
 		{
+			"compile-deps-detect-pure",
+			testCompileDepsPureStr,
+			false,
+		},
+
+		{
 			"compile-multi-dep",
 			testCompileMultiDepStr,
 			false,
@@ -375,8 +381,15 @@ func testCompileOpts(t *testing.T) *CompileOpts {
 	}
 
 	return &CompileOpts{
-		Dir:    dir,
-		Detect: &detect.Config{},
+		Dir: dir,
+		Detect: &detect.Config{
+			Detectors: []*detect.Detector{
+				&detect.Detector{
+					Type: "foo",
+					File: []string{"app.foo"},
+				},
+			},
+		},
 	}
 }
 
@@ -413,6 +426,15 @@ Dep Graph:
 bar
 foo
   bar
+`
+
+const testCompileDepsPureStr = `
+Compiled Appfile: %s
+
+Dep Graph:
+bace12588a9527343f044a5a9260e1fa
+foo
+  bace12588a9527343f044a5a9260e1fa
 `
 
 const testCompileMultiDepStr = `
