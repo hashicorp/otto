@@ -54,7 +54,7 @@ func TestCompile(t *testing.T) {
 
 		{
 			"compile-deps-detect-pure",
-			testCompileDepsPureStr,
+			"",
 			false,
 		},
 
@@ -108,7 +108,9 @@ func TestCompile(t *testing.T) {
 			}
 
 			if err == nil {
-				testCompileCompare(t, c, tc.String)
+				if tc.String != "" {
+					testCompileCompare(t, c, tc.String)
+				}
 				testCompileMarshal(t, c, opts.Dir)
 			}
 		}()
@@ -426,15 +428,6 @@ Dep Graph:
 bar
 foo
   bar
-`
-
-const testCompileDepsPureStr = `
-Compiled Appfile: %s
-
-Dep Graph:
-bace12588a9527343f044a5a9260e1fa
-foo
-  bace12588a9527343f044a5a9260e1fa
 `
 
 const testCompileMultiDepStr = `
