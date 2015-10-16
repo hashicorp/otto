@@ -56,6 +56,7 @@ if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
 fi
 
 export DEBIAN_FRONTEND=noninteractive
+ol "Upgrading Outdated Apt Packages..."
 oe sudo aptitude update -y
 oe sudo aptitude upgrade -y
 
@@ -64,8 +65,7 @@ oe sudo aptitude install software-properties-common python-software-properties -
 oe sudo aptitude update -y
 oe sudo add-apt-repository ppa:webupd8team/java -y
 oe sudo aptitude update -y
-oe sudo aptitude install oracle-java8-installer -y
-oe sudo aptitude install oracle-java8-set-default -y
+oe sudo apt-get install -y --force-yes oracle-java8-installer oracle-java8-set-default
 
 ol "Downloading Gradle {{ gradle_version }}..."
 oe sudo add-apt-repository ppa:cwchien/gradle -y
