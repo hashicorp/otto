@@ -9,15 +9,9 @@ import (
 	"path/filepath"
 
 	"github.com/boltdb/bolt"
-	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/terraform/dag"
 )
-
-// LayeredDir returns the directory where layered data is stored globally.
-func LayeredDir(ctx *app.Context) string {
-	return filepath.Join(ctx.GlobalDir, "vagrant-layered")
-}
 
 // Layered is a Vagrant environment that is created using a series of
 // "layers". Otto manages these layers and this library automatically prunes

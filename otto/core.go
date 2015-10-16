@@ -175,6 +175,24 @@ func (c *Core) Compile() error {
 			mdLock.Unlock()
 		}
 
+		// Compile the foundations for this app
+		subdirs := []string{"app-dev", "app-dev-dep", "app-build", "app-deploy"}
+		for i, f := range foundations {
+			fCtx := foundationCtxs[i]
+			fCtx.Dir = ctx.FoundationDirs[i]
+
+			if _, err := f.Compile(fCtx); err != nil {
+				return err
+			}
+
+			// Make sure the subdirs exist
+			for _, dir := range subdirs {
+				if err := os.MkdirAll(filepath.Join(fCtx.Dir, dir), 0755); err != nil {
+					return err
+				}
+			}
+		}
+
 		// Compile!
 		result, err := app.Compile(ctx)
 		if err != nil {
@@ -182,7 +200,6 @@ func (c *Core) Compile() error {
 		}
 
 		// Compile the foundations for this app
-		subdirs := []string{"app-dev", "app-dev-dep", "app-build", "app-deploy"}
 		for i, f := range foundations {
 			fCtx := foundationCtxs[i]
 			fCtx.Dir = ctx.FoundationDirs[i]

@@ -91,18 +91,21 @@ func (a *App) Dev(ctx *app.Context) error {
 		return err
 	}
 
+	// Setup layers
+	layered, err := vagrant.DevLayered(ctx, []*vagrant.Layer{
+		&vagrant.Layer{
+			ID:          fmt.Sprintf("go%s", goVersion),
+			Vagrantfile: filepath.Join(ctx.Dir, "dev", "layer-base", "Vagrantfile"),
+		},
+	})
+	if err != nil {
+		return err
+	}
+
 	// Build the actual development environment
 	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
-		Layer: &vagrant.Layered{
-			DataDir: vagrant.LayeredDir(ctx),
-			Layers: []*vagrant.Layer{
-				&vagrant.Layer{
-					ID:          fmt.Sprintf("go%s", goVersion),
-					Vagrantfile: filepath.Join(ctx.Dir, "dev", "layer-base", "Vagrantfile"),
-				},
-			},
-		},
+		Layer:        layered,
 	}).Route(ctx)
 }
 
