@@ -10,6 +10,7 @@ import (
 	appNode "github.com/hashicorp/otto/builtin/app/node"
 	appPHP "github.com/hashicorp/otto/builtin/app/php"
 	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
+	appGradle "github.com/hashicorp/otto/builtin/app/gradle"
 	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
 
@@ -81,6 +82,7 @@ func init() {
 	apps.Add(appNode.Tuples.Map(app.StructFactory(new(appNode.App))))
 	apps.Add(appPHP.Tuples.Map(app.StructFactory(new(appPHP.App))))
 	apps.Add(appRuby.Tuples.Map(app.StructFactory(new(appRuby.App))))
+	apps.Add(appGradle.Tuples.Map(app.StructFactory(new(appGradle.App))))
 
 	foundations := foundationConsul.Tuples.Map(foundation.StructFactory(new(foundationConsul.Foundation)))
 
