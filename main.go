@@ -117,9 +117,10 @@ func wrappedMain() int {
 	}
 
 	cli := &cli.CLI{
-		Args:       args,
-		Commands:   Commands,
-		HelpFunc:   cli.BasicHelpFunc("otto"),
+		Args:     args,
+		Commands: Commands,
+		HelpFunc: cli.FilteredHelpFunc(
+			CommandsInclude, cli.BasicHelpFunc("otto")),
 		HelpWriter: os.Stdout,
 	}
 
