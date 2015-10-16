@@ -455,7 +455,7 @@ func (l *Layered) initLayer(db *bolt.DB, layer *Layer, parent *Layer) (*layerVer
 		result = layerVertex{
 			Layer:  layer,
 			State:  layerStatePending,
-			Parent: parent.ID,
+			Parent: parentID,
 			Path:   l.layerPath(layer),
 		}
 		data, err := l.structData(&result)
