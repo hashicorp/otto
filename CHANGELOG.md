@@ -22,6 +22,8 @@ BUG FIXES:
   * appfile: some git dependencies that weren't working now do
   * appfile: application type is merged separately from other applications
       fields so it is optional [GH-192] [GH-212]
+  * appfile: dependencies don't need an Appfile (but they do need
+      a .ottoid) [GH-237]
   * app: fix Vagrant warning about box name [GH-110]
   * app: support Vagrant dev versions
   * app: don't error if no internet is availabile
