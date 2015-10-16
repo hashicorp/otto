@@ -53,6 +53,12 @@ func TestCompile(t *testing.T) {
 		},
 
 		{
+			"compile-deps-detect-pure",
+			"",
+			false,
+		},
+
+		{
 			"compile-multi-dep",
 			testCompileMultiDepStr,
 			false,
@@ -102,7 +108,9 @@ func TestCompile(t *testing.T) {
 			}
 
 			if err == nil {
-				testCompileCompare(t, c, tc.String)
+				if tc.String != "" {
+					testCompileCompare(t, c, tc.String)
+				}
 				testCompileMarshal(t, c, opts.Dir)
 			}
 		}()
@@ -383,8 +391,15 @@ func testCompileOpts(t *testing.T) *CompileOpts {
 	}
 
 	return &CompileOpts{
-		Dir:    dir,
-		Detect: &detect.Config{},
+		Dir: dir,
+		Detect: &detect.Config{
+			Detectors: []*detect.Detector{
+				&detect.Detector{
+					Type: "foo",
+					File: []string{"app.foo"},
+				},
+			},
+		},
 	}
 }
 
