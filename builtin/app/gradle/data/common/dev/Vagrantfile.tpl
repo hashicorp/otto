@@ -65,7 +65,8 @@ oe sudo apt-get install oracle-java8-installer -y --force-yes
 oe sudo apt-get install oracle-java8-set-default -y --force-yes
 oe sudo add-apt-repository ppa:cwchien/gradle
 oe sudo apt-get update -y
-oe sudo apt-get install gradle -y --force-yes
+oe sudo apt-cache search gradle
+oe sudo apt-get install gradle-{{ gradle_version }} -y --force-yes
 
 ol "Installing Git..."
 oe sudo apt-get install -y git --force-yes
