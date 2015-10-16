@@ -1,6 +1,7 @@
 package vagrant
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -62,6 +63,12 @@ func Dev(opts *DevOptions) *router.Router {
 				ExecuteFunc:  opts.actionHalt,
 				SynopsisText: actionHaltSyn,
 				HelpText:     strings.TrimSpace(actionHaltHelp),
+			},
+
+			"layers": &router.SimpleAction{
+				ExecuteFunc:  opts.actionLayers,
+				SynopsisText: actionLayersSyn,
+				HelpText:     strings.TrimSpace(actionLayersHelp),
 			},
 
 			"ssh": &router.SimpleAction{
@@ -267,6 +274,47 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 	return nil
 }
 
+func (opts *DevOptions) actionLayers(rctx router.Context) error {
+	if opts.Layer == nil {
+		return fmt.Errorf(
+			"This development environment does not use layers.\n" +
+				"This command can only be used to manage development\n" +
+				"environments with layers.")
+	}
+
+	ctx := rctx.(*app.Context)
+	fs := flag.NewFlagSet("otto", flag.ContinueOnError)
+	prune := fs.Bool("prune", false, "prune unused layers")
+	if err := fs.Parse(rctx.RouteArgs()); err != nil {
+		return err
+	}
+
+	// Prune?
+	if *prune {
+		ctx.Ui.Header("Pruning any outdated or unused layers...")
+		count, err := opts.Layer.Prune(&ctx.Shared)
+		if err != nil {
+			return err
+		}
+		if count == 0 {
+			ctx.Ui.Message("No outdated or unused layers were found!")
+		} else {
+			ctx.Ui.Message(fmt.Sprintf(
+				"[green]Pruned %d outdated or unused layers!", count))
+		}
+
+		return nil
+	}
+
+	// We're just listing the layers. Eventually we probably should
+	// output status or something more useful here.
+	for _, l := range opts.Layer.Layers {
+		ctx.Ui.Raw(l.ID + "\n")
+	}
+
+	return nil
+}
+
 func (opts *DevOptions) vagrant(ctx *app.Context) *Vagrant {
 	dir := opts.Dir
 	if dir == "" {
@@ -300,6 +348,7 @@ const (
 	actionUpSyn      = "Starts the development environment"
 	actionDestroySyn = "Destroy the development environment"
 	actionHaltSyn    = "Halts the development environment"
+	actionLayersSyn  = "Manage the layers of this development environment"
 	actionSSHSyn     = "SSH into the development environment"
 	actionVagrantSyn = "Run arbitrary Vagrant commands"
 )
@@ -337,6 +386,25 @@ Usage: otto dev halt
 
   This command will stop the development environment. The environment can then
   be started again with 'otto dev'.
+
+`
+
+const actionLayersHelp = `
+Usage: otto dev layers [options]
+
+  Manage the development environment layers.
+
+  This command will manage the layers of the development environment.
+  Otto uses layers as a mechanism for caching parts of the development
+  environment that aren't often updated. This makes "otto dev" faster
+  after the first call.
+
+  If no options are given, the layers will be listed that this development
+  environment uses.
+
+Options:
+
+  -prune       Delete all unused or outdated layers
 
 `
 

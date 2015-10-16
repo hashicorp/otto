@@ -89,16 +89,16 @@ func (l *Layered) Build(ctx *context.Shared) error {
 // amount of time.
 //
 // TODO: "certain amount of time" for now we just prune any orphans
-func (l *Layered) Prune(ctx *context.Shared) error {
+func (l *Layered) Prune(ctx *context.Shared) (int, error) {
 	db, err := l.db()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer db.Close()
 
 	graph, err := l.graph(db)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	// Get all the bad roots. These are anything without something depending
@@ -113,18 +113,21 @@ func (l *Layered) Prune(ctx *context.Shared) error {
 		}
 	}
 	if len(roots) == 0 {
-		return nil
+		return 0, nil
 	}
 
 	// Go through the remaining roots, these are the environments
 	// that must be destroyed.
+	count := 0
 	for _, root := range roots {
 		if err := l.pruneLayer(db, root.(*layerVertex), ctx); err != nil {
-			return err
+			return count, err
 		}
+
+		count++
 	}
 
-	return nil
+	return count, nil
 }
 
 // AddEnv will store the given environment as a user of this layer set,
@@ -286,11 +289,20 @@ func (l *Layered) pruneLayer(db *bolt.DB, v *layerVertex, ctx *context.Shared) e
 	layer := v.Layer
 	path := v.Path
 
+	// First check if the layer even exists
+	exists, err := l.checkLayer(db, layer)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return l.deleteLayer(db, layer, path)
+	}
+
 	ctx.Ui.Header(fmt.Sprintf(
 		"Deleting layer '%s'...", layer.ID))
 
 	// First, note that the layer is no longer ready
-	err := l.updateLayer(db, layer, func(v *layerVertex) {
+	err = l.updateLayer(db, layer, func(v *layerVertex) {
 		v.State = layerStatePending
 	})
 	if err != nil {
@@ -315,7 +327,7 @@ func (l *Layered) pruneLayer(db *bolt.DB, v *layerVertex, ctx *context.Shared) e
 	}
 
 	// Delete the layer
-	return l.deleteLayer(db, layer)
+	return l.deleteLayer(db, layer, path)
 }
 
 func (l *Layered) layerPath(layer *Layer) string {
@@ -458,6 +470,19 @@ func (l *Layered) initLayer(db *bolt.DB, layer *Layer, parent *Layer) (*layerVer
 	return &result, err
 }
 
+func (l *Layered) checkLayer(db *bolt.DB, layer *Layer) (bool, error) {
+	var result bool
+	err := db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltLayersBucket)
+		key := []byte(layer.ID)
+		data := bucket.Get(key)
+		result = len(data) > 0
+		return nil
+	})
+
+	return result, err
+}
+
 func (l *Layered) readLayer(db *bolt.DB, layer *Layer) (*layerVertex, error) {
 	var result layerVertex
 	err := db.View(func(tx *bolt.Tx) error {
@@ -500,11 +525,33 @@ func (l *Layered) updateLayer(db *bolt.DB, layer *Layer, f func(*layerVertex)) e
 	})
 }
 
-func (l *Layered) deleteLayer(db *bolt.DB, layer *Layer) error {
+func (l *Layered) deleteLayer(db *bolt.DB, layer *Layer, path string) error {
+	if err := os.RemoveAll(path); err != nil {
+		return err
+	}
+
 	return db.Update(func(tx *bolt.Tx) error {
+		// Delete the layer itself
 		bucket := tx.Bucket(boltLayersBucket)
 		key := []byte(layer.ID)
-		return bucket.Delete(key)
+		if err := bucket.Delete(key); err != nil {
+			return err
+		}
+
+		// Delete all the edges
+		bucket = tx.Bucket(boltEdgesBucket)
+		if err := bucket.Delete(key); err != nil {
+			return err
+		}
+
+		// Find any values
+		return bucket.ForEach(func(k, data []byte) error {
+			if string(data) == layer.ID {
+				return bucket.Delete(k)
+			}
+
+			return nil
+		})
 	})
 }
 
