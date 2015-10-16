@@ -71,8 +71,13 @@ func (l *Layered) Build(ctx *context.Shared) error {
 
 	// Go through each layer and build it. This will be a no-op if the
 	// layer is already built.
-	for _, v := range vs {
-		if err := l.buildLayer(v, ctx); err != nil {
+	for i, v := range vs {
+		var last *layerVertex
+		if i > 0 {
+			last = vs[i-1]
+		}
+
+		if err := l.buildLayer(v, last, ctx); err != nil {
 			return err
 		}
 	}
@@ -197,7 +202,7 @@ func (l *Layered) Pending() ([]string, error) {
 	return result, nil
 }
 
-func (l *Layered) buildLayer(v *layerVertex, ctx *context.Shared) error {
+func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Shared) error {
 	layer := v.Layer
 	path := v.Path
 
@@ -221,6 +226,7 @@ func (l *Layered) buildLayer(v *layerVertex, ctx *context.Shared) error {
 
 	// Tell the user things are happening
 	ctx.Ui.Header(fmt.Sprintf("Creating layer: %s", layer.ID))
+	return nil
 
 	// Prepare the build directory
 	if err := os.MkdirAll(path, 0755); err != nil {
@@ -373,19 +379,24 @@ func (l *Layered) db() (*bolt.DB, error) {
 func (l *Layered) init(db *bolt.DB) ([]*layerVertex, error) {
 	layerVertices := make([]*layerVertex, len(l.Layers))
 	for i, layer := range l.Layers {
-		layerVertex, err := l.initLayer(db, layer)
+		var parent *Layer
+		if i > 0 {
+			parent = l.Layers[i-1]
+		}
+
+		layerVertex, err := l.initLayer(db, layer, parent)
 		if err != nil {
 			return nil, err
 		}
 
 		layerVertices[i] = layerVertex
-		if i > 0 {
+		if parent != nil {
 			// We have a prior layer, so setup the edge pointer
 			err = db.Update(func(tx *bolt.Tx) error {
 				bucket := tx.Bucket(boltEdgesBucket)
 				return bucket.Put(
 					[]byte(layer.ID),
-					[]byte(layerVertices[i-1].Layer.ID))
+					[]byte(parent.ID))
 			})
 			if err != nil {
 				return nil, err
@@ -397,21 +408,39 @@ func (l *Layered) init(db *bolt.DB) ([]*layerVertex, error) {
 }
 
 // initLayer sets up the layer in the database
-func (l *Layered) initLayer(db *bolt.DB, layer *Layer) (*layerVertex, error) {
+func (l *Layered) initLayer(db *bolt.DB, layer *Layer, parent *Layer) (*layerVertex, error) {
+	var parentID string
+	if parent != nil {
+		parentID = parent.ID
+	}
+
 	var result layerVertex
 	err := db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(boltLayersBucket)
 		key := []byte(layer.ID)
 		data := bucket.Get(key)
 		if len(data) > 0 {
-			return l.structRead(&result, data)
+			var v layerVertex
+			if err := l.structRead(&v, data); err != nil {
+				return err
+			}
+
+			if v.Parent == parentID {
+				result = v
+				return nil
+			}
+
+			// The parent didn't match, so we just initialize a new
+			// entry below. This will also force the destruction of the
+			// old environment.
 		}
 
 		// Vertex doesn't exist. Create it and save it
 		result = layerVertex{
-			Layer: layer,
-			State: layerStatePending,
-			Path:  l.layerPath(layer),
+			Layer:  layer,
+			State:  layerStatePending,
+			Parent: parent.ID,
+			Path:   l.layerPath(layer),
 		}
 		data, err := l.structData(&result)
 		if err != nil {
@@ -562,9 +591,10 @@ const layerPathEnv = "OTTO_VAGRANT_LAYER_PATH"
 // layerVertex is the type of vertex in the graph that is used to track
 // layer usage throughout Otto.
 type layerVertex struct {
-	Layer *Layer     `json:"layer"`
-	State layerState `json:"state"`
-	Path  string     `json:"path"`
+	Layer  *Layer     `json:"layer"`
+	State  layerState `json:"state"`
+	Parent string     `json:"parent"`
+	Path   string     `json:"path"`
 }
 
 func (v *layerVertex) Hashcode() string {

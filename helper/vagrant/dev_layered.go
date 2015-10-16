@@ -55,5 +55,10 @@ func DevLayered(ctx *app.Context, layers []*Layer) (*Layered, error) {
 		})
 	}
 
+	// Add our final layers
+	if len(layers) > 0 {
+		result.Layers = append(result.Layers, layers...)
+	}
+
 	return result, nil
 }

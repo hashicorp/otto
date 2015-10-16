@@ -228,6 +228,7 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 	// Output some info the user prior to running
 	ctx.Ui.Header(
 		"Creating local development environment with Vagrant if it doesn't exist...")
+	return nil
 
 	// Store the dev status into the directory. We just do this before
 	// since there are a lot of cases where Vagrant fails but still imported.
