@@ -5,7 +5,7 @@
 # Vagrantfile, use the Appfile.
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "hashicorp/precise64"
+  config.vm.box = "ubuntu/trusty64"
 
   # Host only network
   config.vm.network "private_network", ip: "{{ dev_ip_address }}"
