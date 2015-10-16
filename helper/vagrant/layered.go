@@ -263,7 +263,7 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 			layerPathEnv: filepath.Join(lastV.Path, "Vagrantfile"),
 		}
 	}
-	if err := vagrant.Execute("destroy", "-f"); err != nil {
+	if err := vagrant.ExecuteSilent("destroy", "-f"); err != nil {
 		return err
 	}
 	if err := vagrant.Execute("up"); err != nil {
