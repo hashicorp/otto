@@ -52,27 +52,33 @@ type Vagrant struct {
 // which is not a supported mode of operation for Vagrant.
 var vagrantMutex = &sync.Mutex{}
 
-// The environment variable that Vagrant uses to configure its data dir.
-const vagrantDataDirEnvVar = "VAGRANT_DOTFILE_PATH"
+const (
+	// The environment variable that Vagrant uses to configure its working dir
+	vagrantCwdEnvVar = "VAGRANT_CWD"
+
+	// The environment variable that Vagrant uses to configure its data dir.
+	vagrantDataDirEnvVar = "VAGRANT_DOTFILE_PATH"
+)
 
 // Execute executes a raw Vagrant command.
 func (v *Vagrant) Execute(command ...string) error {
 	vagrantMutex.Lock()
 	defer vagrantMutex.Unlock()
 
-	// Tell vagrant where to store data
-	origDataDir := os.Getenv(vagrantDataDirEnvVar)
-	defer os.Setenv(vagrantDataDirEnvVar, origDataDir)
-	if err := os.Setenv(vagrantDataDirEnvVar, v.DataDir); err != nil {
-		return err
+	if v.Env == nil {
+		v.Env = make(map[string]string)
 	}
+
+	// Where to store data
+	v.Env[vagrantDataDirEnvVar] = v.DataDir
+
+	// Make sure we use our cwd properly
+	v.Env[vagrantCwdEnvVar] = v.Dir
 
 	// Build up the environment
 	env := os.Environ()
-	if len(v.Env) > 0 {
-		for k, v := range v.Env {
-			env = append(env, fmt.Sprintf("%s=%s", k, v))
-		}
+	for k, v := range v.Env {
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
 
 	// Build the command to execute
