@@ -17,6 +17,7 @@ activate :hashicorp do |h|
   h.bintray_repo    = "mitchellh/otto"
   h.bintray_user    = "mitchellh"
   h.bintray_key     = ENV["BINTRAY_API_KEY"]
+  h.github_slug     = "hashicorp/otto"
 
   h.minify_javascript = false
 end
