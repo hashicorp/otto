@@ -349,6 +349,14 @@ func TestCompileID_existing(t *testing.T) {
 	}
 }
 
+func TestLoadCompile_new(t *testing.T) {
+	path := filepath.Join("./test-fixtures", "load-new")
+	_, err := LoadCompiled(path)
+	if err == nil {
+		t.Fatal("should error")
+	}
+}
+
 func testCompileCompare(t *testing.T, c *Compiled, expected string) {
 	actual := strings.TrimSpace(c.String())
 	expected = strings.TrimSpace(fmt.Sprintf(expected, c.File.Path))

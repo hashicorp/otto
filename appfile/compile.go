@@ -8,12 +8,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/hashicorp/go-getter"
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/otto/appfile/detect"
+	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/terraform/dag"
 )
 
@@ -146,6 +148,24 @@ type CompileEventImport struct {
 // LoadCompiled loads and verifies a compiled Appfile (*Compiled) from
 // disk.
 func LoadCompiled(dir string) (*Compiled, error) {
+	// Check the version
+	vsnStr, err := oneline.Read(filepath.Join(dir, CompileVersionFilename))
+	if err != nil {
+		return nil, err
+	}
+	vsn, err := strconv.ParseInt(vsnStr, 0, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	// If the version is too new, then we can't handle it
+	if vsn > CompileVersion {
+		return nil, fmt.Errorf(
+			"The Appfile for this enviroment was compiled with a newer version\n" +
+				"of Otto. Otto can't load this environment. You can recompile this\n" +
+				"environment to this version of Otto with `otto compile`.")
+	}
+
 	f, err := os.Open(filepath.Join(dir, CompileFilename))
 	if err != nil {
 		return nil, err
