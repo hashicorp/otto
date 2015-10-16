@@ -33,7 +33,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				Type:     "gradle",
 				Callback: custom.processDev,
 				Schema: map[string]*schema.FieldSchema{
-					"node_version": &schema.FieldSchema{
+					"gradle_version": &schema.FieldSchema{
 						Type:        schema.TypeString,
 						Default:     "2.7",
 						Description: "Gradle version to install",
