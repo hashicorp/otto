@@ -4,6 +4,8 @@ IMPROVEMENTS:
 
   * core: IP addresses for dev environments are now in the RFC 6598 space [GH-113]
   * core: Added `otto dev halt` action to halt the Vagrant machine [GH-195]
+  * core: Otto will error if it detects a compiled environment from a newer
+      version of Otto [GH-254]
   * app/custom: Vagrantfile for dev is rendered as a template [GH-168]
   * app/rails: Support for Rails projects [GH-190]
   * app/ruby: Use --no-document when installing bundler in dev [GH-130]
