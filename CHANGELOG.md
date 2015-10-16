@@ -14,6 +14,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+  * core: Ctrl-C now works when asking for credential password [GH-252]
   * appfile: some git dependencies that weren't working now do
   * appfile: application type is merged separately from other applications
       fields so it is optional [GH-192] [GH-212]
