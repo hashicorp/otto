@@ -11,9 +11,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/hashicorp/go-getter"
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/otto/appfile/detect"
-	"github.com/hashicorp/terraform/config/module"
 	"github.com/hashicorp/terraform/dag"
 )
 
@@ -215,7 +215,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	}
 
 	// Build the storage we'll use for storing imports
-	importStorage := &module.FolderStorage{
+	importStorage := &getter.FolderStorage{
 		StorageDir: filepath.Join(opts.Dir, CompileImportsFolder)}
 	importOpts := &compileImportOpts{
 		Storage:   importStorage,
@@ -238,7 +238,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	// Build the storage we'll use for storing downloaded dependencies,
 	// then use that to trigger the recursive call to download all our
 	// dependencies.
-	storage := &module.FolderStorage{
+	storage := &getter.FolderStorage{
 		StorageDir: filepath.Join(opts.Dir, CompileDepsFolder)}
 	if err := compileDependencies(
 		storage,
@@ -261,7 +261,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 }
 
 func compileDependencies(
-	storage module.Storage,
+	storage getter.Storage,
 	importOpts *compileImportOpts,
 	graph *dag.AcyclicGraph,
 	opts *CompileOpts,
@@ -270,7 +270,9 @@ func compileDependencies(
 	vertexMap := make(map[string]*CompiledGraphVertex)
 
 	// Store ourselves in the map
-	key, err := module.Detect(".", filepath.Dir(root.File.Path))
+	key, err := getter.Detect(
+		".", filepath.Dir(root.File.Path),
+		getter.Detectors)
 	if err != nil {
 		return err
 	}
@@ -291,7 +293,9 @@ func compileDependencies(
 
 		log.Printf("[DEBUG] compiling dependencies for: %s", current.Name())
 		for _, dep := range current.File.Application.Dependencies {
-			key, err := module.Detect(dep.Source, filepath.Dir(current.File.Path))
+			key, err := getter.Detect(
+				dep.Source, filepath.Dir(current.File.Path),
+				getter.Detectors)
 			if err != nil {
 				return fmt.Errorf(
 					"Error loading source: %s", err)
@@ -426,7 +430,7 @@ func compileWrite(dir string, compiled *Compiled) error {
 }
 
 type compileImportOpts struct {
-	Storage   module.Storage
+	Storage   getter.Storage
 	Cache     map[string]*File
 	CacheLock *sync.Mutex
 }
@@ -475,7 +479,9 @@ func compileImports(
 
 		// Go through the imports and kick off the download
 		for idx, i := range f.Imports {
-			source, err := module.Detect(i.Source, filepath.Dir(f.Path))
+			source, err := getter.Detect(
+				i.Source, filepath.Dir(f.Path),
+				getter.Detectors)
 			if err != nil {
 				resultErrLock.Lock()
 				defer resultErrLock.Unlock()

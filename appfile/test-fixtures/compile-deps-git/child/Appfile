@@ -1,0 +1,11 @@
+application {
+    name = "bar"
+    type = "bar"
+}
+
+project {
+    name = "foo"
+    infrastructure = "aws"
+}
+
+infrastructure "aws" {}
