@@ -56,19 +56,26 @@ if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
 fi
 
 export DEBIAN_FRONTEND=noninteractive
-oe sudo apt-get update -y
+oe sudo aptitude update -y
+oe sudo aptitude upgrade -y
 
 ol "Downloading Java 8..."
+oe sudo aptitude install software-properties-common python-software-properties -y
+oe sudo aptitude update -y
 oe sudo add-apt-repository ppa:webupd8team/java -y
-oe sudo apt-get update -y
-oe sudo apt-get install oracle-java8-installer -y --force-yes
-oe sudo apt-get install oracle-java8-set-default -y --force-yes
-oe sudo add-apt-repository ppa:cwchien/gradle
-oe sudo apt-get update -y
+oe sudo aptitude update -y
+oe sudo aptitude install oracle-java8-installer -y
+oe sudo aptitude install oracle-java8-set-default -y
+
+ol "Downloading Gradle {{ gradle_version }}..."
+oe sudo add-apt-repository ppa:cwchien/gradle -y
+oe sudo aptitude update -y
 oe sudo apt-cache search gradle
-oe sudo apt-get install gradle-{{ gradle_version }} -y --force-yes
+oe sudo aptitude install gradle-{{ gradle_version }} -y
 
 ol "Installing Git..."
-oe sudo apt-get install -y git --force-yes
+oe sudo add-apt-repository ppa:git-core/ppa -y
+oe sudo aptitude update -y
+oe sudo aptitude install git -y
 
 SCRIPT
