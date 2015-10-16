@@ -16,10 +16,12 @@ BUG FIXES:
   * appfile: some git dependencies that weren't working now do
   * appfile: application type is merged separately from other applications
       fields so it is optional [GH-192] [GH-212]
+  * app: fix Vagrant warning about box name [GH-110]
+  * app: support Vagrant dev versions
+  * app: don't error if no internet is availabile
   * app/node: fix node download directory in build [GH-125]
   * app/ruby: allow `gem install` to work as `vagrant` user in dev [GH-129]
   * app/ruby, app/php: Fix `package.json` causing apps to be detected as Node.js [GH-149]
-  * app: fix Vagrant warning about box name [GH-110]
 
 PLUGIN DEV CHANGES:
 
