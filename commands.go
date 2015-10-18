@@ -100,6 +100,7 @@ func init() {
 		"infra",
 		"status",
 		"version",
+		"init",
 	}
 
 	Commands = map[string]cli.CommandFactory{
@@ -152,6 +153,12 @@ func init() {
 
 		"help": func() (cli.Command, error) {
 			return &command.HelpCommand{
+				Meta: meta,
+			}, nil
+		},
+
+		"init": func() (cli.Command, error) {
+			return &command.InitCommand{
 				Meta: meta,
 			}, nil
 		},
