@@ -23,6 +23,10 @@ type AppOptions struct {
 	// Ctx is the app context of this compilation.
 	Ctx *app.Context
 
+	// Result is the base CompileResult that will be used to return the result.
+	// You can set this if you want to override some settings.
+	Result *app.CompileResult
+
 	// FoundationConfig is the configuration for the foundation that
 	// will be returned as the compilation result.
 	FoundationConfig foundation.Config
@@ -152,10 +156,13 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 		opts.FoundationConfig.ServiceName = opts.Ctx.Application.Name
 	}
 
-	return &app.CompileResult{
-		FoundationConfig:   opts.FoundationConfig,
-		DevDepFragmentPath: fragmentPath,
-	}, nil
+	result := opts.Result
+	if result == nil {
+		result = new(app.CompileResult)
+	}
+	result.FoundationConfig = opts.FoundationConfig
+	result.DevDepFragmentPath = fragmentPath
+	return result, nil
 }
 
 // appFoundations compiles the app-specific foundation files.
