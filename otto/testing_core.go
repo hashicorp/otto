@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -63,6 +64,7 @@ func TestCoreConfig(t TestT) *CoreConfig {
 		DataDir:    filepath.Join(td, "data"),
 		LocalDir:   filepath.Join(td, "local"),
 		CompileDir: filepath.Join(td, "compile"),
+		Directory:  &directory.BoltBackend{Dir: filepath.Join(td, "directory")},
 		Ui:         new(ui.Mock),
 	}
 

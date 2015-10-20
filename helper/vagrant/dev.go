@@ -2,6 +2,7 @@ package vagrant
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -85,17 +86,25 @@ func (opts *DevOptions) actionDestroy(rctx router.Context) error {
 
 	ctx.Ui.Header("Destroying the local development environment...")
 
-	if err := opts.vagrant(ctx).Execute("destroy", "-f"); err != nil {
+	// If the Vagrant directory doesn't exist, then we're already deleted.
+	// So we just verify here that it exists and then call destroy only
+	// if it does.
+	_, err := os.Stat(opts.Dir)
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	ctx.Ui.Raw("\n")
+	if err == nil {
+		if err := opts.vagrant(ctx).Execute("destroy", "-f"); err != nil {
+			return err
+		}
+		ctx.Ui.Raw("\n")
+	}
 
 	// Store the dev status into the directory. We just do this before
 	// since there are a lot of cases where Vagrant fails but still imported.
 	// We just override any prior dev.
 	ctx.Ui.Header("Deleting development environment metadata...")
-	dev := &directory.Dev{Lookup: directory.Lookup{AppID: ctx.Appfile.ID}}
-	if err := ctx.Directory.DeleteDev(dev); err != nil {
+	if err := ctx.Directory.DeleteDev(opts.devLookup(ctx)); err != nil {
 		return fmt.Errorf(
 			"Error deleting dev environment metadata: %s", err)
 	}
