@@ -1,12 +1,10 @@
-package testing
+package otto
 
 import (
 	"fmt"
 	"log"
 	"os"
 	"testing"
-
-	"github.com/hashicorp/otto/otto"
 )
 
 // TestEnvVar must be set to a non-empty value for acceptance tests to run.
@@ -22,7 +20,7 @@ type TestCase struct {
 
 	// Core is the core to use for testing. The Test* methods such
 	// as TestCoreConfig should be used to create the test core.
-	Core *otto.Core
+	Core *Core
 
 	// Steps are the set of operations that are run for this test case.
 	Steps []TestStep
