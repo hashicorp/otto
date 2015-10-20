@@ -64,6 +64,11 @@ type App interface {
 type Context struct {
 	context.Shared
 
+	// CompileResult is the result of the compilation. This is set on
+	// all calls except Compile to be the data from the compilation. This
+	// can be used to check compile versions, for example.
+	CompileResult *CompileResult
+
 	// Action is the sub-action to take when being executed.
 	//
 	// ActionArgs is the list of arguments for this action.
@@ -130,6 +135,10 @@ func (c *Context) UI() ui.Ui {
 
 // CompileResult is the structure containing compilation result values.
 type CompileResult struct {
+	// Version is the version of the compiled result. This is purely metadata:
+	// the app itself should use this to detect certain behaviors on run.
+	Version uint32
+
 	// FoundationConfig is the configuration for the various foundational
 	// elements of Otto.
 	FoundationConfig foundation.Config
@@ -138,4 +147,9 @@ type CompileResult struct {
 	// should be added to other Vagrantfiles when this application is
 	// used as a dependency.
 	DevDepFragmentPath string
+
+	// FoundationResults are the compilation results of the foundations.
+	//
+	// This is populated by Otto core and any set value here will be ignored.
+	FoundationResults []*foundation.CompileResult
 }
