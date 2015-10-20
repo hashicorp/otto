@@ -20,6 +20,10 @@ func TestApp_dev(t *testing.T) {
 			App:  new(App),
 		}),
 
+		Steps: []otto.TestStep{
+			&vagrant.DevTestStepInit{},
+		},
+
 		Teardown: vagrant.DevTestTeardown,
 	})
 }

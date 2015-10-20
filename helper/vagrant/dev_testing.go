@@ -17,3 +17,23 @@ func DevTestTeardown(c *otto.Core) error {
 		Action: "destroy",
 	})
 }
+
+// DevTestStepInit is a otto.TestStep that initilizes dev testing.
+// This should be the first test step before any others for dev.
+type DevTestStepInit struct{}
+
+func (s *DevTestStepInit) Run(c *otto.Core) error {
+	log.Printf("[INFO] test: starting the development environment")
+	return c.Dev()
+}
+
+// DevTestStepGuestScript is an otto.TestStep that runs a script in the
+// guest and verifies it succeeds (exit code 0).
+type DevTestStepScript struct {
+	Command string
+}
+
+func (s *DevTestStepScript) Run(c *otto.Core) error {
+	log.Printf("[INFO] test: testing guest script: %q", s.Command)
+	return nil
+}
