@@ -146,6 +146,18 @@ func (opts *DevOptions) actionRaw(rctx router.Context) error {
 
 func (opts *DevOptions) actionSSH(rctx router.Context) error {
 	ctx := rctx.(*app.Context)
+
+	dev, err := ctx.Directory.GetDev(opts.devLookup(ctx))
+	if err != nil {
+		return err
+	}
+	if dev == nil {
+		return fmt.Errorf(
+			"The development environment hasn't been created yet! Please\n" +
+				"create the development environmet by running `otto dev` before\n" +
+				"attempting to SSH.")
+	}
+
 	project := Project(&ctx.Shared)
 	if err := project.InstallIfNeeded(); err != nil {
 		return err
@@ -215,6 +227,10 @@ func (opts *DevOptions) vagrant(ctx *app.Context) *Vagrant {
 		DataDir: dataDir,
 		Ui:      ctx.Ui,
 	}
+}
+
+func (opts *DevOptions) devLookup(ctx *app.Context) *directory.Dev {
+	return &directory.Dev{Lookup: directory.Lookup{AppID: ctx.Appfile.ID}}
 }
 
 func (opts *DevOptions) sshCache(ctx *app.Context) *SSHCache {
