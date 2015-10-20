@@ -137,19 +137,19 @@ func (c *Context) UI() ui.Ui {
 type CompileResult struct {
 	// Version is the version of the compiled result. This is purely metadata:
 	// the app itself should use this to detect certain behaviors on run.
-	Version uint32
+	Version uint32 `json:"version"`
 
 	// FoundationConfig is the configuration for the various foundational
 	// elements of Otto.
-	FoundationConfig foundation.Config
+	FoundationConfig foundation.Config `json:"foundation_config"`
 
 	// DevDepFragmentPath is the path to the Vagrantfile fragment that
 	// should be added to other Vagrantfiles when this application is
 	// used as a dependency.
-	DevDepFragmentPath string
+	DevDepFragmentPath string `json:"dev_dep_fragment_path"`
 
 	// FoundationResults are the compilation results of the foundations.
 	//
 	// This is populated by Otto core and any set value here will be ignored.
-	FoundationResults []*foundation.CompileResult
+	FoundationResults map[string]*foundation.CompileResult `json:"foundation_results"`
 }
