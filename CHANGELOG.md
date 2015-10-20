@@ -31,6 +31,7 @@ BUG FIXES:
   * app/node: fix node download directory in build [GH-125]
   * app/ruby: allow `gem install` to work as `vagrant` user in dev [GH-129]
   * app/ruby, app/php: Fix `package.json` causing apps to be detected as Node.js [GH-149]
+  * command/build: show help if any args are given [GH-245]
 
 PLUGIN DEV CHANGES:
 
