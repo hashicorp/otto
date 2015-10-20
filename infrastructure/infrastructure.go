@@ -65,5 +65,4 @@ func (c *Context) UI() ui.Ui {
 }
 
 // CompileResult is the structure containing compilation result values.
-type CompileResult struct {
-}
+type CompileResult struct{}
