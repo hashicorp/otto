@@ -65,7 +65,7 @@ func TestCoreConfig(t TestT) *CoreConfig {
 		LocalDir:   filepath.Join(td, "local"),
 		CompileDir: filepath.Join(td, "compile"),
 		Directory:  &directory.BoltBackend{Dir: filepath.Join(td, "directory")},
-		Ui:         new(ui.Mock),
+		Ui:         &ui.Logged{Ui: new(ui.Mock)},
 	}
 
 	// Add some default mock implementations. These can be overwritten easily
