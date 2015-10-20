@@ -37,11 +37,11 @@ type TestStep interface {
 	// Run is used to run the TestStep. It should return an error if
 	// the step failed. If the step fails, then no further steps are
 	// called. The Teardown will be called on the TestCase.
-	Run() error
+	Run(*Core) error
 }
 
 // TestTeardownFunc is the callback used for Teardown in TestCase.
-type TestTeardownFunc func() error
+type TestTeardownFunc func(*Core) error
 
 // Test performs an acceptance test on a backend with the given test case.
 //
@@ -82,7 +82,7 @@ func Test(t TestT, c TestCase) {
 	// Run the steps
 	for i, s := range c.Steps {
 		log.Printf("[WARN] Executing test step %d", i+1)
-		if err := s.Run(); err != nil {
+		if err := s.Run(c.Core); err != nil {
 			t.Error(fmt.Sprintf("Failed step %d: %s", i+1, err))
 			break
 		}
@@ -90,7 +90,11 @@ func Test(t TestT, c TestCase) {
 
 	// Cleanup
 	if c.Teardown != nil {
-		c.Teardown()
+		if err := c.Teardown(c.Core); err != nil {
+			t.Error(fmt.Sprintf(
+				"Teardown failed! Dangling resources may exist. Error:\n\n%s",
+				err))
+		}
 	}
 }
 

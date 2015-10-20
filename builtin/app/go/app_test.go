@@ -1,9 +1,11 @@
 package goapp
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/helper/vagrant"
 	"github.com/hashicorp/otto/otto"
 )
 
@@ -12,6 +14,12 @@ func TestApp_impl(t *testing.T) {
 }
 
 func TestApp_dev(t *testing.T) {
-	core := otto.TestCoreConfig(t)
-	otto.TestAppFixed(t, tuple, config, app)
+	otto.Test(t, otto.TestCase{
+		Core: otto.TestCore(t, &otto.TestCoreOpts{
+			Path: filepath.Join("./test-fixtures", "basic", "Appfile"),
+			App:  new(App),
+		}),
+
+		Teardown: vagrant.DevTestTeardown,
+	})
 }
