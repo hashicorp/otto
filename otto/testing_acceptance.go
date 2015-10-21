@@ -79,6 +79,12 @@ func Test(t TestT, c TestCase) {
 		t.Fatal("Must provide a core")
 	}
 
+	// Compile the app
+	log.Printf("[WARN] test: compiling appfile...")
+	if err := c.Core.Compile(); err != nil {
+		t.Fatal("error compiling: ", err)
+	}
+
 	// Run the steps
 	for i, s := range c.Steps {
 		log.Printf("[WARN] Executing test step %d", i+1)

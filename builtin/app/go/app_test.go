@@ -22,6 +22,9 @@ func TestApp_dev(t *testing.T) {
 
 		Steps: []otto.TestStep{
 			&vagrant.DevTestStepInit{},
+			&vagrant.DevTestStepGuestScript{
+				Command: "go version",
+			},
 		},
 
 		Teardown: vagrant.DevTestTeardown,

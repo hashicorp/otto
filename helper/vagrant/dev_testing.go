@@ -29,11 +29,17 @@ func (s *DevTestStepInit) Run(c *otto.Core) error {
 
 // DevTestStepGuestScript is an otto.TestStep that runs a script in the
 // guest and verifies it succeeds (exit code 0).
-type DevTestStepScript struct {
+type DevTestStepGuestScript struct {
 	Command string
 }
 
-func (s *DevTestStepScript) Run(c *otto.Core) error {
+func (s *DevTestStepGuestScript) Run(c *otto.Core) error {
 	log.Printf("[INFO] test: testing guest script: %q", s.Command)
-	return nil
+	return c.Execute(&otto.ExecuteOpts{
+		Task:   otto.ExecuteTaskDev,
+		Action: "vagrant",
+		Args: []string{
+			"ssh", "-c", s.Command,
+		},
+	})
 }
