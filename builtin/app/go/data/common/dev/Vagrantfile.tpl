@@ -17,7 +17,7 @@
 
   # Make it so that `vagrant ssh` goes directly to the correct dir
   config.vm.provision "shell", inline:
-    %Q[echo "cd {{ shared_folder_path }}" >> /home/vagrant/.bashrc]
+    %Q[echo "cd {{ shared_folder_path }}" >> /home/vagrant/.profile]
 {% endblock %}
 
 {% block footer %}
