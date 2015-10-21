@@ -2,6 +2,7 @@ package otto
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -34,6 +35,9 @@ func TestTest_preCheck(t *testing.T) {
 	mt := new(mockT)
 	Test(mt, TestCase{
 		PreCheck: func() { called = true },
+		Core: TestCore(t, &TestCoreOpts{
+			Path: filepath.Join("./test-fixtures", "basic", "Appfile"),
+		}),
 	})
 
 	if !called {
