@@ -2,6 +2,7 @@ package vagrant
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -85,16 +86,19 @@ func (opts *DevOptions) actionDestroy(rctx router.Context) error {
 	}
 
 	ctx.Ui.Header("Destroying the local development environment...")
+	vagrant := opts.vagrant(ctx)
 
 	// If the Vagrant directory doesn't exist, then we're already deleted.
 	// So we just verify here that it exists and then call destroy only
 	// if it does.
-	_, err := os.Stat(opts.Dir)
+	log.Printf("[DEBUG] vagrant: verifying data dir exists: %s", vagrant.DataDir)
+	_, err := os.Stat(vagrant.DataDir)
 	if err != nil && !os.IsNotExist(err) {
+		log.Printf("[ERROR] vagrant: err: %s", err)
 		return err
 	}
 	if err == nil {
-		if err := opts.vagrant(ctx).Execute("destroy", "-f"); err != nil {
+		if err := vagrant.Execute("destroy", "-f"); err != nil {
 			return err
 		}
 		ctx.Ui.Raw("\n")
