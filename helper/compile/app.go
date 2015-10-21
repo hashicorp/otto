@@ -48,6 +48,11 @@ type CompileCallback func() error
 //
 // AppOptions may be modified by this function during this call.
 func App(opts *AppOptions) (*app.CompileResult, error) {
+	// Write the test data in case we're running tests right now
+	testLock.RLock()
+	defer testLock.RUnlock()
+	testAppOpts = opts
+
 	ctx := opts.Ctx
 
 	// Setup the basic templating data. We put this into the "data" local

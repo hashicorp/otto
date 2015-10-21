@@ -22,6 +22,10 @@ type TestCase struct {
 	// as TestCoreConfig should be used to create the test core.
 	Core *Core
 
+	// Unit, if set to true, won't require the OTTO_ACC variable to be
+	// set and will run as a normal unit test.
+	Unit bool
+
 	// Steps are the set of operations that are run for this test case.
 	Steps []TestStep
 
@@ -56,7 +60,7 @@ type TestTeardownFunc func(*Core) error
 func Test(t TestT, c TestCase) {
 	// We only run acceptance tests if an env var is set because they're
 	// slow and generally require some outside configuration.
-	if os.Getenv(TestEnvVar) == "" {
+	if !c.Unit && os.Getenv(TestEnvVar) == "" {
 		t.Skip(fmt.Sprintf(
 			"Acceptance tests skipped unless env '%s' set",
 			TestEnvVar))
@@ -64,7 +68,7 @@ func Test(t TestT, c TestCase) {
 	}
 
 	// We require verbose mode so that the user knows what is going on.
-	if !testTesting && !testing.Verbose() {
+	if !c.Unit && !testTesting && !testing.Verbose() {
 		t.Fatal("Acceptance tests must be run with the -v flag on tests")
 		return
 	}
