@@ -1,6 +1,8 @@
 package exec
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -43,6 +45,26 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 	// Run the command
 	log.Printf("[DEBUG] execDir: %s", cmd.Dir)
 	log.Printf("[DEBUG] exec: %s %s", cmd.Path, strings.Join(cmd.Args[1:], " "))
+
+	// Build a runnable command that we can log out to make things easier
+	// for debugging. This lets debuging devs just copy and paste the command.
+	var debugBuf bytes.Buffer
+	for _, env := range cmd.Env {
+		parts := strings.SplitN(env, "=", 2)
+		debugBuf.WriteString(fmt.Sprintf("%s=%q ", parts[0], parts[1]))
+	}
+	debugBuf.WriteString(cmd.Path + " ")
+	for _, arg := range cmd.Args[1:] {
+		if strings.Contains(arg, " ") {
+			debugBuf.WriteString(fmt.Sprintf("'%s' ", arg))
+		} else {
+			debugBuf.WriteString(fmt.Sprintf("%s ", arg))
+		}
+	}
+	log.Printf("[DEBUG] exec runnable: %s", debugBuf.String())
+	debugBuf.Reset()
+
+	// Run
 	err := cmd.Run()
 
 	// Wait for all the output to finish
