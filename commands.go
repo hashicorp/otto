@@ -25,6 +25,7 @@ import (
 
 // Commands is the mapping of all the available Otto commands.
 var Commands map[string]cli.CommandFactory
+var CommandsInclude []string
 
 var Detectors = []*detect.Detector{
 	&detect.Detector{
@@ -97,6 +98,16 @@ func init() {
 		Ui: Ui,
 	}
 
+	CommandsInclude = []string{
+		"compile",
+		"build",
+		"deploy",
+		"dev",
+		"infra",
+		"status",
+		"version",
+	}
+
 	Commands = map[string]cli.CommandFactory{
 		"compile": func() (cli.Command, error) {
 			return &command.CompileCommand{
@@ -142,6 +153,12 @@ func init() {
 				Version:           Version,
 				VersionPrerelease: VersionPrerelease,
 				CheckFunc:         commandVersionCheck,
+			}, nil
+		},
+
+		"help": func() (cli.Command, error) {
+			return &command.HelpCommand{
+				Meta: meta,
 			}, nil
 		},
 	}

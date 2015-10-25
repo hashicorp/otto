@@ -48,7 +48,12 @@ func ListKeys() ([]*agent.Key, error) {
 
 	conn, err := net.Dial("unix", sshAuthSock)
 	if err != nil {
-		return nil, fmt.Errorf("Error connecting to agent: %s", err)
+		return nil, fmt.Errorf(
+			"Error connecting to agent: %s\n\n"+
+				"The agent address is detected using the SSH_AUTH_SOCK environment\n"+
+				"variable. Please verify this variable is correct and the SSH agent\n"+
+				"is properly set up.",
+			err)
 	}
 	defer conn.Close()
 

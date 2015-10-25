@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -13,6 +14,14 @@ import (
 	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/terraform/dag"
 )
+
+var testHasGit bool
+
+func init() {
+	if _, err := exec.LookPath("git"); err == nil {
+		testHasGit = true
+	}
+}
 
 func TestCompiled_impl(t *testing.T) {
 	var _ json.Marshaler = new(Compiled)
@@ -40,6 +49,12 @@ func TestCompile(t *testing.T) {
 		{
 			"compile-deps-detect",
 			testCompileDepsStr,
+			false,
+		},
+
+		{
+			"compile-deps-detect-pure",
+			"",
 			false,
 		},
 
@@ -93,11 +108,44 @@ func TestCompile(t *testing.T) {
 			}
 
 			if err == nil {
-				testCompileCompare(t, c, tc.String)
+				if tc.String != "" {
+					testCompileCompare(t, c, tc.String)
+				}
 				testCompileMarshal(t, c, opts.Dir)
 			}
 		}()
 	}
+}
+
+// This is a really important test case that verifies that ".ottoid"
+// is not ignored from dependencies. We had this happen with 0.1
+func TestCompile_dotOttoId(t *testing.T) {
+	if !testHasGit {
+		t.Log("git not found, skipping")
+		t.Skip()
+	}
+
+	opts := testCompileOpts(t)
+	defer os.RemoveAll(opts.Dir)
+	f := testFile(t, "compile-deps-git")
+	defer f.resetID()
+
+	// Rename DOTgit to .git since Git doesn't allow nested .git
+	dir := filepath.Join(filepath.Dir(f.Path), "child")
+	oldName := filepath.Join(dir, "DOTgit")
+	newName := filepath.Join(dir, ".git")
+	if err := os.Rename(oldName, newName); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Rename(newName, oldName)
+
+	c, err := Compile(f, opts)
+	if err != nil {
+		t.Fatalf("err:\n\n%s", err)
+	}
+
+	testCompileCompare(t, c, testCompileDepGitStr)
+	testCompileMarshal(t, c, opts.Dir)
 }
 
 func TestCompile_structure(t *testing.T) {
@@ -309,6 +357,14 @@ func TestCompileID_existing(t *testing.T) {
 	}
 }
 
+func TestLoadCompile_new(t *testing.T) {
+	path := filepath.Join("./test-fixtures", "load-new")
+	_, err := LoadCompiled(path)
+	if err == nil {
+		t.Fatal("should error")
+	}
+}
+
 func testCompileCompare(t *testing.T, c *Compiled, expected string) {
 	actual := strings.TrimSpace(c.String())
 	expected = strings.TrimSpace(fmt.Sprintf(expected, c.File.Path))
@@ -335,8 +391,15 @@ func testCompileOpts(t *testing.T) *CompileOpts {
 	}
 
 	return &CompileOpts{
-		Dir:    dir,
-		Detect: &detect.Config{},
+		Dir: dir,
+		Detect: &detect.Config{
+			Detectors: []*detect.Detector{
+				&detect.Detector{
+					Type: "foo",
+					File: []string{"app.foo"},
+				},
+			},
+		},
 	}
 }
 
@@ -358,6 +421,15 @@ foo
 `
 
 const testCompileDepsStr = `
+Compiled Appfile: %s
+
+Dep Graph:
+bar
+foo
+  bar
+`
+
+const testCompileDepGitStr = `
 Compiled Appfile: %s
 
 Dep Graph:

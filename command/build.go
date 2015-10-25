@@ -14,7 +14,14 @@ type BuildCommand struct {
 func (c *BuildCommand) Run(args []string) int {
 	fs := c.FlagSet("build", FlagSetNone)
 	fs.Usage = func() { c.Ui.Error(c.Help()) }
+
 	if err := fs.Parse(args); err != nil {
+		return 1
+	}
+
+	// Show usage if build command was passed any arguments.
+	if len(args) != 0 {
+		fs.Usage()
 		return 1
 	}
 

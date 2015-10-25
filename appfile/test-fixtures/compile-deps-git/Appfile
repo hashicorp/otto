@@ -1,0 +1,15 @@
+application {
+    name = "foo"
+    type = "bar"
+
+    dependency {
+        source = "git::./child"
+    }
+}
+
+project {
+    name = "foo"
+    infrastructure = "aws"
+}
+
+infrastructure "aws" {}

@@ -37,34 +37,56 @@ type Vagrant struct {
 	// DataDir is the directory where Vagrant commands should store data.
 	DataDir string
 
+	// Env is extra environment variables to set when executing Vagrant.
+	// This will be on top of the environment variables that are in this
+	// process.
+	Env map[string]string
+
 	// Ui, if given, will be used to stream output from the Vagrant
 	// commands. If this is nil, then the output will be logged but
 	// won't be visible to the user.
 	Ui ui.Ui
+
+	lock sync.Mutex
 }
 
 // A global mutex to prevent any Vagrant commands from running in parallel,
 // which is not a supported mode of operation for Vagrant.
 var vagrantMutex = &sync.Mutex{}
 
-// The environment variable that Vagrant uses to configure its data dir.
-const vagrantDataDirEnvVar = "VAGRANT_DOTFILE_PATH"
+const (
+	// The environment variable that Vagrant uses to configure its working dir
+	vagrantCwdEnvVar = "VAGRANT_CWD"
+
+	// The environment variable that Vagrant uses to configure its data dir.
+	vagrantDataDirEnvVar = "VAGRANT_DOTFILE_PATH"
+)
 
 // Execute executes a raw Vagrant command.
 func (v *Vagrant) Execute(command ...string) error {
 	vagrantMutex.Lock()
 	defer vagrantMutex.Unlock()
 
+	if v.Env == nil {
+		v.Env = make(map[string]string)
+	}
+
+	// Where to store data
+	v.Env[vagrantDataDirEnvVar] = v.DataDir
+
+	// Make sure we use our cwd properly
+	v.Env[vagrantCwdEnvVar] = v.Dir
+
+	// Build up the environment
+	env := os.Environ()
+	for k, v := range v.Env {
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
+	}
+
 	// Build the command to execute
 	cmd := exec.Command("vagrant", command...)
 	cmd.Dir = v.Dir
-
-	// Tell vagrant where to store data
-	origDataDir := os.Getenv(vagrantDataDirEnvVar)
-	defer os.Setenv(vagrantDataDirEnvVar, origDataDir)
-	if err := os.Setenv(vagrantDataDirEnvVar, v.DataDir); err != nil {
-		return err
-	}
+	cmd.Env = env
 
 	// Run it with the execHelper
 	if err := execHelper.Run(v.Ui, cmd); err != nil {
@@ -77,4 +99,17 @@ func (v *Vagrant) Execute(command ...string) error {
 	}
 
 	return nil
+}
+
+func (v *Vagrant) ExecuteSilent(command ...string) error {
+	v.lock.Lock()
+	defer v.lock.Unlock()
+
+	// Store the old UI and restore it before exit
+	old := v.Ui
+	defer func() { v.Ui = old }()
+
+	// Make the Ui silent
+	v.Ui = &ui.Logged{Ui: &ui.Null{}}
+	return v.Execute(command...)
 }
