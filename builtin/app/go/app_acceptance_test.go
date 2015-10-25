@@ -3,7 +3,6 @@ package goapp
 import (
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/otto/helper/vagrant"
 	"github.com/hashicorp/otto/otto"
@@ -23,8 +22,6 @@ func TestApp_dev(t *testing.T) {
 			&vagrant.DevTestStepGuestScript{
 				Command: "go version",
 			},
-
-			&otto.TestStepSleep{Duration: 10 * time.Minute},
 
 			// Verify we can build immediately (we should be in the directory)
 			&vagrant.DevTestStepGuestScript{
