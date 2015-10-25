@@ -28,6 +28,7 @@ func DevLayered(ctx *app.Context, layers []*Layer) (*Layered, error) {
 	if err != nil {
 		// If we don't have foundation layers, we're done!
 		if os.IsNotExist(err) {
+			result.Layers = layers
 			return result, nil
 		}
 
