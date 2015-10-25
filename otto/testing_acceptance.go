@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 // TestEnvVar must be set to a non-empty value for acceptance tests to run.
@@ -106,6 +107,15 @@ func Test(t TestT, c TestCase) {
 				err))
 		}
 	}
+}
+
+// TestStepSleep is a debugging test step that inserts a sleep.
+// This is useful for debugging a failing acceptance test.
+type TestStepSleep struct{ Duration time.Duration }
+
+func (t *TestStepSleep) Run(*Core) error {
+	time.Sleep(t.Duration)
+	return nil
 }
 
 // TestT is the interface used to handle the test lifecycle of a test.
