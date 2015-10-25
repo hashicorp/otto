@@ -1,6 +1,8 @@
 package exec
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -43,6 +45,12 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 	// Run the command
 	log.Printf("[DEBUG] execDir: %s", cmd.Dir)
 	log.Printf("[DEBUG] exec: %s %s", cmd.Path, strings.Join(cmd.Args[1:], " "))
+
+	// Build a runnable command that we can log out to make things easier
+	// for debugging. This lets debuging devs just copy and paste the command.
+	logRunnableCommand(cmd)
+
+	// Run
 	err := cmd.Run()
 
 	// Wait for all the output to finish
@@ -65,4 +73,46 @@ const OttoSkipCleanupEnvVar = "OTTO_SKIP_CLEANUP"
 // debugging purposes.
 func ShouldCleanup() bool {
 	return os.Getenv(OttoSkipCleanupEnvVar) == ""
+}
+
+func logRunnableCommand(cmd *exec.Cmd) {
+	// Create the struct of the global available environment variables
+	//
+	// We could probably cache this, but I'm not sure this really matters.
+	// The bottleneck should always be subprocess execution and not this.
+	global := make(map[string]struct{})
+	for _, env := range os.Environ() {
+		idx := strings.Index(env, "=")
+		if idx == -1 {
+			panic("env var doesn't contain = " + env)
+		}
+
+		global[env[:idx]] = struct{}{}
+	}
+
+	// Build the env vars
+	var debugBuf bytes.Buffer
+	for _, env := range cmd.Env {
+		// Split the env var, if we have it globally, then don't put it
+		// in the output in order to save some sanity.
+		parts := strings.SplitN(env, "=", 2)
+		if _, ok := global[parts[0]]; ok {
+			continue
+		}
+
+		debugBuf.WriteString(fmt.Sprintf("%s=%q ", parts[0], parts[1]))
+	}
+
+	// Write the command and the arguments
+	debugBuf.WriteString(cmd.Path + " ")
+	for _, arg := range cmd.Args[1:] {
+		// If the argument contains a space, then we want to quote it
+		if strings.Contains(arg, " ") {
+			debugBuf.WriteString(fmt.Sprintf("'%s' ", arg))
+		} else {
+			debugBuf.WriteString(fmt.Sprintf("%s ", arg))
+		}
+	}
+
+	log.Printf("[DEBUG] exec runnable: %s", debugBuf.String())
 }

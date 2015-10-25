@@ -17,7 +17,7 @@
 
   # Make it so that `vagrant ssh` goes directly to the correct dir
   config.vm.provision "shell", inline:
-    %Q[echo "cd {{ shared_folder_path }}" >> /home/vagrant/.bashrc]
+    %Q[echo "cd {{ shared_folder_path }}" >> /home/vagrant/.profile]
 {% endblock %}
 
 {% block footer %}
@@ -45,8 +45,8 @@ fstype=$(find /opt/gopath -mindepth 0 -maxdepth 0 -type d -printf "%F")
 find /opt/gopath -fstype ${fstype} -print0 | xargs -0 -n 100 chown vagrant:vagrant
 
 ol "Setting up PATH..."
-echo 'export PATH=/opt/gopath/bin:/usr/local/go/bin:$PATH' >> /home/vagrant/.bashrc
-echo 'export GOPATH=/opt/gopath' >> /home/vagrant/.bashrc
+echo 'export PATH=/opt/gopath/bin:/usr/local/go/bin:$PATH' >> /home/vagrant/.profile
+echo 'export GOPATH=/opt/gopath' >> /home/vagrant/.profile
 
 ol "Installing VCSs for go get..."
 oe sudo apt-get update -y

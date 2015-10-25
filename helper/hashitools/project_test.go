@@ -1,6 +1,7 @@
 package hashitools
 
 import (
+	"net/http"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -8,7 +9,20 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
+var hasInternet bool
+
+func init() {
+	var client http.Client
+	if _, err := client.Get("http://www.google.com"); err == nil {
+		hasInternet = true
+	}
+}
+
 func TestProjectLatestVersion(t *testing.T) {
+	if !hasInternet {
+		t.Skip("No internet detected, skipping test")
+	}
+
 	p := &Project{Name: "vagrant"}
 
 	vsn, err := p.LatestVersion()
