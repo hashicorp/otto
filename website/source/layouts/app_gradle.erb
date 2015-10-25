@@ -1,0 +1,40 @@
+<% wrap_layout :inner do %>
+	<% content_for :sidebar do %>
+		<div class="docs-sidebar hidden-print affix-top" role="complementary">
+			<ul class="nav docs-sidenav">
+				<li<%= sidebar_current("docs-home") %>>
+					<a href="/docs/apps/index.html">&laquo; Documentation Home</a>
+				</li>
+
+				<li<%= sidebar_current("docs-gradle-index") %>>
+					<a href="/docs/apps/gradle/index.html">Gradle App Type</a>
+				</li>
+
+				<hr>
+
+				<li<%= sidebar_current("docs-gradle-detect") %>>
+					<a href="/docs/apps/gradle/detect.html">Detection</a>
+				</li>
+
+				<li<%= sidebar_current("docs-gradle-dev") %>>
+					<a href="/docs/apps/gradle/dev.html">Development</a>
+				</li>
+
+				<li<%= sidebar_current("docs-gradle-deploy") %>>
+					<a href="/docs/apps/gradle/deploy/index.html">Build & Deploy</a>
+					<ul class="nav">
+						<li<%= sidebar_current("docs-gradle-deploy-aws") %>>
+							<a href="/docs/apps/gradle/deploy/aws.html">AWS</a>
+						</li>
+					</ul>
+				</li>
+
+				<li<%= sidebar_current("docs-gradle-customization") %>>
+					<a href="/docs/apps/gradle/customization.html">Customization</a>
+				</li>
+			</ul>
+		</div>
+	<% end %>
+
+	<%= yield %>
+<% end %>
