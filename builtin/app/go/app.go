@@ -2,6 +2,7 @@ package goapp
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -19,6 +20,22 @@ import (
 type App struct{}
 
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
+	// Determine if we appear to be using Godeps
+	godeps := false
+	_, err := os.Stat(filepath.Join(filepath.Dir(ctx.Appfile.Path), "Godeps"))
+	if err != nil && !os.IsNotExist(err) {
+		return nil, fmt.Errorf(
+			"Error checking for Godeps folder. The error is shown below.\n"+
+				"Godeps isn't required for usage with Otto but the error returned\n"+
+				"while checking was not typical.\n\n%s", err)
+	} else if err == nil {
+		godeps = true
+		ctx.Ui.Header("Detected Godep!")
+		ctx.Ui.Message(
+			"Godep will be automatically installed in the development\n" +
+				"environment and will be used for builds.")
+	}
+
 	var opts compile.AppOptions
 	custom := &customizations{Opts: &opts}
 	opts = compile.AppOptions{
@@ -31,6 +48,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			AssetDir: AssetDir,
 			Context: map[string]interface{}{
 				"dep_binary_path": fmt.Sprintf("/usr/local/bin/%s", ctx.Application.Name),
+				"godeps":          godeps,
 				"path": map[string]string{
 					"guest_working": fmt.Sprintf(
 						"/otto-deps/%s-%s",
