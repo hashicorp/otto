@@ -120,11 +120,18 @@ func (l *Layered) Prune(ctx *context.Shared) (int, error) {
 	// that must be destroyed.
 	count := 0
 	for _, root := range roots {
-		if err := l.pruneLayer(db, root.(*layerVertex), ctx); err != nil {
+		err := graph.DepthFirstWalk([]dag.Vertex{root},
+			func(v dag.Vertex, depth int) error {
+				if err := l.pruneLayer(db, v.(*layerVertex), ctx); err != nil {
+					return err
+				}
+
+				count++
+				return nil
+			})
+		if err != nil {
 			return count, err
 		}
-
-		count++
 	}
 
 	return count, nil
@@ -560,6 +567,7 @@ func (l *Layered) graph(db *bolt.DB) (*dag.AcyclicGraph, error) {
 	graph.Add("root")
 
 	// First, add all the layers
+	layers := make(map[string]*layerVertex)
 	err := db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(boltLayersBucket)
 		return bucket.ForEach(func(k, data []byte) error {
@@ -568,7 +576,11 @@ func (l *Layered) graph(db *bolt.DB) (*dag.AcyclicGraph, error) {
 				return err
 			}
 
+			// Add this layer to the graph
 			graph.Add(&v)
+
+			// Store the mapping for later
+			layers[v.Layer.ID] = &v
 			return nil
 		})
 	})
@@ -580,9 +592,12 @@ func (l *Layered) graph(db *bolt.DB) (*dag.AcyclicGraph, error) {
 	err = db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(boltEdgesBucket)
 		return bucket.ForEach(func(k, data []byte) error {
-			from := &layerVertex{Layer: &Layer{ID: string(k)}}
-			to := &layerVertex{Layer: &Layer{ID: string(data)}}
-			graph.Connect(dag.BasicEdge(from, to))
+			from := layers[string(k)]
+			to := layers[string(data)]
+			if from != nil && to != nil {
+				graph.Connect(dag.BasicEdge(from, to))
+			}
+
 			return nil
 		})
 	})
@@ -597,8 +612,12 @@ func (l *Layered) graph(db *bolt.DB) (*dag.AcyclicGraph, error) {
 			key := fmt.Sprintf("env-%s", string(k))
 			graph.Add(key)
 
+			// Connect the env to the layer it depends on
 			to := &layerVertex{Layer: &Layer{ID: string(data)}}
 			graph.Connect(dag.BasicEdge(key, to))
+
+			// Connect the root to the environment that is active
+			graph.Connect(dag.BasicEdge("root", key))
 			return nil
 		})
 	})
@@ -648,7 +667,7 @@ type layerVertex struct {
 	Path   string     `json:"path"`
 }
 
-func (v *layerVertex) Hashcode() string {
+func (v *layerVertex) Hashcode() interface{} {
 	return fmt.Sprintf("layer-%s", v.Layer.ID)
 }
 

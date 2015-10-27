@@ -51,7 +51,7 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 	logRunnableCommand(cmd)
 
 	// Run
-	err := cmd.Run()
+	err := Runner(cmd)
 
 	// Wait for all the output to finish
 	out_w.Close()
