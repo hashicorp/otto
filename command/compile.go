@@ -246,11 +246,11 @@ func findAppfile(flag string) (string, error) {
 // existing Appfile by first looking for the DefaultAppfile and then looking
 // for any AltAppfiles in the dir
 func findAppfileInDir(path string) string {
-	if _, err := os.Stat(filepath.Join(path, DefaultAppfile)); err == nil {
+	if fi, err := os.Stat(filepath.Join(path, DefaultAppfile)); err == nil && !fi.IsDir() {
 		return filepath.Join(path, DefaultAppfile)
 	}
 	for _, aaf := range AltAppfiles {
-		if _, err := os.Stat(filepath.Join(path, aaf)); err == nil {
+		if fi, err := os.Stat(filepath.Join(path, aaf)); err == nil && !fi.IsDir() {
 			return filepath.Join(path, aaf)
 		}
 	}

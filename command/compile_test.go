@@ -41,6 +41,41 @@ func TestCompile(t *testing.T) {
 	}
 }
 
+func TestCompile_appfileDir(t *testing.T) {
+	core := otto.TestCoreConfig(t)
+	infra := otto.TestInfra(t, "aws", core)
+	otto.TestFoundation(t, foundation.Tuple{"consul", "aws", "simple"}, core)
+	otto.TestApp(t, app.Tuple{"test", "aws", "simple"}, core)
+
+	ui := new(cli.MockUi)
+	detectors := []*detect.Detector{
+		&detect.Detector{
+			Type: "test",
+			File: []string{"main.txt"},
+		},
+	}
+
+	c := &CompileCommand{
+		Meta: Meta{
+			CoreConfig: core,
+			Ui:         ui,
+		},
+		Detectors: detectors,
+	}
+
+	dir := fixtureDir("compile-appfile-dir")
+	defer testChdir(t, dir)()
+
+	args := []string{}
+	if code := c.Run(args); code != 0 {
+		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
+	}
+
+	if !infra.CompileCalled {
+		t.Fatal("Compile should be called")
+	}
+}
+
 func TestCompile_noExplicitType(t *testing.T) {
 	core := otto.TestCoreConfig(t)
 	infra := otto.TestInfra(t, "aws", core)
