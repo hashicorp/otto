@@ -1,6 +1,9 @@
 ## Next Version
 
+BUG FIXES:
 
+  * command/compile: compilation works if Appfile is a directory (it
+      ignores the directory and detects an Appfile) [GH-280]
 
 ## 0.1.2 (October 20, 2015)
 
