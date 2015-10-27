@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/boltdb/bolt"
 	"github.com/hashicorp/otto/context"
@@ -226,13 +227,18 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 		return err
 	}
 	layerV, err := l.readLayer(db, layer)
-	db.Close()
 	if err != nil {
+		db.Close()
 		return err
 	}
 	if layerV.State == layerStateReady {
-		return nil
+		// Touch the layer so that it is recently used
+		defer db.Close()
+		return l.updateLayer(db, layer, func(v *layerVertex) {
+			v.Touch()
+		})
 	}
+	db.Close()
 
 	// Tell the user things are happening
 	ctx.Ui.Header(fmt.Sprintf("Creating layer: %s", layer.ID))
@@ -289,6 +295,7 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 
 	return l.updateLayer(db, layer, func(v *layerVertex) {
 		v.State = layerStateReady
+		v.Touch()
 	})
 }
 
@@ -661,10 +668,11 @@ const layerPathEnv = "OTTO_VAGRANT_LAYER_PATH"
 // layerVertex is the type of vertex in the graph that is used to track
 // layer usage throughout Otto.
 type layerVertex struct {
-	Layer  *Layer     `json:"layer"`
-	State  layerState `json:"state"`
-	Parent string     `json:"parent"`
-	Path   string     `json:"path"`
+	Layer    *Layer     `json:"layer"`
+	State    layerState `json:"state"`
+	Parent   string     `json:"parent"`
+	Path     string     `json:"path"`
+	LastUsed time.Time  `json:"last_used"`
 }
 
 func (v *layerVertex) Hashcode() interface{} {
@@ -673,6 +681,11 @@ func (v *layerVertex) Hashcode() interface{} {
 
 func (v *layerVertex) Name() string {
 	return v.Layer.ID
+}
+
+// Touch is used to update the last used time
+func (v *layerVertex) Touch() {
+	v.LastUsed = time.Now().UTC()
 }
 
 type layerState byte
