@@ -19,3 +19,9 @@ func NewBasicError(err error) *BasicError {
 func (e *BasicError) Error() string {
 	return e.Message
 }
+
+// ErrorResponse is a basic response structure that can be used with
+// the RPC layer to only return an error.
+type ErrorResponse struct {
+	Error *BasicError
+}

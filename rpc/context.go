@@ -12,7 +12,8 @@ import (
 // args structs that contain a context. It will be populated with the IDs
 // that can be used to communicate back to the interfaces.
 type ContextSharedArgs struct {
-	UiId uint32
+	DirectoryId uint32
+	UiId        uint32
 }
 
 func connectContext(
@@ -20,12 +21,24 @@ func connectContext(
 	ctx *context.Shared, args *ContextSharedArgs) (io.Closer, error) {
 	closer := &multiCloser{}
 
-	// Setup Ui
-	conn, err := broker.Dial(args.UiId)
+	// Setup Directory
+	conn, err := broker.Dial(args.DirectoryId)
 	if err != nil {
 		return closer, err
 	}
 	client := rpc.NewClient(conn)
+	closer.Closers = append(closer.Closers, client)
+	ctx.Directory = &Directory{
+		Client: client,
+		Name:   "Directory",
+	}
+
+	// Setup Ui
+	conn, err = broker.Dial(args.UiId)
+	if err != nil {
+		return closer, err
+	}
+	client = rpc.NewClient(conn)
 	closer.Closers = append(closer.Closers, client)
 	ctx.Ui = &Ui{
 		Client: client,
@@ -36,8 +49,15 @@ func connectContext(
 }
 
 func serveContext(broker *muxBroker, ctx *context.Shared, args *ContextSharedArgs) {
-	// Server the Ui
+	// Serve the directory
 	id := broker.NextId()
+	go acceptAndServe(broker, id, "Directory", &DirectoryServer{
+		Directory: ctx.Directory,
+	})
+	args.DirectoryId = id
+
+	// Server the Ui
+	id = broker.NextId()
 	go acceptAndServe(broker, id, "Ui", &UiServer{
 		Ui: ctx.Ui,
 	})
