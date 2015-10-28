@@ -1,6 +1,8 @@
 package rpc
 
 import (
+	"io"
+	"log"
 	"net/rpc"
 
 	"github.com/hashicorp/otto/directory"
@@ -9,16 +11,83 @@ import (
 // Directory is an implementatin of directory.Backend that communicates
 // over RPC.
 type Directory struct {
+	Broker *muxBroker
 	Client *rpc.Client
 	Name   string
 }
 
-func (d *Directory) PutBlob(string, *directory.BlobData) error {
+func (d *Directory) PutBlob(key string, data *directory.BlobData) error {
+	// Serve the data
+	id := d.Broker.NextId()
+	doneCh := make(chan struct{})
+	go serveSingleCopy("putBlob: "+key, d.Broker, doneCh, id, nil, data.Data)
+
+	// Run it
+	var resp ErrorResponse
+	args := &DirPutBlobArgs{
+		Key: key,
+		Id:  id,
+	}
+	err := d.Client.Call(d.Name+".PutBlob", args, &resp)
+	if err != nil {
+		return err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+		return err
+	}
+
+	// NOTE: We don't wait on the doneCh because the data is being read
+	// on the other side and the contract is that it will exaust the
+	// data on success.
+
 	return nil
 }
 
-func (d *Directory) GetBlob(string) (*directory.BlobData, error) {
-	return nil, nil
+func (d *Directory) GetBlob(key string) (*directory.BlobData, error) {
+	// Create the result
+	pr, pw := io.Pipe()
+	result := &directory.BlobData{
+		Key:  key,
+		Data: pr,
+	}
+
+	// Download the data
+	id := d.Broker.NextId()
+	doneCh := make(chan struct{})
+	go serveSingleCopy("getBlob: "+key, d.Broker, doneCh, id, pw, nil)
+	go func() {
+		// We wait for the data copying to be complete. When it is, we
+		// want to close the writer side of our pipe so that the result
+		// also gets an EOF.
+		<-doneCh
+		pw.Close()
+	}()
+
+	// Run it
+	var resp DirGetBlobResponse
+	args := &DirGetBlobArgs{
+		Key: key,
+		Id:  id,
+	}
+	err := d.Client.Call(d.Name+".GetBlob", args, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+		return nil, err
+	}
+	if !resp.Ok {
+		// No return value (blob key didn't exist)
+		result = nil
+	}
+
+	// NOTE: We don't wait on the doneCh because the data is put as a
+	// io.Reader into the BlobData. It is up to the end user to read
+	// until it is exausted.
+
+	return result, nil
 }
 
 func (d *Directory) PutInfra(v *directory.Infra) error {
@@ -147,6 +216,21 @@ func (d *Directory) GetDeploy(v *directory.Deploy) (*directory.Deploy, error) {
 	return resp.Value, nil
 }
 
+type DirPutBlobArgs struct {
+	Key string
+	Id  uint32
+}
+
+type DirGetBlobArgs struct {
+	Key string
+	Id  uint32
+}
+
+type DirGetBlobResponse struct {
+	Ok    bool
+	Error *BasicError
+}
+
 type DirGetInfraResponse struct {
 	Value *directory.Infra
 	Error *BasicError
@@ -170,7 +254,74 @@ type DirGetDeployResponse struct {
 // DirectoryServer is a net/rpc compatible structure for serving
 // a directory backend. This should not be used directly.
 type DirectoryServer struct {
+	Broker    *muxBroker
 	Directory directory.Backend
+}
+
+func (s *DirectoryServer) PutBlob(
+	args *DirPutBlobArgs,
+	reply *ErrorResponse) error {
+	// Connect to the data stream
+	conn, err := s.Broker.Dial(args.Id)
+	if err != nil {
+		*reply = ErrorResponse{Error: NewBasicError(err)}
+		return nil
+	}
+	defer conn.Close()
+
+	err = s.Directory.PutBlob(args.Key, &directory.BlobData{
+		Data: conn,
+	})
+	*reply = ErrorResponse{
+		Error: NewBasicError(err),
+	}
+	return nil
+}
+
+func (s *DirectoryServer) GetBlob(
+	args *DirGetBlobArgs,
+	reply *DirGetBlobResponse) error {
+	// Connect to the data stream. We need to connect first because
+	// we need to at least connect and close the connection otherwise
+	// we'll leak a serveSingleCopy goroutine. This is why this cannot be
+	// below the GetBlob call below.
+	conn, err := s.Broker.Dial(args.Id)
+	if err != nil {
+		*reply = DirGetBlobResponse{Error: NewBasicError(err)}
+		return nil
+	}
+
+	// Get the blob. If we have an error we return right away
+	result, err := s.Directory.GetBlob(args.Key)
+	*reply = DirGetBlobResponse{
+		Ok:    result != nil,
+		Error: NewBasicError(err),
+	}
+	if err != nil {
+		conn.Close()
+		return nil
+	}
+	if result == nil {
+		// There is no data, so just close the data stream and return
+		conn.Close()
+		return nil
+	}
+
+	// No error! We need to copy the data from the blob into the
+	// resulting connection. We do this in a goroutine though since the
+	// data can be read at any speed.
+	go func() {
+		defer conn.Close()
+		defer result.Close()
+		if _, err := io.Copy(conn, result.Data); err != nil {
+			log.Printf(
+				"[ERR] rpc/directory: error copying getBlob data '%s': %s",
+				args.Key,
+				err)
+		}
+	}()
+
+	return nil
 }
 
 func (s *DirectoryServer) PutInfra(

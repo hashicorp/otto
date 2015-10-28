@@ -29,6 +29,7 @@ func connectContext(
 	client := rpc.NewClient(conn)
 	closer.Closers = append(closer.Closers, client)
 	ctx.Directory = &Directory{
+		Broker: broker,
 		Client: client,
 		Name:   "Directory",
 	}
@@ -52,6 +53,7 @@ func serveContext(broker *muxBroker, ctx *context.Shared, args *ContextSharedArg
 	// Serve the directory
 	id := broker.NextId()
 	go acceptAndServe(broker, id, "Directory", &DirectoryServer{
+		Broker:    broker,
 		Directory: ctx.Directory,
 	})
 	args.DirectoryId = id
