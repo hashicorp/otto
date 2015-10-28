@@ -14,22 +14,13 @@ type App struct {
 }
 
 func (c *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
-	id := c.Broker.NextId()
-	go acceptAndServe(c.Broker, id, "Ui", &UiServer{
-		Ui: ctx.Ui,
-	})
-
-	// Set some interface fields to nil so that they don't get sent via
-	// RPC, which causes errors.
-	ctx.Ui = nil
-	ctx.Directory = nil
-
 	var resp AppCompileResponse
-	args := AppCompileArgs{
-		UiId:    id,
-		Context: ctx,
-	}
+	args := AppCompileArgs{Context: ctx}
 
+	// Serve the shared context data
+	serveContext(c.Broker, &ctx.Shared, &args.ContextSharedArgs)
+
+	// Call
 	err := c.Client.Call(c.Name+".Compile", &args, &resp)
 	if err != nil {
 		return nil, err
@@ -59,7 +50,8 @@ type AppServer struct {
 }
 
 type AppCompileArgs struct {
-	UiId    uint32
+	ContextSharedArgs
+
 	Context *app.Context
 }
 
@@ -71,7 +63,8 @@ type AppCompileResponse struct {
 func (s *AppServer) Compile(
 	args *AppCompileArgs,
 	reply *AppCompileResponse) error {
-	conn, err := s.Broker.Dial(args.UiId)
+	closer, err := connectContext(s.Broker, &args.Context.Shared, &args.ContextSharedArgs)
+	defer closer.Close()
 	if err != nil {
 		*reply = AppCompileResponse{
 			Error: NewBasicError(err),
@@ -79,15 +72,6 @@ func (s *AppServer) Compile(
 
 		return nil
 	}
-
-	client := rpc.NewClient(conn)
-	defer client.Close()
-
-	ui := &Ui{
-		Client: client,
-		Name:   "Ui",
-	}
-	args.Context.Ui = ui
 
 	result, err := s.App.Compile(args.Context)
 	*reply = AppCompileResponse{
