@@ -194,7 +194,7 @@ func appFoundations(opts *AppOptions) error {
 			return err
 		}
 
-		log.Printf("[DEBUG] compile: dir %s has a layer!")
+		log.Printf("[DEBUG] compile: dir %s has a layer!", devDir)
 
 		// We have a layer! Read the ID.
 		id, err := oneline.Read(filepath.Join(devDir, "layer.id"))
