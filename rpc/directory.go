@@ -91,7 +91,7 @@ func (d *Directory) GetBlob(key string) (*directory.BlobData, error) {
 }
 
 func (d *Directory) PutInfra(v *directory.Infra) error {
-	var resp ErrorResponse
+	var resp DirPutInfraResponse
 	err := d.Client.Call(d.Name+".PutInfra", v, &resp)
 	if err != nil {
 		return err
@@ -101,6 +101,7 @@ func (d *Directory) PutInfra(v *directory.Infra) error {
 		return err
 	}
 
+	*v = *resp.Value
 	return nil
 }
 
@@ -119,7 +120,7 @@ func (d *Directory) GetInfra(v *directory.Infra) (*directory.Infra, error) {
 }
 
 func (d *Directory) PutDev(v *directory.Dev) error {
-	var resp ErrorResponse
+	var resp DirPutDevResponse
 	err := d.Client.Call(d.Name+".PutDev", v, &resp)
 	if err != nil {
 		return err
@@ -129,6 +130,7 @@ func (d *Directory) PutDev(v *directory.Dev) error {
 		return err
 	}
 
+	*v = *resp.Value
 	return nil
 }
 
@@ -161,7 +163,7 @@ func (d *Directory) DeleteDev(v *directory.Dev) error {
 }
 
 func (d *Directory) PutBuild(v *directory.Build) error {
-	var resp ErrorResponse
+	var resp DirPutBuildResponse
 	err := d.Client.Call(d.Name+".PutBuild", v, &resp)
 	if err != nil {
 		return err
@@ -171,6 +173,7 @@ func (d *Directory) PutBuild(v *directory.Build) error {
 		return err
 	}
 
+	*v = *resp.Value
 	return nil
 }
 
@@ -189,7 +192,7 @@ func (d *Directory) GetBuild(v *directory.Build) (*directory.Build, error) {
 }
 
 func (d *Directory) PutDeploy(v *directory.Deploy) error {
-	var resp ErrorResponse
+	var resp DirPutDeployResponse
 	err := d.Client.Call(d.Name+".PutDeploy", v, &resp)
 	if err != nil {
 		return err
@@ -199,6 +202,7 @@ func (d *Directory) PutDeploy(v *directory.Deploy) error {
 		return err
 	}
 
+	*v = *resp.Value
 	return nil
 }
 
@@ -247,6 +251,26 @@ type DirGetBuildResponse struct {
 }
 
 type DirGetDeployResponse struct {
+	Value *directory.Deploy
+	Error *BasicError
+}
+
+type DirPutInfraResponse struct {
+	Value *directory.Infra
+	Error *BasicError
+}
+
+type DirPutDevResponse struct {
+	Value *directory.Dev
+	Error *BasicError
+}
+
+type DirPutBuildResponse struct {
+	Value *directory.Build
+	Error *BasicError
+}
+
+type DirPutDeployResponse struct {
 	Value *directory.Deploy
 	Error *BasicError
 }
@@ -326,9 +350,10 @@ func (s *DirectoryServer) GetBlob(
 
 func (s *DirectoryServer) PutInfra(
 	args *directory.Infra,
-	reply *ErrorResponse) error {
+	reply *DirPutInfraResponse) error {
 	err := s.Directory.PutInfra(args)
-	*reply = ErrorResponse{
+	*reply = DirPutInfraResponse{
+		Value: args,
 		Error: NewBasicError(err),
 	}
 	return nil
@@ -347,9 +372,10 @@ func (s *DirectoryServer) GetInfra(
 
 func (s *DirectoryServer) PutDev(
 	args *directory.Dev,
-	reply *ErrorResponse) error {
+	reply *DirPutDevResponse) error {
 	err := s.Directory.PutDev(args)
-	*reply = ErrorResponse{
+	*reply = DirPutDevResponse{
+		Value: args,
 		Error: NewBasicError(err),
 	}
 	return nil
@@ -378,9 +404,10 @@ func (s *DirectoryServer) DeleteDev(
 
 func (s *DirectoryServer) PutBuild(
 	args *directory.Build,
-	reply *ErrorResponse) error {
+	reply *DirPutBuildResponse) error {
 	err := s.Directory.PutBuild(args)
-	*reply = ErrorResponse{
+	*reply = DirPutBuildResponse{
+		Value: args,
 		Error: NewBasicError(err),
 	}
 	return nil
@@ -399,9 +426,10 @@ func (s *DirectoryServer) GetBuild(
 
 func (s *DirectoryServer) PutDeploy(
 	args *directory.Deploy,
-	reply *ErrorResponse) error {
+	reply *DirPutDeployResponse) error {
 	err := s.Directory.PutDeploy(args)
-	*reply = ErrorResponse{
+	*reply = DirPutDeployResponse{
+		Value: args,
 		Error: NewBasicError(err),
 	}
 	return nil
