@@ -15,6 +15,8 @@ var nextId uint32 = 0
 var nextLock sync.Mutex
 
 func init() {
+	// We need this to avoid gob errors in logs when responding to UI
+	// calls (which are a no-op response).
 	gob.Register(new(struct{}))
 }
 
