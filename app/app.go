@@ -88,13 +88,24 @@ type Context struct {
 	// CacheDir is the directory where data can be cached. This data
 	// will persist across compiles of the same version of an Appfile.
 	//
+	// GlobalCacheDir is a directory that is shared across multiple
+	// Otto runs. It can be accessed by any app type and any Otto run. App
+	// types should be _extremely_ careful to use multi-process locking
+	// to prevent races. Additionally, you must be absolutely certain to
+	// have a cleanup process for this directory for your own files.
+	//
 	// The App implementation should function under the assumption that
 	// this cache directory can be cleared at any time between runs.
 	CacheDir string
 
 	// LocalDir is the directory where data local to this single Appfile
 	// will be stored; it isn't cleared for compilation.
-	LocalDir string
+	//
+	// GlobalDir is the directory where data global to Otto will be stored.
+	// It is never automatically cleared so any usage of this directory
+	// must have a cleanup mechanism in some way.
+	LocalDir  string
+	GlobalDir string
 
 	// Tuple is the Tuple that identifies this application. This can be
 	// used so that an implementatin of App can work with multiple tuple

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
+	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/vagrant"
 )
@@ -23,6 +24,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	custom := &customizations{Opts: &opts}
 	opts = compile.AppOptions{
 		Ctx: ctx,
+		Result: &app.CompileResult{
+			Version: 1,
+		},
 		FoundationConfig: foundation.Config{
 			ServiceName: ctx.Application.Name,
 		},
@@ -84,8 +88,34 @@ func (a *App) Deploy(ctx *app.Context) error {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
+	var layered *vagrant.Layered
+
+	// We only setup a layered environment if we've recompiled since
+	// version 0. If we're still at version 0 then we have to use the
+	// non-layered dev environment.
+	if ctx.CompileResult.Version > 0 {
+		// Read the go version, since we use that for our layer
+		goVersion, err := oneline.Read(filepath.Join(ctx.Dir, "dev", "go_version"))
+		if err != nil {
+			return err
+		}
+
+		// Setup layers
+		layered, err = vagrant.DevLayered(ctx, []*vagrant.Layer{
+			&vagrant.Layer{
+				ID:          fmt.Sprintf("go%s", goVersion),
+				Vagrantfile: filepath.Join(ctx.Dir, "dev", "layer-base", "Vagrantfile"),
+			},
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	// Build the actual development environment
 	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
+		Layer:        layered,
 	}).Route(ctx)
 }
 

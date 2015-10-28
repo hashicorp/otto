@@ -1,4 +1,4 @@
-package goapp
+package rubyapp
 
 import (
 	"path/filepath"
@@ -18,14 +18,17 @@ func TestApp_dev(t *testing.T) {
 		Steps: []otto.TestStep{
 			&vagrant.DevTestStepInit{},
 
-			// Verify we have Go
+			// Verify we have Ruby
 			&vagrant.DevTestStepGuestScript{
-				Command: "go version",
+				Command: "ruby --version | grep '2.2'",
+			},
+			&vagrant.DevTestStepGuestScript{
+				Command: "bundle --version",
 			},
 
-			// Verify we can build immediately (we should be in the directory)
+			// Verify everything works
 			&vagrant.DevTestStepGuestScript{
-				Command: "grep '42' <<< $(go build -o test-output && ./test-output 2>&1)",
+				Command: "bundle exec ruby app.rb | grep hello",
 			},
 		},
 

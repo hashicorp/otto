@@ -1,4 +1,4 @@
-package goapp
+package nodeapp
 
 import (
 	"path/filepath"
@@ -18,14 +18,9 @@ func TestApp_dev(t *testing.T) {
 		Steps: []otto.TestStep{
 			&vagrant.DevTestStepInit{},
 
-			// Verify we have Go
+			// Verify we have Node
 			&vagrant.DevTestStepGuestScript{
-				Command: "go version",
-			},
-
-			// Verify we can build immediately (we should be in the directory)
-			&vagrant.DevTestStepGuestScript{
-				Command: "grep '42' <<< $(go build -o test-output && ./test-output 2>&1)",
+				Command: "node --version",
 			},
 		},
 
