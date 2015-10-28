@@ -87,7 +87,28 @@ func (c *App) Dev(ctx *app.Context) error {
 	return err
 }
 
-func (c *App) DevDep(dst, src *app.Context) (*app.DevDep, error) { return nil, nil }
+func (c *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
+	var resp AppDevDepResponse
+	args := AppDevDepArgs{
+		ContextDst: dst,
+		ContextSrc: src,
+	}
+
+	// Serve the shared context data
+	serveContext(c.Broker, &dst.Shared, &args.ContextDstShared)
+	serveContext(c.Broker, &src.Shared, &args.ContextSrcShared)
+
+	// Call
+	err := c.Client.Call(c.Name+".DevDep", &args, &resp)
+	if err == nil && resp.Error != nil {
+		err = resp.Error
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Result, nil
+}
 
 func (c *App) Close() error {
 	return c.Client.Close()
@@ -108,6 +129,18 @@ type AppContextArgs struct {
 
 type AppCompileResponse struct {
 	Result *app.CompileResult
+	Error  *BasicError
+}
+
+type AppDevDepArgs struct {
+	ContextDst       *app.Context
+	ContextDstShared ContextSharedArgs
+	ContextSrc       *app.Context
+	ContextSrcShared ContextSharedArgs
+}
+
+type AppDevDepResponse struct {
+	Result *app.DevDep
 	Error  *BasicError
 }
 
@@ -192,6 +225,40 @@ func (s *AppServer) Dev(
 
 	*reply = AppSimpleResponse{
 		Error: NewBasicError(s.App.Dev(args.Context)),
+	}
+
+	return nil
+}
+
+func (s *AppServer) DevDep(
+	args *AppDevDepArgs,
+	reply *AppDevDepResponse) error {
+	// Dst
+	closer, err := connectContext(s.Broker, &args.ContextDst.Shared, &args.ContextDstShared)
+	defer closer.Close()
+	if err != nil {
+		*reply = AppDevDepResponse{
+			Error: NewBasicError(err),
+		}
+
+		return nil
+	}
+
+	// Src
+	closer, err = connectContext(s.Broker, &args.ContextSrc.Shared, &args.ContextSrcShared)
+	defer closer.Close()
+	if err != nil {
+		*reply = AppDevDepResponse{
+			Error: NewBasicError(err),
+		}
+
+		return nil
+	}
+
+	result, err := s.App.DevDep(args.ContextDst, args.ContextSrc)
+	*reply = AppDevDepResponse{
+		Result: result,
+		Error:  NewBasicError(err),
 	}
 
 	return nil

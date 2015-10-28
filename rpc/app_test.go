@@ -126,3 +126,22 @@ func TestApp_dev(t *testing.T) {
 		t.Fatalf("bad: %#v", err)
 	}
 }
+
+func TestApp_devDep(t *testing.T) {
+	client, server := testNewClientServer(t)
+	defer client.Close()
+
+	appMock := server.AppFunc().(*app.Mock)
+	appReal, err := client.App()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, err = appReal.DevDep(new(app.Context), new(app.Context))
+	if !appMock.DevDepCalled {
+		t.Fatal("should be called")
+	}
+	if err != nil {
+		t.Fatalf("bad: %#v", err)
+	}
+}
