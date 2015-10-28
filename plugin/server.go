@@ -18,18 +18,17 @@ import (
 // The APIVersion is outputted along with the RPC address. The plugin
 // client validates this API version and will show an error if it doesn't
 // know how to speak it.
-const APIVersion = "2"
+const APIVersion = "1"
 
 // The "magic cookie" is used to verify that the user intended to
 // actually run this binary. If this cookie isn't present as an
 // environmental variable, then we bail out early with an error.
-const MagicCookieKey = "TF_PLUGIN_MAGIC_COOKIE"
-const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d6991ca9872b2"
+const MagicCookieKey = "OTTO_PLUGIN_MAGIC_COOKIE"
+const MagicCookieValue = "11aab7ff21cb9ff7b0e9975d53f17a8dab571eac9b5ff0191730046698f07b7f"
 
 // ServeOpts configures what sorts of plugins are served.
 type ServeOpts struct {
-	ProviderFunc    pluginrpc.ProviderFunc
-	ProvisionerFunc pluginrpc.ProvisionerFunc
+	AppFunc pluginrpc.AppFunc
 }
 
 // Serve serves the plugins given by ServeOpts.
@@ -56,8 +55,7 @@ func Serve(opts *ServeOpts) {
 
 	// Create the RPC server to dispense
 	server := &pluginrpc.Server{
-		ProviderFunc:    opts.ProviderFunc,
-		ProvisionerFunc: opts.ProvisionerFunc,
+		AppFunc: opts.AppFunc,
 	}
 
 	// Output the address and service name to stdout so that core can bring it up.
@@ -96,12 +94,12 @@ func serverListener() (net.Listener, error) {
 }
 
 func serverListener_tcp() (net.Listener, error) {
-	minPort, err := strconv.ParseInt(os.Getenv("TF_PLUGIN_MIN_PORT"), 10, 32)
+	minPort, err := strconv.ParseInt(os.Getenv("OTTO_PLUGIN_MIN_PORT"), 10, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	maxPort, err := strconv.ParseInt(os.Getenv("TF_PLUGIN_MAX_PORT"), 10, 32)
+	maxPort, err := strconv.ParseInt(os.Getenv("OTTO_PLUGIN_MAX_PORT"), 10, 32)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +116,7 @@ func serverListener_tcp() (net.Listener, error) {
 }
 
 func serverListener_unix() (net.Listener, error) {
-	tf, err := ioutil.TempFile("", "tf-plugin")
+	tf, err := ioutil.TempFile("", "otto-plugin")
 	if err != nil {
 		return nil, err
 	}

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/otto/otto"
+	"github.com/hashicorp/otto/app"
 	pluginrpc "github.com/hashicorp/otto/rpc"
 )
 
@@ -55,9 +55,9 @@ func TestHelperProcess(*testing.T) {
 	case "bad-version":
 		fmt.Printf("%s1|tcp|:1234\n", APIVersion)
 		<-make(chan int)
-	case "resource-provider":
+	case "app":
 		Serve(&ServeOpts{
-			ProviderFunc: testProviderFixed(new(terraform.MockResourceProvider)),
+			AppFunc: testAppFixed(new(app.Mock)),
 		})
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
@@ -90,8 +90,8 @@ func TestHelperProcess(*testing.T) {
 	}
 }
 
-func testProviderFixed(p terraform.ResourceProvider) pluginrpc.ProviderFunc {
-	return func() terraform.ResourceProvider {
+func testAppFixed(p app.App) pluginrpc.AppFunc {
+	return func() app.App {
 		return p
 	}
 }

@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestResourceProvider(t *testing.T) {
-	c := NewClient(&ClientConfig{Cmd: helperProcess("resource-provider")})
+func TestApp(t *testing.T) {
+	c := NewClient(&ClientConfig{Cmd: helperProcess("app")})
 	defer c.Kill()
 
 	_, err := c.Client()
