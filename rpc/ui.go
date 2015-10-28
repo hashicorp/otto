@@ -51,16 +51,19 @@ type UiServer struct {
 
 func (s *UiServer) Header(msg string, reply *interface{}) error {
 	s.Ui.Header(msg)
+	*reply = new(struct{})
 	return nil
 }
 
 func (s *UiServer) Message(msg string, reply *interface{}) error {
 	s.Ui.Message(msg)
+	*reply = new(struct{})
 	return nil
 }
 
 func (s *UiServer) Raw(msg string, reply *interface{}) error {
 	s.Ui.Raw(msg)
+	*reply = new(struct{})
 	return nil
 }
 
