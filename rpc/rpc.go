@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"net/rpc"
@@ -12,6 +13,10 @@ import (
 // nextId is the next ID to use for names registered.
 var nextId uint32 = 0
 var nextLock sync.Mutex
+
+func init() {
+	gob.Register(new(struct{}))
+}
 
 // Register registers an Otto thing with the RPC server and returns
 // the name it is registered under.

@@ -69,3 +69,60 @@ func TestApp_compileUi(t *testing.T) {
 		t.Fatalf("bad: %#v", ui)
 	}
 }
+
+func TestApp_build(t *testing.T) {
+	client, server := testNewClientServer(t)
+	defer client.Close()
+
+	appMock := server.AppFunc().(*app.Mock)
+	appReal, err := client.App()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = appReal.Build(new(app.Context))
+	if !appMock.BuildCalled {
+		t.Fatal("should be called")
+	}
+	if err != nil {
+		t.Fatalf("bad: %#v", err)
+	}
+}
+
+func TestApp_deploy(t *testing.T) {
+	client, server := testNewClientServer(t)
+	defer client.Close()
+
+	appMock := server.AppFunc().(*app.Mock)
+	appReal, err := client.App()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = appReal.Deploy(new(app.Context))
+	if !appMock.DeployCalled {
+		t.Fatal("should be called")
+	}
+	if err != nil {
+		t.Fatalf("bad: %#v", err)
+	}
+}
+
+func TestApp_dev(t *testing.T) {
+	client, server := testNewClientServer(t)
+	defer client.Close()
+
+	appMock := server.AppFunc().(*app.Mock)
+	appReal, err := client.App()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = appReal.Dev(new(app.Context))
+	if !appMock.DevCalled {
+		t.Fatal("should be called")
+	}
+	if err != nil {
+		t.Fatalf("bad: %#v", err)
+	}
+}

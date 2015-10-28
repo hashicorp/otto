@@ -15,7 +15,7 @@ type App struct {
 
 func (c *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	var resp AppCompileResponse
-	args := AppCompileArgs{Context: ctx}
+	args := AppContextArgs{Context: ctx}
 
 	// Serve the shared context data
 	serveContext(c.Broker, &ctx.Shared, &args.ContextSharedArgs)
@@ -33,9 +33,60 @@ func (c *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	return resp.Result, nil
 }
 
-func (c *App) Build(ctx *app.Context) error                      { return nil }
-func (c *App) Deploy(ctx *app.Context) error                     { return nil }
-func (c *App) Dev(ctx *app.Context) error                        { return nil }
+func (c *App) Build(ctx *app.Context) error {
+	var resp AppSimpleResponse
+	args := AppContextArgs{Context: ctx}
+
+	// Serve the shared context data
+	serveContext(c.Broker, &ctx.Shared, &args.ContextSharedArgs)
+
+	// Call
+	err := c.Client.Call(c.Name+".Build", &args, &resp)
+	if err == nil {
+		if resp.Error != nil {
+			err = resp.Error
+		}
+	}
+
+	return err
+}
+
+func (c *App) Deploy(ctx *app.Context) error {
+	var resp AppSimpleResponse
+	args := AppContextArgs{Context: ctx}
+
+	// Serve the shared context data
+	serveContext(c.Broker, &ctx.Shared, &args.ContextSharedArgs)
+
+	// Call
+	err := c.Client.Call(c.Name+".Deploy", &args, &resp)
+	if err == nil {
+		if resp.Error != nil {
+			err = resp.Error
+		}
+	}
+
+	return err
+}
+
+func (c *App) Dev(ctx *app.Context) error {
+	var resp AppSimpleResponse
+	args := AppContextArgs{Context: ctx}
+
+	// Serve the shared context data
+	serveContext(c.Broker, &ctx.Shared, &args.ContextSharedArgs)
+
+	// Call
+	err := c.Client.Call(c.Name+".Dev", &args, &resp)
+	if err == nil {
+		if resp.Error != nil {
+			err = resp.Error
+		}
+	}
+
+	return err
+}
+
 func (c *App) DevDep(dst, src *app.Context) (*app.DevDep, error) { return nil, nil }
 
 func (c *App) Close() error {
@@ -49,7 +100,7 @@ type AppServer struct {
 	App    app.App
 }
 
-type AppCompileArgs struct {
+type AppContextArgs struct {
 	ContextSharedArgs
 
 	Context *app.Context
@@ -60,8 +111,12 @@ type AppCompileResponse struct {
 	Error  *BasicError
 }
 
+type AppSimpleResponse struct {
+	Error *BasicError
+}
+
 func (s *AppServer) Compile(
-	args *AppCompileArgs,
+	args *AppContextArgs,
 	reply *AppCompileResponse) error {
 	closer, err := connectContext(s.Broker, &args.Context.Shared, &args.ContextSharedArgs)
 	defer closer.Close()
@@ -77,6 +132,66 @@ func (s *AppServer) Compile(
 	*reply = AppCompileResponse{
 		Result: result,
 		Error:  NewBasicError(err),
+	}
+
+	return nil
+}
+
+func (s *AppServer) Build(
+	args *AppContextArgs,
+	reply *AppSimpleResponse) error {
+	closer, err := connectContext(s.Broker, &args.Context.Shared, &args.ContextSharedArgs)
+	defer closer.Close()
+	if err != nil {
+		*reply = AppSimpleResponse{
+			Error: NewBasicError(err),
+		}
+
+		return nil
+	}
+
+	*reply = AppSimpleResponse{
+		Error: NewBasicError(s.App.Build(args.Context)),
+	}
+
+	return nil
+}
+
+func (s *AppServer) Deploy(
+	args *AppContextArgs,
+	reply *AppSimpleResponse) error {
+	closer, err := connectContext(s.Broker, &args.Context.Shared, &args.ContextSharedArgs)
+	defer closer.Close()
+	if err != nil {
+		*reply = AppSimpleResponse{
+			Error: NewBasicError(err),
+		}
+
+		return nil
+	}
+
+	*reply = AppSimpleResponse{
+		Error: NewBasicError(s.App.Deploy(args.Context)),
+	}
+
+	return nil
+}
+
+func (s *AppServer) Dev(
+	args *AppContextArgs,
+	reply *AppSimpleResponse) error {
+	closer, err := connectContext(s.Broker, &args.Context.Shared, &args.ContextSharedArgs)
+	defer closer.Close()
+	if err != nil {
+		*reply = AppSimpleResponse{
+			Error: NewBasicError(err),
+		}
+
+		return nil
+	}
+
+	*reply = AppSimpleResponse{
+		Error: NewBasicError(s.App.Dev(args.Context)),
 	}
 
 	return nil
