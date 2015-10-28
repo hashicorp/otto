@@ -17,8 +17,8 @@ func helperProcess(s ...string) *exec.Cmd {
 	cs = append(cs, s...)
 	env := []string{
 		"GO_WANT_HELPER_PROCESS=1",
-		"TF_PLUGIN_MIN_PORT=10000",
-		"TF_PLUGIN_MAX_PORT=25000",
+		"OTTO_PLUGIN_MIN_PORT=10000",
+		"OTTO_PLUGIN_MAX_PORT=25000",
 	}
 
 	cmd := exec.Command(os.Args[0], cs...)
