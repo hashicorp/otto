@@ -1,9 +1,5 @@
 {% extends "compile:data/app/dev/Vagrantfile.tpl" %}
 
-{% block vagrant_box %}
-  config.vm.clone = ENV["OTTO_VAGRANT_LAYER_PATH"]
-{% endblock %}
-
 {% block vagrant_config %}
   config.vm.provision "shell", inline: $script_app
 {% endblock %}

@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	vagrantMinVersion = version.Must(version.NewVersion("1.8.0"))
+	vagrantMinVersion = version.Must(version.NewVersion("1.7.99"))
 )
 
 // Project returns the hashitools Project for this.
