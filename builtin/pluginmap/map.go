@@ -14,10 +14,10 @@ import (
 )
 
 var Apps = map[string]rpc.AppFunc{
-	"custom":   appCustom.AppFactory,
-	"docker-external":   appDockerExt.AppFactory,
-	"go":   appGo.AppFactory,
-	"node": appNode.AppFactory,
-	"php":  appPHP.AppFactory,
-	"ruby": appRuby.AppFactory,
+	"custom":          appCustom.AppFactory,
+	"docker-external": appDockerExt.AppFactory,
+	"go":              appGo.AppFactory,
+	"node":            appNode.AppFactory,
+	"php":             appPHP.AppFactory,
+	"ruby":            appRuby.AppFactory,
 }
