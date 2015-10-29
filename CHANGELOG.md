@@ -1,5 +1,14 @@
 ## Next Version
 
+FEATURES:
+
+  * **Layered Dev Environments**: Dev environments are now layered. Each
+    layer is cached. When bringing up a new development environment, cached
+    layers are used to speed it up immensely.
+  * **App Type Plugins**: You can now add custom app types (or even override
+    Otto's built-in types) using app type plugins. Want to support a new
+    language? A new framework? App type plugins are for you.
+
 BUG FIXES:
 
   * command/compile: compilation works if Appfile is a directory (it
