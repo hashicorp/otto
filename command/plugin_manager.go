@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/otto/builtin/pluginmap"
 	"github.com/hashicorp/otto/otto"
 	"github.com/hashicorp/otto/plugin"
-	pluginrpc "github.com/hashicorp/otto/rpc"
 	"github.com/kardianos/osext"
 )
 
@@ -31,11 +30,61 @@ type PluginManager struct {
 
 // Plugin is a single plugin that has been loaded.
 type Plugin struct {
-	App     app.Factory
-	AppMeta *app.Meta
+	// Path and Args are the method used to invocate this plugin.
+	// These are the only two values that need to be set manually. Once
+	// these are set, call Load to load the plugin.
+	Path string
+	Args []string
 
-	client    *plugin.Client
-	rpcClient *pluginrpc.Client
+	// The fields below are loaded as part of the Load() call and should
+	// not be set manually, but can be accessed after Load.
+	App     app.Factory `json:"-"`
+	AppMeta *app.Meta   `json:"-"`
+
+	used bool
+}
+
+// Load loads the plugin specified by the Path and instantiates the
+// other fields on this structure.
+func (p *Plugin) Load() error {
+	// Create the plugin client to communicate with the process
+	pluginClient := plugin.NewClient(&plugin.ClientConfig{
+		Cmd:     exec.Command(p.Path, p.Args...),
+		Managed: true,
+	})
+
+	// Request the client
+	client, err := pluginClient.Client()
+	if err != nil {
+		return err
+	}
+
+	// Get the app implementation
+	appImpl, err := client.App()
+	if err != nil {
+		return err
+	}
+
+	p.AppMeta, err = appImpl.Meta()
+	if err != nil {
+		return err
+	}
+
+	// Create a custom factory that when called marks the plugin as used
+	p.used = false
+	p.App = func() (app.App, error) {
+		p.used = true
+		return client.App()
+	}
+
+	return nil
+}
+
+// Used tracks whether or not this plugin was used or not. You can call
+// this after compilation on each plugin to determine what plugin
+// was used.
+func (p *Plugin) Used() bool {
+	return p.used
 }
 
 // ConfigureCore configures the Otto core configuration with the loaded
@@ -93,6 +142,13 @@ func (m *PluginManager) Discover() error {
 	return nil
 }
 
+// StoreUsed will persist the used plugins into a file. LoadUsed can
+// then be called to load the plugins that were used only, making plugin
+// loading much more efficient.
+func (m *PluginManager) StoreUsed(path string) error {
+	return nil
+}
+
 // LoadAll will launch every plugin and add it to the CoreConfig given.
 func (m *PluginManager) LoadAll() error {
 	// If we've never loaded plugin paths, then let's discover those first
@@ -117,35 +173,14 @@ func (m *PluginManager) LoadAll() error {
 // the plugin data. This will merge with any prior configuration in the
 // CoreConfig.
 func (m *PluginManager) Load(path string, args ...string) error {
-	// Create the plugin client to communicate with the process
-	pluginClient := plugin.NewClient(&plugin.ClientConfig{
-		Cmd:     exec.Command(path, args...),
-		Managed: true,
-	})
-
-	// Request the client
-	client, err := pluginClient.Client()
-	if err != nil {
+	plugin := &Plugin{
+		Path: path,
+		Args: args,
+	}
+	if err := plugin.Load(); err != nil {
 		return err
 	}
 
-	// Get the app implementation
-	app, err := client.App()
-	if err != nil {
-		return err
-	}
-
-	appMeta, err := app.Meta()
-	if err != nil {
-		return err
-	}
-
-	m.plugins = append(m.plugins, &Plugin{
-		App:       client.App,
-		AppMeta:   appMeta,
-		client:    pluginClient,
-		rpcClient: client,
-	})
-
+	m.plugins = append(m.plugins, plugin)
 	return nil
 }
