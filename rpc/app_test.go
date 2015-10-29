@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"io"
 	"reflect"
 	"testing"
 
@@ -10,6 +11,7 @@ import (
 
 func TestApp_impl(t *testing.T) {
 	var _ app.App = new(App)
+	var _ io.Closer = new(App)
 }
 
 func TestApp_meta(t *testing.T) {

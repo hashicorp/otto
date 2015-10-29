@@ -3,6 +3,7 @@ package command
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -65,6 +66,9 @@ func (p *Plugin) Load() error {
 	appImpl, err := client.App()
 	if err != nil {
 		return err
+	}
+	if c, ok := appImpl.(io.Closer); ok {
+		defer c.Close()
 	}
 
 	p.AppMeta, err = appImpl.Meta()
