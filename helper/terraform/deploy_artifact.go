@@ -13,7 +13,8 @@ type DeployArtifactExtractor func(
 	*app.Context, *directory.Build, *directory.Infra) (map[string]string, error)
 
 var deployArtifactExtractors = map[string]DeployArtifactExtractor{
-	"aws": deployArtifactExtractAWS,
+	"aws":       deployArtifactExtractAWS,
+	"openstack": deployArtifactExtractOpenStack,
 }
 
 func deployArtifactExtractAWS(
@@ -29,4 +30,19 @@ func deployArtifactExtractAWS(
 	}
 
 	return map[string]string{"ami": ami}, nil
+}
+
+func deployArtifactExtractOpenStack(
+	ctx *app.Context,
+	build *directory.Build,
+	infra *directory.Infra) (map[string]string, error) {
+	image, ok := build.Artifact[infra.Outputs["region"]]
+	if !ok {
+		return nil, fmt.Errorf(
+			"An artifact for the region '%s' could not be found. Please run\n"+
+				"`otto build` and try again.",
+			infra.Outputs["region"])
+	}
+
+	return map[string]string{"image": image}, nil
 }

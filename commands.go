@@ -12,6 +12,7 @@ import (
 	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
 	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
+	infraOpenStack "github.com/hashicorp/otto/builtin/infra/openstack"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile/detect"
@@ -86,7 +87,8 @@ func init() {
 			Apps:        apps,
 			Foundations: foundations,
 			Infrastructures: map[string]infrastructure.Factory{
-				"aws": infraAws.Infra,
+				"aws":       infraAws.Infra,
+				"openstack": infraOpenStack.Infra,
 			},
 		},
 		Ui: Ui,
