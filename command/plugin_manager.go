@@ -42,8 +42,13 @@ type Plugin struct {
 	// Path and Args are the method used to invocate this plugin.
 	// These are the only two values that need to be set manually. Once
 	// these are set, call Load to load the plugin.
-	Path string
-	Args []string
+	Path string   `json:"path,omitempty"`
+	Args []string `json:"args"`
+
+	// Builtin will be set to true by the PluginManager if this plugin
+	// represents a built-in plugin. If it does, then Path above has
+	// no affect, we always use the current executable.
+	Builtin bool `json:"builtin"`
 
 	// The fields below are loaded as part of the Load() call and should
 	// not be set manually, but can be accessed after Load.
@@ -56,9 +61,15 @@ type Plugin struct {
 // Load loads the plugin specified by the Path and instantiates the
 // other fields on this structure.
 func (p *Plugin) Load() error {
+	// If it is builtin, then we always use our own path
+	path := p.Path
+	if p.Builtin {
+		path = pluginExePath
+	}
+
 	// Create the plugin client to communicate with the process
 	pluginClient := plugin.NewClient(&plugin.ClientConfig{
-		Cmd:     exec.Command(p.Path, p.Args...),
+		Cmd:     exec.Command(path, p.Args...),
 		Managed: true,
 	})
 
@@ -130,17 +141,11 @@ func (m *PluginManager) Discover() error {
 	result := make([]*Plugin, 0, 20)
 
 	if !testingMode {
-		// Get our own path
-		exePath, err := osext.Executable()
-		if err != nil {
-			return err
-		}
-
 		// First we add all the builtin plugins which we get by executing ourself
 		for k, _ := range m.PluginMap {
 			result = append(result, &Plugin{
-				Path: exePath,
-				Args: []string{"plugin-builtin", k},
+				Args:    []string{"plugin-builtin", k},
+				Builtin: true,
 			})
 		}
 	}
@@ -255,4 +260,16 @@ const usedPluginVersion int = 1
 type usedPluginWrapper struct {
 	Version int       `json:"version"`
 	Plugins []*Plugin `json:"plugins"`
+}
+
+// pluginExePath is our own path. We cache this so we only have to calculate
+// it once.
+var pluginExePath string
+
+func init() {
+	var err error
+	pluginExePath, err = osext.Executable()
+	if err != nil {
+		panic(err)
+	}
 }
