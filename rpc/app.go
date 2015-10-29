@@ -13,6 +13,21 @@ type App struct {
 	Name   string
 }
 
+func (c *App) Meta() (*app.Meta, error) {
+	var resp AppMetaResponse
+
+	err := c.Client.Call(c.Name+".Meta", new(struct{}), &resp)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+		return nil, err
+	}
+
+	return resp.Result, nil
+}
+
 func (c *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	var resp AppCompileResponse
 	args := AppContextArgs{Context: ctx}
@@ -127,6 +142,11 @@ type AppContextArgs struct {
 	Context *app.Context
 }
 
+type AppMetaResponse struct {
+	Result *app.Meta
+	Error  *BasicError
+}
+
 type AppCompileResponse struct {
 	Result *app.CompileResult
 	Error  *BasicError
@@ -146,6 +166,18 @@ type AppDevDepResponse struct {
 
 type AppSimpleResponse struct {
 	Error *BasicError
+}
+
+func (s *AppServer) Meta(
+	args *struct{},
+	reply *AppMetaResponse) error {
+	result, err := s.App.Meta()
+	*reply = AppMetaResponse{
+		Result: result,
+		Error:  NewBasicError(err),
+	}
+
+	return nil
 }
 
 func (s *AppServer) Compile(

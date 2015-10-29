@@ -12,6 +12,36 @@ func TestApp_impl(t *testing.T) {
 	var _ app.App = new(App)
 }
 
+func TestApp_meta(t *testing.T) {
+	client, server := testNewClientServer(t)
+	defer client.Close()
+
+	appMock := server.AppFunc().(*app.Mock)
+	appReal, err := client.App()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	appMock.MetaResult = &app.Meta{
+		Tuples: []app.Tuple{
+			app.Tuple{"test", "test", "test"},
+		},
+	}
+
+	actual, err := appReal.Meta()
+	if !appMock.MetaCalled {
+		t.Fatal("should be called")
+	}
+	if err != nil {
+		t.Fatalf("bad: %#v", err)
+	}
+
+	expected := appMock.MetaResult
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatalf("bad: %#v", actual)
+	}
+}
+
 func TestApp_compile(t *testing.T) {
 	client, server := testNewClientServer(t)
 	defer client.Close()

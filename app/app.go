@@ -65,7 +65,7 @@ type App interface {
 // Meta is metadata about an app implementation.
 type Meta struct {
 	// Tuples returns the tuples that this app implementation supports.
-	Tuples TupleMap
+	Tuples TupleSlice
 }
 
 // Context is the context for operations on applications. Some of the
