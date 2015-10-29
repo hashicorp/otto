@@ -193,7 +193,11 @@ func (m *PluginManager) LoadUsed(path string) error {
 	}
 
 	if wrapper.Version > usedPluginVersion {
-		// TODO: error
+		return fmt.Errorf(
+			"Couldn't load used plugins because the format of the stored\n" +
+				"metadata is newer than this version of Otto knows how to read.\n\n" +
+				"This is usually caused by a newer version of Otto compiling an\n" +
+				"environment. Please use a later version of Otto to read this.")
 	}
 
 	m.plugins = wrapper.Plugins

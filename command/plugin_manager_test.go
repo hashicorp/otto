@@ -2,7 +2,9 @@ package command
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -39,6 +41,51 @@ func TestPluginLoad_used(t *testing.T) {
 
 	if !plugin.Used() {
 		t.Fatal("should be used")
+	}
+}
+
+func TestPluginManager_saveLoad(t *testing.T) {
+	mock := testPlugin(t, "mock")
+	mgr := &PluginManager{
+		plugins: []*Plugin{
+			mock,
+			testPlugin(t, "empty"),
+			testPlugin(t, "empty"),
+			testPlugin(t, "empty"),
+		},
+	}
+
+	if err := mgr.LoadAll(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Use only the mock
+	if _, err := mock.App(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if !mock.Used() {
+		t.Fatal("should be used")
+	}
+
+	// Create the temporary file to save the data
+	td, err := ioutil.TempDir("", "otto")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.RemoveAll(td)
+	path := filepath.Join(td, "used")
+
+	if err := mgr.StoreUsed(path); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Create a new manager and load only the used
+	mgr = &PluginManager{}
+	if err := mgr.LoadUsed(path); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if v := mgr.Plugins(); len(v) != 1 {
+		t.Fatalf("bad: %#v", v)
 	}
 }
 
@@ -82,6 +129,11 @@ func TestPluginProcess(*testing.T) {
 	// Determine what plugin we're supposed to be serving
 	var opts plugin.ServeOpts
 	switch args[1] {
+	case "empty":
+		appImpl := &app.Mock{}
+		opts.AppFunc = func() app.App {
+			return appImpl
+		}
 	case "mock":
 		appImpl := &app.Mock{
 			MetaResult: testPluginMockMeta,
