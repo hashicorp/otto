@@ -46,6 +46,13 @@ func (c *CompileCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Configure the core with our implementations
+	if err := pluginMgr.ConfigureCore(c.CoreConfig); err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error configuring core: %s", err))
+		return 1
+	}
+
 	// Load the detectors from the plugins
 	detectors := make([]*detect.Detector, 0, 20)
 	detectors = append(detectors, c.Detectors...)

@@ -1,6 +1,7 @@
 package command
 
 import (
+	"log"
 	"os/exec"
 
 	"github.com/hashicorp/otto/app"
@@ -79,6 +80,11 @@ func (m *PluginManager) Discover() error {
 				k,
 			})
 		}
+	}
+
+	// Log it
+	for _, r := range result {
+		log.Printf("[DEBUG] Detected plugin: %v", r)
 	}
 
 	// Save our result
