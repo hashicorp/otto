@@ -1,10 +1,9 @@
 package command
 
 import (
-	"fmt"
+	"os"
 	"strings"
 
-	"github.com/hashicorp/otto/builtin/pluginmap"
 	"github.com/hashicorp/otto/plugin"
 )
 
@@ -15,23 +14,8 @@ type PluginBuiltinCommand struct {
 }
 
 func (c *PluginBuiltinCommand) Run(args []string) int {
-	fs := c.FlagSet("plugin-builtin", FlagSetNone)
-	fs.Usage = func() { c.Ui.Error(c.Help()) }
-	if len(args) != 2 {
-		fs.Usage()
-		return 1
-	}
-
-	var opts plugin.ServeOpts
-	switch args[0] {
-	case "app":
-		opts.AppFunc = pluginmap.Apps[args[1]]
-	default:
-		c.Ui.Error(fmt.Sprintf("Unknown plugin type: %s", args[0]))
-		return 1
-	}
-
-	plugin.Serve(&opts)
+	os.Args = append([]string{"self"}, args...)
+	plugin.ServeMux(c.PluginMap)
 	return 0
 }
 

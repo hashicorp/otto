@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/otto/app"
-	"github.com/hashicorp/otto/builtin/pluginmap"
 	"github.com/hashicorp/otto/helper/semaphore"
 	"github.com/hashicorp/otto/otto"
 	"github.com/hashicorp/otto/plugin"
@@ -31,6 +30,9 @@ type PluginManager struct {
 	// Any plugins with the same types found later (higher index) will
 	// override earlier (lower index) directories.
 	PluginDirs []string
+
+	// PluginMap is the map of availabile built-in plugins
+	PluginMap plugin.ServeMuxMap
 
 	plugins []*Plugin
 }
@@ -135,10 +137,10 @@ func (m *PluginManager) Discover() error {
 		}
 
 		// First we add all the builtin plugins which we get by executing ourself
-		for k, _ := range pluginmap.Apps {
+		for k, _ := range m.PluginMap {
 			result = append(result, &Plugin{
 				Path: exePath,
-				Args: []string{"plugin-builtin", "app", k},
+				Args: []string{"plugin-builtin", k},
 			})
 		}
 	}

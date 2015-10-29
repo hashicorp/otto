@@ -7,6 +7,7 @@ import (
 	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
 
+	"github.com/hashicorp/otto/builtin/pluginmap"
 	"github.com/hashicorp/otto/command"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
@@ -50,7 +51,8 @@ func init() {
 				"aws": infraAws.Infra,
 			},
 		},
-		Ui: Ui,
+		Ui:        Ui,
+		PluginMap: pluginmap.Map,
 	}
 
 	CommandsInclude = []string{

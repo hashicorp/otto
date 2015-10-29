@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/otto"
+	"github.com/hashicorp/otto/plugin"
 	"github.com/hashicorp/otto/ui"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/go-homedir"
@@ -54,6 +55,7 @@ const (
 type Meta struct {
 	CoreConfig *otto.CoreConfig
 	Ui         cli.Ui
+	PluginMap  plugin.ServeMuxMap
 
 	pluginManager *PluginManager
 }
@@ -233,7 +235,9 @@ func (m *Meta) PluginManager() (*PluginManager, error) {
 		return m.pluginManager, nil
 	}
 
-	m.pluginManager = &PluginManager{}
+	m.pluginManager = &PluginManager{
+		PluginMap: m.PluginMap,
+	}
 	return m.pluginManager, nil
 }
 
