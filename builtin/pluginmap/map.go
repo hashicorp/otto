@@ -5,6 +5,8 @@ package pluginmap
 import (
 	"github.com/hashicorp/otto/rpc"
 
+	appCustom "github.com/hashicorp/otto/builtin/app/custom"
+	appDockerExt "github.com/hashicorp/otto/builtin/app/docker-external"
 	appGo "github.com/hashicorp/otto/builtin/app/go"
 	appNode "github.com/hashicorp/otto/builtin/app/node"
 	appPHP "github.com/hashicorp/otto/builtin/app/php"
@@ -12,6 +14,8 @@ import (
 )
 
 var Apps = map[string]rpc.AppFunc{
+	"custom":   appCustom.AppFactory,
+	"docker-external":   appDockerExt.AppFactory,
 	"go":   appGo.AppFactory,
 	"node": appNode.AppFactory,
 	"php":  appPHP.AppFactory,

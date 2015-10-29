@@ -4,12 +4,9 @@ import (
 	"os"
 	"os/signal"
 
-	appCustom "github.com/hashicorp/otto/builtin/app/custom"
-	appDockerExt "github.com/hashicorp/otto/builtin/app/docker-external"
 	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
 
-	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/command"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
@@ -20,8 +17,6 @@ import (
 // Commands is the mapping of all the available Otto commands.
 var Commands map[string]cli.CommandFactory
 var CommandsInclude []string
-
-var Detectors []*detect.Detector
 
 // Ui is the cli.Ui used for communicating to the outside world.
 var Ui cli.Ui
@@ -71,8 +66,7 @@ func init() {
 	Commands = map[string]cli.CommandFactory{
 		"compile": func() (cli.Command, error) {
 			return &command.CompileCommand{
-				Meta:      meta,
-				Detectors: Detectors,
+				Meta: meta,
 			}, nil
 		},
 
