@@ -1,7 +1,10 @@
 package command
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 	"os/exec"
 
 	"github.com/hashicorp/otto/app"
@@ -24,8 +27,7 @@ type PluginManager struct {
 	// override earlier (lower index) directories.
 	PluginDirs []string
 
-	pluginPaths [][]string
-	plugins     []*Plugin
+	plugins []*Plugin
 }
 
 // Plugin is a single plugin that has been loaded.
@@ -87,6 +89,10 @@ func (p *Plugin) Used() bool {
 	return p.used
 }
 
+func (p *Plugin) String() string {
+	return fmt.Sprintf("%s %v", p.Path, p.Args)
+}
+
 // ConfigureCore configures the Otto core configuration with the loaded
 // plugin data.
 func (m *PluginManager) ConfigureCore(core *otto.CoreConfig) error {
@@ -111,7 +117,7 @@ func (m *PluginManager) Plugins() []*Plugin {
 // Discover will find all the available plugin binaries. Each time this
 // is called it will override any previously discovered plugins.
 func (m *PluginManager) Discover() error {
-	result := make([][]string, 0, len(pluginmap.Apps)+5)
+	result := make([]*Plugin, 0, 20)
 
 	if !testingMode {
 		// Get our own path
@@ -122,22 +128,20 @@ func (m *PluginManager) Discover() error {
 
 		// First we add all the builtin plugins which we get by executing ourself
 		for k, _ := range pluginmap.Apps {
-			result = append(result, []string{
-				exePath,
-				"plugin-builtin",
-				"app",
-				k,
+			result = append(result, &Plugin{
+				Path: exePath,
+				Args: []string{"plugin-builtin", "app", k},
 			})
 		}
 	}
 
 	// Log it
 	for _, r := range result {
-		log.Printf("[DEBUG] Detected plugin: %v", r)
+		log.Printf("[DEBUG] Detected plugin: %s", r)
 	}
 
 	// Save our result
-	m.pluginPaths = result
+	m.plugins = result
 
 	return nil
 }
@@ -146,13 +150,56 @@ func (m *PluginManager) Discover() error {
 // then be called to load the plugins that were used only, making plugin
 // loading much more efficient.
 func (m *PluginManager) StoreUsed(path string) error {
-	return nil
+	// Get the used plugins
+	plugins := make([]*Plugin, 0, 2)
+	for _, p := range m.Plugins() {
+		if p.Used() {
+			plugins = append(plugins, p)
+		}
+	}
+
+	// Write the used plugins to the given path as JSON
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	enc := json.NewEncoder(f)
+	return enc.Encode(&usedPluginWrapper{
+		Version: usedPluginVersion,
+		Plugins: plugins,
+	})
+}
+
+// LoadUsed will load the plugins in the given used file that was saved
+// with StoreUsed.
+func (m *PluginManager) LoadUsed(path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	var wrapper usedPluginWrapper
+	dec := json.NewDecoder(f)
+	err = dec.Decode(&wrapper)
+	f.Close()
+	if err != nil {
+		return err
+	}
+
+	if wrapper.Version > usedPluginVersion {
+		// TODO: error
+	}
+
+	m.plugins = wrapper.Plugins
+	return m.LoadAll()
 }
 
 // LoadAll will launch every plugin and add it to the CoreConfig given.
 func (m *PluginManager) LoadAll() error {
 	// If we've never loaded plugin paths, then let's discover those first
-	if m.pluginPaths == nil {
+	if m.Plugins() == nil {
 		if err := m.Discover(); err != nil {
 			return err
 		}
@@ -160,8 +207,8 @@ func (m *PluginManager) LoadAll() error {
 
 	// Go through each plugin path and load single
 	// TODO: parallelize
-	for _, path := range m.pluginPaths {
-		if err := m.Load(path[0], path[1:]...); err != nil {
+	for _, plugin := range m.Plugins() {
+		if err := plugin.Load(); err != nil {
 			return err
 		}
 	}
@@ -169,18 +216,11 @@ func (m *PluginManager) LoadAll() error {
 	return nil
 }
 
-// Load will launch a single plugin and configure the CoreConfig with
-// the plugin data. This will merge with any prior configuration in the
-// CoreConfig.
-func (m *PluginManager) Load(path string, args ...string) error {
-	plugin := &Plugin{
-		Path: path,
-		Args: args,
-	}
-	if err := plugin.Load(); err != nil {
-		return err
-	}
+// usedPluginVersion is the current version of the used plugin format
+// that we understand. We can increment and handle older versions as we go.
+const usedPluginVersion int = 1
 
-	m.plugins = append(m.plugins, plugin)
-	return nil
+type usedPluginWrapper struct {
+	Version int       `json:"version"`
+	Plugins []*Plugin `json:"plugins"`
 }
