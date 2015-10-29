@@ -15,6 +15,7 @@ package app
 
 import (
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/ui"
@@ -66,6 +67,9 @@ type App interface {
 type Meta struct {
 	// Tuples returns the tuples that this app implementation supports.
 	Tuples TupleSlice
+
+	// Detectors are the detectors that exist for this app type.
+	Detectors []*detect.Detector
 }
 
 // Context is the context for operations on applications. Some of the
