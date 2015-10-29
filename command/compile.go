@@ -167,6 +167,19 @@ func (c *CompileCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Store the used plugins so later calls don't have to load everything
+	usedPath, err := c.AppfilePluginsPath(capp)
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error compiling: %s", err))
+		return 1
+	}
+	if err := pluginMgr.StoreUsed(usedPath); err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error compiling plugin data: %s", err))
+		return 1
+	}
+
 	// Success!
 	ui.Header("[green]Compilation success!")
 	ui.Message(fmt.Sprintf(

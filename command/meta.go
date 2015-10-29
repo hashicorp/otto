@@ -103,6 +103,17 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(pluginMgr.Plugins()) == 0 {
+		// We haven't loaded any plugins. Look for them in the
+		// used directory and load them.
+		usedPath, err := m.AppfilePluginsPath(f)
+		if err != nil {
+			return nil, err
+		}
+		if err := pluginMgr.LoadUsed(usedPath); err != nil {
+			return nil, err
+		}
+	}
 
 	// Configure the core with what we have from the plugin manager.
 	if err := pluginMgr.ConfigureCore(m.CoreConfig); err != nil {
@@ -124,6 +135,23 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 	}
 
 	return otto.NewCore(&config)
+}
+
+// AppfilePluginsPath returns the path where the used plugins data
+// should be stored based on an Appfile.
+func (m *Meta) AppfilePluginsPath(f *appfile.Compiled) (string, error) {
+	rootDir, err := m.RootDir(filepath.Dir(f.File.Path))
+	if err != nil {
+		return "", err
+	}
+
+	rootDir, err = filepath.Abs(rootDir)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(
+		rootDir, DefaultOutputDir, DefaultOutputDirCompiledAppfile, "plugins.json"), nil
 }
 
 // DataDir returns the user-local data directory for Otto.
