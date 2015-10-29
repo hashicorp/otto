@@ -19,7 +19,7 @@ import (
 )
 
 // PluginGlob is the glob pattern used to find plugins.
-const PluginGlob = "otto-*"
+const PluginGlob = "otto-plugin-*"
 
 // PluginManager is responsible for discovering and starting plugins.
 //
@@ -111,7 +111,12 @@ func (p *Plugin) Used() bool {
 }
 
 func (p *Plugin) String() string {
-	return fmt.Sprintf("%s %v", p.Path, p.Args)
+	path := p.Path
+	if p.Builtin {
+		path = "<builtin>"
+	}
+
+	return fmt.Sprintf("%s %v", path, p.Args)
 }
 
 // ConfigureCore configures the Otto core configuration with the loaded
@@ -146,6 +151,21 @@ func (m *PluginManager) Discover() error {
 			result = append(result, &Plugin{
 				Args:    []string{"plugin-builtin", k},
 				Builtin: true,
+			})
+		}
+	}
+
+	for _, dir := range m.PluginDirs {
+		log.Printf("[DEBUG] Looking for plugins in: %s", dir)
+		paths, err := plugin.Discover(PluginGlob, dir)
+		if err != nil {
+			return fmt.Errorf(
+				"Error discovering plugins in %s: %s", dir, err)
+		}
+
+		for _, path := range paths {
+			result = append(result, &Plugin{
+				Path: path,
 			})
 		}
 	}

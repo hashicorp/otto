@@ -25,6 +25,7 @@ const (
 	// directory.
 	DefaultLocalDataDir         = "~/.otto.d"
 	DefaultLocalDataDetectorDir = "detect"
+	DefaultLocalDataPluginsDir  = "plugins"
 
 	// DefaultOutputDir is the default filename for the output directory
 	DefaultOutputDir                = ".otto"
@@ -235,8 +236,30 @@ func (m *Meta) PluginManager() (*PluginManager, error) {
 		return m.pluginManager, nil
 	}
 
+	// Get the root directory to look for plugins. If we can't get it,
+	// then assume we're in the pwd for compilation.
+	startDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	rootDir, err := m.RootDir(startDir)
+	if err != nil {
+		rootDir = startDir
+	}
+
+	// Data directory where plugins can be
+	dataDir, err := m.DataDir()
+	if err != nil {
+		return nil, err
+	}
+
 	m.pluginManager = &PluginManager{
 		PluginMap: m.PluginMap,
+		PluginDirs: []string{
+			rootDir,
+			filepath.Join(dataDir, DefaultLocalDataPluginsDir),
+			filepath.Dir(pluginExePath),
+		},
 	}
 	return m.pluginManager, nil
 }
