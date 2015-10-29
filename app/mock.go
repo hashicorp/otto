@@ -2,6 +2,10 @@ package app
 
 // Mock is a mock implementation of the App interface.
 type Mock struct {
+	MetaCalled bool
+	MetaResult *Meta
+	MetaErr    error
+
 	CompileCalled  bool
 	CompileContext *Context
 	CompileResult  *CompileResult
@@ -25,6 +29,11 @@ type Mock struct {
 	DevDepContextSrc *Context
 	DevDepResult     *DevDep
 	DevDepErr        error
+}
+
+func (m *Mock) Meta() (*Meta, error) {
+	m.MetaCalled = true
+	return m.MetaResult, m.MetaErr
 }
 
 func (m *Mock) Compile(ctx *Context) (*CompileResult, error) {

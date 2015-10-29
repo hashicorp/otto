@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/otto"
+	"github.com/hashicorp/otto/plugin"
 	"github.com/hashicorp/otto/ui"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/go-homedir"
@@ -54,6 +55,9 @@ const (
 type Meta struct {
 	CoreConfig *otto.CoreConfig
 	Ui         cli.Ui
+	PluginMap  plugin.ServeMuxMap
+
+	pluginManager *PluginManager
 }
 
 // Appfile loads the compiled Appfile. If the Appfile isn't compiled yet,
@@ -97,6 +101,29 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 		return nil, err
 	}
 
+	pluginMgr, err := m.PluginManager()
+	if err != nil {
+		return nil, err
+	}
+	if len(pluginMgr.Plugins()) == 0 {
+		// We haven't loaded any plugins. Look for them in the
+		// used directory and load them.
+		usedPath, err := m.AppfilePluginsPath(f)
+		if err != nil {
+			return nil, err
+		}
+		if _, err := os.Stat(usedPath); err == nil {
+			if err := pluginMgr.LoadUsed(usedPath); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Configure the core with what we have from the plugin manager.
+	if err := pluginMgr.ConfigureCore(m.CoreConfig); err != nil {
+		return nil, err
+	}
+
 	config := *m.CoreConfig
 	config.Appfile = f
 	config.DataDir = dataDir
@@ -112,6 +139,23 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 	}
 
 	return otto.NewCore(&config)
+}
+
+// AppfilePluginsPath returns the path where the used plugins data
+// should be stored based on an Appfile.
+func (m *Meta) AppfilePluginsPath(f *appfile.Compiled) (string, error) {
+	rootDir, err := m.RootDir(filepath.Dir(f.File.Path))
+	if err != nil {
+		return "", err
+	}
+
+	rootDir, err = filepath.Abs(rootDir)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(
+		rootDir, DefaultOutputDir, DefaultOutputDirCompiledAppfile, "plugins.json"), nil
 }
 
 // DataDir returns the user-local data directory for Otto.
@@ -179,6 +223,22 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	f.SetOutput(errW)
 
 	return f
+}
+
+// PluginManager returns the PluginManager configured with the proper
+// directories for this command invocation.
+//
+// This is a singleton for each Meta, so multiple calls will return the
+// same object.
+func (m *Meta) PluginManager() (*PluginManager, error) {
+	if m.pluginManager != nil {
+		return m.pluginManager, nil
+	}
+
+	m.pluginManager = &PluginManager{
+		PluginMap: m.PluginMap,
+	}
+	return m.pluginManager, nil
 }
 
 // OttoUi returns the ui.Ui object.

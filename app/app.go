@@ -15,6 +15,7 @@ package app
 
 import (
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/ui"
@@ -23,6 +24,9 @@ import (
 // App is the interface that must be implemented by each
 // (app type, infra type, infra flavor) 3-tuple.
 type App interface {
+	// Meta returns the metadata about this App implementation.
+	Meta() (*Meta, error)
+
 	// Compile is called to compile the files that are used to manage
 	// this application.
 	Compile(*Context) (*CompileResult, error)
@@ -57,6 +61,15 @@ type App interface {
 	// is part of the DevDep structure. Any DevDepFragments from the
 	// compilation will still be used, of course.
 	DevDep(dst *Context, src *Context) (*DevDep, error)
+}
+
+// Meta is metadata about an app implementation.
+type Meta struct {
+	// Tuples returns the tuples that this app implementation supports.
+	Tuples TupleSlice
+
+	// Detectors are the detectors that exist for this app type.
+	Detectors []*detect.Detector
 }
 
 // Context is the context for operations on applications. Some of the

@@ -20,6 +20,10 @@ import (
 // App is an implementation of app.App
 type App struct{}
 
+func (a *App) Meta() (*app.Meta, error) {
+	return Meta, nil
+}
+
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	fragmentPath := filepath.Join(ctx.Dir, "dev-dep", "Vagrantfile.fragment")
 
