@@ -99,6 +99,16 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 		return nil, err
 	}
 
+	pluginMgr, err := m.PluginManager()
+	if err != nil {
+		return nil, err
+	}
+
+	// Configure the core with what we have from the plugin manager.
+	if err := pluginMgr.ConfigureCore(m.CoreConfig); err != nil {
+		return nil, err
+	}
+
 	config := *m.CoreConfig
 	config.Appfile = f
 	config.DataDir = dataDir
