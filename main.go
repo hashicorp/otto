@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/otto/plugin"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
 	"github.com/mitchellh/prefixedio"
@@ -89,6 +90,9 @@ func realMain() int {
 }
 
 func wrappedMain() int {
+	// Make sure we cleanup any plugins that were launched.
+	defer plugin.CleanupClients()
+
 	log.SetOutput(os.Stderr)
 	log.Printf(
 		"[INFO] Otto version: %s %s %s",

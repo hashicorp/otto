@@ -54,6 +54,8 @@ const (
 type Meta struct {
 	CoreConfig *otto.CoreConfig
 	Ui         cli.Ui
+
+	pluginManager *PluginManager
 }
 
 // Appfile loads the compiled Appfile. If the Appfile isn't compiled yet,
@@ -179,6 +181,20 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	f.SetOutput(errW)
 
 	return f
+}
+
+// PluginManager returns the PluginManager configured with the proper
+// directories for this command invocation.
+//
+// This is a singleton for each Meta, so multiple calls will return the
+// same object.
+func (m *Meta) PluginManager() (*PluginManager, error) {
+	if m.pluginManager != nil {
+		return m.pluginManager, nil
+	}
+
+	m.pluginManager = &PluginManager{}
+	return m.pluginManager, nil
 }
 
 // OttoUi returns the ui.Ui object.
