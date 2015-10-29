@@ -7,9 +7,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
+	"sync"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/builtin/pluginmap"
+	"github.com/hashicorp/otto/helper/semaphore"
 	"github.com/hashicorp/otto/otto"
 	"github.com/hashicorp/otto/plugin"
 	"github.com/kardianos/osext"
@@ -214,14 +218,32 @@ func (m *PluginManager) LoadAll() error {
 	}
 
 	// Go through each plugin path and load single
-	// TODO: parallelize
+	var merr error
+	var merrLock sync.Mutex
+	var wg sync.WaitGroup
+	sema := semaphore.New(runtime.NumCPU())
 	for _, plugin := range m.Plugins() {
-		if err := plugin.Load(); err != nil {
-			return err
-		}
+		wg.Add(1)
+		go func(plugin *Plugin) {
+			defer wg.Done()
+
+			sema.Acquire()
+			defer sema.Release()
+
+			if err := plugin.Load(); err != nil {
+				merrLock.Lock()
+				defer merrLock.Unlock()
+				merr = multierror.Append(merr, fmt.Errorf(
+					"Error loading plugin %s: %s",
+					plugin.Path, err))
+			}
+		}(plugin)
 	}
 
-	return nil
+	// Wait for all the plugins to load
+	wg.Wait()
+
+	return merr
 }
 
 // usedPluginVersion is the current version of the used plugin format

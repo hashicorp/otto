@@ -110,8 +110,10 @@ func (m *Meta) Core(f *appfile.Compiled) (*otto.Core, error) {
 		if err != nil {
 			return nil, err
 		}
-		if err := pluginMgr.LoadUsed(usedPath); err != nil {
-			return nil, err
+		if _, err := os.Stat(usedPath); err == nil {
+			if err := pluginMgr.LoadUsed(usedPath); err != nil {
+				return nil, err
+			}
 		}
 	}
 
