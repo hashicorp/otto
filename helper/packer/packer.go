@@ -107,9 +107,8 @@ func (p *Packer) Execute(commandRaw ...string) error {
 
 func (p *Packer) uiCallback(o *Output) {
 	// If we don't have a UI return
-	// TODO: log
 	if p.Ui == nil {
-		return
+		p.Ui = &ui.Logged{Ui: &ui.Null{}}
 	}
 
 	// Output the things to our own UI!

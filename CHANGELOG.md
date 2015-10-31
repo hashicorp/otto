@@ -1,4 +1,20 @@
-## 0.1.2 (unreleased)
+## Next Version
+
+FEATURES:
+
+  * **Layered Dev Environments**: Dev environments are now layered. Each
+    layer is cached. When bringing up a new development environment, cached
+    layers are used to speed it up immensely.
+  * **App Type Plugins**: You can now add custom app types (or even override
+    Otto's built-in types) using app type plugins. Want to support a new
+    language? A new framework? App type plugins are for you.
+
+BUG FIXES:
+
+  * command/compile: compilation works if Appfile is a directory (it
+      ignores the directory and detects an Appfile) [GH-280]
+
+## 0.1.2 (October 20, 2015)
 
 IMPROVEMENTS:
 
@@ -28,9 +44,12 @@ BUG FIXES:
   * app: support Vagrant dev versions
   * app: don't error if no internet is availabile
   * app: `VAGRANT_CWD` won't cause dev to break [GH-262]
+  * app: Friendly error message if you attempt to SSH into a dev environment
+      that hasn't been created yet. [GH-69]
   * app/node: fix node download directory in build [GH-125]
   * app/ruby: allow `gem install` to work as `vagrant` user in dev [GH-129]
   * app/ruby, app/php: Fix `package.json` causing apps to be detected as Node.js [GH-149]
+  * command/build: show help if any args are given [GH-245]
 
 PLUGIN DEV CHANGES:
 

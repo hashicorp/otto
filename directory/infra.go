@@ -1,7 +1,6 @@
 package directory
 
 import (
-	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/helper/uuid"
 )
 
@@ -40,13 +39,4 @@ func (i *Infra) IsReady() bool {
 
 func (i *Infra) setId() {
 	i.ID = uuid.GenerateUUID()
-}
-
-// InfraId generates the ID to use to reference an infrastructure in
-// the directory. This is guaranteed to be a unique and consistent ID
-// for the given inputs and should be used by multiple plugins (infra,
-// apps, etc.) to generate a consistent ID for querying data.
-func InfraId(infra *appfile.Infrastructure) string {
-	// TODO: Make a more unique ID.
-	return infra.Name
 }

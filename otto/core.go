@@ -34,6 +34,8 @@ type Core struct {
 	localDir        string
 	compileDir      string
 	ui              ui.Ui
+
+	metadataCache *CompileMetadata
 }
 
 // CoreConfig is configuration for creating a new core with NewCore.
@@ -93,6 +95,10 @@ func NewCore(c *CoreConfig) (*Core, error) {
 
 // Compile takes the Appfile and compiles all the resulting data.
 func (c *Core) Compile() error {
+	// md stores the metadata about the compilation. This is only written
+	// on a successful compile.
+	var md CompileMetadata
+
 	// Get the infra implementation for this
 	infra, infraCtx, err := c.infra()
 	if err != nil {
@@ -112,29 +118,38 @@ func (c *Core) Compile() error {
 		return err
 	}
 
+	// Reset the metadata cache so we don't have that
+	c.resetCompileMetadata()
+
 	// Compile the infrastructure for our application
 	log.Printf("[INFO] running infra compile...")
 	c.ui.Message("Compiling infra...")
-	if _, err := infra.Compile(infraCtx); err != nil {
+	infraResult, err := infra.Compile(infraCtx)
+	if err != nil {
 		return err
 	}
+	md.Infra = infraResult
 
 	// Compile the foundation (not tied to any app). This compilation
 	// of the foundation is used for `otto infra` to set everything up.
 	log.Printf("[INFO] running foundation compilations")
+	md.Foundations = make(map[string]*foundation.CompileResult, len(foundations))
 	for i, f := range foundations {
 		ctx := foundationCtxs[i]
 		c.ui.Message(fmt.Sprintf(
 			"Compiling foundation: %s", ctx.Tuple.Type))
-		if _, err := f.Compile(ctx); err != nil {
+		result, err := f.Compile(ctx)
+		if err != nil {
 			return err
 		}
+
+		md.Foundations[ctx.Tuple.Type] = result
 	}
 
 	// Walk through the dependencies and compile all of them.
 	// We have to compile every dependency for dev building.
-	var resultLock sync.Mutex
-	results := make([]*app.CompileResult, 0, len(c.appfileCompiled.Graph.Vertices()))
+	var mdLock sync.Mutex
+	md.AppDeps = make(map[string]*app.CompileResult)
 	err = c.walk(func(app app.App, ctx *app.Context, root bool) error {
 		if !root {
 			c.ui.Header(fmt.Sprintf(
@@ -149,15 +164,33 @@ func (c *Core) Compile() error {
 		if root {
 			// We grab the lock just in case although if we're the
 			// root this should be serialized.
-			resultLock.Lock()
-			ctx.DevDepFragments = make([]string, 0, len(results))
-			for _, result := range results {
+			mdLock.Lock()
+			ctx.DevDepFragments = make([]string, 0, len(md.AppDeps))
+			for _, result := range md.AppDeps {
 				if result.DevDepFragmentPath != "" {
 					ctx.DevDepFragments = append(
 						ctx.DevDepFragments, result.DevDepFragmentPath)
 				}
 			}
-			resultLock.Unlock()
+			mdLock.Unlock()
+		}
+
+		// Compile the foundations for this app
+		subdirs := []string{"app-dev", "app-dev-dep", "app-build", "app-deploy"}
+		for i, f := range foundations {
+			fCtx := foundationCtxs[i]
+			fCtx.Dir = ctx.FoundationDirs[i]
+
+			if _, err := f.Compile(fCtx); err != nil {
+				return err
+			}
+
+			// Make sure the subdirs exist
+			for _, dir := range subdirs {
+				if err := os.MkdirAll(filepath.Join(fCtx.Dir, dir), 0755); err != nil {
+					return err
+				}
+			}
 		}
 
 		// Compile!
@@ -167,7 +200,6 @@ func (c *Core) Compile() error {
 		}
 
 		// Compile the foundations for this app
-		subdirs := []string{"app-dev", "app-dev-dep", "app-build", "app-deploy"}
 		for i, f := range foundations {
 			fCtx := foundationCtxs[i]
 			fCtx.Dir = ctx.FoundationDirs[i]
@@ -187,15 +219,24 @@ func (c *Core) Compile() error {
 			}
 		}
 
-		// Store the compilation result for later
-		resultLock.Lock()
-		defer resultLock.Unlock()
-		results = append(results, result)
+		// Store the compilation result in the metadata
+		mdLock.Lock()
+		defer mdLock.Unlock()
+
+		if root {
+			md.App = result
+		} else {
+			md.AppDeps[ctx.Appfile.ID] = result
+		}
 
 		return nil
 	})
+	if err != nil {
+		return err
+	}
 
-	return err
+	// We had no compilation errors! Let's save the metadata
+	return c.saveCompileMetadata(&md)
 }
 
 func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
@@ -722,6 +763,9 @@ func (c *Core) executeApp(opts *ExecuteOpts) error {
 }
 
 func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
+	// Whether or not this is the root Appfile
+	root := f.ID == c.appfile.ID
+
 	// We need the configuration for the active infrastructure
 	// so that we can build the tuple below
 	config := f.ActiveInfrastructure()
@@ -744,9 +788,9 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 	// it goes directly into "app" or it is a dependency and goes into
 	// a dep folder.
 	outputDir := filepath.Join(c.compileDir, "app")
-	if id := f.ID; id != c.appfile.ID {
+	if !root {
 		outputDir = filepath.Join(
-			c.compileDir, fmt.Sprintf("dep-%s", id))
+			c.compileDir, fmt.Sprintf("dep-%s", f.ID))
 	}
 
 	// The cache directory for this app
@@ -755,6 +799,14 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 		return nil, fmt.Errorf(
 			"error making cache directory '%s': %s",
 			cacheDir, err)
+	}
+
+	// The directory for global data
+	globalDir := filepath.Join(c.dataDir, "global-data")
+	if err := os.MkdirAll(globalDir, 0755); err != nil {
+		return nil, fmt.Errorf(
+			"error making global data directory '%s': %s",
+			globalDir, err)
 	}
 
 	// Build the contexts for the foundations. We use this
@@ -776,13 +828,30 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 			"Error retrieving dev IP address: %s", err)
 	}
 
+	// Get the metadata
+	var compileResult *app.CompileResult
+	md, err := c.compileMetadata()
+	if err != nil {
+		return nil, fmt.Errorf(
+			"Error loading compilation metadata: %s", err)
+	}
+	if md != nil {
+		if root {
+			compileResult = md.App
+		} else {
+			compileResult = md.AppDeps[f.ID]
+		}
+	}
+
 	return &app.Context{
-		Dir:          outputDir,
-		CacheDir:     cacheDir,
-		LocalDir:     c.localDir,
-		Tuple:        tuple,
-		Application:  f.Application,
-		DevIPAddress: ip.String(),
+		CompileResult: compileResult,
+		Dir:           outputDir,
+		CacheDir:      cacheDir,
+		LocalDir:      c.localDir,
+		GlobalDir:     globalDir,
+		Tuple:         tuple,
+		Application:   f.Application,
+		DevIPAddress:  ip.String(),
 		Shared: context.Shared{
 			Appfile:        f,
 			FoundationDirs: foundationDirs,

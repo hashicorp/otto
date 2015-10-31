@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	vagrantMinVersion = version.Must(version.NewVersion("1.7.4"))
+	vagrantMinVersion = version.Must(version.NewVersion("1.7.99"))
 )
 
 // Project returns the hashitools Project for this.
@@ -46,6 +46,8 @@ type Vagrant struct {
 	// commands. If this is nil, then the output will be logged but
 	// won't be visible to the user.
 	Ui ui.Ui
+
+	lock sync.Mutex
 }
 
 // A global mutex to prevent any Vagrant commands from running in parallel,
@@ -97,4 +99,17 @@ func (v *Vagrant) Execute(command ...string) error {
 	}
 
 	return nil
+}
+
+func (v *Vagrant) ExecuteSilent(command ...string) error {
+	v.lock.Lock()
+	defer v.lock.Unlock()
+
+	// Store the old UI and restore it before exit
+	old := v.Ui
+	defer func() { v.Ui = old }()
+
+	// Make the Ui silent
+	v.Ui = &ui.Logged{Ui: &ui.Null{}}
+	return v.Execute(command...)
 }

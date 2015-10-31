@@ -92,3 +92,30 @@ package by specifying the `TEST` variable. For example below, only
 $ make test TEST=./otto
 ...
 ```
+
+### Acceptance Tests
+
+Otto also has a comprehensive
+[acceptance test](http://en.wikipedia.org/wiki/Acceptance_testing)
+suite covering most of the major features of the built-in app types.
+
+If you're working on a feature of an app type and want to verify it is
+functioning (as well as hasn't broken anything else), we recommend running
+the acceptance tests. Note that we _do not require_ that you run or write
+acceptance tests to have a PR merged. The acceptance tests are here for your
+convenience, and we'll add them if they're missing.
+
+**Note:** Acceptance tests are slow. They spin up real resources and take
+time to run. We recommend filtering as documented below to speed up your
+workflow.
+
+To run the acceptance tests, invoke `make testacc`:
+
+```sh
+$ make testacc TEST=./builtin/app/go TESTARGS='-run=dev'
+...
+```
+
+The `TEST` variable is required, and you should specify the folder where the
+app type is. The `TESTARGS` variable is recommended to filter down to a specific
+test to run, since running all of them at once can take a very long time.
