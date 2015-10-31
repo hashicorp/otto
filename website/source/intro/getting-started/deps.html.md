@@ -47,7 +47,7 @@ In the above example, we've added MongoDB as a dependency to our application.
 An important feature of Otto is that you only need to specify the immediate
 dependencies; dependencies of dependencies do not need to be specified.
 Otto automatically fetches the dependency and inspects it for more
-depenencies, and continues this process.
+dependencies, and continues this process.
 
 ## Develop
 

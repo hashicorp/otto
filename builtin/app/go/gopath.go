@@ -28,7 +28,19 @@ func detectImportPath(ctx *app.Context) (string, error) {
 		return "", nil
 	}
 
+	// Gopath should be absolute
+	gopath, err := filepath.Abs(gopath)
+	if err != nil {
+		return "", fmt.Errorf(
+			"Error expanding GOPATH to an absolute path: %s", err)
+	}
+
 	dir := filepath.Dir(ctx.Appfile.Path)
+	dir, err = filepath.Abs(dir)
+	if err != nil {
+		return "", fmt.Errorf(
+			"Error expanding Appfile path to an absolute path: %s", err)
+	}
 
 	// If the directory to our Appfile is a symlink, resolve that symlink
 	// through. This makes this heuristic work for local dependencies.

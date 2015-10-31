@@ -8,12 +8,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
+	"github.com/hashicorp/go-getter"
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/otto/appfile/detect"
-	"github.com/hashicorp/terraform/config/module"
+	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/terraform/dag"
 )
 
@@ -146,6 +148,24 @@ type CompileEventImport struct {
 // LoadCompiled loads and verifies a compiled Appfile (*Compiled) from
 // disk.
 func LoadCompiled(dir string) (*Compiled, error) {
+	// Check the version
+	vsnStr, err := oneline.Read(filepath.Join(dir, CompileVersionFilename))
+	if err != nil {
+		return nil, err
+	}
+	vsn, err := strconv.ParseInt(vsnStr, 0, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	// If the version is too new, then we can't handle it
+	if vsn > CompileVersion {
+		return nil, fmt.Errorf(
+			"The Appfile for this enviroment was compiled with a newer version\n" +
+				"of Otto. Otto can't load this environment. You can recompile this\n" +
+				"environment to this version of Otto with `otto compile`.")
+	}
+
 	f, err := os.Open(filepath.Join(dir, CompileFilename))
 	if err != nil {
 		return nil, err
@@ -215,7 +235,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	}
 
 	// Build the storage we'll use for storing imports
-	importStorage := &module.FolderStorage{
+	importStorage := &getter.FolderStorage{
 		StorageDir: filepath.Join(opts.Dir, CompileImportsFolder)}
 	importOpts := &compileImportOpts{
 		Storage:   importStorage,
@@ -238,7 +258,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	// Build the storage we'll use for storing downloaded dependencies,
 	// then use that to trigger the recursive call to download all our
 	// dependencies.
-	storage := &module.FolderStorage{
+	storage := &getter.FolderStorage{
 		StorageDir: filepath.Join(opts.Dir, CompileDepsFolder)}
 	if err := compileDependencies(
 		storage,
@@ -261,7 +281,7 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 }
 
 func compileDependencies(
-	storage module.Storage,
+	storage getter.Storage,
 	importOpts *compileImportOpts,
 	graph *dag.AcyclicGraph,
 	opts *CompileOpts,
@@ -270,7 +290,9 @@ func compileDependencies(
 	vertexMap := make(map[string]*CompiledGraphVertex)
 
 	// Store ourselves in the map
-	key, err := module.Detect(".", filepath.Dir(root.File.Path))
+	key, err := getter.Detect(
+		".", filepath.Dir(root.File.Path),
+		getter.Detectors)
 	if err != nil {
 		return err
 	}
@@ -291,7 +313,9 @@ func compileDependencies(
 
 		log.Printf("[DEBUG] compiling dependencies for: %s", current.Name())
 		for _, dep := range current.File.Application.Dependencies {
-			key, err := module.Detect(dep.Source, filepath.Dir(current.File.Path))
+			key, err := getter.Detect(
+				dep.Source, filepath.Dir(current.File.Path),
+				getter.Detectors)
 			if err != nil {
 				return fmt.Errorf(
 					"Error loading source: %s", err)
@@ -324,14 +348,36 @@ func compileDependencies(
 						"Error detecting defaults in %s: %s", key, err)
 				}
 
-				// Parse the Appfile
-				f, err := ParseFile(filepath.Join(dir, "Appfile"))
-				if err != nil {
+				// Parse the Appfile if it exists
+				var f *File
+				appfilePath := filepath.Join(dir, "Appfile")
+				_, err = os.Stat(appfilePath)
+				if err != nil && !os.IsNotExist(err) {
 					return fmt.Errorf(
 						"Error parsing Appfile in %s: %s", key, err)
 				}
+				if err == nil {
+					f, err = ParseFile(appfilePath)
+					if err != nil {
+						return fmt.Errorf(
+							"Error parsing Appfile in %s: %s", key, err)
+					}
+
+					// Realize all the imports for this file
+					if err := compileImports(f, importOpts, opts); err != nil {
+						return err
+					}
+
+					// Merge the files
+					if err := fDef.Merge(f); err != nil {
+						return fmt.Errorf(
+							"Error merging default Appfile for dependency %s: %s",
+							key, err)
+					}
+				}
 
 				// Set the source
+				f = fDef
 				f.Source = key
 
 				// If it doesn't have an otto ID then we can't do anything
@@ -353,21 +399,6 @@ func compileDependencies(
 							"again.",
 						key)
 				}
-
-				// Realize all the imports for this file
-				if err := compileImports(f, importOpts, opts); err != nil {
-					return err
-				}
-
-				// Merge the files
-				log.Printf("DEF: %#v", fDef)
-				log.Printf("WHAT: %#v", f)
-				if err := fDef.Merge(f); err != nil {
-					return fmt.Errorf(
-						"Error merging default Appfile for dependency %s: %s",
-						key, err)
-				}
-				f = fDef
 
 				// We merge the root infrastructure choice upwards to
 				// all dependencies.
@@ -426,7 +457,7 @@ func compileWrite(dir string, compiled *Compiled) error {
 }
 
 type compileImportOpts struct {
-	Storage   module.Storage
+	Storage   getter.Storage
 	Cache     map[string]*File
 	CacheLock *sync.Mutex
 }
@@ -475,7 +506,9 @@ func compileImports(
 
 		// Go through the imports and kick off the download
 		for idx, i := range f.Imports {
-			source, err := module.Detect(i.Source, filepath.Dir(f.Path))
+			source, err := getter.Detect(
+				i.Source, filepath.Dir(f.Path),
+				getter.Detectors)
 			if err != nil {
 				resultErrLock.Lock()
 				defer resultErrLock.Unlock()

@@ -5,10 +5,17 @@
 # Vagrantfile, use the Appfile.
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "hashicorp/precise64"
-  config.vm.provider :parallels do |p, o|
-    o.vm.box = "parallels/ubuntu-12.04"
+  {% block vagrant_box %}
+  if ENV["OTTO_VAGRANT_LAYER_PATH"]
+    config.vm.clone = ENV["OTTO_VAGRANT_LAYER_PATH"]
+  else
+    config.vm.box = "hashicorp/precise64"
+    config.vm.box_check_update = false
+    config.vm.provider :parallels do |p, o|
+      o.vm.box = "parallels/ubuntu-12.04"
+    end
   end
+  {% endblock %}
 
   # Host only network
   config.vm.network "private_network", ip: "{{ dev_ip_address }}"
@@ -33,6 +40,11 @@ Vagrant.configure("2") do |config|
   {% for fragment in dev_fragments %}
   {{ fragment|read }}
   {% endfor %}
+
+  # Use linked clones if possible
+  config.vm.provider "virtualbox" do |p|
+    p.linked_clone = true
+  end
 
   # This is to work around some bugs right now
   ["vmware_fusion", "vmware_workstation"].each do |name|

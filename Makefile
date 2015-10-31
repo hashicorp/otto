@@ -21,6 +21,15 @@ test: generate
 testrace: generate
 	go test -race $(TEST) $(TESTARGS)
 
+# testacc runs acceptance tests
+testacc: generate
+	@if [ "$(TEST)" = "./..." ]; then \
+		echo "ERROR: Set TEST to a specific package. For example,"; \
+		echo "  make testacc TEST=./builtin/app/go"; \
+		exit 1; \
+	fi
+	OTTO_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 90m
+
 # updatedeps installs all the dependencies that Otto needs to run
 # and build.
 updatedeps:

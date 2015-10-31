@@ -81,6 +81,6 @@ server {
 NGINXCONF
 
 ol "Running npm..."
-sudo -u otto-app -i /bin/bash -lc "cd /srv/otto-app && npm install --production"
+sudo -u otto-app -i /bin/bash -lc "cd /srv/otto-app && npm install && npm prune --production"
 
 ol "...done!"

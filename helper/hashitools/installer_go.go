@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/otto/ui"
 	"github.com/mitchellh/ioprogress"
@@ -96,7 +96,7 @@ func (i *GoInstaller) Install(vsn *version.Version) error {
 	i.Ui.Header(fmt.Sprintf("Downloading %s v%s...", i.Name, vsn))
 	i.Ui.Message("URL: " + url)
 	i.Ui.Message("")
-	resp, err := http.Get(url)
+	resp, err := cleanhttp.DefaultClient().Get(url)
 	if err != nil {
 		f.Close()
 		return err

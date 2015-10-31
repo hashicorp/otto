@@ -14,6 +14,11 @@ func TestBackend(t *testing.T, b Backend) {
 	var buf bytes.Buffer
 	var err error
 
+	// Through this method we use "Errorf" instead of "Fatalf". This is
+	// important and deliberate: for our RPC tests, Fatalf causes the
+	// test to hang in a failure due to our RPC model. Errorf causes it
+	// to end properly.
+
 	//---------------------------------------------------------------
 	// Blob
 	//---------------------------------------------------------------
@@ -21,31 +26,37 @@ func TestBackend(t *testing.T, b Backend) {
 	// GetBlob (doesn't exist)
 	data, err := b.GetBlob("foo")
 	if err != nil {
-		t.Fatalf("GetBlob error: %s", err)
+		t.Errorf("GetBlob error: %s", err)
+		return
 	}
 	if data != nil {
 		data.Close()
-		t.Fatalf("GetBlob should be nil data")
+		t.Errorf("GetBlob should be nil data")
+		return
 	}
 
 	// PutBlob
 	err = b.PutBlob("foo", &BlobData{Data: strings.NewReader("bar")})
 	if err != nil {
-		t.Fatalf("PutBlob error: %s", err)
+		t.Errorf("PutBlob error: %s", err)
+		return
 	}
 
 	// GetBlob (exists)
 	data, err = b.GetBlob("foo")
 	if err != nil {
-		t.Fatalf("GetBlob error: %s", err)
+		t.Errorf("GetBlob error: %s", err)
+		return
 	}
 	_, err = io.Copy(&buf, data.Data)
 	data.Close()
 	if err != nil {
-		t.Fatalf("GetBlob error: %s", err)
+		t.Errorf("GetBlob error: %s", err)
+		return
 	}
 	if buf.String() != "bar" {
-		t.Fatalf("GetBlob bad data: %s", buf.String())
+		t.Errorf("GetBlob bad data: %s", buf.String())
+		return
 	}
 
 	//---------------------------------------------------------------
@@ -56,62 +67,76 @@ func TestBackend(t *testing.T, b Backend) {
 	infra := &Infra{Lookup: Lookup{Infra: "foo"}}
 	actualInfra, err := b.GetInfra(infra)
 	if err != nil {
-		t.Fatalf("GetInfra (non-exist) error: %s", err)
+		t.Errorf("GetInfra (non-exist) error: %s", err)
+		return
 	}
 	if actualInfra != nil {
-		t.Fatal("GetInfra (non-exist): infra should be nil")
+		t.Error("GetInfra (non-exist): infra should be nil")
+		return
 	}
 
 	// PutInfra (doesn't exist)
 	infra.Outputs = map[string]string{"foo": "bar"}
 	if infra.ID != "" {
-		t.Fatalf("PutInfra: ID should be empty before set")
+		t.Errorf("PutInfra: ID should be empty before set")
+		return
 	}
 	if err := b.PutInfra(infra); err != nil {
-		t.Fatalf("PutInfra err: %s", err)
+		t.Errorf("PutInfra err: %s", err)
+		return
 	}
 	if infra.ID == "" {
-		t.Fatalf("PutInfra: infra ID not set")
+		t.Errorf("PutInfra: infra ID not set")
+		return
 	}
 
 	// GetInfra (exists)
 	actualInfra, err = b.GetInfra(infra)
 	if err != nil {
-		t.Fatalf("GetInfra (exist) error: %s", err)
+		t.Errorf("GetInfra (exist) error: %s", err)
+		return
 	}
 	if !reflect.DeepEqual(actualInfra, infra) {
-		t.Fatalf("GetInfra (exist) bad: %#v", actualInfra)
+		t.Errorf("GetInfra (exist) bad: %#v", actualInfra)
+		return
 	}
 
 	// GetInfra with foundation (doesn't exist)
 	infra = &Infra{Lookup: Lookup{Infra: "foo", Foundation: "bar"}}
 	actualInfra, err = b.GetInfra(infra)
 	if err != nil {
-		t.Fatalf("GetInfra (non-exist) error: %s", err)
+		t.Errorf("GetInfra (non-exist) error: %s", err)
+		return
 	}
 	if actualInfra != nil {
-		t.Fatal("GetInfra (non-exist): infra should be nil")
+		t.Error("GetInfra (non-exist): infra should be nil")
+		return
 	}
 
 	// PutInfra with foundation (doesn't exist)
 	infra.Outputs = map[string]string{"foo": "bar"}
 	if infra.ID != "" {
-		t.Fatalf("PutInfra: ID should be empty before set")
+		t.Errorf("PutInfra: ID should be empty before set")
+		return
 	}
 	if err := b.PutInfra(infra); err != nil {
-		t.Fatalf("PutInfra err: %s", err)
+		t.Errorf("PutInfra err: %s", err)
+		return
 	}
 	if infra.ID == "" {
-		t.Fatalf("PutInfra: infra ID not set")
+		t.Errorf("PutInfra: infra ID not set")
+		return
 	}
 
 	// GetInfra with foundation (exists)
 	actualInfra, err = b.GetInfra(infra)
 	if err != nil {
-		t.Fatalf("GetInfra (exist) error: %s", err)
+		t.Errorf("GetInfra (exist) error: %s", err)
+		return
 	}
 	if !reflect.DeepEqual(actualInfra, infra) {
-		t.Fatalf("GetInfra (exist) bad: %#v", actualInfra)
+		t.Errorf("GetInfra (exist) bad: %#v", actualInfra)
+		return
 	}
 
 	//---------------------------------------------------------------
@@ -123,30 +148,37 @@ func TestBackend(t *testing.T, b Backend) {
 		AppID: "foo", Infra: "bar", InfraFlavor: "baz"}}
 	deployResult, err := b.GetDeploy(deploy)
 	if err != nil {
-		t.Fatalf("GetDeploy (non-exist) error: %s", err)
+		t.Errorf("GetDeploy (non-exist) error: %s", err)
+		return
 	}
 	if deployResult != nil {
-		t.Fatal("GetDeploy (non-exist): result should be nil")
+		t.Error("GetDeploy (non-exist): result should be nil")
+		return
 	}
 
 	// PutDeploy (doesn't exist)
 	if deploy.ID != "" {
-		t.Fatalf("PutDeploy: ID should be empty before set")
+		t.Errorf("PutDeploy: ID should be empty before set")
+		return
 	}
 	if err := b.PutDeploy(deploy); err != nil {
-		t.Fatalf("PutDeploy err: %s", err)
+		t.Errorf("PutDeploy err: %s", err)
+		return
 	}
 	if deploy.ID == "" {
-		t.Fatalf("PutDeploy: deploy ID not set")
+		t.Errorf("PutDeploy: deploy ID not set")
+		return
 	}
 
 	// GetDeploy (exists)
 	deployResult, err = b.GetDeploy(deploy)
 	if err != nil {
-		t.Fatalf("GetDeploy (exist) error: %s", err)
+		t.Errorf("GetDeploy (exist) error: %s", err)
+		return
 	}
 	if !reflect.DeepEqual(deployResult, deploy) {
-		t.Fatalf("GetDeploy (exist) bad: %#v", deployResult)
+		t.Errorf("GetDeploy (exist) bad: %#v", deployResult)
+		return
 	}
 
 	//---------------------------------------------------------------
@@ -157,48 +189,59 @@ func TestBackend(t *testing.T, b Backend) {
 	dev := &Dev{Lookup: Lookup{AppID: "foo"}}
 	devResult, err := b.GetDev(dev)
 	if err != nil {
-		t.Fatalf("GetDev (non-exist) error: %s", err)
+		t.Errorf("GetDev (non-exist) error: %s", err)
+		return
 	}
 	if devResult != nil {
-		t.Fatal("GetDev (non-exist): result should be nil")
+		t.Error("GetDev (non-exist): result should be nil")
+		return
 	}
 
 	// PutDev (doesn't exist)
 	if dev.ID != "" {
-		t.Fatalf("PutDev: ID should be empty before set")
+		t.Errorf("PutDev: ID should be empty before set")
+		return
 	}
 	if err := b.PutDev(dev); err != nil {
-		t.Fatalf("PutDev err: %s", err)
+		t.Errorf("PutDev err: %s", err)
+		return
 	}
 	if dev.ID == "" {
-		t.Fatalf("PutDev: dev ID not set")
+		t.Errorf("PutDev: dev ID not set")
+		return
 	}
 
 	// GetDev (exists)
 	devResult, err = b.GetDev(dev)
 	if err != nil {
-		t.Fatalf("GetDev (exist) error: %s", err)
+		t.Errorf("GetDev (exist) error: %s", err)
+		return
 	}
 	if !reflect.DeepEqual(devResult, dev) {
-		t.Fatalf("GetDev (exist) bad: %#v", devResult)
+		t.Errorf("GetDev (exist) bad: %#v", devResult)
+		return
 	}
 
 	// DeleteDev (exists)
 	err = b.DeleteDev(dev)
 	if err != nil {
-		t.Fatalf("DeleteDev error: %s", err)
+		t.Errorf("DeleteDev error: %s", err)
+		return
 	}
 	devResult, err = b.GetDev(dev)
 	if err != nil {
-		t.Fatalf("GetDev (non-exist) error: %s", err)
+		t.Errorf("GetDev (non-exist) error: %s", err)
+		return
 	}
 	if devResult != nil {
-		t.Fatal("GetDev (non-exist): result should be nil")
+		t.Error("GetDev (non-exist): result should be nil")
+		return
 	}
 
 	// DeleteDev (doesn't exist)
 	err = b.DeleteDev(dev)
 	if err != nil {
-		t.Fatalf("DeleteDev error: %s", err)
+		t.Errorf("DeleteDev error: %s", err)
+		return
 	}
 }

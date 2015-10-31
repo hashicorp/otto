@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -13,6 +12,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/otto/ui"
 	"github.com/mitchellh/ioprogress"
@@ -97,7 +97,7 @@ func (i *VagrantInstaller) Install(vsn *version.Version) error {
 	i.Ui.Header(fmt.Sprintf("Downloading Vagrant v%s...", vsn))
 	i.Ui.Message("URL: " + url)
 	i.Ui.Message("")
-	resp, err := http.Get(url)
+	resp, err := cleanhttp.DefaultClient().Get(url)
 	if err != nil {
 		f.Close()
 		return err

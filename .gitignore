@@ -2,12 +2,11 @@
 *.dll
 *.exe
 bin/
-builtin/**/bindata.go
-helper/compile/bindata.go
 images/packer_cache
 pkg/
 scratch/
 vendor/
+bindata.go
 example.appfile
 website/.bundle
 website/.vagrant
@@ -22,3 +21,4 @@ website/node_modules
 .otto/
 /.ottoid
 otto-data/
+test-output

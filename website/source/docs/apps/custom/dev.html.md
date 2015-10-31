@@ -31,3 +31,15 @@ customization "dev" {
 
 For the Appfile above, running `otto dev` will run Vagrant in the directory
 of the Appfile against the given Vagrantfile.
+
+The Vagrantfile is rendered as [a template](/docs/apps/custom/template.html).
+It is important at the very least to specify the Vagrant shared folder
+should be the working directory. An example Vagrantfile config is shown
+below to do this:
+
+```
+config.vm.synced_folder '{{ path.working }}', "/vagrant"
+```
+
+If you don't do this, then the directory that `/vagrant` sees will be
+the compiled directory, which is very likely not what you want.
