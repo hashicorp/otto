@@ -27,7 +27,7 @@ unaffordable for hobbyists and even startups. Otto itself is of course free,
 and it has multiple options for infrastructure flavors to balance cost.
 It is certainly cheaper than Heroku.
 
-Admittingly, the deployment experience with Otto is still not as clean
+Admittedly, the deployment experience with Otto is still not as clean
 and simple as Heroku, but for an initial release it is close. As time goes
 on, the Otto deployment experience will only get better. Otto's development
 experience is already fantastic.
