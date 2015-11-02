@@ -170,6 +170,13 @@ func (m *PluginManager) Discover() error {
 		}
 	}
 
+	// Reverse the list of plugins. We do this because we want custom
+	// plugins to take priority over built-in plugins, and the PluginDirs
+	// ordering also defines this priority.
+	for left, right := 0, len(result)-1; left < right; left, right = left+1, right-1 {
+		result[left], result[right] = result[right], result[left]
+	}
+
 	// Log it
 	for _, r := range result {
 		log.Printf("[DEBUG] Detected plugin: %s", r)
