@@ -2,6 +2,7 @@ package vagrant
 
 import (
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -27,6 +28,7 @@ type SSHCache struct {
 func (c *SSHCache) Exec(cacheOkay bool) error {
 	// If we have the cache file, use that
 	if _, err := os.Stat(c.Path); err == nil {
+		log.Printf("[DEBUG] ssh command: ssh -F " + c.Path + " default")
 		cmd := exec.Command("ssh", "-F", c.Path, "default")
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
