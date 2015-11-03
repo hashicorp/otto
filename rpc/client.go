@@ -15,8 +15,8 @@ type Client struct {
 	broker  *muxBroker
 	control *rpc.Client
 
-	// These are the streams used for the various stdin/out/err overrides
-	stdin, stdout, stderr net.Conn
+	// These are the streams used for the various stdout/err overrides
+	stdout, stderr net.Conn
 }
 
 // Dial opens a connection to an RPC server and returns a client.
@@ -51,8 +51,8 @@ func NewClient(conn io.ReadWriteCloser) (*Client, error) {
 		return nil, err
 	}
 
-	// Connect stdin, stdout, stderr streams
-	stdstream := make([]net.Conn, 3)
+	// Connect stdout, stderr streams
+	stdstream := make([]net.Conn, 2)
 	for i, _ := range stdstream {
 		stdstream[i], err = mux.Open()
 		if err != nil {
@@ -69,21 +69,19 @@ func NewClient(conn io.ReadWriteCloser) (*Client, error) {
 	return &Client{
 		broker:  broker,
 		control: rpc.NewClient(control),
-		stdin:   stdstream[0],
-		stdout:  stdstream[1],
-		stderr:  stdstream[2],
+		stdout:  stdstream[0],
+		stderr:  stdstream[1],
 	}, nil
 }
 
-// SyncStreams should be called to enable syncing of stdin, stdout,
+// SyncStreams should be called to enable syncing of stdout,
 // stderr with the plugin.
 //
 // This will return immediately and the syncing will continue to happen
 // in the background. You do not need to launch this in a goroutine itself.
 //
 // This should never be called multiple times.
-func (c *Client) SyncStreams(stdin io.Reader, stdout io.Writer, stderr io.Writer) error {
-	go copyStream("stdin", c.stdin, stdin)
+func (c *Client) SyncStreams(stdout io.Writer, stderr io.Writer) error {
 	go copyStream("stdout", stdout, c.stdout)
 	go copyStream("stderr", stderr, c.stderr)
 	return nil
@@ -93,9 +91,6 @@ func (c *Client) SyncStreams(stdin io.Reader, stdout io.Writer, stderr io.Writer
 // is called.
 func (c *Client) Close() error {
 	if err := c.control.Close(); err != nil {
-		return err
-	}
-	if err := c.stdin.Close(); err != nil {
 		return err
 	}
 	if err := c.stdout.Close(); err != nil {

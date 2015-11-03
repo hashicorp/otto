@@ -65,16 +65,13 @@ func testNewClientServer(t *testing.T) (*Client, *Server, *testStreams) {
 }
 
 func testNewStreams(t *testing.T, s *Server) *testStreams {
-	stdin_r, stdin_w := io.Pipe()
 	stdout_r, stdout_w := io.Pipe()
 	stderr_r, stderr_w := io.Pipe()
 
-	s.Stdin = stdin_w
 	s.Stdout = stdout_r
 	s.Stderr = stderr_r
 
 	return &testStreams{
-		Stdin:  stdin_r,
 		Stdout: stdout_w,
 		Stderr: stderr_w,
 	}
@@ -87,13 +84,11 @@ func testAppFixed(c app.App) AppFunc {
 }
 
 type testStreams struct {
-	Stdin  io.ReadCloser
 	Stdout io.WriteCloser
 	Stderr io.WriteCloser
 }
 
 func (s *testStreams) Close() error {
-	s.Stdin.Close()
 	s.Stdout.Close()
 	s.Stderr.Close()
 	return nil

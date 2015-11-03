@@ -44,12 +44,10 @@ func TestClient_syncStreams(t *testing.T) {
 	client, _, streams := testNewClientServer(t)
 
 	// Start the data copying
-	var stdout_out, stderr_out, stdin_out bytes.Buffer
+	var stdout_out, stderr_out bytes.Buffer
 	stdout := bytes.NewBufferString("stdouttest")
 	stderr := bytes.NewBufferString("stderrtest")
-	stdin := bytes.NewBufferString("stdintest")
-	go client.SyncStreams(stdin, &stdout_out, &stderr_out)
-	go io.Copy(&stdin_out, streams.Stdin)
+	go client.SyncStreams(&stdout_out, &stderr_out)
 	go io.Copy(streams.Stdout, stdout)
 	go io.Copy(streams.Stderr, stderr)
 
@@ -61,9 +59,6 @@ func TestClient_syncStreams(t *testing.T) {
 	client.Close()
 	streams.Close()
 
-	if v := stdin_out.String(); v != "stdintest" {
-		t.Fatalf("bad: %s", v)
-	}
 	if v := stdout_out.String(); v != "stdouttest" {
 		t.Fatalf("bad: %s", v)
 	}

@@ -69,8 +69,10 @@ func (p *Plugin) Load() error {
 
 	// Create the plugin client to communicate with the process
 	pluginClient := plugin.NewClient(&plugin.ClientConfig{
-		Cmd:     exec.Command(path, p.Args...),
-		Managed: true,
+		Cmd:        exec.Command(path, p.Args...),
+		Managed:    true,
+		SyncStdout: os.Stdout,
+		SyncStderr: os.Stderr,
 	})
 
 	// Request the client

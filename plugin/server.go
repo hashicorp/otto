@@ -50,11 +50,6 @@ func Serve(opts *ServeOpts) {
 
 	// Create our new stdout, stderr files. These will override our built-in
 	// stdout/stderr so that it works across the stream boundary.
-	stdin_r, stdin_w, err := os.Pipe()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error preparing Otto plugin: %s\n", err)
-		os.Exit(1)
-	}
 	stdout_r, stdout_w, err := os.Pipe()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error preparing Otto plugin: %s\n", err)
@@ -77,7 +72,6 @@ func Serve(opts *ServeOpts) {
 	// Create the RPC server to dispense
 	server := &pluginrpc.Server{
 		AppFunc: opts.AppFunc,
-		Stdin:   stdin_w,
 		Stdout:  stdout_r,
 		Stderr:  stderr_r,
 	}
@@ -105,8 +99,7 @@ func Serve(opts *ServeOpts) {
 		}
 	}()
 
-	// Set our new stdin, out, err
-	os.Stdin = stdin_r
+	// Set our new out, err
 	os.Stdout = stdout_w
 	os.Stderr = stderr_w
 

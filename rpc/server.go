@@ -15,11 +15,10 @@ import (
 type Server struct {
 	AppFunc AppFunc
 
-	// Stdin, Stdout, Stderr are what this server will use instead of the
+	// Stdout, Stderr are what this server will use instead of the
 	// normal stdin/out/err. This is because due to the multi-process nature
 	// of our plugin system, we can't use the normal process values so we
 	// make our own custom one we pipe across.
-	Stdin  io.Writer
 	Stdout io.Reader
 	Stderr io.Reader
 }
@@ -63,7 +62,7 @@ func (s *Server) ServeConn(conn io.ReadWriteCloser) {
 	}
 
 	// Connect the stdstreams (in, out, err)
-	stdstream := make([]net.Conn, 3)
+	stdstream := make([]net.Conn, 2)
 	for i, _ := range stdstream {
 		stdstream[i], err = mux.Accept()
 		if err != nil {
@@ -74,9 +73,8 @@ func (s *Server) ServeConn(conn io.ReadWriteCloser) {
 	}
 
 	// Copy std streams out to the proper place
-	go copyStream("stdin", s.Stdin, stdstream[0])
-	go copyStream("stdout", stdstream[1], s.Stdout)
-	go copyStream("stderr", stdstream[2], s.Stderr)
+	go copyStream("stdout", stdstream[0], s.Stdout)
+	go copyStream("stderr", stdstream[1], s.Stderr)
 
 	// Create the broker and start it up
 	broker := newMuxBroker(mux)
