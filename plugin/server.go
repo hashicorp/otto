@@ -45,6 +45,22 @@ func Serve(opts *ServeOpts) {
 		os.Exit(1)
 	}
 
+	// Logging goes to the original stderr
+	log.SetOutput(os.Stderr)
+
+	// Create our new stdout, stderr files. These will override our built-in
+	// stdout/stderr so that it works across the stream boundary.
+	stdout_r, stdout_w, err := os.Pipe()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error preparing Otto plugin: %s\n", err)
+		os.Exit(1)
+	}
+	stderr_r, stderr_w, err := os.Pipe()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error preparing Otto plugin: %s\n", err)
+		os.Exit(1)
+	}
+
 	// Register a listener so we can accept a connection
 	listener, err := serverListener()
 	if err != nil {
@@ -56,6 +72,8 @@ func Serve(opts *ServeOpts) {
 	// Create the RPC server to dispense
 	server := &pluginrpc.Server{
 		AppFunc: opts.AppFunc,
+		Stdout:  stdout_r,
+		Stderr:  stderr_r,
 	}
 
 	// Output the address and service name to stdout so that core can bring it up.
@@ -80,6 +98,10 @@ func Serve(opts *ServeOpts) {
 				newCount)
 		}
 	}()
+
+	// Set our new out, err
+	os.Stdout = stdout_w
+	os.Stderr = stderr_w
 
 	// Serve
 	server.Accept(listener)

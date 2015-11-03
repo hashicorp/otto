@@ -63,8 +63,19 @@ type ClientConfig struct {
 	StartTimeout time.Duration
 
 	// If non-nil, then the stderr of the client will be written to here
-	// (as well as the log).
+	// (as well as the log). This is the original os.Stderr of the subprocess.
+	// This isn't the output of synced stderr.
 	Stderr io.Writer
+
+	// SyncStdout, SyncStderr can be set to override the
+	// respective os.Std* values in the plugin. Care should be taken to
+	// avoid races here. If these are nil, then this will automatically be
+	// hooked up to os.Stdin, Stdout, and Stderr, respectively.
+	//
+	// If the default values (nil) are used, then this package will not
+	// sync any of these streams.
+	SyncStdout io.Writer
+	SyncStderr io.Writer
 }
 
 // This makes sure all the managed subprocesses are killed and properly
@@ -113,6 +124,13 @@ func NewClient(config *ClientConfig) (c *Client) {
 		config.Stderr = ioutil.Discard
 	}
 
+	if config.SyncStdout == nil {
+		config.SyncStdout = ioutil.Discard
+	}
+	if config.SyncStderr == nil {
+		config.SyncStderr = ioutil.Discard
+	}
+
 	c = &Client{config: config}
 	if config.Managed {
 		managedClients = append(managedClients, c)
@@ -139,6 +157,16 @@ func (c *Client) Client() (*pluginrpc.Client, error) {
 
 	c.client, err = pluginrpc.Dial(addr.Network(), addr.String())
 	if err != nil {
+		return nil, err
+	}
+
+	// Begin the stream syncing so that stdin, out, err work properly
+	err = c.client.SyncStreams(
+		c.config.SyncStdout,
+		c.config.SyncStderr)
+	if err != nil {
+		c.client.Close()
+		c.client = nil
 		return nil, err
 	}
 

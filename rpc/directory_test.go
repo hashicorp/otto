@@ -22,7 +22,8 @@ func TestDirectory(t *testing.T) {
 	defer os.RemoveAll(td)
 
 	// Create the actual plugin client/server
-	client, server := testNewClientServer(t)
+	client, server, streams := testNewClientServer(t)
+	defer streams.Close()
 	defer client.Close()
 
 	// Build a context that points to our bolt directory backend
