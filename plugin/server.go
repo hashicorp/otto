@@ -105,6 +105,11 @@ func Serve(opts *ServeOpts) {
 		}
 	}()
 
+	// Set our new stdin, out, err
+	os.Stdin = stdin_r
+	os.Stdout = stdout_w
+	os.Stderr = stderr_w
+
 	// Serve
 	server.Accept(listener)
 }
