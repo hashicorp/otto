@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"io"
 	"net"
 	"net/rpc"
 	"testing"
@@ -46,12 +47,13 @@ func testClientServer(t *testing.T) (*rpc.Client, *rpc.Server) {
 	return client, server
 }
 
-func testNewClientServer(t *testing.T) (*Client, *Server) {
+func testNewClientServer(t *testing.T) (*Client, *Server, *testStreams) {
 	clientConn, serverConn := testConn(t)
 
 	server := &Server{
 		AppFunc: testAppFixed(new(app.Mock)),
 	}
+	streams := testNewStreams(t, server)
 	go server.ServeConn(serverConn)
 
 	client, err := NewClient(clientConn)
@@ -59,11 +61,40 @@ func testNewClientServer(t *testing.T) (*Client, *Server) {
 		t.Fatalf("err: %s", err)
 	}
 
-	return client, server
+	return client, server, streams
+}
+
+func testNewStreams(t *testing.T, s *Server) *testStreams {
+	stdin_r, stdin_w := io.Pipe()
+	stdout_r, stdout_w := io.Pipe()
+	stderr_r, stderr_w := io.Pipe()
+
+	s.Stdin = stdin_w
+	s.Stdout = stdout_r
+	s.Stderr = stderr_r
+
+	return &testStreams{
+		Stdin:  stdin_r,
+		Stdout: stdout_w,
+		Stderr: stderr_w,
+	}
 }
 
 func testAppFixed(c app.App) AppFunc {
 	return func() app.App {
 		return c
 	}
+}
+
+type testStreams struct {
+	Stdin  io.ReadCloser
+	Stdout io.WriteCloser
+	Stderr io.WriteCloser
+}
+
+func (s *testStreams) Close() error {
+	s.Stdin.Close()
+	s.Stdout.Close()
+	s.Stderr.Close()
+	return nil
 }

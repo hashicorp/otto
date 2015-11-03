@@ -15,7 +15,8 @@ func TestApp_impl(t *testing.T) {
 }
 
 func TestApp_meta(t *testing.T) {
-	client, server := testNewClientServer(t)
+	client, server, streams := testNewClientServer(t)
+	defer streams.Close()
 	defer client.Close()
 
 	appMock := server.AppFunc().(*app.Mock)
@@ -45,7 +46,8 @@ func TestApp_meta(t *testing.T) {
 }
 
 func TestApp_compile(t *testing.T) {
-	client, server := testNewClientServer(t)
+	client, server, streams := testNewClientServer(t)
+	defer streams.Close()
 	defer client.Close()
 
 	appMock := server.AppFunc().(*app.Mock)
@@ -71,7 +73,8 @@ func TestApp_compile(t *testing.T) {
 }
 
 func TestApp_compileUi(t *testing.T) {
-	client, server := testNewClientServer(t)
+	client, server, streams := testNewClientServer(t)
+	defer streams.Close()
 	defer client.Close()
 
 	appMock := server.AppFunc().(*app.Mock)
@@ -103,7 +106,8 @@ func TestApp_compileUi(t *testing.T) {
 }
 
 func TestApp_build(t *testing.T) {
-	client, server := testNewClientServer(t)
+	client, server, streams := testNewClientServer(t)
+	defer streams.Close()
 	defer client.Close()
 
 	appMock := server.AppFunc().(*app.Mock)
@@ -122,7 +126,8 @@ func TestApp_build(t *testing.T) {
 }
 
 func TestApp_deploy(t *testing.T) {
-	client, server := testNewClientServer(t)
+	client, server, streams := testNewClientServer(t)
+	defer streams.Close()
 	defer client.Close()
 
 	appMock := server.AppFunc().(*app.Mock)
@@ -141,7 +146,8 @@ func TestApp_deploy(t *testing.T) {
 }
 
 func TestApp_dev(t *testing.T) {
-	client, server := testNewClientServer(t)
+	client, server, streams := testNewClientServer(t)
+	defer streams.Close()
 	defer client.Close()
 
 	appMock := server.AppFunc().(*app.Mock)
@@ -160,7 +166,8 @@ func TestApp_dev(t *testing.T) {
 }
 
 func TestApp_devDep(t *testing.T) {
-	client, server := testNewClientServer(t)
+	client, server, streams := testNewClientServer(t)
+	defer streams.Close()
 	defer client.Close()
 
 	appMock := server.AppFunc().(*app.Mock)

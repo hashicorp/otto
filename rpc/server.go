@@ -14,6 +14,14 @@ import (
 // implementations over net/rpc.
 type Server struct {
 	AppFunc AppFunc
+
+	// Stdin, Stdout, Stderr are what this server will use instead of the
+	// normal stdin/out/err. This is because due to the multi-process nature
+	// of our plugin system, we can't use the normal process values so we
+	// make our own custom one we pipe across.
+	Stdin  io.Writer
+	Stdout io.Reader
+	Stderr io.Reader
 }
 
 // AppFunc creates app.App when they're requested from the server.
@@ -53,6 +61,22 @@ func (s *Server) ServeConn(conn io.ReadWriteCloser) {
 		log.Printf("[ERR] plugin: %s", err)
 		return
 	}
+
+	// Connect the stdstreams (in, out, err)
+	stdstream := make([]net.Conn, 3)
+	for i, _ := range stdstream {
+		stdstream[i], err = mux.Accept()
+		if err != nil {
+			mux.Close()
+			log.Printf("[ERR] plugin: accepting stream %d: %s", i, err)
+			return
+		}
+	}
+
+	// Copy std streams out to the proper place
+	go copyStream("stdin", s.Stdin, stdstream[0])
+	go copyStream("stdout", stdstream[1], s.Stdout)
+	go copyStream("stderr", stdstream[2], s.Stderr)
 
 	// Create the broker and start it up
 	broker := newMuxBroker(mux)
