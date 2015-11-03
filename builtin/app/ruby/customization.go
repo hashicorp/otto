@@ -1,15 +1,34 @@
 package rubyapp
 
 import (
+	"path/filepath"
+
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/schema"
 )
+
+const defaultLatestVersion = "2.2"
 
 type customizations struct {
 	Opts *compile.AppOptions
 }
 
 func (c *customizations) processRuby(d *schema.FieldData) error {
-	c.Opts.Bindata.Context["ruby_version"] = d.Get("ruby_version")
+	vsn := d.Get("ruby_version")
+
+	// If we were asked to detect the version, we attempt to do so.
+	// If we can't detect it for non-erroneous reasons, we use our default.
+	if vsn == "detect" {
+		var err error
+		vsn, err = detectRubyVersionGemfile(filepath.Dir(c.Opts.Ctx.Appfile.Path))
+		if err != nil {
+			return err
+		}
+		if vsn == "" {
+			vsn = defaultLatestVersion
+		}
+	}
+
+	c.Opts.Bindata.Context["ruby_version"] = vsn
 	return nil
 }
