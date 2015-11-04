@@ -49,6 +49,10 @@ we recommend looking at the
 [builtin app types](https://github.com/hashicorp/otto/tree/master/builtin/app)
 for real examples of how we use the `App` interface.
 
+There is also a very basic
+[example app type plugin](https://github.com/hashicorp/otto-example-app-plugin)
+to show the general structure of things in the simplest possible form.
+
 ## Compilation
 
 Otto has a distinct compilation step through `otto compile`. During this
