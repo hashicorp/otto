@@ -44,43 +44,43 @@ func Dev(opts *DevOptions) *router.Router {
 			"": &router.SimpleAction{
 				ExecuteFunc:  opts.actionUp,
 				SynopsisText: actionUpSyn,
-				HelpText:     strings.TrimSpace(actionUpHelp),
+				HelpText:     actionUpHelp,
 			},
 
 			"address": &router.SimpleAction{
 				ExecuteFunc:  opts.actionAddress,
 				SynopsisText: actionAddressSyn,
-				HelpText:     strings.TrimSpace(actionAddressHelp),
+				HelpText:     actionAddressHelp,
 			},
 
 			"destroy": &router.SimpleAction{
 				ExecuteFunc:  opts.actionDestroy,
 				SynopsisText: actionDestroySyn,
-				HelpText:     strings.TrimSpace(actionDestroyHelp),
+				HelpText:     actionDestroyHelp,
 			},
 
 			"halt": &router.SimpleAction{
 				ExecuteFunc:  opts.actionHalt,
 				SynopsisText: actionHaltSyn,
-				HelpText:     strings.TrimSpace(actionHaltHelp),
+				HelpText:     actionHaltHelp,
 			},
 
 			"layers": &router.SimpleAction{
 				ExecuteFunc:  opts.actionLayers,
 				SynopsisText: actionLayersSyn,
-				HelpText:     strings.TrimSpace(actionLayersHelp),
+				HelpText:     actionLayersHelp,
 			},
 
 			"ssh": &router.SimpleAction{
 				ExecuteFunc:  opts.actionSSH,
 				SynopsisText: actionSSHSyn,
-				HelpText:     strings.TrimSpace(actionSSHHelp),
+				HelpText:     actionSSHHelp,
 			},
 
 			"vagrant": &router.SimpleAction{
 				ExecuteFunc:  opts.actionRaw,
 				SynopsisText: actionVagrantSyn,
-				HelpText:     strings.TrimSpace(actionVagrantHelp),
+				HelpText:     actionVagrantHelp,
 			},
 		},
 	}

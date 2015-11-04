@@ -2,7 +2,6 @@ package terraform
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
@@ -52,17 +51,17 @@ func (i *Infrastructure) Execute(ctx *infrastructure.Context) error {
 			"": &router.SimpleAction{
 				ExecuteFunc:  i.actionApply,
 				SynopsisText: infraApplySyn,
-				HelpText:     strings.TrimSpace(infraApplyHelp),
+				HelpText:     infraApplyHelp,
 			},
 			"destroy": &router.SimpleAction{
 				ExecuteFunc:  i.actionDestroy,
 				SynopsisText: infraDestroySyn,
-				HelpText:     strings.TrimSpace(infraDestroyHelp),
+				HelpText:     infraDestroyHelp,
 			},
 			"info": &router.SimpleAction{
 				ExecuteFunc:  i.actionInfo,
 				SynopsisText: infraInfoSyn,
-				HelpText:     strings.TrimSpace(infraInfoHelp),
+				HelpText:     infraInfoHelp,
 			},
 		},
 	}

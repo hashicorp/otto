@@ -3,7 +3,6 @@ package terraform
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"
@@ -46,17 +45,17 @@ func Deploy(opts *DeployOptions) *router.Router {
 			"": &router.SimpleAction{
 				ExecuteFunc:  opts.actionDeploy,
 				SynopsisText: actionDeploySyn,
-				HelpText:     strings.TrimSpace(actionDeployHelp),
+				HelpText:     actionDeployHelp,
 			},
 			"destroy": &router.SimpleAction{
 				ExecuteFunc:  opts.actionDestroy,
 				SynopsisText: actionDestroySyn,
-				HelpText:     strings.TrimSpace(actionDestroyHelp),
+				HelpText:     actionDestroyHelp,
 			},
 			"info": &router.SimpleAction{
 				ExecuteFunc:  opts.actionInfo,
 				SynopsisText: actionInfoSyn,
-				HelpText:     strings.TrimSpace(actionInfoHelp),
+				HelpText:     actionInfoHelp,
 			},
 		},
 	}
