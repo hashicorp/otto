@@ -59,7 +59,7 @@ cd ruby-install-${RUBY_INSTALL_VERSION}/
 sudo make install
 
 ol "Installing Ruby ${RUBY_VERSION}. This can take a few minutes..."
-sudo ruby-install ruby ${RUBY_VERSION} -- --disable-install-rdoc
+oe sudo ruby-install ruby ${RUBY_VERSION} -- --disable-install-rdoc
 
 ol "Configuring Ruby environment..."
 echo 'export GEM_HOME=$HOME/.gem' >> $HOME/.ruby_env
