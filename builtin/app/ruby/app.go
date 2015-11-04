@@ -44,7 +44,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				Schema: map[string]*schema.FieldSchema{
 					"ruby_version": &schema.FieldSchema{
 						Type:        schema.TypeString,
-						Default:     "2.2",
+						Default:     "detect",
 						Description: "Ruby version to install",
 					},
 				},

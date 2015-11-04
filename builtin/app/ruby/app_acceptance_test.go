@@ -35,3 +35,31 @@ func TestApp_dev(t *testing.T) {
 		Teardown: vagrant.DevTestTeardown,
 	})
 }
+
+func TestApp_dev_detectGemfile(t *testing.T) {
+	otto.Test(t, otto.TestCase{
+		Core: otto.TestCore(t, &otto.TestCoreOpts{
+			Path: filepath.Join("./test-fixtures", "detect-gemfile", "Appfile"),
+			App:  new(App),
+		}),
+
+		Steps: []otto.TestStep{
+			&vagrant.DevTestStepInit{},
+
+			// Verify we have Ruby
+			&vagrant.DevTestStepGuestScript{
+				Command: "ruby --version | grep '2.1'",
+			},
+			&vagrant.DevTestStepGuestScript{
+				Command: "bundle --version",
+			},
+
+			// Verify everything works
+			&vagrant.DevTestStepGuestScript{
+				Command: "bundle exec ruby app.rb | grep hello",
+			},
+		},
+
+		Teardown: vagrant.DevTestTeardown,
+	})
+}
