@@ -9,6 +9,10 @@ FEATURES:
     Otto's built-in types) using app type plugins. Want to support a new
     language? A new framework? App type plugins are for you.
 
+IMPROVEMENTS:
+
+  * app/ruby: Automatically detect desired Ruby version and install it [GH-293]
+
 BUG FIXES:
 
   * command/compile: compilation works if Appfile is a directory (it
