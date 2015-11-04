@@ -3,7 +3,6 @@ package terraform
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/directory"

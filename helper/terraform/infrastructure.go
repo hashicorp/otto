@@ -2,7 +2,6 @@ package terraform
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
