@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/hashicorp/otto/helper/oneline"
 )
 
 var rubyVersionGemfileRegexp = regexp.MustCompile(`ruby\s+['"]([.\d]+)['"]`)
@@ -16,6 +18,12 @@ var rubyVersionGemfileRegexp = regexp.MustCompile(`ruby\s+['"]([.\d]+)['"]`)
 func detectRubyVersion(dir string) (result string, err error) {
 	log.Printf("[DEBUG] ruby: Attempting to detect Ruby version for: %s", dir)
 
+	// .ruby-version
+	result, err = detectRubyVersionFile(dir)
+	if result != "" || err != nil {
+		return
+	}
+
 	// Gemfile
 	result, err = detectRubyVersionGemfile(dir)
 	if result != "" || err != nil {
@@ -24,6 +32,27 @@ func detectRubyVersion(dir string) (result string, err error) {
 
 	// No version detected
 	return "", nil
+}
+
+func detectRubyVersionFile(dir string) (result string, err error) {
+	path := filepath.Join(dir, ".ruby-version")
+
+	// Verify the .ruby-version exists
+	if _, err = os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			log.Printf("[DEBUG] ruby: .ruby-version not found, will not detect Ruby version this way")
+			err = nil
+		}
+
+		return
+	}
+
+	log.Printf("[DEBUG] ruby: .ruby-version found! Attempting to detect Ruby version")
+
+	// Read the first line of the file
+	result, err = oneline.Read(path)
+	log.Printf("[DEBUG] ruby: .ruby-version detected Ruby: %q", result)
+	return
 }
 
 func detectRubyVersionGemfile(dir string) (result string, err error) {

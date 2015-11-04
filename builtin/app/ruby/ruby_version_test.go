@@ -24,3 +24,33 @@ func TestDetectRubyVersion_gemfileNoVersion(t *testing.T) {
 		t.Fatalf("bad: %s", vsn)
 	}
 }
+
+func TestDetectRubyVersion_rubyVersionFile(t *testing.T) {
+	vsn, err := detectRubyVersion(filepath.Join("./test-fixtures", "ruby-version-file"))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if vsn != "2.2.2" {
+		t.Fatalf("bad: %s", vsn)
+	}
+}
+
+func TestDetectRubyVersion_rubyVersionFileEmpty(t *testing.T) {
+	vsn, err := detectRubyVersion(filepath.Join("./test-fixtures", "ruby-version-file-empty"))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if vsn != "" {
+		t.Fatalf("bad: %s", vsn)
+	}
+}
+
+func TestDetectRubyVersion_rubyVersionPlusGemfile(t *testing.T) {
+	vsn, err := detectRubyVersion(filepath.Join("./test-fixtures", "ruby-version-file-gemfile"))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if vsn != "2.2.2" {
+		t.Fatalf("bad: %s", vsn)
+	}
+}

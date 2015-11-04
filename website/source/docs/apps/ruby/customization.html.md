@@ -36,9 +36,12 @@ version to use. If no Ruby version is detected, it will default to some
 recent version (we try to keep this up to date but it depends on the
 release process of Otto itself).
 
-To detect the Ruby version, Otto will inspect your `Gemfile` to look
-for a Ruby version specification. If one is found, that version will be
-installed.
+To detect the Ruby version, Otto will inspect the following files in
+the following order. The first match found with a Ruby version will be
+used.
+
+1. `.ruby-version` - A file that only contains the Ruby version.
+2. `Gemfile` - If a Gemfile contains a `ruby` directive, this will be read.
 
 The detected version, if any, will be output during `otto compile`.
 
