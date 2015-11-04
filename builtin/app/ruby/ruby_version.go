@@ -51,7 +51,7 @@ func detectRubyVersionFile(dir string) (result string, err error) {
 
 	// Read the first line of the file
 	result, err = oneline.Read(path)
-	log.Printf("[DEBUG] ruby: Gemfile detected Ruby: %q", result)
+	log.Printf("[DEBUG] ruby: .ruby-version detected Ruby: %q", result)
 	return
 }
 
