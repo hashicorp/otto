@@ -41,26 +41,29 @@ if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
   oe sudo service ssh restart
 fi
 
-export DEBIAN_FRONTEND=noninteractive
+export RUBY_INSTALL_VERSION="0.5.0"
+export RUBY_VERSION="{{ ruby_version }}"
 
 ol "Adding apt repositories and updating..."
 oe sudo apt-get update
-oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
-oe sudo add-apt-repository -y ppa:chris-lea/node.js
-oe sudo apt-add-repository -y ppa:brightbox/ruby-ng
-oe sudo apt-get update
 
-export RUBY_VERSION="{{ ruby_version }}"
-
-ol "Installing Ruby ${RUBY_VERSION} and supporting packages..."
+ol "Installing supporting packages..."
 export DEBIAN_FRONTEND=noninteractive
-oe sudo apt-get install -y bzr git mercurial build-essential \
-  software-properties-common \
-  nodejs \
-  ruby$RUBY_VERSION ruby$RUBY_VERSION-dev
+oe sudo apt-get install -y bzr git mercurial build-essential nodejs
+
+ol "Installing ruby-install v${RUBY_INSTALL_VERSION}..."
+wget -O ruby-install-${RUBY_INSTALL_VERSION}.tar.gz \
+  https://github.com/postmodern/ruby-install/archive/v${RUBY_INSTALL_VERSION}.tar.gz
+tar -xzvf ruby-install-${RUBY_INSTALL_VERSION}.tar.gz
+cd ruby-install-${RUBY_INSTALL_VERSION}/
+sudo make install
+
+ol "Installing Ruby ${RUBY_VERSION}. This can take a few minutes..."
+sudo ruby-install ruby ${RUBY_VERSION} -- --disable-install-rdoc
 
 ol "Configuring Ruby environment..."
-echo 'export GEM_HOME=$HOME/.gem\nexport PATH=$HOME/.gem/bin:$PATH' >> $HOME/.ruby_env
+echo 'export GEM_HOME=$HOME/.gem' >> $HOME/.ruby_env
+echo "export PATH=\$HOME/.gem/bin:/opt/rubies/ruby-${RUBY_VERSION}/bin:\$PATH" >> $HOME/.ruby_env
 echo 'source $HOME/.ruby_env' >> $HOME/.profile
 source $HOME/.ruby_env
 
