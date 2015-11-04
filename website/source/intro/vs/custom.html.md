@@ -8,7 +8,7 @@ description: |-
 
 # Otto vs. Custom Solutions
 
-The problems Otto solves are not new: applications need to developed,
+The problems Otto solves are not new: applications need to be developed,
 built, and deployed. Therefore, you likely already have solutions in place
 to do this and may be wondering why Otto should be used over custom scripts
 and so on.
