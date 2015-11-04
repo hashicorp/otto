@@ -8,14 +8,15 @@ description: |-
 
 # Plugin Basics
 
-**NOTE: Plugins are not yet available with Otto 0.1.** We'll expose the plugin
-interface publicly with Otto 0.2. We've started documented the process
-below, however, if you want to look forward to it. The contents on this
-page will likely change.
-
 This page documents the basics of how the plugin system in Otto
 works, and how to setup a basic development environment for plugin development
 if you're writing an Otto plugin.
+
+If you're only looking for how to use plugins, see the
+[plugin installation page](/docs/plugins/install.html). If you're interested
+in developing plugins but haven't read the guide on installation, read
+that as well since it'll be important to understand how to install the
+plugin you create.
 
 ~> **Advanced topic!** Plugin development is a highly advanced
 topic in Otto, and is not required knowledge for day-to-day usage.
@@ -43,22 +44,8 @@ The network communication and RPC is handled automatically by higher-level
 Otto libraries. The exact interface to implement is documented
 in its respective documentation section.
 
-## Installing a Plugin
-
-The easiest way to install a plugin is to name it correctly, then place it
-in the proper directory. To name a plugin correctly, make sure the binary is
-named `otto-TYPE-NAME`. For example, `otto-app-ruby` is an "app" type plugin
-named "ruby". Valid types for plugins are down this page more.
-
-Once the plugin is named properly, Otto automatically discovers plugins in the
-following directories in the given order. If a conflicting plugin is found
-later, it will take precedence over one found earlier.
-
-1. The directory where Otto is, or the executable directory.
-
-1. ~/.otto.d/plugins on Unix systems or %APPDATA%/otto.d/plugins on Windows.
-
-1. The current working directory.
+Otto provides high-level libraries for making the creation of plugins
+simple and to ensure a common behavior.
 
 ## Developing a Plugin
 
@@ -67,13 +54,13 @@ a plugin is basic command-line skills and basic knowledge of the
 [Go programming language](http://golang.org).
 
 -> **Note:** A common pitfall is not properly setting up a
-<code>$GOPATH</code>. This can lead to strange errors. You can read more about
+`$GOPATH`. This can lead to strange errors. You can read more about
 this [here](https://golang.org/doc/code.html) to familiarize
 yourself.
 
 Create a new Go project somewhere in your `$GOPATH`. If you're a
 GitHub user, we recommend creating the project in the directory
-`$GOPATH/src/github.com/USERNAME/otto-NAME`, where `USERNAME`
+`$GOPATH/src/github.com/USERNAME/otto-plugin-NAME`, where `USERNAME`
 is your GitHub username and `NAME` is the name of the plugin you're
 developing. This structure is what Go expects and simplifies things down
 the road.
@@ -89,16 +76,19 @@ import (
 )
 
 func main() {
-	plugin.Serve(new(MyPlugin))
+	plugin.Serve(&plugin.ServeOpts{
+		AppFunc: AppFactory,
+	})
 }
 ```
 
 And that's basically it! You'll have to change the argument given to
 `plugin.Serve` to be your actual plugin, but that is the only change
-you'll have to make. The argument should be a structure implementing
-one of the plugin interfaces (depending on what sort of plugin
-you're creating).
+you'll have to make. See the GoDoc or the
+[example plugin](https://github.com/hashicorp/otto-example-app-plugin)
+for more details.
 
-Otto plugins must follow a very specific naming convention of
-`otto-TYPE-NAME`. For example, `otto-app-ruby`, which
-tells Otto that the plugin is an app that serves Ruby applications.
+Instead of going into extreme technical detail here, we've uploaded a
+really basic [example app plugin](https://github.com/hashicorp/otto-example-app-plugin).
+Please use that as a guide for developing your own plugin combined with
+the GoDoc of Otto itself.
