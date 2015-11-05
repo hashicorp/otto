@@ -4,13 +4,6 @@
 // - Edits should not be made here
 // --------------------------------------------------
 
-$header-height: 74px;
-$project-logo-size: 40px;
-$project-logo-pad-left: 12px;
-$by-width: 107px;
-$by-height: 17px;
-$nav-margin-right: 12px;
-
 #header {
     position: relative;
     color: $white;
@@ -56,8 +49,8 @@ $nav-margin-right: 12px;
 
         .by{
             display: inline-block;
-            width: $by-width;
-            height: $by-height;
+            width: $by-hashicorp-width;
+            height: $by-hashicorp-height;
             //variable bits
             margin-left: 6px;
             margin-bottom: -6px;
@@ -66,7 +59,7 @@ $nav-margin-right: 12px;
             white-space: nowrap;
             overflow: hidden;
             background: image-url('../images/hashicorp-header/by-hashicorp.png') 0 0 no-repeat;
-            @include img-retina("../images/hashicorp-header/by-hashicorp.png", "../images/hashicorp-header/by-hashicorp@2x.png", $by-width, $by-height);
+            @include img-retina("../images/hashicorp-header/by-hashicorp.png", "../images/hashicorp-header/by-hashicorp@2x.png", $by-hashicorp-width, $by-hashicorp-height);
         }
     }
 
@@ -75,7 +68,7 @@ $nav-margin-right: 12px;
             position: relative;
 
             svg path{
-                @include transition( all 0.3s ease );    
+                @include transition( all 0.3s ease );
             }
 
             &:hover{
@@ -109,7 +102,7 @@ $nav-margin-right: 12px;
     .main-links,
     .external-links {
         li > a {
-            @include v-nav-style();
+            @include hashi-a-style();
             margin: 0 10px;
             line-height: $header-height;
         }

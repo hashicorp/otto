@@ -4,15 +4,6 @@
 // - edits should be made here
 // --------------------------------------------------
 
-@mixin v-nav-project-style{
-    color: $blue-light;
-
-    &:hover{
-        color: $orange;
-    }
-}
-
-
 #header {
     .navbar-brand {
         .logo{
@@ -48,7 +39,7 @@
     .main-links,
     .external-links {
         li > a {
-            @include v-nav-project-style();
+            @include project-a-style();
         }
     }
 }

@@ -17,12 +17,8 @@ body.page-sub{
 
         li{
             a{
-                @include v-nav-style();
-                color: $blue-light;
-
-                &:hover{
-                    color: $orange;
-                }
+                @include hashi-a-style();
+                @include project-a-style
             }
         }
     }

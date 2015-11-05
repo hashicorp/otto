@@ -194,7 +194,7 @@ $sidebar-icon-height: 20px;
                 position: relative;
                 cursor: pointer;
                 user-select: none;
-                @include v-nav-style-core();
+                @include hashi-a-style-core();
 
                 svg{
                     top: 2px;
