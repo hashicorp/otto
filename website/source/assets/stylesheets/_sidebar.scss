@@ -342,6 +342,14 @@ $sidebar-font-weight: 300;
       &:hover {
         background: transparent;
       }
+
+      svg{
+            top: 2px;
+            width: 14px;
+            height: 14px;
+            margin-bottom: -2px;
+            margin-right: 4px;
+      }
     }
   }
 }
