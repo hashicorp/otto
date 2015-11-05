@@ -1,7 +1,7 @@
 //
 // Header
 // - Project Specific
-//
+// - edits should be made here
 // --------------------------------------------------
 
 @mixin v-nav-project-style{
@@ -54,7 +54,6 @@
 
                 svg path{
                     fill: $blue-light;
-                    @include transition( all 0.3s ease );
                 }
             }
         }
