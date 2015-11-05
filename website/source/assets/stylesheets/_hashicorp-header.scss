@@ -74,6 +74,16 @@ $nav-margin-right: 12px;
         li {
             position: relative;
 
+            svg path{
+                @include transition( all 0.3s ease );    
+            }
+
+            &:hover{
+                svg path{
+                    @include transition( all 0.3s ease );
+                }
+            }
+
             &.download{
                 margin-right: 10px;
             }
