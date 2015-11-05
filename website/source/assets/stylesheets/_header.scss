@@ -20,16 +20,26 @@
 
     .navbar-brand {
         .logo{
+            color: $black;
+
             &:hover{
+				color: $orange;
 			}
         }
     }
 
     .buttons{
         margin-top: 2px; //baseline everything
-        
+
         ul.navbar-nav{
             li {
+                &:hover{
+                    svg path{
+                        fill: $black;
+                        @include transition( all 0.3s ease );
+                    }
+                }
+
                 &.download{
 
                 }
@@ -44,6 +54,7 @@
 
                 svg path{
                     fill: $blue-light;
+                    @include transition( all 0.3s ease );
                 }
             }
         }

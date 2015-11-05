@@ -25,11 +25,9 @@ $nav-margin-right: 12px;
 
     .navbar-header{
         .navbar-toggle{
+            height: $header-height;
+            margin: 0;
             padding-right: 15px;
-            margin-top: 26px;
-            margin-bottom: 14px;
-            margin-right: 0;
-            //border: 2px solid $white;
             border-radius: 0;
             .icon-bar{
                 border: 1px solid $black;
@@ -50,7 +48,6 @@ $nav-margin-right: 12px;
             vertical-align: middle;
             height: $header-height;
             padding: 0;
-            color: $black;
             font-family: $font-family-bitstream;
             font-size: 28px;
             line-height: $header-height;
@@ -61,7 +58,6 @@ $nav-margin-right: 12px;
 
             &:hover{
 				@include transition(all 300ms ease-in);
-				color: $orange;
 				text-decoration: none;
 			}
         }
@@ -85,26 +81,21 @@ $nav-margin-right: 12px;
     .external-links {
         li {
             position: relative;
-            padding-left: 12px;
 
             &.download{
                 margin-right: 10px;
             }
 
-            &.github{
-            }
-
             >a {
-
-            }
-
-            svg{
-                position: absolute;
-                left: 0;
-                top: 50%;
-                margin-top: -7px;
-                width: 14px;
-                height: 14px;
+                padding-left: 12px;
+                svg{
+                    position: absolute;
+                    left: -12px;
+                    top: 50%;
+                    margin-top: -7px;
+                    width: 14px;
+                    height: 14px;
+                }
             }
         }
     }
