@@ -116,27 +116,3 @@ $nav-margin-right: 12px;
         @include transition( color 0.3s ease );
     }
 }
-
-@media (max-width: 992px) {
-
-    #header{
-        .buttons{
-            ul.navbar-nav{
-                li {
-                      &.download{
-                        margin-right: 8px;
-                    }
-                }
-            }
-        }
-    }
-
-}
-
-@media (max-width: 763px) {
-    .navbar-static-top {
-        .nav-white {
-            background-color:rgba(0,0,0,0.5);
-        }
-    }
-}
