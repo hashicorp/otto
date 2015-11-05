@@ -22,7 +22,7 @@ $sidebar-width: 240px;
 $sidebar-padding: 16px;
 $sidebar-divider: $sidebar-padding/2;
 
-$sidebar-nav-height: 48px;
+$sidebar-nav-height: 42px;
 
 $sidebar-icon-width: 40px;
 $sidebar-icon-height: 20px;
@@ -114,8 +114,11 @@ $sidebar-font-weight: 300;
     margin-bottom: 15px;
   }
 
-  .sidebar-divider, .sidebar-nav .divider {
-    background-color: $divider;
+  .sidebar-divider, .divider {
+    width: 80%;
+    height: 1px;
+    margin: 8px auto;
+    background-color: lighten($divider, 20%);
   }
 
   .sidebar-text {
@@ -141,8 +144,6 @@ $sidebar-font-weight: 300;
 
   .sidebar-nav {
     text-align: center;
-    //border-bottom: 1px solid $faint-gray;
-    padding-bottom: 8px;
 
     &:last-child{
       border-bottom: none;
@@ -197,10 +198,6 @@ $sidebar-font-weight: 300;
         color: $link-disabled-color;
         background-color: $link-disabled-bg;
       }
-    }
-    > li > .ink {
-      //background: #80d8ff;
-      //opacity: 0.5;
     }
 
     // Dropdown menu items
@@ -261,7 +258,7 @@ $sidebar-font-weight: 300;
   //----------------
   .sidebar-header {
     position: relative;
-    margin-bottom: $sidebar-divider;
+    // margin-bottom: $sidebar-divider;
     @include transition(all .2s ease-in-out);
     //border-bottom: 1px solid $faint-gray;
 
