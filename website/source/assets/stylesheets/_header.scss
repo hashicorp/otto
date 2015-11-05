@@ -14,13 +14,12 @@
 
 
 #header {
-    &.navbar-static-top{
-
-    }
-
     .navbar-brand {
         .logo{
             color: $black;
+            background: image-url('../images/logo-header.png') 0 0 no-repeat;
+            @include img-retina("../images/logo-header.png", "../images/logo-header@2x.png", $project-logo-size, $project-logo-size);
+            background-position: 0 center;
 
             &:hover{
 				color: $orange;
@@ -40,18 +39,6 @@
                     }
                 }
 
-                &.download{
-
-                }
-
-                &.github{
-
-                }
-
-                >a {
-
-                }
-
                 svg path{
                     fill: $blue-light;
                 }
@@ -65,29 +52,4 @@
             @include v-nav-project-style();
         }
     }
-
-    .nav > li > a:hover, .nav > li > a:focus {
-
-    }
-}
-
-@media (min-width: 992px) {
-
-}
-
-@media (max-width: 992px) {
-
-
-}
-
-@media (max-width: 768px) {
-
-}
-
-@media (max-width: 763px) {
-
-}
-
-@media (max-width: 320px) {
-
 }

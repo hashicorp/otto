@@ -36,7 +36,6 @@ $nav-margin-right: 12px;
         }
     }
 
-
     .navbar-brand {
         display: block;
         height: $header-height;
@@ -52,8 +51,6 @@ $nav-margin-right: 12px;
             font-size: 28px;
             line-height: $header-height;
             padding-left: $project-logo-size + $project-logo-pad-left;
-            background: image-url('../images/logo-header.png') 0 0 no-repeat;
-            @include img-retina("../images/logo-header.png", "../images/logo-header@2x.png", $project-logo-size, $project-logo-size);
             background-position: 0 center;
 
             &:hover{
@@ -120,10 +117,6 @@ $nav-margin-right: 12px;
     }
 }
 
-@media (min-width: 992px) {
-
-}
-
 @media (max-width: 992px) {
 
     #header{
@@ -140,18 +133,10 @@ $nav-margin-right: 12px;
 
 }
 
-@media (max-width: 768px) {
-
-}
-
 @media (max-width: 763px) {
     .navbar-static-top {
         .nav-white {
             background-color:rgba(0,0,0,0.5);
         }
     }
-}
-
-@media (max-width: 320px) {
-
 }
