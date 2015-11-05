@@ -16,6 +16,10 @@
 //Global Site
 @import '_global';
 
+// Hashicorp Shared Project Styles
+@import '_hashicorp-nav-util';
+@import '_hashicorp-header';
+
 // Components
 @import '_header';
 @import '_footer';

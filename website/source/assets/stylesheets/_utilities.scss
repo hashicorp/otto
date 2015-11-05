@@ -38,28 +38,6 @@
     transform: skewY($skew);
 }
 
-@mixin v-nav-style-core{
-    color: $blue-light;
-    font-family: $font-family-roboto;
-    font-weight: $font-weight-md;
-    font-size: 13px;
-    letter-spacing: 0.0625em;
-}
-
-@mixin v-nav-style{
-    margin: 0 15px;
-    padding: 0;
-    line-height: 22px;
-    @include v-nav-style-core();
-    @include transition( color 0.3s ease );
-
-    &:hover{
-        color: $orange;
-        @include transition( color 0.3s ease );
-        background-color: transparent;
-    }
-}
-
 @mixin bez-1-transition{
     @include transition( all 300ms ease-in-out );
 }
