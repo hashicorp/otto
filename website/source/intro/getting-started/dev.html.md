@@ -26,11 +26,22 @@ under the covers. In this case, it may have also installed
 [VirtualBox](http://www.virtualbox.org) as well as a fairly
 large (~350 MB) base image for your environment. This is a one time cost.
 
+## Layers
+
 The whole process to go from nothing to development environment probably
-took about 5 minutes. You'll only periodically run this command to start
-an environment, so performance here isn't critically important, but a future
-version of Otto will speed this up dramatically, down to less than a
-minute.
+took about 5 minutes. In the output, you may have noticed messages about
+creating "layers." Otto uses layered development environments and caches
+the layers to make future `otto dev` calls fast.
+
+If you `otto dev` another Ruby environment or destroy this environment and
+bring it back up, it'll only take about 30 seconds. This is because it is
+re-using the layers it already created.
+
+You'll only periodically run this command to start an environment, so performance
+here isn't critically important, but you can still tear down and bring up
+a new environment in less than a minute.
+
+## Verifying It Worked
 
 If you inspect the repository you cloned, you'll notice that there
 isn't any configuration for Otto. For simple cases, Otto doesn't need
