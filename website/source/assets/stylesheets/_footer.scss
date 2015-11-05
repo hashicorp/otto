@@ -10,7 +10,7 @@ body.page-sub{
 
 #footer{
     padding: 40px 0;
-    color: black;
+    color: $black;
 
     .footer-links{
         margin-bottom: 20px;
@@ -18,6 +18,11 @@ body.page-sub{
         li{
             a{
                 @include v-nav-style();
+                color: $blue-light;
+
+                &:hover{
+                    color: $orange;
+                }
             }
         }
     }

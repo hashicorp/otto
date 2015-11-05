@@ -18,11 +18,6 @@ $nav-margin-right: 12px;
     margin-bottom: 0;
     transition: all 1s ease;
 
-    &.navbar-static-top{
-        height:70px;
-        z-index: 1000;
-    }
-
     .navbar-header{
         .navbar-toggle{
             height: $header-height;
