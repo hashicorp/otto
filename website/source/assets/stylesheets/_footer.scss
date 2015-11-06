@@ -9,7 +9,7 @@ body.page-sub{
 }
 
 #footer{
-    padding: 40px 0;
+    padding: 48px 0 40px;
     color: $black;
 
     .footer-links{
@@ -44,6 +44,7 @@ body.page-sub{
         .hashi-project{
             display: inline-block;
             vertical-align: middle;
+            margin-top: -5px;
             height: 30px;
             line-height: 30px;
             text-decoration: none;
