@@ -59,6 +59,10 @@
             white-space: nowrap;
             overflow: hidden;
 
+            .svg{
+                font-size: 12px;
+            }
+            
             svg{
                 path,
                 line{
