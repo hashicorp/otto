@@ -12,11 +12,10 @@ Sidebar = Base.extend({
 	constructor: function(){
 		this.$body = $('body');
 		this.$overlay = $('.sidebar-overlay');
-    	this.$sidebar = $('#sidebar');
-    	this.$sidebarHeader = $('#sidebar .sidebar-header');
-    	this.$toggleButton = $('.navbar-toggle');
-
-    	this.sidebarImg = this.$sidebarHeader.css('background-image');
+    this.$sidebar = $('#sidebar');
+    this.$sidebarHeader = $('#sidebar .sidebar-header');
+    this.$toggleButton = $('.navbar-toggle');
+    this.sidebarImg = this.$sidebarHeader.css('background-image');
 
 		this.addEventListeners();
 	},

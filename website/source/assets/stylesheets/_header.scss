@@ -8,6 +8,8 @@
     .navbar-brand {
         .logo{
             color: $black;
+            font-family: $font-family-bitstream;
+            font-size: 28px;
             background: image-url('../images/logo-header.png') 0 0 no-repeat;
             @include img-retina("../images/logo-header.png", "../images/logo-header@2x.png", $project-logo-size, $project-logo-size);
             background-position: 0 center;
@@ -18,7 +20,6 @@
         }
 
         .by{
-            color: $black;
             &:hover{
                 svg{
                     line{
@@ -36,7 +37,7 @@
             li {
                 &:hover{
                     svg path{
-                        fill: $black;
+                        fill: $white;
                     }
                 }
 

@@ -140,17 +140,6 @@ $sidebar-icon-height: 20px;
         position: relative;
         margin-bottom: $sidebar-padding;
         @include transition(all .2s ease-in-out);
-        //border-bottom: 1px solid $faint-gray;
-
-        .buttons{
-            text-align: center;
-            padding: $xsmall-pad 0 $small-pad;
-            a{
-                &.outline-btn{
-                    margin-right: 10px;
-                }
-            }
-        }
     }
 
     .sidebar-image {
