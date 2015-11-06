@@ -32,8 +32,9 @@
 
         .logo{
             display: inline-block;
-            vertical-align: middle;
             height: $header-height;
+            background-color: black;
+            vertical-align:top;
             padding: 0;
             font-family: $font-family-bitstream;
             font-size: 28px;
@@ -49,21 +50,35 @@
 
         .by{
             display: inline-block;
-            width: $by-hashicorp-width;
-            height: $by-hashicorp-height;
-            //variable bits
-            margin-left: 6px;
-            margin-bottom: -6px;
-            //
+            vertical-align:top;
+            height: $header-height;
+            margin-left: 3px;
+            padding-top: 2px;
+            line-height: $header-height;
+            font-family: $header-font-family;
+            font-weight: $header-font-weight;
             font-size: 0;
-            white-space: nowrap;
-            overflow: hidden;
+            text-decoration: none;
 
-            .svg{
-                font-size: 12px;
+            .svg-wrap{
+                font-size: 13px;
             }
-            
+
             svg{
+                &.svg-by{
+                    width: $by-hashicorp-width;
+                    height: $by-hashicorp-height;
+                    margin-bottom: -4px;
+                    margin-left: -1px;
+                }
+
+                &.svg-logo{
+                    width: 16px;
+                    height: 16px;
+                    margin-bottom: -3px;
+                    margin-left: -1px;
+                }
+
                 path,
                 line{
                     fill: $black;
