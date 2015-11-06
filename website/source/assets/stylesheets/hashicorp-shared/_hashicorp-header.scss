@@ -11,6 +11,24 @@
     margin-bottom: 0;
     transition: all 1s ease;
 
+    &.white{
+      .navbar-brand {
+          .by{
+              color: white;
+              font-weight: 300;
+              svg{
+                  path,
+                  polygon{
+                      fill: white;
+                  }
+                  line{
+                    stroke: white;
+                  }
+              }
+          }
+      }
+    }
+
     .navbar-header{
         .navbar-toggle{
             height: $header-height;
@@ -35,7 +53,6 @@
             height: $header-height;
             vertical-align:top;
             padding: 0;
-            font-size: 28px;
             line-height: $header-height;
             padding-left: $project-logo-size + $project-logo-pad-left;
             background-position: 0 center;
@@ -52,9 +69,10 @@
             height: $header-height;
             margin-left: 3px;
             padding-top: 2px;
+            color: black;
             line-height: $header-height;
             font-family: $header-font-family;
-            font-weight: $header-font-weight;
+            font-weight: 600;
             font-size: 0;
             text-decoration: none;
 
@@ -78,13 +96,20 @@
                 }
 
                 path,
-                line{
-                    fill: $black;
+                polygon{
+                    fill: black;
                     @include transition(all 300ms ease-in);
 
                     &:hover{
                         @include transition(all 300ms ease-in);
                     }
+                }
+                line{
+                  stroke: black;
+
+                  &:hover{
+                      @include transition(all 300ms ease-in);
+                  }
                 }
             }
         }
