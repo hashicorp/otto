@@ -133,6 +133,7 @@
         li > a {
             @include hashi-a-style();
             margin: 0 10px;
+            padding-top: 1px;
             line-height: $header-height;
         }
     }
