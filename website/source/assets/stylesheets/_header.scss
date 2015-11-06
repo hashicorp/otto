@@ -16,6 +16,16 @@
 				color: $orange;
 			}
         }
+
+        .by{
+            &:hover{
+                svg{
+                    line{
+                        stroke: $orange;
+                    }
+                }
+            }
+        }
     }
 
     .buttons{

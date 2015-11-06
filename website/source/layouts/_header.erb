@@ -5,7 +5,7 @@
 				<div class="navbar-header">
 					<div class="navbar-brand">
 						<a class="logo" href="/">otto</a>
-						<a class="by" href="https://hashicorp.com/">by Hashicorp</a>
+						<a class="by" href="https://hashicorp.com/"><%= partial "layouts/svg/svg-by-hashicorp" %>by Hashicorp</a>
 					</div>
 					<button class="navbar-toggle" type="button">
 						<span class="sr-only">Toggle navigation</span>
@@ -18,10 +18,10 @@
 					<nav role="navigation">
 						<ul class="external-links nav navbar-nav navbar-right">
 							<li class="first download">
-								<a href="/downloads.html"><%= partial "layouts/svg-download" %>Download</a>
+								<a href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a>
 							</li>
 							<li class="github">
-								<a href="https://github.com/hashicorp/otto"><%= partial "layouts/svg-github" %>GitHub</a>
+								<a href="https://github.com/hashicorp/otto"><%= partial "layouts/svg/svg-github" %>GitHub</a>
 							</li>
 						</ul>
 						<ul class="main-links nav navbar-nav navbar-right">

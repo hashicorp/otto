@@ -55,11 +55,21 @@
             margin-left: 6px;
             margin-bottom: -6px;
             //
-            text-indent: 100%;
+            font-size: 0;
             white-space: nowrap;
             overflow: hidden;
-            background: image-url('../images/hashicorp-header/by-hashicorp.png') 0 0 no-repeat;
-            @include img-retina("../images/hashicorp-header/by-hashicorp.png", "../images/hashicorp-header/by-hashicorp@2x.png", $by-hashicorp-width, $by-hashicorp-height);
+
+            svg{
+                path,
+                line{
+                    fill: $black;
+                    @include transition(all 300ms ease-in);
+
+                    &:hover{
+                        @include transition(all 300ms ease-in);
+                    }
+                }
+            }
         }
     }
 
