@@ -127,20 +127,3 @@ func init() {
 		},
 	}
 }
-
-// makeShutdownCh creates an interrupt listener and returns a channel.
-// A message will be sent on the channel for every interrupt received.
-func makeShutdownCh() <-chan struct{} {
-	resultCh := make(chan struct{})
-
-	signalCh := make(chan os.Signal, 4)
-	signal.Notify(signalCh, os.Interrupt)
-	go func() {
-		for {
-			<-signalCh
-			resultCh <- struct{}{}
-		}
-	}()
-
-	return resultCh
-}
