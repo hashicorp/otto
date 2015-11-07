@@ -5,7 +5,7 @@ sidebar_current: "docs-apps"
 description: |-
   The application type in the Appfile
   is the most important piece of information that tells Otto how to function.
-  Otto uses this information to know how to develop, build, and deploy
+  Otto uses this information to know how to develop, build and deploy
   the application.
 ---
 
@@ -13,7 +13,7 @@ description: |-
 
 The application type in the [Appfile](/docs/concepts/appfile.html)
 is the most important piece of information that tells Otto how to function.
-Otto uses this information to know how to develop, build, and deploy
+Otto uses this information to know how to develop, build and deploy
 the application.
 
 This section documents the application types that Otto supports by default
