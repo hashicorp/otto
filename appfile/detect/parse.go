@@ -40,7 +40,7 @@ func Parse(r io.Reader) (*Config, error) {
 	var result Config
 
 	// Parse the detects
-	if o := list.Prefix("detect"); len(o.Items) > 0 {
+	if o := list.Filter("detect"); len(o.Items) > 0 {
 		if err := parseDetect(&result, o); err != nil {
 			return nil, fmt.Errorf("error parsing 'import': %s", err)
 		}

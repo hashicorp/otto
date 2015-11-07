@@ -139,7 +139,7 @@ func parseApplication(result *File, list *ast.ObjectList) error {
 }
 
 func parseCustomizations(result *File, list *ast.ObjectList) error {
-	list = list.Prefix("customization")
+	list = list.Children()
 	if len(list.Items) == 0 {
 		return nil
 	}
@@ -166,7 +166,7 @@ func parseCustomizations(result *File, list *ast.ObjectList) error {
 }
 
 func parseImport(result *File, list *ast.ObjectList) error {
-	list = list.Prefix("import")
+	list = list.Children()
 	if len(list.Items) == 0 {
 		return nil
 	}
@@ -199,7 +199,7 @@ func parseImport(result *File, list *ast.ObjectList) error {
 }
 
 func parseInfra(result *File, list *ast.ObjectList) error {
-	list = list.Prefix("infrastructure")
+	list = list.Children()
 	if len(list.Items) == 0 {
 		return nil
 	}
@@ -261,7 +261,7 @@ func parseInfra(result *File, list *ast.ObjectList) error {
 }
 
 func parseFoundations(result *Infrastructure, list *ast.ObjectList) error {
-	list = list.Prefix("foundation")
+	list = list.Children()
 	if len(list.Items) == 0 {
 		return nil
 	}
