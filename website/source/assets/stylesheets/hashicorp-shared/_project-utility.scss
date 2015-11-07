@@ -10,9 +10,9 @@ $project-logo-pad-left: 8px;
 
 // Mixins
 @mixin project-a-style{
-    color: $blue-light;
+  color: $blue-light;
 
-    &:hover{
-        color: $orange;
-    }
+  &:hover{
+    color: $orange;
+  }
 }
