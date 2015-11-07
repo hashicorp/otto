@@ -9,7 +9,7 @@ import (
 	"sort"
 
 	"github.com/hashicorp/hcl"
-	hclobj "github.com/hashicorp/hcl/hcl"
+	"github.com/hashicorp/hcl/hcl/ast"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -25,16 +25,22 @@ func Parse(r io.Reader) (*Config, error) {
 	}
 
 	// Parse the buffer
-	obj, err := hcl.Parse(buf.String())
+	root, err := hcl.Parse(buf.String())
 	if err != nil {
 		return nil, fmt.Errorf("error parsing: %s", err)
 	}
 	buf.Reset()
 
+	// Top-level item should be the object list
+	list, ok := root.Node.(*ast.ObjectList)
+	if !ok {
+		return nil, fmt.Errorf("error parsing: file doesn't contain a root object")
+	}
+
 	var result Config
 
 	// Parse the detects
-	if o := obj.Get("detect", false); o != nil {
+	if o := list.Prefix("detect"); len(o.Items) > 0 {
 		if err := parseDetect(&result, o); err != nil {
 			return nil, fmt.Errorf("error parsing 'import': %s", err)
 		}
@@ -108,34 +114,28 @@ func ParseDir(path string) (*Config, error) {
 	return &result, nil
 }
 
-func parseDetect(result *Config, obj *hclobj.Object) error {
-	// Get all the maps of keys to the actual object
-	objects := make([]*hclobj.Object, 0, 2)
-	for _, o1 := range obj.Elem(false) {
-		for _, o2 := range o1.Elem(true) {
-			objects = append(objects, o2)
-		}
-	}
-
-	if len(objects) == 0 {
+func parseDetect(result *Config, list *ast.ObjectList) error {
+	if len(list.Items) == 0 {
 		return nil
 	}
 
 	// Go through each object and turn it into an actual result.
-	collection := make([]*Detector, 0, len(objects))
-	for _, o := range objects {
+	collection := make([]*Detector, 0, len(list.Items))
+	for _, item := range list.Items {
+		key := item.Keys[0].Token.Value().(string)
+
 		var m map[string]interface{}
-		if err := hcl.DecodeObject(&m, o); err != nil {
+		if err := hcl.DecodeObject(&m, item.Val); err != nil {
 			return err
 		}
 
 		var d Detector
 		if err := mapstructure.WeakDecode(m, &d); err != nil {
 			return fmt.Errorf(
-				"error parsing detector '%s': %s", o.Key, err)
+				"error parsing detector '%s': %s", key, err)
 		}
 
-		d.Type = o.Key
+		d.Type = key
 		collection = append(collection, &d)
 	}
 
