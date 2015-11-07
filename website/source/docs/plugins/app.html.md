@@ -8,7 +8,7 @@ description: |-
 
 # App Plugins
 
-Apps in Otto are responsible for development, build, and deploy of
+Apps in Otto are responsible for development, build and deploy of
 an application. An example of an app type is [PHP](/docs/apps/php).
 
 By writing an app plugin for Otto, you can add support to Otto for new

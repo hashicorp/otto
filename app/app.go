@@ -1,6 +1,6 @@
 // app contains the interfaces and structures for application type
 // implementations for Otto. Applications are the components that
-// know how to dev, build, and deploy a certain kind of application such
+// know how to dev, build and deploy a certain kind of application such
 // as Rails, PHP, etc.
 //
 // All app implementations are built specific to a certain 3-tuple:
@@ -10,7 +10,7 @@
 //
 // When building app plugins, it is possible for that plugin to support
 // multiple matrix elements, but each implementation of the interface
-// is expeced to only implement one.
+// is expected to only implement one.
 package app
 
 import (
