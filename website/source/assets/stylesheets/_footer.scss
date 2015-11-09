@@ -100,25 +100,13 @@ body.page-sub{
 }
 
 @media (max-width: 768px) {
-
-  body.page-sub{
-    #footer{
-      .col-md-5{
-        &:last-child{
-          padding-top: 0;
-          border-top: none;
-        }
-      }
-    }
-  }
-
   #footer{
-    padding: 100px 0 40px;
     text-align: center;
 
     .footer-links{
       float: none;
       display: inline-block;
+      margin-bottom: 36px;
     }
 
     .footer-hashi {
@@ -127,19 +115,18 @@ body.page-sub{
 
       .pull-right{
         float: none !important;
+        padding-right: 0;
       }
     }
   }
 }
 
-@media (max-width: 320px) {
-
+@media (max-width: 414px) {
   #footer{
-    text-align: center;
-
     .footer-links{
-      .li-under{
-        float: none !important;
+      li{
+        display: block;
+        float: none;
       }
     }
   }
