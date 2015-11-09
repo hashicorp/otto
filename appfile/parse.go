@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl"
-	hclobj "github.com/hashicorp/hcl/hcl"
+	"github.com/hashicorp/hcl/hcl/ast"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -26,11 +26,17 @@ func Parse(r io.Reader) (*File, error) {
 	}
 
 	// Parse the buffer
-	obj, err := hcl.Parse(buf.String())
+	root, err := hcl.Parse(buf.String())
 	if err != nil {
 		return nil, fmt.Errorf("error parsing: %s", err)
 	}
 	buf.Reset()
+
+	// Top-level item should be the object list
+	list, ok := root.Node.(*ast.ObjectList)
+	if !ok {
+		return nil, fmt.Errorf("error parsing: file doesn't contain a root object")
+	}
 
 	// Check for invalid keys
 	valid := []string{
@@ -40,42 +46,42 @@ func Parse(r io.Reader) (*File, error) {
 		"infrastructure",
 		"project",
 	}
-	if err := checkHCLKeys(obj, valid); err != nil {
+	if err := checkHCLKeys(list, valid); err != nil {
 		return nil, err
 	}
 
 	var result File
 
 	// Parse the imports
-	if o := obj.Get("import", false); o != nil {
+	if o := list.Filter("import"); len(o.Items) > 0 {
 		if err := parseImport(&result, o); err != nil {
 			return nil, fmt.Errorf("error parsing 'import': %s", err)
 		}
 	}
 
 	// Parse the application
-	if o := obj.Get("application", false); o != nil {
+	if o := list.Filter("application"); len(o.Items) > 0 {
 		if err := parseApplication(&result, o); err != nil {
 			return nil, fmt.Errorf("error parsing 'application': %s", err)
 		}
 	}
 
 	// Parse the project
-	if o := obj.Get("project", false); o != nil {
+	if o := list.Filter("project"); len(o.Items) > 0 {
 		if err := parseProject(&result, o); err != nil {
 			return nil, fmt.Errorf("error parsing 'project': %s", err)
 		}
 	}
 
 	// Parse the infrastructure
-	if o := obj.Get("infrastructure", false); o != nil {
+	if o := list.Filter("infrastructure"); len(o.Items) > 0 {
 		if err := parseInfra(&result, o); err != nil {
 			return nil, fmt.Errorf("error parsing 'infrastructure': %s", err)
 		}
 	}
 
 	// Parse the customizations
-	if o := obj.Get("customization", false); o != nil {
+	if o := list.Filter("customization"); len(o.Items) > 0 {
 		if err := parseCustomizations(&result, o); err != nil {
 			return nil, fmt.Errorf("error parsing 'customization': %s", err)
 		}
@@ -108,19 +114,22 @@ func ParseFile(path string) (*File, error) {
 	return result, err
 }
 
-func parseApplication(result *File, obj *hclobj.Object) error {
-	if obj.Len() > 1 {
+func parseApplication(result *File, list *ast.ObjectList) error {
+	if len(list.Items) > 1 {
 		return fmt.Errorf("only one 'application' block allowed")
 	}
 
+	// Get our one item
+	item := list.Items[0]
+
 	// Check for invalid keys
 	valid := []string{"name", "type", "dependency"}
-	if err := checkHCLKeys(obj, valid); err != nil {
+	if err := checkHCLKeys(item.Val, valid); err != nil {
 		return multierror.Prefix(err, "application:")
 	}
 
 	var m map[string]interface{}
-	if err := hcl.DecodeObject(&m, obj); err != nil {
+	if err := hcl.DecodeObject(&m, item.Val); err != nil {
 		return err
 	}
 
@@ -129,35 +138,24 @@ func parseApplication(result *File, obj *hclobj.Object) error {
 	return mapstructure.WeakDecode(m, &app)
 }
 
-func parseCustomizations(result *File, obj *hclobj.Object) error {
-	// Get all the maps of keys to the actual object
-	objects := make(map[string]*hclobj.Object)
-	for _, o1 := range obj.Elem(false) {
-		for _, o2 := range o1.Elem(true) {
-			if _, ok := objects[o2.Key]; ok {
-				return fmt.Errorf(
-					"customization '%s' defined more than once",
-					o2.Key)
-			}
-
-			objects[o2.Key] = o2
-		}
-	}
-
-	if len(objects) == 0 {
+func parseCustomizations(result *File, list *ast.ObjectList) error {
+	list = list.Children()
+	if len(list.Items) == 0 {
 		return nil
 	}
 
 	// Go through each object and turn it into an actual result.
-	collection := make([]*Customization, 0, len(objects))
-	for n, o := range objects {
+	collection := make([]*Customization, 0, len(list.Items))
+	for _, item := range list.Items {
+		key := item.Keys[0].Token.Value().(string)
+
 		var m map[string]interface{}
-		if err := hcl.DecodeObject(&m, o); err != nil {
+		if err := hcl.DecodeObject(&m, item.Val); err != nil {
 			return err
 		}
 
 		var c Customization
-		c.Type = strings.ToLower(n)
+		c.Type = strings.ToLower(key)
 		c.Config = m
 
 		collection = append(collection, &c)
@@ -167,38 +165,32 @@ func parseCustomizations(result *File, obj *hclobj.Object) error {
 	return nil
 }
 
-func parseImport(result *File, obj *hclobj.Object) error {
-	// Get all the maps of keys to the actual object
-	objects := make([]*hclobj.Object, 0, 3)
-	set := make(map[string]struct{})
-	for _, o1 := range obj.Elem(false) {
-		for _, o2 := range o1.Elem(true) {
-			if _, ok := set[o2.Key]; ok {
-				return fmt.Errorf(
-					"imported '%s' more than once",
-					o2.Key)
-			}
-
-			objects = append(objects, o2)
-			set[o2.Key] = struct{}{}
-		}
-	}
-
-	if len(objects) == 0 {
+func parseImport(result *File, list *ast.ObjectList) error {
+	list = list.Children()
+	if len(list.Items) == 0 {
 		return nil
 	}
 
 	// Go through each object and turn it into an actual result.
-	collection := make([]*Import, 0, len(objects))
-	for _, o := range objects {
+	collection := make([]*Import, 0, len(list.Items))
+	seen := make(map[string]struct{})
+	for _, item := range list.Items {
+		key := item.Keys[0].Token.Value().(string)
+
+		// Make sure we haven't already found this import
+		if _, ok := seen[key]; ok {
+			return fmt.Errorf("import '%s' defined more than once", key)
+		}
+		seen[key] = struct{}{}
+
 		// Check for invalid keys
-		if err := checkHCLKeys(o, nil); err != nil {
+		if err := checkHCLKeys(item.Val, nil); err != nil {
 			return multierror.Prefix(err, fmt.Sprintf(
-				"import '%s':", o.Key))
+				"import '%s':", key))
 		}
 
 		collection = append(collection, &Import{
-			Source: o.Key,
+			Source: key,
 		})
 	}
 
@@ -206,37 +198,40 @@ func parseImport(result *File, obj *hclobj.Object) error {
 	return nil
 }
 
-func parseInfra(result *File, obj *hclobj.Object) error {
-	// Get all the maps of keys to the actual object
-	objects := make(map[string]*hclobj.Object)
-	for _, o1 := range obj.Elem(false) {
-		for _, o2 := range o1.Elem(true) {
-			if _, ok := objects[o2.Key]; ok {
-				return fmt.Errorf(
-					"infrastructure '%s' defined more than once",
-					o2.Key)
-			}
-
-			objects[o2.Key] = o2
-		}
-	}
-
-	if len(objects) == 0 {
+func parseInfra(result *File, list *ast.ObjectList) error {
+	list = list.Children()
+	if len(list.Items) == 0 {
 		return nil
 	}
 
 	// Go through each object and turn it into an actual result.
-	collection := make([]*Infrastructure, 0, len(objects))
-	for n, o := range objects {
+	collection := make([]*Infrastructure, 0, len(list.Items))
+	seen := make(map[string]struct{})
+	for _, item := range list.Items {
+		n := item.Keys[0].Token.Value().(string)
+
+		// Make sure we haven't already found this
+		if _, ok := seen[n]; ok {
+			return fmt.Errorf("infrastructure '%s' defined more than once", n)
+		}
+		seen[n] = struct{}{}
+
 		// Check for invalid keys
 		valid := []string{"name", "type", "flavor", "foundation"}
-		if err := checkHCLKeys(o, valid); err != nil {
+		if err := checkHCLKeys(item.Val, valid); err != nil {
 			return multierror.Prefix(err, fmt.Sprintf(
 				"infrastructure '%s':", n))
 		}
 
+		var listVal *ast.ObjectList
+		if ot, ok := item.Val.(*ast.ObjectType); ok {
+			listVal = ot.List
+		} else {
+			return fmt.Errorf("infrastructure '%s': should be an object", n)
+		}
+
 		var m map[string]interface{}
-		if err := hcl.DecodeObject(&m, o); err != nil {
+		if err := hcl.DecodeObject(&m, item.Val); err != nil {
 			return err
 		}
 
@@ -252,7 +247,7 @@ func parseInfra(result *File, obj *hclobj.Object) error {
 		}
 
 		// Parse the foundations if we have any
-		if o2 := o.Get("foundation", false); o != nil {
+		if o2 := listVal.Filter("foundation"); len(o2.Items) > 0 {
 			if err := parseFoundations(&infra, o2); err != nil {
 				return fmt.Errorf("error parsing 'foundation': %s", err)
 			}
@@ -265,30 +260,26 @@ func parseInfra(result *File, obj *hclobj.Object) error {
 	return nil
 }
 
-func parseFoundations(result *Infrastructure, obj *hclobj.Object) error {
-	// Get all the maps of keys to the actual object
-	objects := make(map[string]*hclobj.Object)
-	for _, o1 := range obj.Elem(false) {
-		for _, o2 := range o1.Elem(true) {
-			if _, ok := objects[o2.Key]; ok {
-				return fmt.Errorf(
-					"foundation '%s' defined more than once",
-					o2.Key)
-			}
-
-			objects[o2.Key] = o2
-		}
-	}
-
-	if len(objects) == 0 {
+func parseFoundations(result *Infrastructure, list *ast.ObjectList) error {
+	list = list.Children()
+	if len(list.Items) == 0 {
 		return nil
 	}
 
 	// Go through each object and turn it into an actual result.
-	collection := make([]*Foundation, 0, len(objects))
-	for n, o := range objects {
+	collection := make([]*Foundation, 0, len(list.Items))
+	seen := make(map[string]struct{})
+	for _, item := range list.Items {
+		n := item.Keys[0].Token.Value().(string)
+
+		// Make sure we haven't already found this
+		if _, ok := seen[n]; ok {
+			return fmt.Errorf("foundation '%s' defined more than once", n)
+		}
+		seen[n] = struct{}{}
+
 		var m map[string]interface{}
-		if err := hcl.DecodeObject(&m, o); err != nil {
+		if err := hcl.DecodeObject(&m, item.Val); err != nil {
 			return err
 		}
 
@@ -304,19 +295,22 @@ func parseFoundations(result *Infrastructure, obj *hclobj.Object) error {
 	return nil
 }
 
-func parseProject(result *File, obj *hclobj.Object) error {
-	if obj.Len() > 1 {
+func parseProject(result *File, list *ast.ObjectList) error {
+	if len(list.Items) > 1 {
 		return fmt.Errorf("only one 'project' block allowed")
 	}
 
+	// Get our one item
+	item := list.Items[0]
+
 	// Check for invalid keys
 	valid := []string{"name", "infrastructure"}
-	if err := checkHCLKeys(obj, valid); err != nil {
+	if err := checkHCLKeys(item.Val, valid); err != nil {
 		return multierror.Prefix(err, "project:")
 	}
 
 	var m map[string]interface{}
-	if err := hcl.DecodeObject(&m, obj); err != nil {
+	if err := hcl.DecodeObject(&m, item.Val); err != nil {
 		return err
 	}
 
@@ -330,17 +324,28 @@ func parseProject(result *File, obj *hclobj.Object) error {
 	return nil
 }
 
-func checkHCLKeys(obj *hclobj.Object, valid []string) error {
+func checkHCLKeys(node ast.Node, valid []string) error {
+	var list *ast.ObjectList
+	switch n := node.(type) {
+	case *ast.ObjectList:
+		list = n
+	case *ast.ObjectType:
+		list = n.List
+	default:
+		return fmt.Errorf("cannot check HCL keys of type %T", n)
+	}
+
 	validMap := make(map[string]struct{}, len(valid))
 	for _, v := range valid {
 		validMap[v] = struct{}{}
 	}
 
 	var result error
-	for _, o := range obj.Elem(true) {
-		if _, ok := validMap[o.Key]; !ok {
+	for _, item := range list.Items {
+		key := item.Keys[0].Token.Value().(string)
+		if _, ok := validMap[key]; !ok {
 			result = multierror.Append(result, fmt.Errorf(
-				"invald key: %s", o.Key))
+				"invald key: %s", key))
 		}
 	}
 
