@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/otto/helper/schema"
 )
 
-const defaultLatestVersion = "2.2"
+const defaultLatestVersion = "2.2.0"
 
 type customizations struct {
 	Opts *compile.AppOptions
