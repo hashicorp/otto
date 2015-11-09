@@ -56,6 +56,7 @@ detect_gem_deps rmagick "libmagickwand-dev"
 detect_gem_deps sqlite3 "libsqlite3-dev"
 detect_gem_deps libxml-ruby "libxml-dev"
 detect_gem_deps paperclip "imagemagick"
+detect_gem_deps poltergeist "phantomjs"
 
 if [ -n "${gem_deps_queue-}" ]; then
   ol "Installing native gem system dependencies..."
