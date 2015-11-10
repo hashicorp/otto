@@ -17,6 +17,10 @@ import (
 // App is an implementation of app.App
 type App struct{}
 
+func (a *App) Meta() (*app.Meta, error) {
+	return Meta, nil
+}
+
 // Compile ...
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	var opts compile.AppOptions
