@@ -15,6 +15,7 @@ package app
 
 import (
 	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/ui"
@@ -23,6 +24,9 @@ import (
 // App is the interface that must be implemented by each
 // (app type, infra type, infra flavor) 3-tuple.
 type App interface {
+	// Meta returns the metadata about this App implementation.
+	Meta() (*Meta, error)
+
 	// Compile is called to compile the files that are used to manage
 	// this application.
 	Compile(*Context) (*CompileResult, error)
@@ -59,6 +63,15 @@ type App interface {
 	DevDep(dst *Context, src *Context) (*DevDep, error)
 }
 
+// Meta is metadata about an app implementation.
+type Meta struct {
+	// Tuples returns the tuples that this app implementation supports.
+	Tuples TupleSlice
+
+	// Detectors are the detectors that exist for this app type.
+	Detectors []*detect.Detector
+}
+
 // Context is the context for operations on applications. Some of the
 // fields in this struct are only available for certain operations.
 type Context struct {
@@ -88,13 +101,24 @@ type Context struct {
 	// CacheDir is the directory where data can be cached. This data
 	// will persist across compiles of the same version of an Appfile.
 	//
+	// GlobalCacheDir is a directory that is shared across multiple
+	// Otto runs. It can be accessed by any app type and any Otto run. App
+	// types should be _extremely_ careful to use multi-process locking
+	// to prevent races. Additionally, you must be absolutely certain to
+	// have a cleanup process for this directory for your own files.
+	//
 	// The App implementation should function under the assumption that
 	// this cache directory can be cleared at any time between runs.
 	CacheDir string
 
 	// LocalDir is the directory where data local to this single Appfile
 	// will be stored; it isn't cleared for compilation.
-	LocalDir string
+	//
+	// GlobalDir is the directory where data global to Otto will be stored.
+	// It is never automatically cleared so any usage of this directory
+	// must have a cleanup mechanism in some way.
+	LocalDir  string
+	GlobalDir string
 
 	// Tuple is the Tuple that identifies this application. This can be
 	// used so that an implementatin of App can work with multiple tuple

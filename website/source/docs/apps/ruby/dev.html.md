@@ -17,7 +17,9 @@ page for details on how to customize some of the behavior on this page.
 
 ## Pre-Installed Software
 
-  * **Ruby and RubyGems**
+  * **Ruby and RubyGems** - The version of Ruby is determined based on
+      [customizations](/docs/apps/ruby/customization.html). See that page
+      for defaults as well.
   * **Bundler**
   * **Node.JS** - A common requirement for web development.
   * **Git, Mercurial** - Useful for Bundler

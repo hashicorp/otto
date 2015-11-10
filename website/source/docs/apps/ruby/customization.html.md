@@ -12,7 +12,7 @@ description: |-
 This page documents the [customizations](/docs/appfile/customization.html)
 that are available to change the behavior of Ruby applications with Otto.
 
-## Type: "ruby"
+### Type: "ruby"
 
 Example:
 
@@ -25,5 +25,27 @@ customization "ruby" {
 Available options:
 
   * `ruby_version` (string) - The Ruby version to install for development
-    and deployment. This defaults to 2.2. Note that for Ruby 1.9.3, you
-    need to specify "1.9.1". This is a strange quirk due to upstream dependencies.
+    and deployment. This defaults to "detect", but can be any specific Ruby
+    version. If "detect" is specified, the Ruby version will be detected.
+    See the "ruby version detection" section below.
+
+### Ruby Version Detection
+
+By default, Otto will attempt to automatically detect the proper Ruby
+version to use. If no Ruby version is detected, it will default to some
+recent version (we try to keep this up to date but it depends on the
+release process of Otto itself).
+
+To detect the Ruby version, Otto will inspect the following files in
+the following order. The first match found with a Ruby version will be
+used.
+
+1. `.ruby-version` - A file that only contains the Ruby version.
+2. `Gemfile` - If a Gemfile contains a `ruby` directive, this will be read.
+
+The detected version, if any, will be output during `otto compile`.
+
+The detected version is installed using [ruby-install](https://github.com/postmodern/ruby-install).
+We believe this is the best practice of installing Ruby and uses the
+official Ruby source to compile. Due to the dev layers system, the compilation
+only needs to happen once per system.

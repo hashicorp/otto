@@ -29,10 +29,6 @@ contains instructions for setting the PATH on Windows. For each of those
 pages, refer to the question and accepted answer for best practices. Create
 any files that they refer to that don't exist.
 
-Also, if you have not already done so, please install [VirtualBox](http://virtualbox.org).
-The development environment for Otto will use this. A future version of
-Otto will do this for you automatically.
-
 ## Verifying the Installation
 
 After installing Otto, verify the installation worked by opening a new

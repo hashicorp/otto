@@ -67,7 +67,7 @@ func (r *Router) help(ctx Context) error {
 	// to look up, then do that.
 	if ctx.RouteName() == "help" && len(ctx.RouteArgs()) > 0 {
 		if a, ok := r.Actions[ctx.RouteArgs()[0]]; ok {
-			ctx.UI().Raw(a.Help())
+			ctx.UI().Raw(a.Help() + "\n")
 			return nil
 		}
 		message.WriteString(fmt.Sprintf(

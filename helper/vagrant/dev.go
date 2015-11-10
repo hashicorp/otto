@@ -1,7 +1,10 @@
 package vagrant
 
 import (
+	"flag"
 	"fmt"
+	"log"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -19,6 +22,13 @@ type DevOptions struct {
 	// DataDir is the path to the directory where Vagrant should store its data.
 	// Defaults to `#{ctx.LocalDir/vagrant}` if empty.
 	DataDir string
+
+	// Layer, if non-nil, will be the set of layers that this environment
+	// builds on top of. If this is set, then the layers will be managed
+	// automatically by this.
+	//
+	// If this is nil, then layers won't be used.
+	Layer *Layered
 
 	// Instructions are help text that is shown after creating the
 	// development environment.
@@ -55,6 +65,12 @@ func Dev(opts *DevOptions) *router.Router {
 				HelpText:     strings.TrimSpace(actionHaltHelp),
 			},
 
+			"layers": &router.SimpleAction{
+				ExecuteFunc:  opts.actionLayers,
+				SynopsisText: actionLayersSyn,
+				HelpText:     strings.TrimSpace(actionLayersHelp),
+			},
+
 			"ssh": &router.SimpleAction{
 				ExecuteFunc:  opts.actionSSH,
 				SynopsisText: actionSSHSyn,
@@ -84,18 +100,36 @@ func (opts *DevOptions) actionDestroy(rctx router.Context) error {
 	}
 
 	ctx.Ui.Header("Destroying the local development environment...")
+	vagrant := opts.vagrant(ctx)
 
-	if err := opts.vagrant(ctx).Execute("destroy", "-f"); err != nil {
+	if opts.Layer != nil {
+		if err := opts.Layer.RemoveEnv(vagrant); err != nil {
+			return fmt.Errorf(
+				"Error preparing dev environment: %s", err)
+		}
+	}
+
+	// If the Vagrant directory doesn't exist, then we're already deleted.
+	// So we just verify here that it exists and then call destroy only
+	// if it does.
+	log.Printf("[DEBUG] vagrant: verifying data dir exists: %s", vagrant.DataDir)
+	_, err := os.Stat(vagrant.DataDir)
+	if err != nil && !os.IsNotExist(err) {
+		log.Printf("[ERROR] vagrant: err: %s", err)
 		return err
 	}
-	ctx.Ui.Raw("\n")
+	if err == nil {
+		if err := vagrant.Execute("destroy", "-f"); err != nil {
+			return err
+		}
+		ctx.Ui.Raw("\n")
+	}
 
 	// Store the dev status into the directory. We just do this before
 	// since there are a lot of cases where Vagrant fails but still imported.
 	// We just override any prior dev.
 	ctx.Ui.Header("Deleting development environment metadata...")
-	dev := &directory.Dev{Lookup: directory.Lookup{AppID: ctx.Appfile.ID}}
-	if err := ctx.Directory.DeleteDev(dev); err != nil {
+	if err := ctx.Directory.DeleteDev(opts.devLookup(ctx)); err != nil {
 		return fmt.Errorf(
 			"Error deleting dev environment metadata: %s", err)
 	}
@@ -174,13 +208,33 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 		return err
 	}
 
+	// If we are layered, then let the user know we're going to use
+	// a layer development environment...
+	if opts.Layer != nil {
+		pending, err := opts.Layer.Pending()
+		if err != nil {
+			return fmt.Errorf("Error checking dev layer status: %s", err)
+		}
+
+		if len(pending) > 0 {
+			ctx.Ui.Header("Creating development environment layers...")
+			ctx.Ui.Message(
+				"Otto uses layers to speed up building development environments.\n" +
+					"Each layer only needs to be built once. We've detected that the\n" +
+					"layers below aren't created yet. These will be built this time.\n" +
+					"Future development envirionments will use the cached versions\n" +
+					"to be much, much faster.")
+		}
+
+		if err := opts.Layer.Build(&ctx.Shared); err != nil {
+			return fmt.Errorf(
+				"Error building dev environment layers: %s", err)
+		}
+	}
+
 	// Output some info the user prior to running
 	ctx.Ui.Header(
 		"Creating local development environment with Vagrant if it doesn't exist...")
-	ctx.Ui.Message(
-		"Raw Vagrant output will begin streaming in below. Otto does\n" +
-			"not create this output. It is mirrored directly from Vagrant\n" +
-			"while the development environment is being created.\n\n")
 
 	// Store the dev status into the directory. We just do this before
 	// since there are a lot of cases where Vagrant fails but still imported.
@@ -193,7 +247,14 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 	}
 
 	// Run it!
-	if err := opts.vagrant(ctx).Execute("up"); err != nil {
+	vagrant := opts.vagrant(ctx)
+	if opts.Layer != nil {
+		if err := opts.Layer.AddEnv(vagrant); err != nil {
+			return fmt.Errorf(
+				"Error preparing dev environment: %s", err)
+		}
+	}
+	if err := vagrant.Execute("up"); err != nil {
 		return err
 	}
 
@@ -208,6 +269,47 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 	ctx.Ui.Message(fmt.Sprintf("IP address: %s", ctx.DevIPAddress))
 	if opts.Instructions != "" {
 		ctx.Ui.Message("\n" + opts.Instructions)
+	}
+
+	return nil
+}
+
+func (opts *DevOptions) actionLayers(rctx router.Context) error {
+	if opts.Layer == nil {
+		return fmt.Errorf(
+			"This development environment does not use layers.\n" +
+				"This command can only be used to manage development\n" +
+				"environments with layers.")
+	}
+
+	ctx := rctx.(*app.Context)
+	fs := flag.NewFlagSet("otto", flag.ContinueOnError)
+	prune := fs.Bool("prune", false, "prune unused layers")
+	if err := fs.Parse(rctx.RouteArgs()); err != nil {
+		return err
+	}
+
+	// Prune?
+	if *prune {
+		ctx.Ui.Header("Pruning any outdated or unused layers...")
+		count, err := opts.Layer.Prune(&ctx.Shared)
+		if err != nil {
+			return err
+		}
+		if count == 0 {
+			ctx.Ui.Message("No outdated or unused layers were found!")
+		} else {
+			ctx.Ui.Message(fmt.Sprintf(
+				"[green]Pruned %d outdated or unused layers!", count))
+		}
+
+		return nil
+	}
+
+	// We're just listing the layers. Eventually we probably should
+	// output status or something more useful here.
+	for _, l := range opts.Layer.Layers {
+		ctx.Ui.Raw(l.ID + "\n")
 	}
 
 	return nil
@@ -246,6 +348,7 @@ const (
 	actionUpSyn      = "Starts the development environment"
 	actionDestroySyn = "Destroy the development environment"
 	actionHaltSyn    = "Halts the development environment"
+	actionLayersSyn  = "Manage the layers of this development environment"
 	actionSSHSyn     = "SSH into the development environment"
 	actionVagrantSyn = "Run arbitrary Vagrant commands"
 )
@@ -283,6 +386,25 @@ Usage: otto dev halt
 
   This command will stop the development environment. The environment can then
   be started again with 'otto dev'.
+
+`
+
+const actionLayersHelp = `
+Usage: otto dev layers [options]
+
+  Manage the development environment layers.
+
+  This command will manage the layers of the development environment.
+  Otto uses layers as a mechanism for caching parts of the development
+  environment that aren't often updated. This makes "otto dev" faster
+  after the first call.
+
+  If no options are given, the layers will be listed that this development
+  environment uses.
+
+Options:
+
+  -prune       Delete all unused or outdated layers
 
 `
 

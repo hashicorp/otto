@@ -2,6 +2,7 @@ package compile
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
+	"github.com/hashicorp/otto/helper/oneline"
 )
 
 // AppOptions are the options for compiling an application.
@@ -20,6 +22,10 @@ import (
 type AppOptions struct {
 	// Ctx is the app context of this compilation.
 	Ctx *app.Context
+
+	// Result is the base CompileResult that will be used to return the result.
+	// You can set this if you want to override some settings.
+	Result *app.CompileResult
 
 	// FoundationConfig is the configuration for the foundation that
 	// will be returned as the compilation result.
@@ -48,6 +54,11 @@ type CompileCallback func() error
 //
 // AppOptions may be modified by this function during this call.
 func App(opts *AppOptions) (*app.CompileResult, error) {
+	// Write the test data in case we're running tests right now
+	testLock.RLock()
+	defer testLock.RUnlock()
+	testAppOpts = opts
+
 	ctx := opts.Ctx
 
 	// Setup the basic templating data. We put this into the "data" local
@@ -123,6 +134,10 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 		}
 	}
 
+	if err := appFoundations(opts); err != nil {
+		return nil, err
+	}
+
 	// Callbacks
 	for _, cb := range opts.Callbacks {
 		if err := cb(); err != nil {
@@ -141,8 +156,71 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 		opts.FoundationConfig.ServiceName = opts.Ctx.Application.Name
 	}
 
-	return &app.CompileResult{
-		FoundationConfig:   opts.FoundationConfig,
-		DevDepFragmentPath: fragmentPath,
-	}, nil
+	result := opts.Result
+	if result == nil {
+		result = new(app.CompileResult)
+	}
+	result.FoundationConfig = opts.FoundationConfig
+	result.DevDepFragmentPath = fragmentPath
+	return result, nil
+}
+
+// appFoundations compiles the app-specific foundation files.
+func appFoundations(opts *AppOptions) error {
+	// Setup the bindata for rendering
+	dataCopy := Data
+	data := &dataCopy
+	data.Context = make(map[string]interface{})
+	for k, v := range opts.Bindata.Context {
+		data.Context[k] = v
+	}
+
+	// Go through each foundation and setup the layers
+	log.Printf("[INFO] compile: looking for foundation layers for dev")
+	for i, dir := range opts.Ctx.FoundationDirs {
+		devDir := filepath.Join(dir, "app-dev")
+		log.Printf("[DEBUG] compile: checking foundation dir: %s", devDir)
+
+		_, err := os.Stat(filepath.Join(devDir, "layer.sh"))
+		if err != nil {
+			// If the file doesn't exist then this foundation just
+			// doesn't have a layer. Not a big deal.
+			if os.IsNotExist(err) {
+				log.Printf("[DEBUG] compile: dir %s has no layers", devDir)
+				continue
+			}
+
+			// The error is something else, return it...
+			return err
+		}
+
+		log.Printf("[DEBUG] compile: dir %s has a layer!", devDir)
+
+		// We have a layer! Read the ID.
+		id, err := oneline.Read(filepath.Join(devDir, "layer.id"))
+		if err != nil {
+			return err
+		}
+
+		// Setup the data for this render
+		data.Context["foundation_id"] = id
+		data.Context["foundation_dir"] = devDir
+
+		// Create the directory where this will be stored
+		renderDir := filepath.Join(
+			opts.Ctx.Dir, "foundation-layers", fmt.Sprintf("%d-%s", i, id))
+		if err := os.MkdirAll(renderDir, 0755); err != nil {
+			return err
+		}
+
+		// Render our standard template for a foundation layer
+		err = data.RenderAsset(
+			filepath.Join(renderDir, "Vagrantfile"),
+			"data/internal/foundation-layer.Vagrantfile.tpl")
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -18,6 +18,8 @@ import (
 type CompileCommand struct {
 	Meta
 
+	// Detectors to use for compilation. These will be overridden by any
+	// plugins.
 	Detectors []*detect.Detector
 }
 
@@ -28,6 +30,27 @@ func (c *CompileCommand) Run(args []string) int {
 	fs.StringVar(&flagAppfile, "appfile", "", "")
 	if err := fs.Parse(args); err != nil {
 		return 1
+	}
+
+	// Load all the plugins, we use all the plugins for compilation only
+	// so we have full access to detectors and app types.
+	pluginMgr, err := c.PluginManager()
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error initializing plugin manager: %s", err))
+		return 1
+	}
+	if err := pluginMgr.LoadAll(); err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error loading plugins: %s", err))
+		return 1
+	}
+
+	// Load the detectors from the plugins
+	detectors := make([]*detect.Detector, 0, 20)
+	detectors = append(detectors, c.Detectors...)
+	for _, p := range pluginMgr.Plugins() {
+		detectors = append(detectors, p.AppMeta.Detectors...)
 	}
 
 	// Load a UI
@@ -67,7 +90,7 @@ func (c *CompileCommand) Run(args []string) int {
 	if detectConfig == nil {
 		detectConfig = &detect.Config{}
 	}
-	err = detectConfig.Merge(&detect.Config{Detectors: c.Detectors})
+	err = detectConfig.Merge(&detect.Config{Detectors: detectors})
 	if err != nil {
 		c.Ui.Error(err.Error())
 		return 1
@@ -141,6 +164,19 @@ func (c *CompileCommand) Run(args []string) int {
 	if err := core.Compile(); err != nil {
 		c.Ui.Error(fmt.Sprintf(
 			"Error compiling: %s", err))
+		return 1
+	}
+
+	// Store the used plugins so later calls don't have to load everything
+	usedPath, err := c.AppfilePluginsPath(capp)
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error compiling: %s", err))
+		return 1
+	}
+	if err := pluginMgr.StoreUsed(usedPath); err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error compiling plugin data: %s", err))
 		return 1
 	}
 
@@ -246,11 +282,11 @@ func findAppfile(flag string) (string, error) {
 // existing Appfile by first looking for the DefaultAppfile and then looking
 // for any AltAppfiles in the dir
 func findAppfileInDir(path string) string {
-	if _, err := os.Stat(filepath.Join(path, DefaultAppfile)); err == nil {
+	if fi, err := os.Stat(filepath.Join(path, DefaultAppfile)); err == nil && !fi.IsDir() {
 		return filepath.Join(path, DefaultAppfile)
 	}
 	for _, aaf := range AltAppfiles {
-		if _, err := os.Stat(filepath.Join(path, aaf)); err == nil {
+		if fi, err := os.Stat(filepath.Join(path, aaf)); err == nil && !fi.IsDir() {
 			return filepath.Join(path, aaf)
 		}
 	}

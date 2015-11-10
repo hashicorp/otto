@@ -4,18 +4,10 @@ import (
 	"os"
 	"os/signal"
 
-	appCustom "github.com/hashicorp/otto/builtin/app/custom"
-	appDockerExt "github.com/hashicorp/otto/builtin/app/docker-external"
-	appGo "github.com/hashicorp/otto/builtin/app/go"
-	appNode "github.com/hashicorp/otto/builtin/app/node"
-	appPHP "github.com/hashicorp/otto/builtin/app/php"
-	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
-	appGradle "github.com/hashicorp/otto/builtin/app/gradle"
 	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
 
-	"github.com/hashicorp/otto/app"
-	"github.com/hashicorp/otto/appfile/detect"
+	"github.com/hashicorp/otto/builtin/pluginmap"
 	"github.com/hashicorp/otto/command"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
@@ -26,33 +18,6 @@ import (
 // Commands is the mapping of all the available Otto commands.
 var Commands map[string]cli.CommandFactory
 var CommandsInclude []string
-
-var Detectors = []*detect.Detector{
-	&detect.Detector{
-		Type: "go",
-		File: []string{"*.go"},
-	},
-	&detect.Detector{
-		Type: "php",
-		File: []string{"*.php", "composer.json"},
-	},
-	&detect.Detector{
-		Type: "rails",
-		File: []string{"config/application.rb"},
-	},
-	&detect.Detector{
-		Type: "ruby",
-		File: []string{"*.rb", "Gemfile", "config.ru"},
-	},
-	&detect.Detector{
-		Type: "node",
-		File: []string{"package.json"},
-	},
-	&detect.Detector{
-		Type: "gradle",
-		File: []string{"build.gradle"},
-	},
-}
 
 // Ui is the cli.Ui used for communicating to the outside world.
 var Ui cli.Ui
@@ -77,25 +42,17 @@ func init() {
 		},
 	}
 
-	apps := appGo.Tuples.Map(app.StructFactory(new(appGo.App)))
-	apps.Add(appCustom.Tuples.Map(app.StructFactory(new(appCustom.App))))
-	apps.Add(appDockerExt.Tuples.Map(app.StructFactory(new(appDockerExt.App))))
-	apps.Add(appNode.Tuples.Map(app.StructFactory(new(appNode.App))))
-	apps.Add(appPHP.Tuples.Map(app.StructFactory(new(appPHP.App))))
-	apps.Add(appRuby.Tuples.Map(app.StructFactory(new(appRuby.App))))
-	apps.Add(appGradle.Tuples.Map(app.StructFactory(new(appGradle.App))))
-
 	foundations := foundationConsul.Tuples.Map(foundation.StructFactory(new(foundationConsul.Foundation)))
 
 	meta := command.Meta{
 		CoreConfig: &otto.CoreConfig{
-			Apps:        apps,
 			Foundations: foundations,
 			Infrastructures: map[string]infrastructure.Factory{
 				"aws": infraAws.Infra,
 			},
 		},
-		Ui: Ui,
+		Ui:        Ui,
+		PluginMap: pluginmap.Map,
 	}
 
 	CommandsInclude = []string{
@@ -111,8 +68,7 @@ func init() {
 	Commands = map[string]cli.CommandFactory{
 		"compile": func() (cli.Command, error) {
 			return &command.CompileCommand{
-				Meta:      meta,
-				Detectors: Detectors,
+				Meta: meta,
 			}, nil
 		},
 
@@ -153,6 +109,14 @@ func init() {
 				Version:           Version,
 				VersionPrerelease: VersionPrerelease,
 				CheckFunc:         commandVersionCheck,
+			}, nil
+		},
+
+		// Internal or not shown to users directly
+
+		"plugin-builtin": func() (cli.Command, error) {
+			return &command.PluginBuiltinCommand{
+				Meta: meta,
 			}, nil
 		},
 

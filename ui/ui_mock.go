@@ -7,6 +7,8 @@ type Mock struct {
 	MessageBuf []string
 	RawBuf     []string
 
+	InputCalled bool
+	InputOpts   *InputOpts
 	InputResult string
 	InputError  error
 }
@@ -24,5 +26,7 @@ func (u *Mock) Raw(msg string) {
 }
 
 func (u *Mock) Input(opts *InputOpts) (string, error) {
+	u.InputCalled = true
+	u.InputOpts = opts
 	return u.InputResult, u.InputError
 }
