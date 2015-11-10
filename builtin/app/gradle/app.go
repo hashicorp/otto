@@ -39,7 +39,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				Schema: map[string]*schema.FieldSchema{
 					"gradle_version": &schema.FieldSchema{
 						Type:        schema.TypeString,
-						Default:     "2.7",
+						Default:     "2.8",
 						Description: "Gradle version to install",
 					},
 				},
