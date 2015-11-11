@@ -26,5 +26,10 @@ page for a list of behavior that can be changed.
   * The application is deployed behind [Phusion Passenger](https://www.phusionpassenger.com/)
     and [Nginx](http://nginx.org/).
 
+  * The Passenger/Nginx combination
+    [expects](https://www.phusionpassenger.com/library/config/nginx/reference/#example-2)
+    that the application can be started from `app.js` in the application
+    root.
+
   * `npm install --production` is used during the build process to
     get all the dependencies for your applicaiton.
