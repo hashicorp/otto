@@ -104,12 +104,16 @@ func (c *Core) Compile() error {
 	if err != nil {
 		return err
 	}
+	defer maybeClose(infra)
 
 	// Get all the foundation implementations (which are tied as singletons
 	// to the infrastructure).
 	foundations, foundationCtxs, err := c.foundations()
 	if err != nil {
 		return err
+	}
+	for _, f := range foundations {
+		defer maybeClose(f)
 	}
 
 	// Delete the prior output directory
@@ -279,6 +283,7 @@ func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
 				"Error loading App implementation for '%s': %s",
 				dag.VertexName(raw), err)
 		}
+		defer maybeClose(app)
 
 		// Call our callback
 		return f(app, appCtx, raw == root)
@@ -296,6 +301,7 @@ func (c *Core) Build() error {
 	if err := c.creds(infra, infraCtx); err != nil {
 		return err
 	}
+	defer maybeClose(infra)
 
 	// We only use the root application for this task, upstream dependencies
 	// don't have an effect on the build process.
@@ -313,6 +319,7 @@ func (c *Core) Build() error {
 		return fmt.Errorf(
 			"Error loading App: %s", err)
 	}
+	defer maybeClose(rootApp)
 
 	// Just update our shared data so we get the creds
 	rootCtx.Shared.InfraCreds = infraCtx.Shared.InfraCreds
@@ -330,6 +337,7 @@ func (c *Core) Deploy(action string, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer maybeClose(infra)
 
 	// Special case: don't try to fetch creds during `help` or `info`
 	if action != "help" && action != "info" {
@@ -356,6 +364,7 @@ func (c *Core) Deploy(action string, args []string) error {
 		return fmt.Errorf(
 			"Error loading App: %s", err)
 	}
+	defer maybeClose(rootApp)
 
 	// Update our shared data so we get the creds
 	rootCtx.Shared.InfraCreds = infraCtx.Shared.InfraCreds
@@ -387,6 +396,7 @@ func (c *Core) Dev() error {
 		return fmt.Errorf(
 			"Error loading App: %s", err)
 	}
+	defer maybeClose(rootApp)
 
 	// Go through all the dependencies and build their immutable
 	// dev environment pieces for the final configuration.
@@ -466,6 +476,7 @@ func (c *Core) Infra(action string, args []string) error {
 			return err
 		}
 	}
+	defer maybeClose(infra)
 
 	// Set the action and action args
 	infraCtx.Action = action
@@ -479,6 +490,9 @@ func (c *Core) Infra(action string, args []string) error {
 		if err != nil {
 			return err
 		}
+	}
+	for _, f := range foundations {
+		defer maybeClose(f)
 	}
 
 	// If we're doing anything other than destroying, then
@@ -748,6 +762,7 @@ func (c *Core) executeApp(opts *ExecuteOpts) error {
 	if err != nil {
 		return err
 	}
+	defer maybeClose(app)
 
 	// Set the action and action args
 	appCtx.Action = opts.Action
