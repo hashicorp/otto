@@ -27,6 +27,14 @@ type App interface {
 	// Meta returns the metadata about this App implementation.
 	Meta() (*Meta, error)
 
+	// Implicit returns implicit configurations for an Appfile that is
+	// using this type. This is called after this app type is detected
+	// to be used, and allows the app implementation to setup defaults.
+	//
+	// The App implementation can then define implicit dependencies and
+	// things like that based on the environment.
+	Implicit(*Context) (*appfile.File, error)
+
 	// Compile is called to compile the files that are used to manage
 	// this application.
 	Compile(*Context) (*CompileResult, error)

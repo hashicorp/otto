@@ -1,12 +1,21 @@
 package app
 
+import (
+	"github.com/hashicorp/otto/appfile"
+)
+
 // Mock is a mock implementation of the App interface.
 type Mock struct {
+	CloseCalled bool
+
 	MetaCalled bool
 	MetaResult *Meta
 	MetaErr    error
 
-	CloseCalled bool
+	ImplicitCalled  bool
+	ImplicitContext *Context
+	ImplicitResult  *appfile.File
+	ImplicitErr     error
 
 	CompileCalled  bool
 	CompileContext *Context
@@ -41,6 +50,12 @@ func (m *Mock) Meta() (*Meta, error) {
 func (m *Mock) Close() error {
 	m.CloseCalled = true
 	return nil
+}
+
+func (m *Mock) Implicit(ctx *Context) (*appfile.File, error) {
+	m.ImplicitCalled = true
+	m.ImplicitContext = ctx
+	return m.ImplicitResult, m.ImplicitErr
 }
 
 func (m *Mock) Compile(ctx *Context) (*CompileResult, error) {
