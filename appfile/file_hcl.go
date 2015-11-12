@@ -163,24 +163,26 @@ func (f *Application) HCL() *ast.ObjectItem {
 		},
 		Assign: emptyAssign,
 	})
-	items = append(items, &ast.ObjectItem{
-		Keys: []*ast.ObjectKey{
-			&ast.ObjectKey{
-				Token: token.Token{
-					Type: token.IDENT,
-					Text: "type",
-					Pos:  token.Pos{Line: 2},
+	if f.Type != "" {
+		items = append(items, &ast.ObjectItem{
+			Keys: []*ast.ObjectKey{
+				&ast.ObjectKey{
+					Token: token.Token{
+						Type: token.IDENT,
+						Text: "type",
+						Pos:  token.Pos{Line: 2},
+					},
 				},
 			},
-		},
-		Val: &ast.LiteralType{
-			Token: token.Token{
-				Type: token.STRING,
-				Text: fmt.Sprintf(`"%s"`, f.Type),
+			Val: &ast.LiteralType{
+				Token: token.Token{
+					Type: token.STRING,
+					Text: fmt.Sprintf(`"%s"`, f.Type),
+				},
 			},
-		},
-		Assign: emptyAssign,
-	})
+			Assign: emptyAssign,
+		})
+	}
 	for _, dep := range f.Dependencies {
 		item := dep.HCL()
 		items = append(items, item)

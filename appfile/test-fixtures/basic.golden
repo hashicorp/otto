@@ -1,6 +1,5 @@
 application {
   name = "foo"
-  type = ""
 
   dependency {
     source = "foo"
