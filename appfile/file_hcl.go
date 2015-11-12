@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/hcl/hcl/token"
 )
 
+var emptyAssign = token.Pos{Line: 1}
+
 // HCL converts the Appfile to an HCL AST, allowing printing of the Appfile
 // back to HCL.
 //
@@ -14,7 +16,7 @@ import (
 // back to the same HCL. Comments, in particular, won't be preserved.
 func (f *File) HCL() *ast.File {
 	// Convert all the various components into members of the root object
-	items := make([]*ast.ObjectItem, 0, 4+len(f.Imports)+len(f.Customization.Raw))
+	items := make([]*ast.ObjectItem, 0, 10+len(f.Imports))
 	for _, imp := range f.Imports {
 		items = append(items, imp.HCL())
 	}
@@ -34,6 +36,10 @@ func (f *File) HCL() *ast.File {
 }
 
 func (f *CustomizationSet) HCL() []*ast.ObjectItem {
+	if f == nil {
+		return nil
+	}
+
 	items := make([]*ast.ObjectItem, 0, len(f.Raw))
 	for _, c := range f.Raw {
 		items = append(items, c.HCL())
@@ -64,7 +70,8 @@ func (f *Customization) HCL() *ast.ObjectItem {
 					Token: token.Token{Type: token.IDENT, Text: k},
 				},
 			},
-			Val: val,
+			Val:    val,
+			Assign: emptyAssign,
 		})
 	}
 
@@ -102,6 +109,7 @@ func (f *Dependency) HCL() *ast.ObjectItem {
 				Text: fmt.Sprintf(`"%s"`, f.Source),
 			},
 		},
+		Assign: emptyAssign,
 	})
 
 	return &ast.ObjectItem{
@@ -140,7 +148,11 @@ func (f *Application) HCL() *ast.ObjectItem {
 	items = append(items, &ast.ObjectItem{
 		Keys: []*ast.ObjectKey{
 			&ast.ObjectKey{
-				Token: token.Token{Type: token.IDENT, Text: "name"},
+				Token: token.Token{
+					Type: token.IDENT,
+					Text: "name",
+					Pos:  token.Pos{Line: 1},
+				},
 			},
 		},
 		Val: &ast.LiteralType{
@@ -149,11 +161,16 @@ func (f *Application) HCL() *ast.ObjectItem {
 				Text: fmt.Sprintf(`"%s"`, f.Name),
 			},
 		},
+		Assign: emptyAssign,
 	})
 	items = append(items, &ast.ObjectItem{
 		Keys: []*ast.ObjectKey{
 			&ast.ObjectKey{
-				Token: token.Token{Type: token.IDENT, Text: "type"},
+				Token: token.Token{
+					Type: token.IDENT,
+					Text: "type",
+					Pos:  token.Pos{Line: 2},
+				},
 			},
 		},
 		Val: &ast.LiteralType{
@@ -162,9 +179,11 @@ func (f *Application) HCL() *ast.ObjectItem {
 				Text: fmt.Sprintf(`"%s"`, f.Type),
 			},
 		},
+		Assign: emptyAssign,
 	})
 	for _, dep := range f.Dependencies {
-		items = append(items, dep.HCL())
+		item := dep.HCL()
+		items = append(items, item)
 	}
 
 	return &ast.ObjectItem{
@@ -186,7 +205,11 @@ func (f *Project) HCL() *ast.ObjectItem {
 	items = append(items, &ast.ObjectItem{
 		Keys: []*ast.ObjectKey{
 			&ast.ObjectKey{
-				Token: token.Token{Type: token.IDENT, Text: "name"},
+				Token: token.Token{
+					Type: token.IDENT,
+					Text: "name",
+					Pos:  token.Pos{Line: 1},
+				},
 			},
 		},
 		Val: &ast.LiteralType{
@@ -195,11 +218,16 @@ func (f *Project) HCL() *ast.ObjectItem {
 				Text: fmt.Sprintf(`"%s"`, f.Name),
 			},
 		},
+		Assign: emptyAssign,
 	})
 	items = append(items, &ast.ObjectItem{
 		Keys: []*ast.ObjectKey{
 			&ast.ObjectKey{
-				Token: token.Token{Type: token.IDENT, Text: "infrastructure"},
+				Token: token.Token{
+					Type: token.IDENT,
+					Text: "infrastructure",
+					Pos:  token.Pos{Line: 2},
+				},
 			},
 		},
 		Val: &ast.LiteralType{
@@ -208,6 +236,7 @@ func (f *Project) HCL() *ast.ObjectItem {
 				Text: fmt.Sprintf(`"%s"`, f.Infrastructure),
 			},
 		},
+		Assign: emptyAssign,
 	})
 
 	return &ast.ObjectItem{
@@ -229,7 +258,11 @@ func (f *Infrastructure) HCL() *ast.ObjectItem {
 	items = append(items, &ast.ObjectItem{
 		Keys: []*ast.ObjectKey{
 			&ast.ObjectKey{
-				Token: token.Token{Type: token.IDENT, Text: "name"},
+				Token: token.Token{
+					Type: token.IDENT,
+					Text: "name",
+					Pos:  token.Pos{Line: 1},
+				},
 			},
 		},
 		Val: &ast.LiteralType{
@@ -238,11 +271,16 @@ func (f *Infrastructure) HCL() *ast.ObjectItem {
 				Text: fmt.Sprintf(`"%s"`, f.Name),
 			},
 		},
+		Assign: emptyAssign,
 	})
 	items = append(items, &ast.ObjectItem{
 		Keys: []*ast.ObjectKey{
 			&ast.ObjectKey{
-				Token: token.Token{Type: token.IDENT, Text: "type"},
+				Token: token.Token{
+					Type: token.IDENT,
+					Text: "type",
+					Pos:  token.Pos{Line: 2},
+				},
 			},
 		},
 		Val: &ast.LiteralType{
@@ -251,11 +289,16 @@ func (f *Infrastructure) HCL() *ast.ObjectItem {
 				Text: fmt.Sprintf(`"%s"`, f.Type),
 			},
 		},
+		Assign: emptyAssign,
 	})
 	items = append(items, &ast.ObjectItem{
 		Keys: []*ast.ObjectKey{
 			&ast.ObjectKey{
-				Token: token.Token{Type: token.IDENT, Text: "flavor"},
+				Token: token.Token{
+					Type: token.IDENT,
+					Text: "flavor",
+					Pos:  token.Pos{Line: 3},
+				},
 			},
 		},
 		Val: &ast.LiteralType{
@@ -264,6 +307,7 @@ func (f *Infrastructure) HCL() *ast.ObjectItem {
 				Text: fmt.Sprintf(`"%s"`, f.Flavor),
 			},
 		},
+		Assign: emptyAssign,
 	})
 
 	return &ast.ObjectItem{
