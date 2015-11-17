@@ -33,6 +33,10 @@ type App interface {
 	//
 	// The App implementation can then define implicit dependencies and
 	// things like that based on the environment.
+	//
+	// The Context argument for this function call will be very sparse.
+	// Only Appfile and UI will be set. Everythign else should be considered
+	// unusable.
 	Implicit(*Context) (*appfile.File, error)
 
 	// Compile is called to compile the files that are used to manage
