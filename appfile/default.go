@@ -11,10 +11,15 @@ import (
 // The path to the directory must be absolute, since the path is used
 // as a way to determine the name of the application.
 func Default(dir string, det *detect.Config) (*File, error) {
+	var appType string
 	appName := filepath.Base(dir)
-	appType, err := detect.App(dir, det)
-	if err != nil {
-		return nil, err
+	if det != nil {
+		t, err := detect.App(dir, det)
+		if err != nil {
+			return nil, err
+		}
+
+		appType = t
 	}
 
 	return &File{
