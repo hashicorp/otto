@@ -45,6 +45,7 @@ type File struct {
 type Application struct {
 	Name         string
 	Type         string
+	Detect       bool
 	Dependencies []*Dependency `mapstructure:"dependency"`
 }
 

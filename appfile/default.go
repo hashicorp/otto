@@ -21,8 +21,9 @@ func Default(dir string, det *detect.Config) (*File, error) {
 		Path: filepath.Join(dir, "Appfile"),
 
 		Application: &Application{
-			Name: appName,
-			Type: appType,
+			Name:   appName,
+			Type:   appType,
+			Detect: true,
 		},
 
 		Project: &Project{

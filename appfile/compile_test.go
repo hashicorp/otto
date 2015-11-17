@@ -160,8 +160,9 @@ func TestCompile_structure(t *testing.T) {
 			"",
 			&File{
 				Application: &Application{
-					Name: "foo",
-					Type: "bar",
+					Name:   "foo",
+					Type:   "bar",
+					Detect: true,
 				},
 				Project: &Project{
 					Name:           "foo",
@@ -182,8 +183,9 @@ func TestCompile_structure(t *testing.T) {
 			"",
 			&File{
 				Application: &Application{
-					Name: "bar",
-					Type: "bar",
+					Name:   "bar",
+					Type:   "bar",
+					Detect: true,
 				},
 				Project: &Project{
 					Name:           "foo",
@@ -211,8 +213,9 @@ func TestCompile_structure(t *testing.T) {
 			"child",
 			&File{
 				Application: &Application{
-					Name: "child",
-					Type: "bar",
+					Name:   "child",
+					Type:   "bar",
+					Detect: true,
 				},
 				Project: &Project{
 					Name:           "bar",
@@ -233,8 +236,9 @@ func TestCompile_structure(t *testing.T) {
 			"child",
 			&File{
 				Application: &Application{
-					Name: "child",
-					Type: "bar",
+					Name:   "child",
+					Type:   "bar",
+					Detect: true,
 				},
 				Project: &Project{
 					Name:           "bar",
