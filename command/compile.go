@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/appfile/detect"
+	appfileLoad "github.com/hashicorp/otto/appfile/load"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -53,27 +54,6 @@ func (c *CompileCommand) Run(args []string) int {
 		detectors = append(detectors, p.AppMeta.Detectors...)
 	}
 
-	// Load a UI
-	ui := c.OttoUi()
-	ui.Header("Loading Appfile...")
-
-	app, appPath, err := loadAppfile(flagAppfile)
-	if err != nil {
-		c.Ui.Error(err.Error())
-		return 1
-	}
-
-	// Tell the user what is happening if they have no Appfile
-	if app == nil {
-		ui.Header("No Appfile found! Detecting project information...")
-		ui.Message(fmt.Sprintf(
-			"No Appfile was found. If there is no Appfile, Otto will do its best\n" +
-				"to detect the type of application this is and set reasonable defaults.\n" +
-				"This is a good way to get started with Otto, but over time we recommend\n" +
-				"writing a real Appfile since this will allow more complex customizations,\n" +
-				"the ability to reference dependencies, versioning, and more."))
-	}
-
 	// Parse the detectors
 	dataDir, err := c.DataDir()
 	if err != nil {
@@ -96,38 +76,52 @@ func (c *CompileCommand) Run(args []string) int {
 		return 1
 	}
 
-	// Load the default Appfile so we can merge in any defaults into
-	// the loaded Appfile (if there is one).
-	appDef, err := appfile.Default(appPath, detectConfig)
+	// Create the Appfile loader
+	loader := &appfileLoad.Loader{
+		Detector: detectConfig,
+	}
+
+	// Load a UI
+	ui := c.OttoUi()
+	ui.Header("Loading Appfile...")
+
+	app, appPath, err := loadAppfile(flagAppfile)
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf(
-			"Error loading Appfile: %s", err))
+		c.Ui.Error(err.Error())
+		return 1
+	}
+
+	// Tell the user what is happening if they have no Appfile
+	if app == nil {
+		ui.Header("No Appfile found! Detecting project information...")
+		ui.Message(fmt.Sprintf(
+			"No Appfile was found. If there is no Appfile, Otto will do its best\n" +
+				"to detect the type of application this is and set reasonable defaults.\n" +
+				"This is a good way to get started with Otto, but over time we recommend\n" +
+				"writing a real Appfile since this will allow more complex customizations,\n" +
+				"the ability to reference dependencies, versioning, and more."))
+	}
+
+	// Load the complete Appfile
+	app, err = loader.Load(app, appPath)
+	if err != nil {
+		c.Ui.Error(err.Error())
 		return 1
 	}
 
 	// If there was no loaded Appfile and we don't have an application
 	// type then we weren't able to detect the type. Error.
-	if app == nil && appDef.Application.Type == "" {
+	if app == nil || app.Application.Type == "" {
 		c.Ui.Error(strings.TrimSpace(errCantDetectType))
 		return 1
 	}
-
-	// Merge the appfiles
-	if app != nil {
-		if err := appDef.Merge(app); err != nil {
-			c.Ui.Error(fmt.Sprintf(
-				"Error loading Appfile: %s", err))
-			return 1
-		}
-	}
-	app = appDef
 
 	// Compile the Appfile
 	ui.Header("Fetching all Appfile dependencies...")
 	capp, err := appfile.Compile(app, &appfile.CompileOpts{
 		Dir: filepath.Join(
 			filepath.Dir(app.Path), DefaultOutputDir, DefaultOutputDirCompiledAppfile),
-		Detect:   detectConfig,
+		Loader:   loader.Load,
 		Callback: c.compileCallback(ui),
 	})
 	if err != nil {
