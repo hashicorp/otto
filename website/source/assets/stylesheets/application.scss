@@ -5,16 +5,18 @@
 
 // Core variables and mixins
 @import '_variables';
-@import '_mixins';
-
-// Utility classes
-@import '_utilities';
 
 // Core CSS
 @import '_webfonts';
 
 //Global Site
 @import '_global';
+
+// Hashicorp Shared Project Styles
+@import 'hashicorp-shared/_project-utility';
+@import 'hashicorp-shared/_hashicorp-utility';
+@import 'hashicorp-shared/_hashicorp-header';
+@import 'hashicorp-shared/_hashicorp-sidebar';
 
 // Components
 @import '_header';

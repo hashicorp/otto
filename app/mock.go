@@ -6,6 +6,8 @@ type Mock struct {
 	MetaResult *Meta
 	MetaErr    error
 
+	CloseCalled bool
+
 	CompileCalled  bool
 	CompileContext *Context
 	CompileResult  *CompileResult
@@ -34,6 +36,11 @@ type Mock struct {
 func (m *Mock) Meta() (*Meta, error) {
 	m.MetaCalled = true
 	return m.MetaResult, m.MetaErr
+}
+
+func (m *Mock) Close() error {
+	m.CloseCalled = true
+	return nil
 }
 
 func (m *Mock) Compile(ctx *Context) (*CompileResult, error) {

@@ -6,6 +6,26 @@ import (
 	"github.com/hashicorp/otto/app"
 )
 
+func TestCoreCompile_close(t *testing.T) {
+	// Make a core that returns a fixed app
+	coreConfig := TestCoreConfig(t)
+	coreConfig.Appfile = TestAppfile(t, testPath("basic", "Appfile"))
+	appMock := TestApp(t, TestAppTuple, coreConfig)
+	core := testCore(t, coreConfig)
+
+	// Compile!
+	if err := core.Compile(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !appMock.CompileCalled {
+		t.Fatal("compile should be called")
+	}
+	if !appMock.CloseCalled {
+		t.Fatal("close should be called")
+	}
+}
+
 func TestCoreDev_compileMetadata(t *testing.T) {
 	// Make a core that returns a fixed app
 	coreConfig := TestCoreConfig(t)
