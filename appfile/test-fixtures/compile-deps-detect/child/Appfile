@@ -1,4 +1,0 @@
-application {
-    name = "bar"
-    type = "foo"
-}

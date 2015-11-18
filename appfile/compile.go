@@ -14,7 +14,6 @@ import (
 
 	"github.com/hashicorp/go-getter"
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/terraform/dag"
 )
@@ -119,9 +118,12 @@ type CompileOpts struct {
 	// be deleted.
 	Dir string
 
-	// Detect is the detect configuration that will be used for processing
-	// defaults for the various dependencies.
-	Detect *detect.Config
+	// Loader is called to load an Appfile in the given directory.
+	// This can return the file as-is, but this point gives the caller
+	// an opportunity to modify the Appfile prior to full compilation.
+	//
+	// The File given will already have all the imports merged.
+	Loader func(f *File, dir string) (*File, error)
 
 	// Callback is an optional way to receive notifications of events
 	// during the compilation process. The CompileEvent argument should be
@@ -341,13 +343,6 @@ func compileDependencies(
 					return err
 				}
 
-				// Parse a default
-				fDef, err := Default(dir, opts.Detect)
-				if err != nil {
-					return fmt.Errorf(
-						"Error detecting defaults in %s: %s", key, err)
-				}
-
 				// Parse the Appfile if it exists
 				var f *File
 				appfilePath := filepath.Join(dir, "Appfile")
@@ -367,17 +362,18 @@ func compileDependencies(
 					if err := compileImports(f, importOpts, opts); err != nil {
 						return err
 					}
+				}
 
-					// Merge the files
-					if err := fDef.Merge(f); err != nil {
+				// Do any additional loading if we have a loader
+				if opts.Loader != nil {
+					f, err = opts.Loader(f, dir)
+					if err != nil {
 						return fmt.Errorf(
-							"Error merging default Appfile for dependency %s: %s",
-							key, err)
+							"Error loading Appfile in %s: %s", key, err)
 					}
 				}
 
 				// Set the source
-				f = fDef
 				f.Source = key
 
 				// If it doesn't have an otto ID then we can't do anything
@@ -403,7 +399,12 @@ func compileDependencies(
 				// We merge the root infrastructure choice upwards to
 				// all dependencies.
 				f.Infrastructure = root.File.Infrastructure
-				f.Project.Infrastructure = root.File.Project.Infrastructure
+				if root.File.Project != nil {
+					if f.Project == nil {
+						f.Project = new(Project)
+					}
+					f.Project.Infrastructure = root.File.Project.Infrastructure
+				}
 
 				// Build the vertex for this
 				vertex = &CompiledGraphVertex{

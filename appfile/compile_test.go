@@ -11,7 +11,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/terraform/dag"
 )
 
@@ -43,18 +42,6 @@ func TestCompile(t *testing.T) {
 		{
 			"compile-deps",
 			testCompileDepsStr,
-			false,
-		},
-
-		{
-			"compile-deps-detect",
-			testCompileDepsStr,
-			false,
-		},
-
-		{
-			"compile-deps-detect-pure",
-			"",
 			false,
 		},
 
@@ -395,15 +382,8 @@ func testCompileOpts(t *testing.T) *CompileOpts {
 	}
 
 	return &CompileOpts{
-		Dir: dir,
-		Detect: &detect.Config{
-			Detectors: []*detect.Detector{
-				&detect.Detector{
-					Type: "foo",
-					File: []string{"app.foo"},
-				},
-			},
-		},
+		Dir:    dir,
+		Loader: nil,
 	}
 }
 
