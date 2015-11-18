@@ -89,7 +89,7 @@ func TestCompile(t *testing.T) {
 			f := testFile(t, tc.Dir)
 			defer f.resetID()
 
-			c, err := Compile(f, opts)
+			c, err := testCompiler(t, opts).Compile(f)
 			if (err != nil) != tc.Err {
 				t.Fatalf("err: %s\n\n%s", tc.Dir, err)
 			}
@@ -126,7 +126,7 @@ func TestCompile_dotOttoId(t *testing.T) {
 	}
 	defer os.Rename(newName, oldName)
 
-	c, err := Compile(f, opts)
+	c, err := testCompiler(t, opts).Compile(f)
 	if err != nil {
 		t.Fatalf("err:\n\n%s", err)
 	}
@@ -260,7 +260,7 @@ func TestCompile_structure(t *testing.T) {
 				tc.File.Imports = f.Imports
 			}
 
-			c, err := Compile(f, opts)
+			c, err := testCompiler(t, opts).Compile(f)
 			if (err != nil) != tc.Err {
 				t.Fatalf("err: %s\n\n%s", tc.Dir, err)
 			}
@@ -316,7 +316,7 @@ func TestCompileID(t *testing.T) {
 	f := testFile(t, "compile-id")
 	defer f.resetID()
 
-	c, err := Compile(f, opts)
+	c, err := testCompiler(t, opts).Compile(f)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -338,7 +338,7 @@ func TestCompileID_existing(t *testing.T) {
 	}
 
 	copyId := f.ID
-	c, err := Compile(f, opts)
+	c, err := testCompiler(t, opts).Compile(f)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -385,6 +385,15 @@ func testCompileOpts(t *testing.T) *CompileOpts {
 		Dir:    dir,
 		Loader: nil,
 	}
+}
+
+func testCompiler(t *testing.T, opts *CompileOpts) *Compiler {
+	c, err := NewCompiler(opts)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	return c
 }
 
 func testFile(t *testing.T, dir string) *File {
