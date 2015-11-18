@@ -1,10 +1,12 @@
 package load
 
 import (
+	"io/ioutil"
 	"path/filepath"
 	"reflect"
 	"testing"
 
+	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/appfile/detect"
 )
@@ -39,6 +41,9 @@ func TestLoader_basic(t *testing.T) {
 				Application: &appfile.Application{
 					Name: "foo",
 					Type: "test",
+					Dependencies: []*appfile.Dependency{
+						&appfile.Dependency{Source: "tubes"},
+					},
 				},
 			},
 		},
@@ -49,12 +54,23 @@ func TestLoader_basic(t *testing.T) {
 			&appfile.File{
 				Application: &appfile.Application{
 					Type: "test",
+					Dependencies: []*appfile.Dependency{
+						&appfile.Dependency{Source: "tubes"},
+					},
 				},
 			},
 		},
 	}
 
-	l := testLoader(t)
+	l, appMock := testLoader(t)
+	appMock.ImplicitResult = &appfile.File{
+		Application: &appfile.Application{
+			Dependencies: []*appfile.Dependency{
+				&appfile.Dependency{Source: "tubes"},
+			},
+		},
+	}
+
 	for _, tc := range cases {
 		tc.Path = testPath(tc.Path)
 
@@ -86,7 +102,23 @@ func testPath(path ...string) string {
 	return filepath.Join(args...)
 }
 
-func testLoader(t *testing.T) *Loader {
+func testLoader(t *testing.T) (*Loader, *app.Mock) {
+	td, err := ioutil.TempDir("", "otto")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	compiler, err := appfile.NewCompiler(&appfile.CompileOpts{
+		Dir: filepath.Join(td, "compile"),
+	})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Create a single mock instance that is returned so we can verify
+	// calls and modify return values.
+	appMock := new(app.Mock)
+
 	return &Loader{
 		Detector: &detect.Config{
 			Detectors: []*detect.Detector{
@@ -96,5 +128,13 @@ func testLoader(t *testing.T) *Loader {
 				},
 			},
 		},
-	}
+
+		Compiler: compiler,
+
+		Apps: map[app.Tuple]app.Factory{
+			app.Tuple{"test", "*", "*"}: func() (app.App, error) {
+				return appMock, nil
+			},
+		},
+	}, appMock
 }

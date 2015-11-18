@@ -2,9 +2,14 @@ package load
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
+	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/appfile/detect"
+	"github.com/hashicorp/otto/otto"
 )
 
 // Loader is used to load an Appfile.
@@ -33,6 +38,15 @@ type Loader struct {
 	// Detector is the detector configuration. If this is nil then
 	// no type detection will be done.
 	Detector *detect.Config
+
+	// Compiler is the appfile compiler that we're using. This is used
+	// to do a minimal compile (MinCompile) to realize imports of
+	// Appfiles prior to implicit loading.
+	Compiler *appfile.Compiler
+
+	// Apps will be used to load the proper app implementation for
+	// implicit loading.
+	Apps map[app.Tuple]app.Factory
 }
 
 func (l *Loader) Load(f *appfile.File, dir string) (*appfile.File, error) {
@@ -66,6 +80,57 @@ func (l *Loader) Load(f *appfile.File, dir string) (*appfile.File, error) {
 		return realFile, nil
 	}
 
-	// TODO: plugin loading and implicit
-	return realFile, nil
+	// Minimally compile the file that we can use to create a core
+	compiled, err := l.Compiler.MinCompile(realFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a temporary directory we use for the core
+	td, err := ioutil.TempDir("", "otto")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(td)
+
+	// Create a core
+	core, err := otto.NewCore(&otto.CoreConfig{
+		DataDir:    filepath.Join(td, "data"),
+		LocalDir:   filepath.Join(td, "local"),
+		CompileDir: filepath.Join(td, "compile"),
+		Appfile:    compiled,
+		Apps:       l.Apps,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the app implementation
+	app, appCtx, err := core.App()
+	if err != nil {
+		return nil, err
+	}
+
+	// Load the implicit Appfile
+	implicit, err := app.Implicit(appCtx)
+	if err != nil {
+		return nil, err
+	}
+
+	var final appfile.File
+	if err := final.Merge(appDef); err != nil {
+		return nil, fmt.Errorf("Error loading Appfile: %s", err)
+	}
+	if implicit != nil {
+		if err := final.Merge(implicit); err != nil {
+			return nil, fmt.Errorf("Error loading Appfile: %s", err)
+		}
+	}
+	if f != nil {
+		if err := final.Merge(f); err != nil {
+			return nil, fmt.Errorf("Error loading Appfile: %s", err)
+		}
+	}
+
+	return &final, nil
 }

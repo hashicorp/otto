@@ -270,12 +270,12 @@ func (c *Compiler) Compile(f *File) (*Compiled, error) {
 		return nil, err
 	}
 
-	// Start building our compiled Appfile
-	compiled.Graph = new(dag.AcyclicGraph)
-
-	// Add our root vertex for this Appfile
-	vertex := &CompiledGraphVertex{File: f, NameValue: f.Application.Name}
-	compiled.Graph.Add(vertex)
+	// Get our root vertex
+	root, err := compiled.Graph.Root()
+	if err != nil {
+		return nil, err
+	}
+	vertex := root.(*CompiledGraphVertex)
 
 	// Build the storage we'll use for storing downloaded dependencies,
 	// then use that to trigger the recursive call to download all our
@@ -305,12 +305,16 @@ func (c *Compiler) Compile(f *File) (*Compiled, error) {
 // This does not fetch dependencies.
 func (c *Compiler) MinCompile(f *File) (*Compiled, error) {
 	// Start building our compiled Appfile
-	compiled := &Compiled{File: f}
+	compiled := &Compiled{File: f, Graph: new(dag.AcyclicGraph)}
 
 	// Load the imports for this single Appfile
 	if err := c.compileImports(f); err != nil {
 		return nil, err
 	}
+
+	// Add our root vertex for this Appfile
+	vertex := &CompiledGraphVertex{File: f, NameValue: f.Application.Name}
+	compiled.Graph.Add(vertex)
 
 	return compiled, nil
 }
