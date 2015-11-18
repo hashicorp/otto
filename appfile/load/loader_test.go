@@ -42,6 +42,16 @@ func TestLoader_basic(t *testing.T) {
 				},
 			},
 		},
+
+		{
+			"detect-no-appfile",
+			nil,
+			&appfile.File{
+				Application: &appfile.Application{
+					Type: "test",
+				},
+			},
+		},
 	}
 
 	l := testLoader(t)

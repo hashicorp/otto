@@ -45,17 +45,16 @@ func (l *Loader) Load(f *appfile.File, dir string) (*appfile.File, error) {
 	}
 
 	// Merge the detected Appfile with the real Appfile
+	var merged appfile.File
+	if err := merged.Merge(appDef); err != nil {
+		return nil, fmt.Errorf("Error loading Appfile: %s", err)
+	}
 	if realFile != nil {
-		var merged appfile.File
-		if err := merged.Merge(appDef); err != nil {
-			return nil, fmt.Errorf("Error loading Appfile: %s", err)
-		}
 		if err := merged.Merge(realFile); err != nil {
 			return nil, fmt.Errorf("Error loading Appfile: %s", err)
 		}
-
-		realFile = &merged
 	}
+	realFile = &merged
 
 	// If we have no application type, there is nothing more to do
 	if realFile == nil || realFile.Application.Type == "" {
