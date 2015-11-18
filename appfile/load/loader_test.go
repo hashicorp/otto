@@ -34,7 +34,8 @@ func TestLoader_basic(t *testing.T) {
 			"detect",
 			&appfile.File{
 				Application: &appfile.Application{
-					Name: "foo",
+					Name:   "foo",
+					Detect: true,
 				},
 			},
 			&appfile.File{
@@ -57,6 +58,23 @@ func TestLoader_basic(t *testing.T) {
 					Dependencies: []*appfile.Dependency{
 						&appfile.Dependency{Source: "tubes"},
 					},
+				},
+			},
+		},
+
+		{
+			"detect-false",
+			&appfile.File{
+				Application: &appfile.Application{
+					Name:   "foo",
+					Detect: false,
+				},
+			},
+			&appfile.File{
+				Application: &appfile.Application{
+					Name:   "foo",
+					Type:   "test",
+					Detect: false,
 				},
 			},
 		},

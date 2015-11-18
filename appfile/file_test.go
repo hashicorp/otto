@@ -93,6 +93,28 @@ func TestFileMerge(t *testing.T) {
 			},
 		},
 
+		"Application (detect)": {
+			One: &File{
+				Application: &Application{
+					Name:   "foo",
+					Detect: true,
+				},
+			},
+			Two: &File{
+				Application: &Application{
+					Type:   "foo",
+					Detect: false,
+				},
+			},
+			Three: &File{
+				Application: &Application{
+					Name:   "foo",
+					Type:   "foo",
+					Detect: false,
+				},
+			},
+		},
+
 		"Infra (no merge)": {
 			One: &File{
 				Infrastructure: []*Infrastructure{
