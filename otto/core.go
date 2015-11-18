@@ -252,7 +252,10 @@ func (c *Core) Compile() error {
 		if root {
 			md.App = result
 		} else {
-			md.AppDeps[ctx.Appfile.ID] = result
+			// Don't store the result if its nil because it is pointless
+			if result != nil {
+				md.AppDeps[ctx.Appfile.ID] = result
+			}
 		}
 
 		return nil

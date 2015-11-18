@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/otto"
@@ -72,6 +73,59 @@ func TestCompile_appfileDir(t *testing.T) {
 	}
 
 	if !infra.CompileCalled {
+		t.Fatal("Compile should be called")
+	}
+}
+
+func TestCompile_implicit(t *testing.T) {
+	dir := fixtureDir("compile-implicit")
+	defer os.Remove(filepath.Join(dir, ".ottoid"))
+	defer testChdir(t, dir)()
+
+	core := otto.TestCoreConfig(t)
+	otto.TestFoundation(t, foundation.Tuple{"consul", "aws", "simple"}, core)
+	infra := otto.TestInfra(t, "aws", core)
+	appImpl := otto.TestApp(t, app.Tuple{"test", "aws", "simple"}, core)
+	childAppImpl := otto.TestApp(t, app.Tuple{"child", "aws", "simple"}, core)
+
+	appImpl.ImplicitResult = &appfile.File{
+		Application: &appfile.Application{
+			Dependencies: []*appfile.Dependency{
+				&appfile.Dependency{
+					Source: "child",
+				},
+			},
+		},
+	}
+
+	ui := new(cli.MockUi)
+	detectors := []*detect.Detector{
+		&detect.Detector{
+			Type: "test",
+			File: []string{"test-file"},
+		},
+	}
+
+	c := &CompileCommand{
+		Meta: Meta{
+			CoreConfig: core,
+			Ui:         ui,
+		},
+		Detectors: detectors,
+	}
+
+	args := []string{}
+	if code := c.Run(args); code != 0 {
+		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
+	}
+
+	if !infra.CompileCalled {
+		t.Fatal("Compile should be called")
+	}
+	if !appImpl.CompileCalled {
+		t.Fatal("Compile should be called")
+	}
+	if !childAppImpl.CompileCalled {
 		t.Fatal("Compile should be called")
 	}
 }

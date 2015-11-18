@@ -76,11 +76,6 @@ func (c *CompileCommand) Run(args []string) int {
 		return 1
 	}
 
-	// Create the Appfile loader
-	loader := &appfileLoad.Loader{
-		Detector: detectConfig,
-	}
-
 	// Load a UI
 	ui := c.OttoUi()
 	ui.Header("Loading Appfile...")
@@ -102,6 +97,28 @@ func (c *CompileCommand) Run(args []string) int {
 				"the ability to reference dependencies, versioning, and more."))
 	}
 
+	// Build the appfile compiler
+	var loader appfileLoad.Loader
+	compiler, err := appfile.NewCompiler(&appfile.CompileOpts{
+		Dir: filepath.Join(
+			appPath, DefaultOutputDir, DefaultOutputDirCompiledAppfile),
+		Loader:   loader.Load,
+		Callback: c.compileCallback(ui),
+	})
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error initializing Appfile compiler: %s", err))
+		return 1
+	}
+
+	// Create the Appfile loader
+	if err := pluginMgr.ConfigureCore(c.CoreConfig); err != nil {
+		panic(err)
+	}
+	loader.Detector = detectConfig
+	loader.Compiler = compiler
+	loader.Apps = c.CoreConfig.Apps
+
 	// Load the complete Appfile
 	app, err = loader.Load(app, appPath)
 	if err != nil {
@@ -118,12 +135,7 @@ func (c *CompileCommand) Run(args []string) int {
 
 	// Compile the Appfile
 	ui.Header("Fetching all Appfile dependencies...")
-	capp, err := appfile.Compile(app, &appfile.CompileOpts{
-		Dir: filepath.Join(
-			filepath.Dir(app.Path), DefaultOutputDir, DefaultOutputDirCompiledAppfile),
-		Loader:   loader.Load,
-		Callback: c.compileCallback(ui),
-	})
+	capp, err := compiler.Compile(app)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf(
 			"Error compiling Appfile: %s", err))

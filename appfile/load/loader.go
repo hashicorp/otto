@@ -106,13 +106,14 @@ func (l *Loader) Load(f *appfile.File, dir string) (*appfile.File, error) {
 	}
 
 	// Get the app implementation
-	app, appCtx, err := core.App()
+	appImpl, appCtx, err := core.App()
 	if err != nil {
 		return nil, err
 	}
+	defer app.Close(appImpl)
 
 	// Load the implicit Appfile
-	implicit, err := app.Implicit(appCtx)
+	implicit, err := appImpl.Implicit(appCtx)
 	if err != nil {
 		return nil, err
 	}
