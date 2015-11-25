@@ -62,21 +62,48 @@ if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
   oe sudo service ssh restart
 fi
 
-ol "Adding apt repositories and updating..."
+ol "Adding build dependencies and updating..."
+# taken from PHP FPM docker image
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get update -y
-oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
-oe sudo add-apt-repository -y ppa:ondrej/php5-{{ php_version }}
-# Seems to be required to prevent "unauthenticated packages"
-# errors out of apt-get install.
-oe sudo apt-key update
-oe sudo apt-get update -y
+# persistent / runtime deps
+oe sudo apt-get install -y ca-certificates curl librecode0 libsqlite3-0 libxml2
+# phpize deps
+oe sudo apt-get install -y autoconf file g++ gcc libc-dev make pkg-config re2c
+oe mkdir -p /usr/local/etc/php/conf.d
+oe gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "0BD78B5F97500D450838F95DFE857D9A90D90EC1"
+oe gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3"
+oe sudo apt-get install -y libcurl4-openssl-dev libreadline6-dev librecode-dev libsqlite3-dev libssl-dev libxml2-dev xz-utils
+oe curl -SL "http://php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" -o php.tar.xz
+oe curl -SL "http://php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror" -o php.tar.xz.asc
+oe gpg --verify php.tar.xz.asc
+oe mkdir -p /usr/src/php
+oe tar -xof php.tar.xz -C /usr/src/php --strip-components=1
+oe rm php.tar.xz*
 
-ol "Installing PHP and supporting packages..."
-oe sudo apt-get install -y php5 \
-  bzr git mercurial build-essential \
-  curl \
-  php5-mcrypt php5-mysql php5-fpm php5-gd php5-readline php5-pgsql
+ol "Building PHP-FPM..."
+oe cd /usr/src/php
+oe ./configure --with-config-file-path="$PHP_INI_DIR" \
+		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
+		--enable-fpm \
+		--with-fpm-user=www-data \
+		--with-fpm-group=www-data \
+		--disable-cgi \
+		--enable-mysqlnd \
+		--with-curl \
+		--with-openssl \
+		--with-readline \
+		--with-recode \
+		--with-zlib
+oe make -j"$(nproc)"
+oe make install
+oe make clean
+
+ol "Installing Nginx"
+oe sudo apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
+oe echo "deb http://nginx.org/packages/mainline/debian/ jessie nginx" >> /etc/apt/sources.list
+oe sudo apt-get update -y
+oe sudo apt-get install nginx
 
 ol "Installing Composer..."
 cd /tmp
