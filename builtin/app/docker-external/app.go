@@ -63,6 +63,12 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 						Default:     "",
 						Description: "Args to pass to `docker run`",
 					},
+
+					"command": &schema.FieldSchema{
+						Type:        schema.TypeString,
+						Default:     "",
+						Description: "Command to pass to `docker run`",
+					},
 				},
 			},
 		},

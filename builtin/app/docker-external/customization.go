@@ -17,5 +17,6 @@ func (c *customizations) processDocker(d *schema.FieldData) error {
 
 	c.Opts.Bindata.Context["docker_image"] = image
 	c.Opts.Bindata.Context["run_args"] = d.Get("run_args").(string)
+	c.Opts.Bindata.Context["command"] = d.Get("command").(string)
 	return nil
 }

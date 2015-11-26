@@ -7,7 +7,7 @@ SCRIPT
 
 config.vm.provision "shell", inline: $preshell
 config.vm.provision "docker" do |d|
-  d.run "{{ name }}", args: "{{ run_args }}", image: "{{ docker_image }}"
+  d.run "{{ name }}", args: "{{ run_args }}", image: "{{ docker_image }}", cmd: "{{ command }}"
 end
 
 # Sync our own dep folder in there
