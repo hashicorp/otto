@@ -71,8 +71,8 @@ func (i *VagrantInstaller) Install(vsn *version.Version) error {
 	switch runtime.GOOS {
 	case "darwin":
 		url = fmt.Sprintf(
-			"https://dl.bintray.com/mitchellh/vagrant/vagrant_%s.dmg",
-			vsn)
+			"https://releases.hashicorp.com/vagrant/vagrant_%s/vagrant_%s.dmg",
+			vsn, vsn)
 	default:
 		return fmt.Errorf(
 			"Otto doesn't yet support installing Vagrant automatically\n" +

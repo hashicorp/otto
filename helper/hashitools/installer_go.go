@@ -75,8 +75,8 @@ func (i *GoInstaller) InstallAsk(installed, required, latest *version.Version) (
 func (i *GoInstaller) Install(vsn *version.Version) error {
 	// All Go projects use a standard URL format
 	url := fmt.Sprintf(
-		"https://dl.bintray.com/mitchellh/%s/%s_%s_%s_%s.zip",
-		i.Name, i.Name, vsn, runtime.GOOS, runtime.GOARCH)
+		"https://releases.hashicorp.com/%s/%s/%s_%s_%s_%s.zip",
+		i.Name, vsn, i.Name, vsn, runtime.GOOS, runtime.GOARCH)
 
 	// Create the temporary directory where we'll store the data
 	td, err := ioutil.TempDir("", "otto")
