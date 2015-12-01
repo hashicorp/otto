@@ -194,7 +194,7 @@ func (c *CompileCommand) Run(args []string) int {
 }
 
 func (c *CompileCommand) Synopsis() string {
-	return "Prepares your project for being run."
+	return "Prepares your project for being run"
 }
 
 func (c *CompileCommand) Help() string {
