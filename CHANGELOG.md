@@ -16,6 +16,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+  * app/ruby: Fix libxml2 package name [GH-320]
   * command/compile: compilation works if Appfile is a directory (it
       ignores the directory and detects an Appfile) [GH-280]
 
