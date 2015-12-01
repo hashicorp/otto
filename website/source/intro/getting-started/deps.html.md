@@ -51,8 +51,8 @@ dependencies, and continues this process.
 
 ## Develop
 
-Once you've declared a dependency, run `otto dev` again. If you have
-a development environment already created, run `otto dev destroy` first.
+Once you've declared a dependency, run `otto compile` and `otto dev` again. 
+If you have a development environment already created, run `otto dev destroy` first.
 
 Once this process completes, you should notice some output about
 setting up "mongodb" in various places. Otto automatically installs
