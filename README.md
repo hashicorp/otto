@@ -17,8 +17,6 @@ of the Otto website.
 
 ## Key Features
 
-The key features of Otto are:
-
 * **Automatic development environments**: Otto detects your application
   type and builds a development environment tailored specifically for that
   application, with zero or minimal configuration. If your application depends
