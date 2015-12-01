@@ -63,7 +63,7 @@ This feature is very nice since even if other members of a team
 might have edited the Appfile, your environment isn't affected
 until you decide to recompile.
 
-With the Appfile above, recompiling won't have any adverse affect,
+With the Appfile above, recompiling won't have any adverse effect,
 since we've created an Appfile that is functionally equivalent to what
 Otto did with zero configuration.
 
