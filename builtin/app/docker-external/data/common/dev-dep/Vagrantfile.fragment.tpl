@@ -1,6 +1,7 @@
 $preshell = <<SCRIPT
 if command -v apt-get >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update >/dev/null 2>&1
     sudo apt-get install -y apt-transport-https >/dev/null 2>&1
 fi
 SCRIPT
