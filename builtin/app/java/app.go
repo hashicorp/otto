@@ -1,4 +1,4 @@
-package gradleapp
+package javaapp
 
 import (
 	"strings"
@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/otto/helper/vagrant"
 )
 
-//go:generate go-bindata -pkg=gradleapp -nomemcopy -nometadata ./data/...
+//go:generate go-bindata -pkg=javaapp -nomemcopy -nometadata ./data/...
 
 // App is an implementation of app.App
 type App struct{}
@@ -34,13 +34,18 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		},
 		Customizations: []*compile.Customization{
 			&compile.Customization{
-				Type:     "gradle",
+				Type:     "java",
 				Callback: custom.processDev,
 				Schema: map[string]*schema.FieldSchema{
 					"gradle_version": &schema.FieldSchema{
 						Type:        schema.TypeString,
 						Default:     "2.8",
-						Description: "Gradle version to install",
+						Description: "Java version to install",
+					},
+					"maven_version": &schema.FieldSchema{
+						Type:        schema.TypeString,
+						Default:     "3.3.9",
+						Description: "Maven version to install",
 					},
 				},
 			},
@@ -83,10 +88,10 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 }
 
 const devInstructions = `
-A development environment has been created for writing a generic Gradle-based
-application. For this development environment, Gradle is pre-installed. To
-work on your project, edit files locally on your own machine. The file changes
-will be synced to the development environment.
+A development environment has been created for writing a generic Java based
+application using Java as the build system. For this development environment,
+Java is pre-installed. To work on your project, edit files locally on your own
+machine. The file changes will be synced to the development environment.
 
 When you're ready to build or test your project, run 'otto dev ssh'
 to enter the development environment. You'll be placed directly into the
