@@ -69,7 +69,7 @@ const (
 )
 
 // Execute executes a raw Vagrant command.
-func (v *Vagrant) Execute(command ...string) error {
+func (v *Vagrant) Execute(commandRaw ...string) error {
 	vagrantMutex.Lock()
 	defer vagrantMutex.Unlock()
 
@@ -88,6 +88,11 @@ func (v *Vagrant) Execute(command ...string) error {
 	for k, v := range v.Env {
 		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
+
+	// Build the args
+	command := make([]string, len(commandRaw)+1)
+	command[0] = "--machine-readable"
+	copy(command[1:], commandRaw)
 
 	// Build the command to execute
 	cmd := exec.Command("vagrant", command...)
