@@ -22,3 +22,9 @@ website/node_modules
 /.ottoid
 otto-data/
 test-output
+# Generated Code
+directory/deploystate_string.go
+directory/devstate_string.go
+directory/infrastate_string.go
+helper/bindata/bindata_test.go
+otto/executetask_string.go
