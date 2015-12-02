@@ -1,22 +1,22 @@
 ---
-layout: "app_go"
-page_title: "AWS - Build & Deploy - Go App Type"
-sidebar_current: "docs-go-deploy-aws"
+layout: "app_java"
+page_title: "AWS - Build & Deploy - Java App Type"
+sidebar_current: "docs-java-deploy-aws"
 description: |-
-  This page documents how the Go application builds and deploys on
+  This page documents how the Java application builds and deploys on
   AWS infrastructure.
 ---
 
 # Build & Deploy: AWS
 
-This page documents how the Go application builds and deploys on
+This page documents how the Java application builds and deploys on
 [AWS infrastructure](/docs/infra/aws).
 
 The sections below are split into a section of commonalities between
 the different infrastructure flavors, and then specific sections for
 each infrastructure flavor.
 
-Please see the [customizations](/docs/apps/go/customization.html)
+Please see the [customizations](/docs/apps/java/customization.html)
 page for a list of behavior that can be changed.
 
 ## Common
@@ -47,7 +47,3 @@ For the "vpc-public-private" flavor:
 
   * The EC2 instances are launched into the private subnet and can only
     be accessed for SSH via the bastion host.
-
--> **NOTE:** Support for public-facing Go services is coming shortly
-in a future version of Otto. For Otto 0.1, we focused more purely on
-developer experience.
