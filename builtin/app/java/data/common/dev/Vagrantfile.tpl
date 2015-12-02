@@ -73,6 +73,10 @@ oe sudo aptitude update -y
 oe sudo apt-cache search gradle
 oe sudo aptitude install gradle-{{ gradle_version }} -y
 
+ol "Downloading Maven {{ maven_version }}..."
+oe sudo aptitude update -y
+oe sudo aptitude install maven -y
+
 ol "Installing Git..."
 oe sudo add-apt-repository ppa:git-core/ppa -y
 oe sudo aptitude update -y

@@ -1,4 +1,4 @@
-package gradleapp
+package javaapp
 
 import (
 	"github.com/hashicorp/otto/helper/compile"
@@ -11,5 +11,6 @@ type customizations struct {
 
 func (c *customizations) processDev(d *schema.FieldData) error {
 	c.Opts.Bindata.Context["gradle_version"] = d.Get("gradle_version")
+	c.Opts.Bindata.Context["maven_version"] = d.Get("maven_version")
 	return nil
 }

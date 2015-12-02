@@ -1,13 +1,14 @@
 ---
-layout: "app_gradle"
-page_title: "Detection - Gradle App Type"
-sidebar_current: "docs-gradle-detect"
+layout: "app_java"
+page_title: "Detection - Java App Type"
+sidebar_current: "docs-java-detect"
 description: |-
-  How Otto detects Gradle applications.
+  How Otto detects Java applications.
 ---
 
 # Detection
 
-Gradle applications are detected using the following methods:
+Java applications are detected using the following methods:
 
   * File match (any): `build.gradle`
+  * File match (any): `pom.xml`

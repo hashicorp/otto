@@ -1,23 +1,24 @@
 ---
-layout: "app_gradle"
-page_title: "Customization - Gradle App Type"
-sidebar_current: "docs-gradle-customization"
+layout: "app_java"
+page_title: "Customization - Java App Type"
+sidebar_current: "docs-java-customization"
 description: |-
   This page documents the customizations
-  that are available to change the behavior of Gradle applications with Otto.
+  that are available to change the behavior of Java applications with Otto.
 ---
 
 # Customization
 
 This page documents the [customizations](/docs/appfile/customization.html)
-that are available to change the behavior of Gradle applications with Otto.
+that are available to change the behavior of Java applications with Otto.
 
-## Type: "gradle"
+## Type: "java"
 
 Example:
 
 ```
-customization "go" {
-    gradle_version = "2.7"
+customization "java" {
+    gradle_version = "2.8"
+    maven_version = "3.3.9"
 }
 ```

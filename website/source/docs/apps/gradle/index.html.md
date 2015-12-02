@@ -1,15 +1,15 @@
 ---
-layout: "app_gradle"
-page_title: "Gradle - App Types"
-sidebar_current: "docs-gradle-index"
+layout: "app_java"
+page_title: "Java - App Types"
+sidebar_current: "docs-java-index"
 description: |-
-  The Gradle application type is used to develop general Gradle-based applications.
+  The Java application type is used to develop general Java-based applications.
 ---
 
-# Gradle App Type
+# Java App Type
 
-**Type:** `gradle`
+**Type:** `java`
 
-The Gradle application type is used to develop general Gradle-based applications.
+The Java application type is used to develop general Java-based applications.
 
 ## TODO

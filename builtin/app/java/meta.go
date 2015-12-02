@@ -1,4 +1,4 @@
-package gradleapp
+package javaapp
 
 import (
 	"github.com/hashicorp/otto/app"
@@ -19,13 +19,13 @@ var Meta = &app.Meta{
 // Tuples is the list of tuples that this built-in app implementation knows
 // that it can support.
 var Tuples = app.TupleSlice([]app.Tuple{
-	{"gradle", "*", "*"},
+	{"java", "*", "*"},
 })
 
 // Detectors is the list of detectors that trigger this app to be used.
 var Detectors = []*detect.Detector{
 	&detect.Detector{
-		Type: "gradle",
-		File: []string{"build.gradle"},
+		Type: "java",
+		File: []string{"build.gradle", "pom.xml"},
 	},
 }
