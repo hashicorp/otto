@@ -13,9 +13,11 @@ IMPROVEMENTS:
 
   * app/ruby: Automatically detect desired Ruby version and install it [GH-293]
   * app/ruby: Install PhantomJS when poltergeist is detected [GH-313]
+  * core: Use releases.hashicorp.com to download HashiCorp binaries [GH-353]
 
 BUG FIXES:
 
+  * app/ruby: Fix libxml2 package name [GH-320]
   * command/compile: compilation works if Appfile is a directory (it
       ignores the directory and detects an Appfile) [GH-280]
 

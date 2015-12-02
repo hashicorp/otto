@@ -54,7 +54,7 @@ detect_gem_deps nokogiri "zlib1g-dev"
 detect_gem_deps pg "libpq-dev"
 detect_gem_deps rmagick "libmagickwand-dev"
 detect_gem_deps sqlite3 "libsqlite3-dev"
-detect_gem_deps libxml-ruby "libxml-dev"
+detect_gem_deps libxml-ruby "libxml2-dev"
 detect_gem_deps paperclip "imagemagick"
 detect_gem_deps poltergeist "phantomjs"
 

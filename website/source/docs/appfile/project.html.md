@@ -22,7 +22,7 @@ The project configuration looks like the following:
 ```
 project {
     name = "my-app"
-    infrastructure = "aws"
+    infrastructure = "production"
 }
 ```
 
@@ -37,8 +37,9 @@ The `project` block allows the following keys to be set:
       to an infrastructure.
 
   * `infrastructure` (string) - The name of the infrastructure that this
-      project should be deployed onto by default. This should match
-      the name of a configured [infrastructure](/docs/appfile/infra.html).
+    project should be deployed onto by default. This should match the name of a
+    configured [infrastructure](/docs/appfile/infra.html). In the example
+    above, the infrastructure is named "production".
 
 For people with multiple applications, the `project` block is usually
 shared via [imports](/docs/appfile/import.html) in the Appfile.
