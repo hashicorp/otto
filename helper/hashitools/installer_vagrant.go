@@ -71,7 +71,7 @@ func (i *VagrantInstaller) Install(vsn *version.Version) error {
 	switch runtime.GOOS {
 	case "darwin":
 		url = fmt.Sprintf(
-			"https://releases.hashicorp.com/vagrant/vagrant_%s/vagrant_%s.dmg",
+			"https://releases.hashicorp.com/vagrant/%s/vagrant_%s.dmg",
 			vsn, vsn)
 	default:
 		return fmt.Errorf(
