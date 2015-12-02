@@ -47,6 +47,12 @@ type Vagrant struct {
 	// won't be visible to the user.
 	Ui ui.Ui
 
+	// Callbacks is a mapping of callbacks that will be called for certain
+	// event types within the output. These will always be serialized and
+	// will block on this callback returning so it is important to make
+	// this fast.
+	Callbacks map[string]OutputCallback
+
 	lock sync.Mutex
 }
 
@@ -88,8 +94,19 @@ func (v *Vagrant) Execute(command ...string) error {
 	cmd.Dir = v.Dir
 	cmd.Env = env
 
+	// Build our custom UI that we'll use that'll call the registered
+	// callbacks as well as streaming data to the UI.
+	callbacks := make(map[string]OutputCallback)
+	callbacks["ui"] = v.uiCallback
+	for n, cb := range v.Callbacks {
+		callbacks[n] = cb
+	}
+	ui := &vagrantUi{Callbacks: callbacks}
+
 	// Run it with the execHelper
-	if err := execHelper.Run(v.Ui, cmd); err != nil {
+	err := execHelper.Run(v.Ui, cmd)
+	ui.Finish()
+	if err != nil {
 		return fmt.Errorf(
 			"Error executing Vagrant: %s\n\n"+
 				"The error messages from Vagrant are usually very informative.\n"+
@@ -112,4 +129,14 @@ func (v *Vagrant) ExecuteSilent(command ...string) error {
 	// Make the Ui silent
 	v.Ui = &ui.Logged{Ui: &ui.Null{}}
 	return v.Execute(command...)
+}
+
+func (v *Vagrant) uiCallback(o *Output) {
+	// If we don't have a UI return
+	if v.Ui == nil {
+		v.Ui = &ui.Logged{Ui: &ui.Null{}}
+	}
+
+	// Output the things to our own UI!
+	v.Ui.Raw(o.Data[1] + "\n")
 }
