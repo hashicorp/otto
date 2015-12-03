@@ -48,11 +48,21 @@ func (c *SSHCache) Exec(cacheOkay bool) error {
 
 // Cache will execute "ssh-config" and cache the SSH info.
 func (c *SSHCache) Cache() error {
+	// Callback that records the output
+	var result string
+	callback := func(o *Output) {
+		result = o.Data[0]
+	}
+
 	// We just copy the Vagrant instance so we can modify it without
-	// worrying about restoring stuff.
-	var mockUi ui.Mock
+	// worrying about restoring stuff. We set the UI to nil so nothing
+	// goes to the UI, and we set a callback to read the SSH config from
+	// the machine-readable output.
 	vagrant := *c.Vagrant
-	vagrant.Ui = &mockUi
+	vagrant.Ui = nil
+	vagrant.Callbacks = map[string]OutputCallback{
+		"ssh-config": callback,
+	}
 	if err := vagrant.Execute("ssh-config"); err != nil {
 		return err
 	}
@@ -63,11 +73,8 @@ func (c *SSHCache) Cache() error {
 		return err
 	}
 	defer f.Close()
-
-	for _, raw := range mockUi.RawBuf {
-		if _, err := io.Copy(f, strings.NewReader(raw)); err != nil {
-			return err
-		}
+	if _, err := io.Copy(f, strings.NewReader(result)); err != nil {
+		return err
 	}
 
 	return nil
