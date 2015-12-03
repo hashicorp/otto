@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 	"github.com/hashicorp/terraform/dag"
+	"github.com/mitchellh/copystructure"
 )
 
 // Core is the main struct to use to interact with Otto as a library.
@@ -881,6 +882,22 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 		} else {
 			compileResult = md.AppDeps[f.ID]
 		}
+	}
+
+	// Get the customizations. If we don't have any at all, we fast-path
+	// this by doing nothing. If we do, we have to make a deep copy in
+	// order to prune out the irrelevant ones.
+	if f.Customization != nil && len(f.Customization.Raw) > 0 {
+		// Perform a deep copy of the Appfile so we can modify it
+		fRaw, err := copystructure.Copy(f)
+		if err != nil {
+			return nil, err
+		}
+		f = fRaw.(*appfile.File)
+
+		// Get the app-only customizations and set it on the Appfile
+		cs := f.Customization.Filter("app")
+		f.Customization = &appfile.CustomizationSet{Raw: cs}
 	}
 
 	return &app.Context{

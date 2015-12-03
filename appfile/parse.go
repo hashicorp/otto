@@ -142,7 +142,7 @@ func parseCustomizations(result *File, list *ast.ObjectList) error {
 	// Go through each object and turn it into an actual result.
 	collection := make([]*Customization, 0, len(list.Items))
 	for _, item := range list.Items {
-		var key string
+		key := "app"
 		if len(item.Keys) > 0 {
 			key = item.Keys[0].Token.Value().(string)
 		}

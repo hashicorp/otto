@@ -84,7 +84,7 @@ func TestParse(t *testing.T) {
 				Customization: &CustomizationSet{
 					Raw: []*Customization{
 						&Customization{
-							Type: "",
+							Type: "app",
 							Config: map[string]interface{}{
 								"go_version": "1.5",
 							},
