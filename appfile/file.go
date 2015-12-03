@@ -52,7 +52,7 @@ type Application struct {
 // Customization is the structure of customization stanzas within
 // the Appfile.
 type Customization struct {
-	Type   string
+	Name   string
 	Config map[string]interface{}
 }
 

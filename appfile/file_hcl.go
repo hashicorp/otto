@@ -78,12 +78,12 @@ func (f *Customization) HCL() *ast.ObjectItem {
 	return &ast.ObjectItem{
 		Keys: []*ast.ObjectKey{
 			&ast.ObjectKey{
-				Token: token.Token{Type: token.IDENT, Text: "dependency"},
+				Token: token.Token{Type: token.IDENT, Text: "customization"},
 			},
 			&ast.ObjectKey{
 				Token: token.Token{
 					Type: token.STRING,
-					Text: fmt.Sprintf(`"%s"`, f.Type),
+					Text: fmt.Sprintf(`"%s"`, f.Name),
 				},
 			},
 		},

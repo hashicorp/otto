@@ -67,7 +67,24 @@ func TestParse(t *testing.T) {
 				Customization: &CustomizationSet{
 					Raw: []*Customization{
 						&Customization{
-							Type: "dev",
+							Name: "dev",
+							Config: map[string]interface{}{
+								"go_version": "1.5",
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"basic-custom-no-name.hcl",
+			&File{
+				Customization: &CustomizationSet{
+					Raw: []*Customization{
+						&Customization{
+							Name: "",
 							Config: map[string]interface{}{
 								"go_version": "1.5",
 							},
@@ -84,7 +101,7 @@ func TestParse(t *testing.T) {
 				Customization: &CustomizationSet{
 					Raw: []*Customization{
 						&Customization{
-							Type: "dev",
+							Name: "dev",
 							Config: map[string]interface{}{
 								"go_version": "1.5",
 							},

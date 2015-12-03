@@ -31,7 +31,7 @@ func (s *CustomizationSet) Filter(t string) []*Customization {
 	// to just over-allocate here.
 	result := make([]*Customization, 0, len(s.Raw))
 	for _, c := range s.Raw {
-		if c.Type == t {
+		if c.Name == t {
 			result = append(result, c)
 		}
 	}
