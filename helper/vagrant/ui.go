@@ -71,6 +71,7 @@ func (u *vagrantUi) Raw(msg string) {
 		buf := string(bufRaw) + msg[:idx]
 		bufRaw = nil
 		u.buf.Reset()
+		log.Printf("[DEBUG] Vagrant output line: %s", buf)
 
 		// If we have more data, clear msg to that point. If we have
 		// no more data, then just set message to empty and we'll break

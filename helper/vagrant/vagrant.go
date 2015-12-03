@@ -109,7 +109,7 @@ func (v *Vagrant) Execute(commandRaw ...string) error {
 	ui := &vagrantUi{Callbacks: callbacks}
 
 	// Run it with the execHelper
-	err := execHelper.Run(v.Ui, cmd)
+	err := execHelper.Run(ui, cmd)
 	ui.Finish()
 	if err != nil {
 		return fmt.Errorf(
