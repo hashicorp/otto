@@ -88,7 +88,7 @@ func (u *vagrantUi) Raw(msg string) {
 		if len(parts) < 3 {
 			// Uh, invalid event?
 			log.Printf("[ERROR] Invalid Vagrant event line: %s", buf)
-			return
+			continue
 		}
 
 		// Look for the callback
