@@ -42,7 +42,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
 		},
-		Customizations: []*compile.Customization{
+		Customizations: append([]*compile.Customization{
 			&compile.Customization{
 				Type:     "ruby",
 				Callback: custom.processRuby,
@@ -54,7 +54,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 					},
 				},
 			},
-		},
+		}, compile.VagrantCustomizations(&opts)...),
 	}
 
 	return compile.App(&opts)

@@ -36,7 +36,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
 		},
-		Customizations: []*compile.Customization{
+		Customizations: append([]*compile.Customization{
 			&compile.Customization{
 				Type:     "php",
 				Callback: custom.processPhp,
@@ -48,7 +48,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 					},
 				},
 			},
-		},
+		}, compile.VagrantCustomizations(&opts)...),
 	}
 
 	return compile.App(&opts)

@@ -62,4 +62,9 @@ Vagrant.configure("2") do |config|
   {% block vagrant_config %}{% endblock %}
 end
 
+{% if dev_extra_vagrantfile != "" %}
+# Extra Vagrantfile specified in Appfile manually
+load "{{ dev_extra_vagrantfile }}"
+{% endif %}
+
 {% block footer %}{% endblock %}

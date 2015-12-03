@@ -52,7 +52,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 			},
 		},
-		Customizations: []*compile.Customization{
+		Customizations: append([]*compile.Customization{
 			&compile.Customization{
 				Type:     "go",
 				Callback: custom.processGo,
@@ -82,7 +82,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 					},
 				},
 			},
-		},
+		}, compile.VagrantCustomizations(&opts)...),
 	}
 
 	return compile.App(&opts)
