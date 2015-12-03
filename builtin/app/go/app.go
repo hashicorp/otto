@@ -52,37 +52,28 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 			},
 		},
-		Customizations: append([]*compile.Customization{
-			&compile.Customization{
-				Type:     "go",
-				Callback: custom.processGo,
-				Schema: map[string]*schema.FieldSchema{
-					"go_version": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "1.5",
-						Description: "Go version to install",
-					},
+		Customization: (&compile.Customization{
+			Callback: custom.process,
+			Schema: map[string]*schema.FieldSchema{
+				"go_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "1.5",
+					Description: "Go version to install",
+				},
 
-					"import_path": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "",
-						Description: "Go import path for where to put this in the GOPATH",
-					},
+				"go_import_path": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "",
+					Description: "Go import path for where to put this in the GOPATH",
+				},
+
+				"run_command": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "{{ dep_binary_path }}",
+					Description: "Command to run this app as a dep",
 				},
 			},
-
-			&compile.Customization{
-				Type:     "dev-dep",
-				Callback: custom.processDevDep,
-				Schema: map[string]*schema.FieldSchema{
-					"run_command": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "{{ dep_binary_path }}",
-						Description: "Command to run this app as a dep",
-					},
-				},
-			},
-		}, compile.VagrantCustomizations(&opts)...),
+		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
 
 	return compile.App(&opts)

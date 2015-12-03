@@ -60,9 +60,11 @@ func processCustomizations(cs *appfile.CustomizationSet, c *Customization) error
 
 	// Go through all the customizations and merge. We only do
 	// key-level merging.
-	for _, c := range cs.Raw {
-		for k, v := range c.Config {
-			rawData[k] = v
+	if cs != nil {
+		for _, c := range cs.Raw {
+			for k, v := range c.Config {
+				rawData[k] = v
+			}
 		}
 	}
 

@@ -36,19 +36,16 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
 		},
-		Customizations: append([]*compile.Customization{
-			&compile.Customization{
-				Type:     "php",
-				Callback: custom.processPhp,
-				Schema: map[string]*schema.FieldSchema{
-					"php_version": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "5.6",
-						Description: "PHP version to install",
-					},
+		Customization: (&compile.Customization{
+			Callback: custom.process,
+			Schema: map[string]*schema.FieldSchema{
+				"php_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "5.6",
+					Description: "PHP version to install",
 				},
 			},
-		}, compile.VagrantCustomizations(&opts)...),
+		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
 
 	return compile.App(&opts)
