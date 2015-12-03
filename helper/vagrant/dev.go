@@ -342,11 +342,22 @@ func (opts *DevOptions) vagrant(ctx *app.Context) *Vagrant {
 	if dataDir == "" {
 		dataDir = filepath.Join(ctx.LocalDir, "vagrant")
 	}
-	return &Vagrant{
+	result := &Vagrant{
 		Dir:     dir,
 		DataDir: dataDir,
 		Ui:      ctx.Ui,
 	}
+
+	// If we have a layered environment we want to configure every environment
+	// with the layer information so that we can call arbitrary commands.
+	if opts.Layer != nil {
+		if err := opts.Layer.ConfigureEnv(result); err != nil {
+			// This shouldn't fail
+			panic(err)
+		}
+	}
+
+	return result
 }
 
 func (opts *DevOptions) devLookup(ctx *app.Context) *directory.Dev {
