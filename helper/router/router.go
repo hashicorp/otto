@@ -2,6 +2,7 @@ package router
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"sort"
@@ -9,6 +10,10 @@ import (
 
 	"github.com/hashicorp/otto/ui"
 )
+
+// ErrHelp can be returned by Execute functions to force the action to
+// show help for a given command.
+var ErrHelp = errors.New("help")
 
 // Router is a helper to route subcommands to specific callbacks.
 //
@@ -56,7 +61,16 @@ func (r *Router) Route(ctx Context) error {
 		return r.help(ctx)
 	}
 
-	return action.Execute(ctx)
+	err := action.Execute(ctx)
+	if err != nil && err == ErrHelp {
+		return r.Route(&simpleContext{
+			Name:  "help",
+			Args:  []string{ctx.RouteName()},
+			UIVal: ctx.UI(),
+		})
+	}
+
+	return err
 }
 
 func (r *Router) help(ctx Context) error {
