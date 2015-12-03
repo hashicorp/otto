@@ -20,10 +20,15 @@ var Meta = &app.Meta{
 // that it can support.
 var Tuples = app.TupleSlice([]app.Tuple{
 	{"php", "*", "*"},
+	{"wordpress", "*", "*"},
 })
 
 // Detectors is the list of detectors that trigger this app to be used.
 var Detectors = []*detect.Detector{
+	&detect.Detector{
+		Type: "wordpress",
+		File: []string{"wp-config.php", "wp-config-sample.php"},
+	},
 	&detect.Detector{
 		Type: "php",
 		File: []string{"*.php", "composer.json"},
