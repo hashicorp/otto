@@ -42,19 +42,16 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
 		},
-		Customizations: append([]*compile.Customization{
-			&compile.Customization{
-				Type:     "node",
-				Callback: custom.processDev,
-				Schema: map[string]*schema.FieldSchema{
-					"node_version": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "4.1.0",
-						Description: "Node version to install",
-					},
+		Customization: (&compile.Customization{
+			Callback: custom.process,
+			Schema: map[string]*schema.FieldSchema{
+				"node_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "4.1.0",
+					Description: "Node version to install",
 				},
 			},
-		}, compile.VagrantCustomizations(&opts)...),
+		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
 
 	return compile.App(&opts)

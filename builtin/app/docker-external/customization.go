@@ -9,7 +9,7 @@ type customizations struct {
 	Opts *compile.AppOptions
 }
 
-func (c *customizations) processDocker(d *schema.FieldData) error {
+func (c *customizations) process(d *schema.FieldData) error {
 	image := d.Get("image").(string)
 	if image == "" {
 		image = c.Opts.Ctx.Application.Name

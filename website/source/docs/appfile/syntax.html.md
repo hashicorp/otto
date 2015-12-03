@@ -10,6 +10,11 @@ description: |-
 
 The syntax of Appfiles is [HCL](https://github.com/hashicorp/hcl).
 
+We show what this looks like below as well as a basic syntax guide. The
+actual meaning of the various sections of the Appfile below are documented
+in more specific sections that can be found by navigating to the links to the
+left.
+
 ## HCL
 
 Here is an example of an Appfile:
@@ -25,7 +30,7 @@ application {
 
 /*
 Let's disable this for now
-customization "go" {
+customization {
     go_version = "1.4.2"
 }
 */

@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/mitchellh/copystructure"
 )
 
 func TestFileActiveInfrastructure(t *testing.T) {
@@ -266,5 +268,21 @@ func TestFileMerge(t *testing.T) {
 		if !reflect.DeepEqual(tc.One, tc.Three) {
 			t.Fatalf("%s:\n\n%#v\n\n%#v", name, tc.One, tc.Three)
 		}
+	}
+}
+
+func TestFileDeepCopy(t *testing.T) {
+	f, err := ParseFile(filepath.Join("./test-fixtures", "basic.hcl"))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	f2, err := copystructure.Copy(f)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !reflect.DeepEqual(f, f2) {
+		t.Fatalf("bad:\n\n%#v\n\n%#v", f, f2)
 	}
 }

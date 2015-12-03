@@ -139,15 +139,13 @@ func parseApplication(result *File, list *ast.ObjectList) error {
 }
 
 func parseCustomizations(result *File, list *ast.ObjectList) error {
-	list = list.Children()
-	if len(list.Items) == 0 {
-		return nil
-	}
-
 	// Go through each object and turn it into an actual result.
 	collection := make([]*Customization, 0, len(list.Items))
 	for _, item := range list.Items {
-		key := item.Keys[0].Token.Value().(string)
+		key := "app"
+		if len(item.Keys) > 0 {
+			key = item.Keys[0].Token.Value().(string)
+		}
 
 		var m map[string]interface{}
 		if err := hcl.DecodeObject(&m, item.Val); err != nil {

@@ -12,12 +12,10 @@ description: |-
 This page documents the [customizations](/docs/appfile/customization.html)
 that are available to change the behavior of Docker applications with Otto.
 
-## Type: "docker"
-
 Example:
 
 ```
-customization "docker" {
+customization {
     image = "mongo:3.0"
 }
 ```

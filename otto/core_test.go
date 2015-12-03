@@ -1,6 +1,8 @@
 package otto
 
 import (
+	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/hashicorp/otto/app"
@@ -41,6 +43,37 @@ func TestCoreCompile_close(t *testing.T) {
 	}
 	if !appMock.CloseCalled {
 		t.Fatal("close should be called")
+	}
+}
+
+func TestCoreCompile_customizationFilter(t *testing.T) {
+	// Make a core that returns a fixed app
+	coreConfig := TestCoreConfig(t)
+	coreConfig.Appfile = TestAppfile(t, testPath("customization-app-filter", "Appfile"))
+	appMock := TestApp(t, TestAppTuple, coreConfig)
+	core := testCore(t, coreConfig)
+
+	// Compile!
+	if err := core.Compile(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !appMock.CompileCalled {
+		t.Fatal("compile should be called")
+	}
+
+	// Verify our customizations
+	var keys []string
+	for _, c := range appMock.CompileContext.Appfile.Customization.Raw {
+		for k, _ := range c.Config {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+
+	expected := []string{"bar", "foo"}
+	if !reflect.DeepEqual(keys, expected) {
+		t.Fatalf("bad: %#v", keys)
 	}
 }
 

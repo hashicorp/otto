@@ -42,19 +42,16 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
 		},
-		Customizations: append([]*compile.Customization{
-			&compile.Customization{
-				Type:     "ruby",
-				Callback: custom.processRuby,
-				Schema: map[string]*schema.FieldSchema{
-					"ruby_version": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "detect",
-						Description: "Ruby version to install",
-					},
+		Customization: (&compile.Customization{
+			Callback: custom.process,
+			Schema: map[string]*schema.FieldSchema{
+				"ruby_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "detect",
+					Description: "Ruby version to install",
 				},
 			},
-		}, compile.VagrantCustomizations(&opts)...),
+		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
 
 	return compile.App(&opts)

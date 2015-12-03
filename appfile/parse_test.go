@@ -79,6 +79,23 @@ func TestParse(t *testing.T) {
 		},
 
 		{
+			"basic-custom-no-name.hcl",
+			&File{
+				Customization: &CustomizationSet{
+					Raw: []*Customization{
+						&Customization{
+							Type: "app",
+							Config: map[string]interface{}{
+								"go_version": "1.5",
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
 			"basic-custom-case.hcl",
 			&File{
 				Customization: &CustomizationSet{

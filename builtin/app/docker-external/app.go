@@ -52,25 +52,22 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 			},
 		},
-		Customizations: []*compile.Customization{
-			&compile.Customization{
-				Type:     "docker",
-				Callback: custom.processDocker,
-				Schema: map[string]*schema.FieldSchema{
-					"image": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "",
-						Description: "Image name to run",
-					},
+		Customization: (&compile.Customization{
+			Callback: custom.process,
+			Schema: map[string]*schema.FieldSchema{
+				"image": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "",
+					Description: "Image name to run",
+				},
 
-					"run_args": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "",
-						Description: "Args to pass to `docker run`",
-					},
+				"run_args": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "",
+					Description: "Args to pass to `docker run`",
 				},
 			},
-		},
+		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
 
 	return compile.App(&opts)
