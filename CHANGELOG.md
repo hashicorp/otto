@@ -17,6 +17,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+  * core: cached SSH info for dev no longer can be corrupted with stderr [GH-343]
   * app/ruby: Fix libxml2 package name [GH-320]
   * command/compile: compilation works if Appfile is a directory (it
       ignores the directory and detects an Appfile) [GH-280]
