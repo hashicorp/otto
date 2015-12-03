@@ -1,0 +1,11 @@
+customization "foo" {
+    nope = 1
+}
+
+customization {
+    foo = 1
+}
+
+customization "app" {
+    bar = 1
+}
