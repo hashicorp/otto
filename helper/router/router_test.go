@@ -1,6 +1,7 @@
 package router
 
 import (
+	"flag"
 	"testing"
 
 	"github.com/hashicorp/otto/ui"
@@ -76,6 +77,43 @@ func TestRouter_helpErr(t *testing.T) {
 	}
 
 	err := r.Route(&stubContext{routeName: "foo"})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !called {
+		t.Fatal("should be called")
+	}
+}
+
+func TestRouter_flagHelpErr(t *testing.T) {
+	var called bool
+	executeFunc := func(ctx Context) error {
+		called = true
+		return nil
+	}
+
+	flagExecuteFunc := func(ctx Context) error {
+		fs := flag.NewFlagSet("foo", flag.ContinueOnError)
+		return fs.Parse(ctx.RouteArgs())
+	}
+
+	r := &Router{
+		Actions: map[string]Action{
+			"help": &SimpleAction{
+				ExecuteFunc: executeFunc,
+			},
+
+			"foo": &SimpleAction{
+				ExecuteFunc: flagExecuteFunc,
+			},
+		},
+	}
+
+	err := r.Route(&stubContext{
+		routeName: "foo",
+		routeArgs: []string{"-help"},
+	})
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

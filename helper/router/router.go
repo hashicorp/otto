@@ -3,6 +3,7 @@ package router
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"sort"
@@ -62,6 +63,11 @@ func (r *Router) Route(ctx Context) error {
 	}
 
 	err := action.Execute(ctx)
+	if err == flag.ErrHelp {
+		// We special case and allow flag.ErrHelp to mean our help error
+		// so that we show help properly.
+		err = ErrHelp
+	}
 	if err != nil && err == ErrHelp {
 		return r.Route(&simpleContext{
 			Name:  "help",
