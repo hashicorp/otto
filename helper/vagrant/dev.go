@@ -249,7 +249,13 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 	// Run it!
 	vagrant := opts.vagrant(ctx)
 	if opts.Layer != nil {
-		if err := opts.Layer.AddEnv(vagrant); err != nil {
+		if err := opts.Layer.ConfigureEnv(vagrant); err != nil {
+			return fmt.Errorf(
+				"Error preparing dev environment: %s", err)
+		}
+
+		// Configure the environment as ready
+		if err := opts.Layer.SetEnv(vagrant, envStateReady); err != nil {
 			return fmt.Errorf(
 				"Error preparing dev environment: %s", err)
 		}
