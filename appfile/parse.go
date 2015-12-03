@@ -153,7 +153,7 @@ func parseCustomizations(result *File, list *ast.ObjectList) error {
 		}
 
 		var c Customization
-		c.Name = strings.ToLower(key)
+		c.Type = strings.ToLower(key)
 		c.Config = m
 
 		collection = append(collection, &c)

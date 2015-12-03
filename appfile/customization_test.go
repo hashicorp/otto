@@ -13,23 +13,23 @@ func TestCustomizationSetFilter(t *testing.T) {
 	}{
 		{
 			[]*Customization{
-				&Customization{Name: "foo"},
-				&Customization{Name: "bar"},
+				&Customization{Type: "foo"},
+				&Customization{Type: "bar"},
 			},
 			"foo",
 			[]*Customization{
-				&Customization{Name: "foo"},
+				&Customization{Type: "foo"},
 			},
 		},
 
 		{
 			[]*Customization{
-				&Customization{Name: "foo"},
-				&Customization{Name: "bar"},
+				&Customization{Type: "foo"},
+				&Customization{Type: "bar"},
 			},
 			"fOo",
 			[]*Customization{
-				&Customization{Name: "foo"},
+				&Customization{Type: "foo"},
 			},
 		},
 	}

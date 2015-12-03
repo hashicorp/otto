@@ -83,7 +83,7 @@ func (f *Customization) HCL() *ast.ObjectItem {
 			&ast.ObjectKey{
 				Token: token.Token{
 					Type: token.STRING,
-					Text: fmt.Sprintf(`"%s"`, f.Name),
+					Text: fmt.Sprintf(`"%s"`, f.Type),
 				},
 			},
 		},

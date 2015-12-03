@@ -67,7 +67,7 @@ func TestParse(t *testing.T) {
 				Customization: &CustomizationSet{
 					Raw: []*Customization{
 						&Customization{
-							Name: "dev",
+							Type: "dev",
 							Config: map[string]interface{}{
 								"go_version": "1.5",
 							},
@@ -84,7 +84,7 @@ func TestParse(t *testing.T) {
 				Customization: &CustomizationSet{
 					Raw: []*Customization{
 						&Customization{
-							Name: "",
+							Type: "",
 							Config: map[string]interface{}{
 								"go_version": "1.5",
 							},
@@ -101,7 +101,7 @@ func TestParse(t *testing.T) {
 				Customization: &CustomizationSet{
 					Raw: []*Customization{
 						&Customization{
-							Name: "dev",
+							Type: "dev",
 							Config: map[string]interface{}{
 								"go_version": "1.5",
 							},
