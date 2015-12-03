@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -101,6 +102,8 @@ func (l *Layered) Prune(ctx *context.Shared) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	log.Printf("[DEBUG] vagrant: layer graph: \n%s", graph.String())
 
 	// Get all the bad roots. These are anything without something depending
 	// on it except for the main "root"
@@ -214,6 +217,8 @@ func (l *Layered) Pending() ([]string, error) {
 }
 
 func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Shared) error {
+	log.Printf("[DEBUG] vagrant: building layer: %s", v.Layer.ID)
+
 	layer := v.Layer
 	path := v.Path
 
@@ -232,6 +237,8 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 		return err
 	}
 	if layerV.State == layerStateReady {
+		log.Printf("[DEBUG] vagrant: layer already ready: %s", v.Layer.ID)
+
 		// Touch the layer so that it is recently used
 		defer db.Close()
 		return l.updateLayer(db, layer, func(v *layerVertex) {
@@ -300,6 +307,8 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 }
 
 func (l *Layered) pruneLayer(db *bolt.DB, v *layerVertex, ctx *context.Shared) error {
+	log.Printf("[DEBUG] vagrant: pruning layer: %s", v.Layer.ID)
+
 	layer := v.Layer
 	path := v.Path
 
@@ -309,6 +318,7 @@ func (l *Layered) pruneLayer(db *bolt.DB, v *layerVertex, ctx *context.Shared) e
 		return err
 	}
 	if !exists {
+		log.Printf("[DEBUG] vagrant: layer doesn't exist already: %s", v.Layer.ID)
 		return l.deleteLayer(db, layer, path)
 	}
 
