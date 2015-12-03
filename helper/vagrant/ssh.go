@@ -6,8 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/hashicorp/otto/ui"
 )
 
 // SSHCache is a helper to cache the SSH connection info from Vagrant
