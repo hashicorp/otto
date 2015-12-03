@@ -21,6 +21,8 @@ BUG FIXES:
   * app/ruby: Fix libxml2 package name [GH-320]
   * command/compile: compilation works if Appfile is a directory (it
       ignores the directory and detects an Appfile) [GH-280]
+  * foundation/consul: copy upstart instead of moving it so it works multiple
+      times [GH-354]
 
 ## 0.1.2 (October 20, 2015)
 
