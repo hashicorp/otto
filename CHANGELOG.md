@@ -1,5 +1,12 @@
 ## Next Version
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * Customizations have been heavily simplified and the resulting syntax
+    is no longer valid with Otto 0.2. Upgrading your Appfiles to the new
+    format is very simple. Please see the customizations documentation
+    for more information.
+
 FEATURES:
 
   * **Layered Dev Environments**: Dev environments are now layered. Each
