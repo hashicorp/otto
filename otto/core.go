@@ -296,6 +296,9 @@ func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
 		// Convert to the rich vertex type so that we can access data
 		v := raw.(*appfile.CompiledGraphVertex)
 
+		// Do some logging to help ourselves out
+		log.Printf("[DEBUG] core walking app: %s", v.File.Application.Name)
+
 		// Get the context and app for this appfile
 		appCtx, err := c.appContext(v.File)
 		if err != nil {
@@ -446,8 +449,14 @@ func (c *Core) Dev() error {
 			return nil
 		}
 
+		// Copy the root context so it isn't modified by the call below
+		rootCtxCopy := *rootCtx
+
 		// Build the development dependency
-		dep, err := appImpl.DevDep(rootCtx, ctx)
+		log.Printf(
+			"[DEBUG] core: calling DevDep for '%s'",
+			ctx.Appfile.Application.Name)
+		dep, err := appImpl.DevDep(&rootCtxCopy, ctx)
 		if err != nil {
 			return fmt.Errorf(
 				"Error building dependency for dev '%s': %s",
@@ -482,6 +491,9 @@ func (c *Core) Dev() error {
 
 	// All the development dependencies are built/loaded. We now have
 	// everything we need to build the complete development environment.
+	log.Printf(
+		"[DEBUG] core: calling Dev for root app '%s'",
+		rootCtx.Appfile.Application.Name)
 	return rootApp.Dev(rootCtx)
 }
 
