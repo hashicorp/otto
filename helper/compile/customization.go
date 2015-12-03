@@ -50,6 +50,11 @@ func (c *Customization) Merge(other *Customization) *Customization {
 }
 
 func processCustomizations(cs *appfile.CustomizationSet, c *Customization) error {
+	// If we have no customization we do nothing
+	if c == nil {
+		return nil
+	}
+
 	// We process customizations below by going through multiple
 	// passes. We can very likely condense this into one for loop but
 	// it helps the semantic understanding to split it out and there should
