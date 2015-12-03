@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/packer"
@@ -21,35 +23,42 @@ func (a *App) Meta() (*app.Meta, error) {
 	return Meta, nil
 }
 
+func (a *App) Implicit(ctx *app.Context) (*appfile.File, error) {
+	return nil, nil
+}
+
 // Compile ...
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	var opts compile.AppOptions
 	custom := &customizations{Opts: &opts}
 	opts = compile.AppOptions{
 		Ctx: ctx,
+		Result: &app.CompileResult{
+			Version: 1,
+		},
+		FoundationConfig: foundation.Config{
+			ServiceName: ctx.Application.Name,
+		},
 		Bindata: &bindata.Data{
 			Asset:    Asset,
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
 		},
-		Customizations: []*compile.Customization{
-			&compile.Customization{
-				Type:     "java",
-				Callback: custom.processDev,
-				Schema: map[string]*schema.FieldSchema{
-					"gradle_version": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "2.8",
-						Description: "Java version to install",
-					},
-					"maven_version": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "3.3.9",
-						Description: "Maven version to install",
-					},
+		Customization: (&compile.Customization{
+			Callback: custom.processDev,
+			Schema: map[string]*schema.FieldSchema{
+				"gradle_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "2.8",
+					Description: "Java version to install",
+				},
+				"maven_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "3.3.9",
+					Description: "Maven version to install",
 				},
 			},
-		},
+		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
 
 	return compile.App(&opts)
