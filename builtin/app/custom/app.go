@@ -49,48 +49,27 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		FoundationConfig: foundation.Config{
 			ServiceName: ctx.Application.Name,
 		},
-		Customizations: []*compile.Customization{
-			&compile.Customization{
-				Type:     "dev",
-				Callback: custom.processDev,
-				Schema: map[string]*schema.FieldSchema{
-					"vagrantfile": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Description: "Path to Vagrantfile",
-					},
+		Customization: &compile.Customization{
+			Callback: custom.process,
+			Schema: map[string]*schema.FieldSchema{
+				"dev_vagrantfile": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Description: "Path to Vagrantfile",
 				},
-			},
 
-			&compile.Customization{
-				Type:     "dev-dep",
-				Callback: custom.processDevDep,
-				Schema: map[string]*schema.FieldSchema{
-					"vagrantfile": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Description: "Path to Vagrantfile template",
-					},
+				"dep_vagrantfile": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Description: "Path to Vagrantfile template",
 				},
-			},
 
-			&compile.Customization{
-				Type:     "build",
-				Callback: custom.processBuild,
-				Schema: map[string]*schema.FieldSchema{
-					"packer": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Description: "Path to Packer template",
-					},
+				"packer": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Description: "Path to Packer template",
 				},
-			},
 
-			&compile.Customization{
-				Type:     "deploy",
-				Callback: custom.processDeploy,
-				Schema: map[string]*schema.FieldSchema{
-					"terraform": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Description: "Path to a Terraform module",
-					},
+				"terraform": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Description: "Path to a Terraform module",
 				},
 			},
 		},
