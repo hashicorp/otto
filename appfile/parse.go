@@ -123,7 +123,7 @@ func parseApplication(result *File, list *ast.ObjectList) error {
 	item := list.Items[0]
 
 	// Check for invalid keys
-	valid := []string{"name", "type", "dependency"}
+	valid := []string{"name", "type", "detect", "dependency"}
 	if err := checkHCLKeys(item.Val, valid); err != nil {
 		return multierror.Prefix(err, "application:")
 	}
@@ -133,7 +133,7 @@ func parseApplication(result *File, list *ast.ObjectList) error {
 		return err
 	}
 
-	var app Application
+	app := Application{Detect: true}
 	result.Application = &app
 	return mapstructure.WeakDecode(m, &app)
 }
@@ -345,7 +345,7 @@ func checkHCLKeys(node ast.Node, valid []string) error {
 		key := item.Keys[0].Token.Value().(string)
 		if _, ok := validMap[key]; !ok {
 			result = multierror.Append(result, fmt.Errorf(
-				"invald key: %s", key))
+				"invalid key: %s", key))
 		}
 	}
 

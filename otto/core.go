@@ -93,6 +93,28 @@ func NewCore(c *CoreConfig) (*Core, error) {
 	}, nil
 }
 
+// App returns the app implementation and context for this configured Core.
+//
+// If App implements io.Closer, it is up to the caller to call Close on it.
+func (c *Core) App() (app.App, *app.Context, error) {
+	root, err := c.appfileCompiled.Graph.Root()
+	if err != nil {
+		return nil, nil, err
+	}
+	rootCtx, err := c.appContext(root.(*appfile.CompiledGraphVertex).File)
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"Error loading App: %s", err)
+	}
+	rootApp, err := c.app(rootCtx)
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"Error loading App: %s", err)
+	}
+
+	return rootApp, rootCtx, nil
+}
+
 // Compile takes the Appfile and compiles all the resulting data.
 func (c *Core) Compile() error {
 	// md stores the metadata about the compilation. This is only written
@@ -230,7 +252,10 @@ func (c *Core) Compile() error {
 		if root {
 			md.App = result
 		} else {
-			md.AppDeps[ctx.Appfile.ID] = result
+			// Don't store the result if its nil because it is pointless
+			if result != nil {
+				md.AppDeps[ctx.Appfile.ID] = result
+			}
 		}
 
 		return nil

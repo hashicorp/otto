@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -40,6 +41,35 @@ func TestApp_meta(t *testing.T) {
 	}
 
 	expected := appMock.MetaResult
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatalf("bad: %#v", actual)
+	}
+}
+
+func TestApp_implicit(t *testing.T) {
+	client, server, streams := testNewClientServer(t)
+	defer streams.Close()
+	defer client.Close()
+
+	appMock := server.AppFunc().(*app.Mock)
+	appReal, err := client.App()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	appMock.ImplicitResult = &appfile.File{
+		ID: "FOO",
+	}
+
+	actual, err := appReal.Implicit(new(app.Context))
+	if !appMock.ImplicitCalled {
+		t.Fatal("should be called")
+	}
+	if err != nil {
+		t.Fatalf("bad: %#v", err)
+	}
+
+	expected := appMock.ImplicitResult
 	if !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("bad: %#v", actual)
 	}

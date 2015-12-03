@@ -6,6 +6,24 @@ import (
 	"github.com/hashicorp/otto/app"
 )
 
+func TestCoreApp(t *testing.T) {
+	// Make a core that returns a fixed app
+	coreConfig := TestCoreConfig(t)
+	coreConfig.Appfile = TestAppfile(t, testPath("basic", "Appfile"))
+	appMock := TestApp(t, TestAppTuple, coreConfig)
+	core := testCore(t, coreConfig)
+
+	// Get the App
+	app, _, err := core.App()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if app != appMock {
+		t.Fatal("should be equal")
+	}
+}
+
 func TestCoreCompile_close(t *testing.T) {
 	// Make a core that returns a fixed app
 	coreConfig := TestCoreConfig(t)

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/packer"
@@ -19,6 +20,10 @@ type App struct{}
 
 func (a *App) Meta() (*app.Meta, error) {
 	return Meta, nil
+}
+
+func (a *App) Implicit(ctx *app.Context) (*appfile.File, error) {
+	return nil, nil
 }
 
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
