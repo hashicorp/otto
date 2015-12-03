@@ -52,6 +52,17 @@ type Layer struct {
 	Vagrantfile string
 }
 
+// Graph will return the full graph that is currently encoded.
+func (l *Layered) Graph() (*dag.AcyclicGraph, error) {
+	db, err := l.db()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	return l.graph(db)
+}
+
 // Build will build all the layers that are defined in this Layered
 // struct. It will automatically output to the UI as needed.
 //

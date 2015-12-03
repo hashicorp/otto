@@ -284,9 +284,21 @@ func (opts *DevOptions) actionLayers(rctx router.Context) error {
 
 	ctx := rctx.(*app.Context)
 	fs := flag.NewFlagSet("otto", flag.ContinueOnError)
+	graph := fs.Bool("graph", false, "show graph")
 	prune := fs.Bool("prune", false, "prune unused layers")
 	if err := fs.Parse(rctx.RouteArgs()); err != nil {
 		return err
+	}
+
+	// Graph?
+	if *graph {
+		graph, err := opts.Layer.Graph()
+		if err != nil {
+			return err
+		}
+
+		ctx.Ui.Raw(graph.String() + "\n")
+		return nil
 	}
 
 	// Prune?
@@ -400,10 +412,13 @@ Usage: otto dev layers [options]
   after the first call.
 
   If no options are given, the layers will be listed that this development
-  environment uses.
+  environment uses. If multiple conflicting options are given, the first
+  in alphabetical order is processed. For example, if both "-graph" and
+  "-prune" are specified, the graph will be shown.
 
 Options:
 
+  -graph       Show the full layer graph for Otto
   -prune       Delete all unused or outdated layers
 
 `
