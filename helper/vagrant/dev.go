@@ -406,6 +406,12 @@ Usage: otto dev layers [options]
 
   Manage the development environment layers.
 
+  WARNING: This is an advanced, low level command. You shouldn't need this
+  command. It is meant to give you the ability to get out of a bad situation
+  if Otto mis-manages your layers. If you run into a scenario where you need
+  to use this, please report a bug to Otto so we can think of others ways
+  around it.
+
   This command will manage the layers of the development environment.
   Otto uses layers as a mechanism for caching parts of the development
   environment that aren't often updated. This makes "otto dev" faster
