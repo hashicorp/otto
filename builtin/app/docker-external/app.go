@@ -36,6 +36,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	custom := &customizations{Opts: &opts}
 	opts = compile.AppOptions{
 		Ctx: ctx,
+		Result: &app.CompileResult{
+			Version: 1,
+		},
 		FoundationConfig: foundation.Config{
 			ServiceName: ctx.Application.Name,
 		},
@@ -96,8 +99,24 @@ func (a *App) Deploy(ctx *app.Context) error {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
+	var layered *vagrant.Layered
+
+	// We only setup a layered environment if we've recompiled since
+	// version 0. If we're still at version 0 then we have to use the
+	// non-layered dev environment.
+	if ctx.CompileResult.Version > 0 {
+		// Setup layers
+		var err error
+		layered, err = vagrant.DevLayered(ctx, []*vagrant.Layer{})
+		if err != nil {
+			return err
+		}
+	}
+
+	// Build the actual development environment
 	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
+		Layer:        layered,
 	}).Route(ctx)
 }
 
