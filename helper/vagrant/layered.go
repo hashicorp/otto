@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -49,6 +50,17 @@ type Layer struct {
 	// Vagrantfile will be copied to another directory, so any paths
 	// in it should be relative to the Vagrantfile.
 	Vagrantfile string
+}
+
+// Graph will return the full graph that is currently encoded.
+func (l *Layered) Graph() (*dag.AcyclicGraph, error) {
+	db, err := l.db()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	return l.graph(db)
 }
 
 // Build will build all the layers that are defined in this Layered
@@ -102,6 +114,8 @@ func (l *Layered) Prune(ctx *context.Shared) (int, error) {
 		return 0, err
 	}
 
+	log.Printf("[DEBUG] vagrant: layer graph: \n%s", graph.String())
+
 	// Get all the bad roots. These are anything without something depending
 	// on it except for the main "root"
 	roots := make([]dag.Vertex, 0)
@@ -138,38 +152,54 @@ func (l *Layered) Prune(ctx *context.Shared) (int, error) {
 	return count, nil
 }
 
-// AddEnv will store the given environment as a user of this layer set,
-// preventing the pruning of the layers here.
+// ConfigureEnv configures the Vagrant instance with the proper environment
+// variables to be able to execute things.
 //
-// This will also modify the argument to set the environment variable
-// to point to the proper layer.
-func (l *Layered) AddEnv(v *Vagrant) error {
+// Once the env is used, SetEnvStatus should be used to modify the env
+// status around it. This is critical to make sure layers don't get pruned.
+func (l *Layered) ConfigureEnv(v *Vagrant) error {
 	// Get the final layer
 	layer := l.Layers[len(l.Layers)-1]
-
-	// Update the DB with our environment
-	db, err := l.db()
-	if err != nil {
-		return err
-	}
-	err = db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(boltEnvsBucket)
-		key := []byte(v.DataDir)
-		return bucket.Put(key, []byte(layer.ID))
-	})
-	db.Close()
-	if err != nil {
-		return err
-	}
 
 	// Get the path for the final layer and add it to the environment
 	path := filepath.Join(l.layerPath(layer), "Vagrantfile")
 	if v.Env == nil {
 		v.Env = make(map[string]string)
 	}
+	v.Env[layerID] = layer.ID
 	v.Env[layerPathEnv] = path
 
 	return nil
+}
+
+// SetEnv configures the status of an env, persisting that its ready or
+// deleted which controls whether layers get pruned or not.
+//
+// The Vagrant pointer given must already be configured using ConfigureEnv.
+func (l *Layered) SetEnv(v *Vagrant, state envState) error {
+	// Update the DB with our environment
+	db, err := l.db()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	return db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(boltEnvsBucket)
+		key := []byte(v.DataDir)
+
+		// If the state is deleted then call it good
+		if state == envStateDeleted {
+			return bucket.Delete(key)
+		}
+
+		// Otherwise we're inserting
+		layerId, ok := v.Env[layerID]
+		if !ok {
+			return fmt.Errorf("Vagrant environment not configured with layer ID.")
+		}
+
+		return bucket.Put(key, []byte(layerId))
+	})
 }
 
 // RemoveEnv will remove the environment from the tracked layers.
@@ -214,6 +244,8 @@ func (l *Layered) Pending() ([]string, error) {
 }
 
 func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Shared) error {
+	log.Printf("[DEBUG] vagrant: building layer: %s", v.Layer.ID)
+
 	layer := v.Layer
 	path := v.Path
 
@@ -232,6 +264,8 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 		return err
 	}
 	if layerV.State == layerStateReady {
+		log.Printf("[DEBUG] vagrant: layer already ready: %s", v.Layer.ID)
+
 		// Touch the layer so that it is recently used
 		defer db.Close()
 		return l.updateLayer(db, layer, func(v *layerVertex) {
@@ -300,6 +334,8 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 }
 
 func (l *Layered) pruneLayer(db *bolt.DB, v *layerVertex, ctx *context.Shared) error {
+	log.Printf("[DEBUG] vagrant: pruning layer: %s", v.Layer.ID)
+
 	layer := v.Layer
 	path := v.Path
 
@@ -309,6 +345,7 @@ func (l *Layered) pruneLayer(db *bolt.DB, v *layerVertex, ctx *context.Shared) e
 		return err
 	}
 	if !exists {
+		log.Printf("[DEBUG] vagrant: layer doesn't exist already: %s", v.Layer.ID)
 		return l.deleteLayer(db, layer, path)
 	}
 
@@ -663,7 +700,13 @@ var (
 	boltDataVersion byte = 1
 )
 
-const layerPathEnv = "OTTO_VAGRANT_LAYER_PATH"
+const (
+	// layerPathEnv is the path to the previous layer
+	layerPathEnv = "OTTO_VAGRANT_LAYER_PATH"
+
+	// layerID is the ID of the previous layer
+	layerID = "OTTO_VAGRANT_LAYER_ID"
+)
 
 // layerVertex is the type of vertex in the graph that is used to track
 // layer usage throughout Otto.
@@ -694,4 +737,12 @@ const (
 	layerStateInvalid layerState = iota
 	layerStatePending
 	layerStateReady
+)
+
+type envState byte
+
+const (
+	envStateInvalid envState = iota
+	envStateDeleted
+	envStateReady
 )

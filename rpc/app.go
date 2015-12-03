@@ -4,6 +4,7 @@ import (
 	"net/rpc"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
 )
 
 // App is an implementation of app.App that communicates over RPC.
@@ -17,6 +18,26 @@ func (c *App) Meta() (*app.Meta, error) {
 	var resp AppMetaResponse
 
 	err := c.Client.Call(c.Name+".Meta", new(struct{}), &resp)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+		return nil, err
+	}
+
+	return resp.Result, nil
+}
+
+func (c *App) Implicit(ctx *app.Context) (*appfile.File, error) {
+	var resp AppImplicitResponse
+	args := AppContextArgs{Context: ctx}
+
+	// Serve the shared context data
+	serveContext(c.Broker, &ctx.Shared, &args.ContextSharedArgs)
+
+	// Call
+	err := c.Client.Call(c.Name+".Implicit", &args, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -152,6 +173,11 @@ type AppCompileResponse struct {
 	Error  *BasicError
 }
 
+type AppImplicitResponse struct {
+	Result *appfile.File
+	Error  *BasicError
+}
+
 type AppDevDepArgs struct {
 	ContextDst       *app.Context
 	ContextDstShared ContextSharedArgs
@@ -173,6 +199,28 @@ func (s *AppServer) Meta(
 	reply *AppMetaResponse) error {
 	result, err := s.App.Meta()
 	*reply = AppMetaResponse{
+		Result: result,
+		Error:  NewBasicError(err),
+	}
+
+	return nil
+}
+
+func (s *AppServer) Implicit(
+	args *AppContextArgs,
+	reply *AppImplicitResponse) error {
+	closer, err := connectContext(s.Broker, &args.Context.Shared, &args.ContextSharedArgs)
+	defer closer.Close()
+	if err != nil {
+		*reply = AppImplicitResponse{
+			Error: NewBasicError(err),
+		}
+
+		return nil
+	}
+
+	result, err := s.App.Implicit(args.Context)
+	*reply = AppImplicitResponse{
 		Result: result,
 		Error:  NewBasicError(err),
 	}

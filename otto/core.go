@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 	"github.com/hashicorp/terraform/dag"
+	"github.com/mitchellh/copystructure"
 )
 
 // Core is the main struct to use to interact with Otto as a library.
@@ -91,6 +92,28 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		compileDir:      c.CompileDir,
 		ui:              c.Ui,
 	}, nil
+}
+
+// App returns the app implementation and context for this configured Core.
+//
+// If App implements io.Closer, it is up to the caller to call Close on it.
+func (c *Core) App() (app.App, *app.Context, error) {
+	root, err := c.appfileCompiled.Graph.Root()
+	if err != nil {
+		return nil, nil, err
+	}
+	rootCtx, err := c.appContext(root.(*appfile.CompiledGraphVertex).File)
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"Error loading App: %s", err)
+	}
+	rootApp, err := c.app(rootCtx)
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"Error loading App: %s", err)
+	}
+
+	return rootApp, rootCtx, nil
 }
 
 // Compile takes the Appfile and compiles all the resulting data.
@@ -230,7 +253,10 @@ func (c *Core) Compile() error {
 		if root {
 			md.App = result
 		} else {
-			md.AppDeps[ctx.Appfile.ID] = result
+			// Don't store the result if its nil because it is pointless
+			if result != nil {
+				md.AppDeps[ctx.Appfile.ID] = result
+			}
 		}
 
 		return nil
@@ -856,6 +882,22 @@ func (c *Core) appContext(f *appfile.File) (*app.Context, error) {
 		} else {
 			compileResult = md.AppDeps[f.ID]
 		}
+	}
+
+	// Get the customizations. If we don't have any at all, we fast-path
+	// this by doing nothing. If we do, we have to make a deep copy in
+	// order to prune out the irrelevant ones.
+	if f.Customization != nil && len(f.Customization.Raw) > 0 {
+		// Perform a deep copy of the Appfile so we can modify it
+		fRaw, err := copystructure.Copy(f)
+		if err != nil {
+			return nil, err
+		}
+		f = fRaw.(*appfile.File)
+
+		// Get the app-only customizations and set it on the Appfile
+		cs := f.Customization.Filter("app")
+		f.Customization = &appfile.CustomizationSet{Raw: cs}
 	}
 
 	return &app.Context{

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
@@ -24,6 +25,10 @@ func (a *App) Meta() (*app.Meta, error) {
 	return Meta, nil
 }
 
+func (a *App) Implicit(ctx *app.Context) (*appfile.File, error) {
+	return nil, nil
+}
+
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	fragmentPath := filepath.Join(ctx.Dir, "dev-dep", "Vagrantfile.fragment")
 
@@ -31,6 +36,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	custom := &customizations{Opts: &opts}
 	opts = compile.AppOptions{
 		Ctx: ctx,
+		Result: &app.CompileResult{
+			Version: 1,
+		},
 		FoundationConfig: foundation.Config{
 			ServiceName: ctx.Application.Name,
 		},
@@ -47,25 +55,22 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 			},
 		},
-		Customizations: []*compile.Customization{
-			&compile.Customization{
-				Type:     "docker",
-				Callback: custom.processDocker,
-				Schema: map[string]*schema.FieldSchema{
-					"image": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "",
-						Description: "Image name to run",
-					},
+		Customization: (&compile.Customization{
+			Callback: custom.process,
+			Schema: map[string]*schema.FieldSchema{
+				"image": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "",
+					Description: "Image name to run",
+				},
 
-					"run_args": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "",
-						Description: "Args to pass to `docker run`",
-					},
+				"run_args": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "",
+					Description: "Args to pass to `docker run`",
 				},
 			},
-		},
+		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
 
 	return compile.App(&opts)
@@ -94,8 +99,24 @@ func (a *App) Deploy(ctx *app.Context) error {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
+	var layered *vagrant.Layered
+
+	// We only setup a layered environment if we've recompiled since
+	// version 0. If we're still at version 0 then we have to use the
+	// non-layered dev environment.
+	if ctx.CompileResult.Version > 0 {
+		// Setup layers
+		var err error
+		layered, err = vagrant.DevLayered(ctx, []*vagrant.Layer{})
+		if err != nil {
+			return err
+		}
+	}
+
+	// Build the actual development environment
 	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
+		Layer:        layered,
 	}).Route(ctx)
 }
 

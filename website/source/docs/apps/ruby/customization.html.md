@@ -12,8 +12,6 @@ description: |-
 This page documents the [customizations](/docs/appfile/customization.html)
 that are available to change the behavior of Ruby applications with Otto.
 
-### Type: "ruby"
-
 Example:
 
 ```

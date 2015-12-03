@@ -14,7 +14,6 @@ import (
 
 	"github.com/hashicorp/go-getter"
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/otto/appfile/detect"
 	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/terraform/dag"
 )
@@ -119,14 +118,31 @@ type CompileOpts struct {
 	// be deleted.
 	Dir string
 
-	// Detect is the detect configuration that will be used for processing
-	// defaults for the various dependencies.
-	Detect *detect.Config
+	// Loader is called to load an Appfile in the given directory.
+	// This can return the file as-is, but this point gives the caller
+	// an opportunity to modify the Appfile prior to full compilation.
+	//
+	// The File given will already have all the imports merged.
+	Loader func(f *File, dir string) (*File, error)
 
 	// Callback is an optional way to receive notifications of events
 	// during the compilation process. The CompileEvent argument should be
 	// type switched to determine what it is.
 	Callback func(CompileEvent)
+}
+
+// Compiler is responsible for compiling Appfiles. For each instance
+// of the compiler, the directory where Appfile data is stored is cleared
+// and reloaded.
+//
+// Multiple calls to Compile can be made with a single Appfile and the
+// dependencies won't be reloaded.
+type Compiler struct {
+	opts          *CompileOpts
+	depStorage    getter.Storage
+	importCache   map[string]*File
+	importLock    sync.Mutex
+	importStorage getter.Storage
 }
 
 // CompileEvent is a potential event that a Callback can receive during
@@ -181,6 +197,27 @@ func LoadCompiled(dir string) (*Compiled, error) {
 	return &c, nil
 }
 
+// NewCompiler initializes a compiler with the given options.
+func NewCompiler(opts *CompileOpts) (*Compiler, error) {
+	// Create the directory if it doesn't already exist
+	if err := os.MkdirAll(opts.Dir, 0755); err != nil {
+		return nil, err
+	}
+
+	// Setup our result
+	c := &Compiler{opts: opts}
+
+	// Setup our import storage and locks
+	c.importCache = make(map[string]*File)
+	c.importStorage = &getter.FolderStorage{
+		StorageDir: filepath.Join(opts.Dir, CompileImportsFolder)}
+
+	// Setup dep storage
+	c.depStorage = &getter.FolderStorage{
+		StorageDir: filepath.Join(opts.Dir, CompileDepsFolder)}
+	return c, nil
+}
+
 // Compile compiles an Appfile.
 //
 // This may require network connectivity if there are imports or
@@ -194,23 +231,11 @@ func LoadCompiled(dir string) (*Compiled, error) {
 // recursively delete the compilation directory after this is completed.
 // Note that certain functions of Otto such as development environments
 // will depend on those directories existing, however.
-func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
-	// First clear the directory. In the future, we can keep it around
-	// and do incremental compilations.
-	if err := os.RemoveAll(opts.Dir); err != nil {
-		return nil, err
-	}
-	if err := os.MkdirAll(opts.Dir, 0755); err != nil {
-		return nil, err
-	}
-
+func (c *Compiler) Compile(f *File) (*Compiled, error) {
 	// Write the version of the compilation that we'll be completing.
-	if err := compileVersion(opts.Dir); err != nil {
+	if err := compileVersion(c.opts.Dir); err != nil {
 		return nil, fmt.Errorf("Error writing compiled Appfile version: %s", err)
 	}
-
-	// Start building our compiled Appfile
-	compiled := &Compiled{File: f, Graph: new(dag.AcyclicGraph)}
 
 	// Check if we have an ID for this or not. If we don't, then we need
 	// to write the ID file. We only do this if the file has a path.
@@ -234,36 +259,28 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 		}
 	}
 
-	// Build the storage we'll use for storing imports
-	importStorage := &getter.FolderStorage{
-		StorageDir: filepath.Join(opts.Dir, CompileImportsFolder)}
-	importOpts := &compileImportOpts{
-		Storage:   importStorage,
-		Cache:     make(map[string]*File),
-		CacheLock: &sync.Mutex{},
-	}
-	if err := compileImports(f, importOpts, opts); err != nil {
+	// Do a minimum compile to start
+	compiled, err := c.MinCompile(f)
+	if err != nil {
 		return nil, err
 	}
 
 	// Validate the root early
-	if err := f.Validate(); err != nil {
+	if err := compiled.File.Validate(); err != nil {
 		return nil, err
 	}
 
-	// Add our root vertex for this Appfile
-	vertex := &CompiledGraphVertex{File: f, NameValue: f.Application.Name}
-	compiled.Graph.Add(vertex)
+	// Get our root vertex
+	root, err := compiled.Graph.Root()
+	if err != nil {
+		return nil, err
+	}
+	vertex := root.(*CompiledGraphVertex)
 
 	// Build the storage we'll use for storing downloaded dependencies,
 	// then use that to trigger the recursive call to download all our
 	// dependencies.
-	storage := &getter.FolderStorage{
-		StorageDir: filepath.Join(opts.Dir, CompileDepsFolder)}
-	if err := compileDependencies(
-		storage,
-		importOpts,
-		compiled.Graph, opts, vertex); err != nil {
+	if err := c.compileDependencies(vertex, compiled.Graph); err != nil {
 		return nil, err
 	}
 
@@ -273,19 +290,39 @@ func Compile(f *File, opts *CompileOpts) (*Compiled, error) {
 	}
 
 	// Write the compiled Appfile data
-	if err := compileWrite(opts.Dir, compiled); err != nil {
+	if err := compileWrite(c.opts.Dir, compiled); err != nil {
 		return nil, err
 	}
 
 	return compiled, nil
 }
 
-func compileDependencies(
-	storage getter.Storage,
-	importOpts *compileImportOpts,
-	graph *dag.AcyclicGraph,
-	opts *CompileOpts,
-	root *CompiledGraphVertex) error {
+// MinCompile does a minimal compilation of the given Appfile.
+//
+// This will load and merge any imports. This is used for a very basic
+// Compiled Appfile that can be used with Otto core.
+//
+// This does not fetch dependencies.
+func (c *Compiler) MinCompile(f *File) (*Compiled, error) {
+	// Start building our compiled Appfile
+	compiled := &Compiled{File: f, Graph: new(dag.AcyclicGraph)}
+
+	// Load the imports for this single Appfile
+	if err := c.compileImports(f); err != nil {
+		return nil, err
+	}
+
+	// Add our root vertex for this Appfile
+	vertex := &CompiledGraphVertex{File: f, NameValue: f.Application.Name}
+	compiled.Graph.Add(vertex)
+
+	return compiled, nil
+}
+
+func (c *Compiler) compileDependencies(root *CompiledGraphVertex, graph *dag.AcyclicGraph) error {
+	// For easier reference below
+	storage := c.depStorage
+
 	// Make a map to keep track of the dep source to vertex mapping
 	vertexMap := make(map[string]*CompiledGraphVertex)
 
@@ -326,8 +363,8 @@ func compileDependencies(
 				log.Printf("[DEBUG] loading dependency: %s", key)
 
 				// Call the callback if we have one
-				if opts.Callback != nil {
-					opts.Callback(&CompileEventDep{
+				if c.opts.Callback != nil {
+					c.opts.Callback(&CompileEventDep{
 						Source: key,
 					})
 				}
@@ -339,13 +376,6 @@ func compileDependencies(
 				dir, _, err := storage.Dir(key)
 				if err != nil {
 					return err
-				}
-
-				// Parse a default
-				fDef, err := Default(dir, opts.Detect)
-				if err != nil {
-					return fmt.Errorf(
-						"Error detecting defaults in %s: %s", key, err)
 				}
 
 				// Parse the Appfile if it exists
@@ -364,20 +394,21 @@ func compileDependencies(
 					}
 
 					// Realize all the imports for this file
-					if err := compileImports(f, importOpts, opts); err != nil {
+					if err := c.compileImports(f); err != nil {
 						return err
 					}
+				}
 
-					// Merge the files
-					if err := fDef.Merge(f); err != nil {
+				// Do any additional loading if we have a loader
+				if c.opts.Loader != nil {
+					f, err = c.opts.Loader(f, dir)
+					if err != nil {
 						return fmt.Errorf(
-							"Error merging default Appfile for dependency %s: %s",
-							key, err)
+							"Error loading Appfile in %s: %s", key, err)
 					}
 				}
 
 				// Set the source
-				f = fDef
 				f.Source = key
 
 				// If it doesn't have an otto ID then we can't do anything
@@ -403,7 +434,12 @@ func compileDependencies(
 				// We merge the root infrastructure choice upwards to
 				// all dependencies.
 				f.Infrastructure = root.File.Infrastructure
-				f.Project.Infrastructure = root.File.Project.Infrastructure
+				if root.File.Project != nil {
+					if f.Project == nil {
+						f.Project = new(Project)
+					}
+					f.Project.Infrastructure = root.File.Project.Infrastructure
+				}
 
 				// Build the vertex for this
 				vertex = &CompiledGraphVertex{
@@ -427,35 +463,6 @@ func compileDependencies(
 	return nil
 }
 
-func compileVersion(dir string) error {
-	f, err := os.Create(filepath.Join(dir, CompileVersionFilename))
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	_, err = fmt.Fprintf(f, "%d", CompileVersion)
-	return err
-}
-
-func compileWrite(dir string, compiled *Compiled) error {
-	// Pretty-print the JSON data so that it can be more easily inspected
-	data, err := json.MarshalIndent(compiled, "", "    ")
-	if err != nil {
-		return err
-	}
-
-	// Write it out
-	f, err := os.Create(filepath.Join(dir, CompileFilename))
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	_, err = io.Copy(f, bytes.NewReader(data))
-	return err
-}
-
 type compileImportOpts struct {
 	Storage   getter.Storage
 	Cache     map[string]*File
@@ -464,19 +471,16 @@ type compileImportOpts struct {
 
 // compileImports takes a File, loads all the imports, and merges them
 // into the File.
-func compileImports(
-	root *File,
-	importOpts *compileImportOpts,
-	opts *CompileOpts) error {
+func (c *Compiler) compileImports(root *File) error {
 	// If we have no imports, short-circuit the whole thing
 	if len(root.Imports) == 0 {
 		return nil
 	}
 
 	// Pull these out into variables so they're easier to reference
-	storage := importOpts.Storage
-	cache := importOpts.Cache
-	cacheLock := importOpts.CacheLock
+	storage := c.importStorage
+	cache := c.importCache
+	cacheLock := &c.importLock
 
 	// A graph is used to track for cycles
 	var graphLock sync.Mutex
@@ -596,8 +600,8 @@ func compileImports(
 
 		// Call the callback if we have one
 		log.Printf("[DEBUG] loading import: %s", source)
-		if opts.Callback != nil {
-			opts.Callback(&CompileEventImport{
+		if c.opts.Callback != nil {
+			c.opts.Callback(&CompileEventImport{
 				Source: source,
 			})
 		}
@@ -651,4 +655,33 @@ func compileImports(
 
 	importSingle("root", root)
 	return resultErr
+}
+
+func compileVersion(dir string) error {
+	f, err := os.Create(filepath.Join(dir, CompileVersionFilename))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = fmt.Fprintf(f, "%d", CompileVersion)
+	return err
+}
+
+func compileWrite(dir string, compiled *Compiled) error {
+	// Pretty-print the JSON data so that it can be more easily inspected
+	data, err := json.MarshalIndent(compiled, "", "    ")
+	if err != nil {
+		return err
+	}
+
+	// Write it out
+	f, err := os.Create(filepath.Join(dir, CompileFilename))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = io.Copy(f, bytes.NewReader(data))
+	return err
 }

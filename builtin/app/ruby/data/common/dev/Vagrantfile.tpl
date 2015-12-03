@@ -64,7 +64,7 @@ if [ -n "${gem_deps_queue-}" ]; then
 fi
 
 ol "Bundling gem dependencies..."
-oe bundle
+bundle
 
 {% if app_type == "rails" %}
   ol "Detected Rails application"

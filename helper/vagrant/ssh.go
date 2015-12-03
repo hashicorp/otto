@@ -1,13 +1,12 @@
 package vagrant
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/hashicorp/otto/ui"
 )
 
 // SSHCache is a helper to cache the SSH connection info from Vagrant
@@ -48,13 +47,30 @@ func (c *SSHCache) Exec(cacheOkay bool) error {
 
 // Cache will execute "ssh-config" and cache the SSH info.
 func (c *SSHCache) Cache() error {
+	// Callback that records the output
+	var result string
+	callback := func(o *Output) {
+		result = o.Data[0]
+	}
+
 	// We just copy the Vagrant instance so we can modify it without
-	// worrying about restoring stuff.
-	var mockUi ui.Mock
+	// worrying about restoring stuff. We set the UI to nil so nothing
+	// goes to the UI, and we set a callback to read the SSH config from
+	// the machine-readable output.
 	vagrant := *c.Vagrant
-	vagrant.Ui = &mockUi
+	vagrant.Ui = nil
+	vagrant.Callbacks = map[string]OutputCallback{
+		"ssh-config": callback,
+	}
 	if err := vagrant.Execute("ssh-config"); err != nil {
 		return err
+	}
+
+	// If we have no output, it is an error
+	if result == "" {
+		return fmt.Errorf(
+			"No SSH info found in the output of Vagrant. This is a bug somewhere.\n" +
+				"Please re-run the command with OTTO_LOG=1 and report this as a bug.")
 	}
 
 	// Write the output to the cache
@@ -63,11 +79,8 @@ func (c *SSHCache) Cache() error {
 		return err
 	}
 	defer f.Close()
-
-	for _, raw := range mockUi.RawBuf {
-		if _, err := io.Copy(f, strings.NewReader(raw)); err != nil {
-			return err
-		}
+	if _, err := io.Copy(f, strings.NewReader(result)); err != nil {
+		return err
 	}
 
 	return nil

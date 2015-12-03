@@ -1,5 +1,12 @@
 ## Next Version
 
+BACKWARDS INCOMPATIBILITIES:
+
+  * Customizations have been heavily simplified and the resulting syntax
+    is no longer valid with Otto 0.2. Upgrading your Appfiles to the new
+    format is very simple. Please see the customizations documentation
+    for more information.
+
 FEATURES:
 
   * **Layered Dev Environments**: Dev environments are now layered. Each
@@ -17,9 +24,12 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
+  * core: cached SSH info for dev no longer can be corrupted with stderr [GH-343]
   * app/ruby: Fix libxml2 package name [GH-320]
   * command/compile: compilation works if Appfile is a directory (it
       ignores the directory and detects an Appfile) [GH-280]
+  * foundation/consul: copy upstart instead of moving it so it works multiple
+      times [GH-354]
 
 ## 0.1.2 (October 20, 2015)
 

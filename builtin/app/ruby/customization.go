@@ -14,7 +14,7 @@ type customizations struct {
 	Opts *compile.AppOptions
 }
 
-func (c *customizations) processRuby(d *schema.FieldData) error {
+func (c *customizations) process(d *schema.FieldData) error {
 	vsn := d.Get("ruby_version")
 
 	// If we were asked to detect the version, we attempt to do so.

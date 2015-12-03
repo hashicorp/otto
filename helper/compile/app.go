@@ -36,9 +36,9 @@ type AppOptions struct {
 	// default template data if those keys are not set.
 	Bindata *bindata.Data
 
-	// Customizations is a list of helpers to process customizations
-	// in the Appfile. See the Customization docs for more information.
-	Customizations []*Customization
+	// Customization is used to configure the customizations for this
+	// application. See the Customization type docs for more info.
+	Customization *Customization
 
 	// Callbacks are called just prior to compilation completing.
 	Callbacks []CompileCallback
@@ -107,11 +107,9 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 	}
 
 	// Process the customizations!
-	err := processCustomizations(&processOpts{
-		Customizations: opts.Customizations,
-		Appfile:        ctx.Appfile,
-		Bindata:        data,
-	})
+	err := processCustomizations(
+		ctx.Appfile.Customization,
+		opts.Customization)
 	if err != nil {
 		return nil, err
 	}

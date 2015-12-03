@@ -46,6 +46,12 @@ Vagrant.configure("2") do |config|
     p.linked_clone = true
   end
 
+  if Vagrant.has_plugin?("vagrant-parallels", ">= 1.6.0")
+    config.vm.provider "parallels" do |p|
+      p.linked_clone = true
+    end
+  end
+
   # This is to work around some bugs right now
   ["vmware_fusion", "vmware_workstation"].each do |name|
     config.vm.provider(name) do |p|
@@ -55,5 +61,10 @@ Vagrant.configure("2") do |config|
 
   {% block vagrant_config %}{% endblock %}
 end
+
+{% if dev_extra_vagrantfile != "" %}
+# Extra Vagrantfile specified in Appfile manually
+load "{{ dev_extra_vagrantfile }}"
+{% endif %}
 
 {% block footer %}{% endblock %}

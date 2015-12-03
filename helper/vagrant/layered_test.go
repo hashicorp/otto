@@ -135,7 +135,10 @@ func TestLayeredPrune(t *testing.T) {
 
 	// Add an environment
 	env := &Vagrant{DataDir: filepath.Join(dir, "v1")}
-	if err := layer.AddEnv(env); err != nil {
+	if err := layer.ConfigureEnv(env); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if err := layer.SetEnv(env, envStateReady); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 

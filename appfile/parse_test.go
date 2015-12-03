@@ -16,7 +16,8 @@ func TestParse(t *testing.T) {
 			"basic.hcl",
 			&File{
 				Application: &Application{
-					Name: "foo",
+					Name:   "foo",
+					Detect: true,
 					Dependencies: []*Dependency{
 						&Dependency{
 							Source: "foo",
@@ -48,6 +49,17 @@ func TestParse(t *testing.T) {
 			true,
 		},
 
+		{
+			"app-no-detect.hcl",
+			&File{
+				Application: &Application{
+					Name:   "foo",
+					Detect: false,
+				},
+			},
+			false,
+		},
+
 		// Customizations
 		{
 			"basic-custom.hcl",
@@ -56,6 +68,23 @@ func TestParse(t *testing.T) {
 					Raw: []*Customization{
 						&Customization{
 							Type: "dev",
+							Config: map[string]interface{}{
+								"go_version": "1.5",
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"basic-custom-no-name.hcl",
+			&File{
+				Customization: &CustomizationSet{
+					Raw: []*Customization{
+						&Customization{
+							Type: "app",
 							Config: map[string]interface{}{
 								"go_version": "1.5",
 							},
@@ -94,7 +123,8 @@ func TestParse(t *testing.T) {
 			"infra-foundations.hcl",
 			&File{
 				Application: &Application{
-					Name: "foo",
+					Name:   "foo",
+					Detect: true,
 				},
 				Infrastructure: []*Infrastructure{
 					&Infrastructure{
@@ -127,8 +157,9 @@ func TestParse(t *testing.T) {
 			"imports.hcl",
 			&File{
 				Application: &Application{
-					Name: "otto",
-					Type: "go",
+					Name:   "otto",
+					Type:   "go",
+					Detect: true,
 				},
 				Imports: []*Import{
 					&Import{

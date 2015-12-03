@@ -22,6 +22,12 @@ Vagrant.configure("2") do |config|
     v.linked_clone = true
   end
 
+  if Vagrant.has_plugin?("vagrant-parallels", ">= 1.6.0")
+    config.vm.provider "parallels" do |p|
+      p.linked_clone = true
+    end
+  end
+
   # Disable the default synced folder
   config.vm.synced_folder ".", "/vagrant", disabled: true
 

@@ -9,7 +9,7 @@ type customizations struct {
 	Opts *compile.AppOptions
 }
 
-func (c *customizations) processDev(d *schema.FieldData) error {
+func (c *customizations) process(d *schema.FieldData) error {
 	c.Opts.Bindata.Context["node_version"] = d.Get("node_version")
 	return nil
 }

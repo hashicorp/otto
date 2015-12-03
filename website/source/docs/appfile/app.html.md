@@ -31,6 +31,9 @@ application {
 The `application` block tells Otto about the application that the
 Appfile describes. Only one application block can exist in an Appfile.
 
+More fine-grained configuration of the application is done using
+[customization](/docs/appfile/customization.html) blocks.
+
 The `application` block allows the following keys to be set:
 
   * `name` (string) - The name of the application. This doesn't have

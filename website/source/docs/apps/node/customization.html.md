@@ -12,12 +12,10 @@ description: |-
 This page documents the [customizations](/docs/appfile/customization.html)
 that are available to change the behavior of Node.js applications with Otto.
 
-## Type: "node"
-
 Example:
 
 ```
-customization "node" {
+customization {
     node_version = "4.1.0"
 }
 ```

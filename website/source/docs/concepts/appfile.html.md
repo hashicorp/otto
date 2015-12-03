@@ -22,7 +22,7 @@ application {
   type = "ruby"
 }
 
-customization "ruby" {
+customization {
   ruby_version = "2.0"
 }
 ```

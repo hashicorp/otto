@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/oneline"
@@ -24,6 +25,10 @@ func (a *App) Meta() (*app.Meta, error) {
 	return Meta, nil
 }
 
+func (a *App) Implicit(ctx *app.Context) (*appfile.File, error) {
+	return nil, nil
+}
+
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	var opts compile.AppOptions
 	custom := &customizations{Opts: &opts}
@@ -37,19 +42,16 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
 		},
-		Customizations: []*compile.Customization{
-			&compile.Customization{
-				Type:     "node",
-				Callback: custom.processDev,
-				Schema: map[string]*schema.FieldSchema{
-					"node_version": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "4.1.0",
-						Description: "Node version to install",
-					},
+		Customization: (&compile.Customization{
+			Callback: custom.process,
+			Schema: map[string]*schema.FieldSchema{
+				"node_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "4.1.0",
+					Description: "Node version to install",
 				},
 			},
-		},
+		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
 
 	return compile.App(&opts)

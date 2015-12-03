@@ -11,46 +11,26 @@ type customizations struct {
 	Opts *compile.AppOptions
 }
 
-func (c *customizations) processBuild(d *schema.FieldData) error {
-	p, ok := d.GetOk("packer")
-	if !ok {
-		return nil
+func (c *customizations) process(d *schema.FieldData) error {
+	if p, ok := d.GetOk("packer"); ok {
+		c.Opts.Bindata.Context["build_packer_path"] = p.(string)
+		c.Opts.Callbacks = append(c.Opts.Callbacks, c.compileCustomBuild(d))
 	}
 
-	c.Opts.Bindata.Context["build_packer_path"] = p.(string)
-	c.Opts.Callbacks = append(c.Opts.Callbacks, c.compileCustomBuild(d))
-	return nil
-}
-
-func (c *customizations) processDeploy(d *schema.FieldData) error {
-	tf, ok := d.GetOk("terraform")
-	if !ok {
-		return nil
+	if tf, ok := d.GetOk("terraform"); ok {
+		c.Opts.Bindata.Context["deploy_terraform_path"] = tf.(string)
+		c.Opts.Callbacks = append(c.Opts.Callbacks, c.compileCustomDeploy(d))
 	}
 
-	c.Opts.Bindata.Context["deploy_terraform_path"] = tf.(string)
-	c.Opts.Callbacks = append(c.Opts.Callbacks, c.compileCustomDeploy(d))
-	return nil
-}
-
-func (c *customizations) processDev(d *schema.FieldData) error {
-	p, ok := d.GetOk("vagrantfile")
-
-	if !ok {
-		return nil
+	if p, ok := d.GetOk("dev_vagrantfile"); ok {
+		c.Opts.Bindata.Context["dev_vagrant_path"] = p.(string)
+		c.Opts.Callbacks = append(c.Opts.Callbacks, c.compileCustomDev(d))
 	}
 
-	c.Opts.Bindata.Context["dev_vagrant_path"] = p.(string)
-	c.Opts.Callbacks = append(c.Opts.Callbacks, c.compileCustomDev(d))
-	return nil
-}
-
-func (c *customizations) processDevDep(d *schema.FieldData) error {
-	if _, ok := d.GetOk("vagrantfile"); !ok {
-		return nil
+	if _, ok := d.GetOk("dep_vagrantfile"); ok {
+		c.Opts.Callbacks = append(c.Opts.Callbacks, c.compileCustomDevDep(d))
 	}
 
-	c.Opts.Callbacks = append(c.Opts.Callbacks, c.compileCustomDevDep(d))
 	return nil
 }
 

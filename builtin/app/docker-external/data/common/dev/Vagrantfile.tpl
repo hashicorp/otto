@@ -1,33 +1,17 @@
-Vagrant.configure("2") do |config|
-  config.vm.box = "hashicorp/precise64"
+{% extends "compile:data/app/dev/Vagrantfile.tpl" %}
 
-  # Host only network
-  config.vm.network "private_network", ip: "{{ dev_ip_address }}"
-
-  # Setup some stuff
-  config.vm.provision "shell", inline: $script
-
-  # Foundation configuration (if any)
-  {% for dir in foundation_dirs.dev %}
-  dir = "/otto/foundation-{{ forloop.Counter }}"
-  config.vm.synced_folder "{{ dir }}", dir
-  config.vm.provision "shell", inline: "cd #{dir} && bash #{dir}/main.sh"
-  {% endfor %}
+{% block vagrant_config %}
+  # Disable the default synced folder
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
   # Read in the fragment that we use as a dep
   eval(File.read("{{ fragment_path }}"), binding)
 
-  ["vmware_fusion", "vmware_workstation"].each do |name|
-    config.vm.provider(name) do |p|
-      p.enable_vmrun_ip_lookup = false
-    end
-  end
+  # Setup some stuff
+  config.vm.provision "shell", inline: $script
+{% endblock %}
 
-  config.vm.provider :parallels do |p, o|
-    o.vm.box = "parallels/ubuntu-12.04"
-  end
-end
-
+{% block footer %}
 $script = <<SCRIPT
 set -e
 
@@ -49,3 +33,4 @@ ol "Installing HTTPS driver for Apt..."
 oe sudo apt-get update
 oe sudo apt-get install -y apt-transport-https
 SCRIPT
+{% endblock %}

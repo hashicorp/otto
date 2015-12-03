@@ -50,9 +50,13 @@ func TestAppfile(t TestT, path string) *appfile.Compiled {
 	}
 
 	// Compile it!
-	result, err := appfile.Compile(f, &appfile.CompileOpts{
+	compiler, err := appfile.NewCompiler(&appfile.CompileOpts{
 		Dir: td,
 	})
+	if err != nil {
+		t.Fatal("err: ", err)
+	}
+	result, err := compiler.Compile(f)
 	if err != nil {
 		t.Fatal("err: ", err)
 	}

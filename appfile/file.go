@@ -45,6 +45,7 @@ type File struct {
 type Application struct {
 	Name         string
 	Type         string
+	Detect       bool
 	Dependencies []*Dependency `mapstructure:"dependency"`
 }
 
@@ -154,6 +155,9 @@ func (app *Application) Merge(other *Application) {
 	}
 	if len(other.Dependencies) > 0 {
 		app.Dependencies = other.Dependencies
+	}
+	if !other.Detect {
+		app.Detect = false
 	}
 }
 

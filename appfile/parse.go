@@ -123,7 +123,7 @@ func parseApplication(result *File, list *ast.ObjectList) error {
 	item := list.Items[0]
 
 	// Check for invalid keys
-	valid := []string{"name", "type", "dependency"}
+	valid := []string{"name", "type", "detect", "dependency"}
 	if err := checkHCLKeys(item.Val, valid); err != nil {
 		return multierror.Prefix(err, "application:")
 	}
@@ -133,21 +133,19 @@ func parseApplication(result *File, list *ast.ObjectList) error {
 		return err
 	}
 
-	var app Application
+	app := Application{Detect: true}
 	result.Application = &app
 	return mapstructure.WeakDecode(m, &app)
 }
 
 func parseCustomizations(result *File, list *ast.ObjectList) error {
-	list = list.Children()
-	if len(list.Items) == 0 {
-		return nil
-	}
-
 	// Go through each object and turn it into an actual result.
 	collection := make([]*Customization, 0, len(list.Items))
 	for _, item := range list.Items {
-		key := item.Keys[0].Token.Value().(string)
+		key := "app"
+		if len(item.Keys) > 0 {
+			key = item.Keys[0].Token.Value().(string)
+		}
 
 		var m map[string]interface{}
 		if err := hcl.DecodeObject(&m, item.Val); err != nil {
@@ -345,7 +343,7 @@ func checkHCLKeys(node ast.Node, valid []string) error {
 		key := item.Keys[0].Token.Value().(string)
 		if _, ok := validMap[key]; !ok {
 			result = multierror.Append(result, fmt.Errorf(
-				"invald key: %s", key))
+				"invalid key: %s", key))
 		}
 	}
 

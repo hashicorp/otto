@@ -102,13 +102,6 @@ func (opts *DevOptions) actionDestroy(rctx router.Context) error {
 	ctx.Ui.Header("Destroying the local development environment...")
 	vagrant := opts.vagrant(ctx)
 
-	if opts.Layer != nil {
-		if err := opts.Layer.RemoveEnv(vagrant); err != nil {
-			return fmt.Errorf(
-				"Error preparing dev environment: %s", err)
-		}
-	}
-
 	// If the Vagrant directory doesn't exist, then we're already deleted.
 	// So we just verify here that it exists and then call destroy only
 	// if it does.
@@ -129,6 +122,13 @@ func (opts *DevOptions) actionDestroy(rctx router.Context) error {
 	// since there are a lot of cases where Vagrant fails but still imported.
 	// We just override any prior dev.
 	ctx.Ui.Header("Deleting development environment metadata...")
+	if opts.Layer != nil {
+		if err := opts.Layer.RemoveEnv(vagrant); err != nil {
+			return fmt.Errorf(
+				"Error preparing dev environment: %s", err)
+		}
+	}
+
 	if err := ctx.Directory.DeleteDev(opts.devLookup(ctx)); err != nil {
 		return fmt.Errorf(
 			"Error deleting dev environment metadata: %s", err)
@@ -249,7 +249,13 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 	// Run it!
 	vagrant := opts.vagrant(ctx)
 	if opts.Layer != nil {
-		if err := opts.Layer.AddEnv(vagrant); err != nil {
+		if err := opts.Layer.ConfigureEnv(vagrant); err != nil {
+			return fmt.Errorf(
+				"Error preparing dev environment: %s", err)
+		}
+
+		// Configure the environment as ready
+		if err := opts.Layer.SetEnv(vagrant, envStateReady); err != nil {
 			return fmt.Errorf(
 				"Error preparing dev environment: %s", err)
 		}
@@ -284,9 +290,21 @@ func (opts *DevOptions) actionLayers(rctx router.Context) error {
 
 	ctx := rctx.(*app.Context)
 	fs := flag.NewFlagSet("otto", flag.ContinueOnError)
+	graph := fs.Bool("graph", false, "show graph")
 	prune := fs.Bool("prune", false, "prune unused layers")
 	if err := fs.Parse(rctx.RouteArgs()); err != nil {
 		return err
+	}
+
+	// Graph?
+	if *graph {
+		graph, err := opts.Layer.Graph()
+		if err != nil {
+			return err
+		}
+
+		ctx.Ui.Raw(graph.String() + "\n")
+		return nil
 	}
 
 	// Prune?
@@ -324,11 +342,22 @@ func (opts *DevOptions) vagrant(ctx *app.Context) *Vagrant {
 	if dataDir == "" {
 		dataDir = filepath.Join(ctx.LocalDir, "vagrant")
 	}
-	return &Vagrant{
+	result := &Vagrant{
 		Dir:     dir,
 		DataDir: dataDir,
 		Ui:      ctx.Ui,
 	}
+
+	// If we have a layered environment we want to configure every environment
+	// with the layer information so that we can call arbitrary commands.
+	if opts.Layer != nil {
+		if err := opts.Layer.ConfigureEnv(result); err != nil {
+			// This shouldn't fail
+			panic(err)
+		}
+	}
+
+	return result
 }
 
 func (opts *DevOptions) devLookup(ctx *app.Context) *directory.Dev {
@@ -394,16 +423,25 @@ Usage: otto dev layers [options]
 
   Manage the development environment layers.
 
+  WARNING: This is an advanced, low level command. You shouldn't need this
+  command. It is meant to give you the ability to get out of a bad situation
+  if Otto mis-manages your layers. If you run into a scenario where you need
+  to use this, please report a bug to Otto so we can think of others ways
+  around it.
+
   This command will manage the layers of the development environment.
   Otto uses layers as a mechanism for caching parts of the development
   environment that aren't often updated. This makes "otto dev" faster
   after the first call.
 
   If no options are given, the layers will be listed that this development
-  environment uses.
+  environment uses. If multiple conflicting options are given, the first
+  in alphabetical order is processed. For example, if both "-graph" and
+  "-prune" are specified, the graph will be shown.
 
 Options:
 
+  -graph       Show the full layer graph for Otto
   -prune       Delete all unused or outdated layers
 
 `
