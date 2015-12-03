@@ -1,6 +1,7 @@
 package vagrant
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -63,6 +64,13 @@ func (c *SSHCache) Cache() error {
 	}
 	if err := vagrant.Execute("ssh-config"); err != nil {
 		return err
+	}
+
+	// If we have no output, it is an error
+	if result == "" {
+		return fmt.Errorf(
+			"No SSH info found in the output of Vagrant. This is a bug somewhere.\n" +
+				"Please re-run the command with OTTO_LOG=1 and report this as a bug.")
 	}
 
 	// Write the output to the cache
