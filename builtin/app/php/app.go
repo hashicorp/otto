@@ -26,7 +26,19 @@ func (a *App) Meta() (*app.Meta, error) {
 }
 
 func (a *App) Implicit(ctx *app.Context) (*appfile.File, error) {
-	return nil, nil
+	// For Wordpress we implicitly depend on MySQL
+	var result appfile.File
+	if ctx.Tuple.App == "wordpress" {
+		result.Application = &appfile.Application{
+			Dependencies: []*appfile.Dependency{
+				&appfile.Dependency{
+					Source: "github.com/hashicorp/otto/examples/mysql",
+				},
+			},
+		}
+	}
+
+	return &result, nil
 }
 
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
@@ -100,9 +112,14 @@ func (a *App) Dev(ctx *app.Context) error {
 		}
 	}
 
+	instructions := devInstructions
+	if ctx.Tuple.App == "wordpress" {
+		instructions = devInstructionsWordpress
+	}
+
 	// Build the actual development environment
 	return vagrant.Dev(&vagrant.DevOptions{
-		Instructions: strings.TrimSpace(devInstructions),
+		Instructions: strings.TrimSpace(instructions),
 		Layer:        layered,
 	}).Route(ctx)
 }
@@ -124,6 +141,17 @@ directory where you can run "composer", "php", etc.
 You can access the environment from this machine using the IP address above.
 For example, if you start your app with 'php -S 0.0.0.0:5000', then you can
 access it using the above IP at port 5000.
+`
+
+const devInstructionsWordpress = `
+A development environment has been created for working on Wordpress.
+
+To start the web server, SSH into the development environment using
+"otto dev ssh" and run "php -S 0.0.0.0:3000". You can then visit Wordpress
+using the IP above on port 3000.
+
+MySQL has also automatically been setup. The address for MySQL is
+"mysql.service.consul", the username and password is "root".
 `
 
 const buildErr = `
