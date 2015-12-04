@@ -47,6 +47,20 @@ func TestApp(t *testing.T) {
 				},
 			},
 		},
+
+		{
+			"app-contents",
+			"foo",
+			false,
+			[]*Detector{
+				&Detector{
+					Type: "foo",
+					Contents: map[string]string{
+						"Foofile": "true",
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {
