@@ -31,7 +31,7 @@ func (c *customizations) process(d *schema.FieldData) error {
 	if gopathPath == "" {
 		var err error
 		c.Opts.Ctx.Ui.Header("Detecting application import path for GOPATH...")
-		gopathPath, err = detectImportPath(c.Opts.Ctx)
+		gopathPath, err = DetectImportPath(c.Opts.Ctx)
 		if err != nil {
 			return err
 		}

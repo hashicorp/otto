@@ -9,12 +9,12 @@ import (
 	"github.com/hashicorp/otto/app"
 )
 
-// detectImportPath will try to automatically determine the import path
+// DetectImportPath will try to automatically determine the import path
 // for the Go application under development.
 //
 // This is necessary to setup proper GOPATH directories for development
 // and builds.
-func detectImportPath(ctx *app.Context) (string, error) {
+func DetectImportPath(ctx *app.Context) (string, error) {
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
 		ctx.Ui.Message(
