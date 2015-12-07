@@ -10,6 +10,9 @@ $script_app = <<SCRIPT
 . /otto/scriptpacks/JAVA/main.sh
 otto_init
 
+oe() { $@ 2>&1 | logger -t otto > /dev/null; }
+ol() { echo "[otto] $@"; }
+
 # Make it so that `vagrant ssh` goes directly to the correct dir
 vagrant_default_cd "vagrant" "/vagrant"
 
@@ -29,7 +32,7 @@ oe sudo aptitude install software-properties-common python-software-properties -
 oe sudo aptitude update -y
 oe sudo add-apt-repository ppa:webupd8team/java -y
 oe sudo aptitude update -y
-oe sudo apt-get install -y --force-yes oracle-java8-installer oracle-java8-set-default
+oe sudo aptitude install -y --force-yes oracle-java8-installer oracle-java8-set-default
 
 ol "Downloading Gradle {{ gradle_version }}..."
 oe sudo add-apt-repository ppa:cwchien/gradle -y
@@ -42,22 +45,23 @@ oe sudo aptitude update -y
 oe sudo aptitude install maven -y
 
 ol "Downloading Scala..."
-oe sudo apt-get remove scala-library scala
-oe sudo wget www.scala-lang.org/files/archive/scala-2.10.4.deb
+oe sudo aptitude remove scala-library scala
+sudo wget www.scala-lang.org/files/archive/scala-2.10.4.deb
 oe sudo dpkg -i scala-2.10.4.deb
-oe sudo apt-get update
-oe sudo apt-get install scala
+oe sudo aptitude update
+oe sudo aptitude install scala
 
 ol "Downloading SBT..."
-oe wget http://scalasbt.artifactoryonline.com/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.12.4/sbt.deb
+wget http://scalasbt.artifactoryonline.com/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.12.4/sbt.deb
 oe sudo dpkg -i sbt.deb
-oe sudo apt-get update
-oe sudo apt-get install sbt
+oe sudo aptitude update
+oe sudo aptitude install sbt
 
 ol "Installing Git..."
 oe sudo add-apt-repository ppa:git-core/ppa -y
 oe sudo aptitude update -y
 oe sudo aptitude install git -y
+git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 SCRIPT
 {% endblock %}
