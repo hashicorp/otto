@@ -111,7 +111,8 @@ machine. The file changes will be synced to the development environment.
 
 When you're ready to build or test your project, run 'otto dev ssh'
 to enter the development environment. You'll be placed directly into the
-working directory where you can run "gradle init", "gradle build", etc.
+working directory where you can run "gradle init", "gradle build", "mvn clean",
+"mvn test" etc.
 
 You can access the environment from this machine using the IP address above.
 For example, if your app is running on port 5000, then access it using the

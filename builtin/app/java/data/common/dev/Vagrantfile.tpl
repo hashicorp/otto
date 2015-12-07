@@ -13,14 +13,51 @@ otto_init
 # Make it so that `vagrant ssh` goes directly to the correct dir
 vagrant_default_cd "vagrant" "/vagrant"
 
-# Install Java
-otto_output "Preparing to install Java..."
-java_install_prepare
-otto_output "Installing Java 8..."
-java_install_8
-otto_output "Installing Gradle {{ gradle_version }}..."
-java_gradle_install "{{ gradle_version }}"
-otto_output "Installing Maven..."
-java_maven_install
+# Configuring SSH for faster login
+if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
+  echo "UseDNS no" | sudo tee -a /etc/ssh/sshd_config >/dev/null
+  oe sudo service ssh restart
+fi
+
+export DEBIAN_FRONTEND=noninteractive
+ol "Upgrading Outdated Apt Packages..."
+oe sudo aptitude update -y
+oe sudo aptitude upgrade -y
+
+ol "Downloading Java 8..."
+oe sudo aptitude install software-properties-common python-software-properties -y
+oe sudo aptitude update -y
+oe sudo add-apt-repository ppa:webupd8team/java -y
+oe sudo aptitude update -y
+oe sudo apt-get install -y --force-yes oracle-java8-installer oracle-java8-set-default
+
+ol "Downloading Gradle {{ gradle_version }}..."
+oe sudo add-apt-repository ppa:cwchien/gradle -y
+oe sudo aptitude update -y
+oe sudo apt-cache search gradle
+oe sudo aptitude install gradle-{{ gradle_version }} -y
+
+ol "Downloading Maven..."
+oe sudo aptitude update -y
+oe sudo aptitude install maven -y
+
+ol "Downloading Scala..."
+oe sudo apt-get remove scala-library scala
+oe sudo wget www.scala-lang.org/files/archive/scala-2.10.4.deb
+oe sudo dpkg -i scala-2.10.4.deb
+oe sudo apt-get update
+oe sudo apt-get install scala
+
+ol "Downloading SBT..."
+oe wget http://scalasbt.artifactoryonline.com/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.12.4/sbt.deb
+oe sudo dpkg -i sbt.deb
+oe sudo apt-get update
+oe sudo apt-get install sbt
+
+ol "Installing Git..."
+oe sudo add-apt-repository ppa:git-core/ppa -y
+oe sudo aptitude update -y
+oe sudo aptitude install git -y
+
 SCRIPT
 {% endblock %}
