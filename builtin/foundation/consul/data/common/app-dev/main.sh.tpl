@@ -12,7 +12,7 @@ if ! command -v consul >/dev/null 2>&1; then
     oe sudo apt-get update -y
     oe sudo apt-get install -y unzip
     cd /tmp
-    oe wget https://releases.hashicorp.com/consul/0.5.2/consul_0.5.2_linux_amd64.zip -O consul.zip
+    oe wget https://releases.hashicorp.com/consul/0.6.0/consul_0.6.0_linux_amd64.zip -O consul.zip
     oe unzip consul.zip
     oe sudo chmod +x consul
     oe sudo mv consul /usr/local/bin/consul
