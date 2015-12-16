@@ -14,6 +14,10 @@
 // to function correctly.
 package scriptpack
 
+import (
+	"github.com/hashicorp/otto/helper/bindata"
+)
+
 // ScriptPack is a struct representing a single ScriptPack. This is exported
 // from the various scriptpacks.
 type ScriptPack struct {

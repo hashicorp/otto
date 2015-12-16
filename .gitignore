@@ -12,6 +12,7 @@ website/.bundle
 website/.vagrant
 website/build
 website/node_modules
+.bundle/
 .vagrant/
 *.backup
 *.log
