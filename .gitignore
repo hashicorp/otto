@@ -12,6 +12,7 @@ website/.bundle
 website/.vagrant
 website/build
 website/node_modules
+_scriptpack_staging/
 .bundle/
 .vagrant/
 *.backup

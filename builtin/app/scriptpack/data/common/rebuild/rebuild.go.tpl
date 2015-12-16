@@ -15,7 +15,7 @@ func main() {
 	// doesn't, it will show up in the error output.
 	log.SetOutput(ioutil.Discard)
 
-	path := filepath.Join("{{ path.working }}", "_staging")
+	path := filepath.Join("{{ path.working }}", "_scriptpack_staging")
 	if err := os.RemoveAll(path); err !=nil {
 		fmt.Fprintf(os.Stderr, err.Error()+"\n")
 		os.Exit(1)
