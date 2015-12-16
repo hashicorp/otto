@@ -15,6 +15,8 @@
 package scriptpack
 
 import (
+	"path/filepath"
+
 	"github.com/hashicorp/otto/helper/bindata"
 )
 
@@ -40,4 +42,12 @@ type ScriptPack struct {
 	// which itself has a conflicting named dependency, then the first
 	// one loaded will win. Be careful about this.
 	Dependencies []*ScriptPack
+}
+
+// Write writes the contents of the ScriptPack and any dependencies into
+// the given directory.
+func (s *ScriptPack) Write(dst string) error {
+	// TODO: Deps
+	dst = filepath.Join(dst, s.Name)
+	return s.Data.CopyDir(dst, "data")
 }
