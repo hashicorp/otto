@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/otto/scriptpack"
 )
 
+//go:generate go generate github.com/hashicorp/otto/builtin/scriptpack/stdlib
 //go:generate go-bindata -o=bindata.go -pkg=php -nomemcopy -nometadata ./data/...
 
 // ScriptPack is the exported ScriptPack that can be used.
