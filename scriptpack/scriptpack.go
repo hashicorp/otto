@@ -53,13 +53,30 @@ type ScriptPack struct {
 func (s *ScriptPack) Env(path string) map[string]string {
 	result := make(map[string]string)
 	result[fmt.Sprintf("SCRIPTPACK_%s_ROOT", s.Name)] = filepath.Join(path, s.Name)
+	for _, dep := range s.Dependencies {
+		for k, v := range dep.Env(path) {
+			result[k] = v
+		}
+	}
+
 	return result
 }
 
 // Write writes the contents of the ScriptPack and any dependencies into
 // the given directory.
 func (s *ScriptPack) Write(dst string) error {
-	// TODO: Deps
+	// Deps
+	for _, dep := range s.Dependencies {
+		if err := dep.Write(dst); err != nil {
+			return err
+		}
+	}
+
+	// Our own
 	dst = filepath.Join(dst, s.Name)
-	return s.Data.CopyDir(dst, "data")
+	if err := s.Data.CopyDir(dst, "data"); err != nil {
+		return err
+	}
+
+	return nil
 }

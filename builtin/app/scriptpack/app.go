@@ -95,23 +95,37 @@ func (a *App) DevDep(dst, src *app.Context) (*app.DevDep, error) {
 
 func (a *App) actionRebuild(rctx router.Context) error {
 	ctx := rctx.(*app.Context)
+	cwd := filepath.Dir(ctx.Appfile.Path)
 
 	// Get the path to the rebuild binary
 	path := filepath.Join(ctx.Dir, "rebuild", "rebuild.go")
 
 	// Run it to regenerate the contents
-	cmd := exec.Command("go", "run", path)
+	ctx.Ui.Header("Rebuilding ScriptPack data...")
+	cmd := exec.Command("go", "generate")
+	cmd.Dir = cwd
+	if err := execHelper.Run(ctx.Ui, cmd); err != nil {
+		return err
+	}
+
+	cmd = exec.Command("go", "run", path)
+	cmd.Dir = cwd
 	if err := execHelper.Run(ctx.Ui, cmd); err != nil {
 		return err
 	}
 
 	// Success
-	ctx.Ui.Raw("ScriptPack data rebuilt!\n")
+	ctx.Ui.Message("ScriptPack data rebuilt!")
 	return nil
 }
 
 func (a *App) actionTest(rctx router.Context) error {
 	ctx := rctx.(*app.Context)
+
+	// Rebuild
+	if err := a.actionRebuild(rctx); err != nil {
+		return err
+	}
 
 	// Verify we have the files
 	dir := filepath.Join(filepath.Dir(ctx.Appfile.Path), "_scriptpack_staging")

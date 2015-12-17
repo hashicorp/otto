@@ -1,6 +1,7 @@
 package php
 
 import (
+	"github.com/hashicorp/otto/builtin/scriptpack/stdlib"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/scriptpack"
 )
@@ -13,5 +14,8 @@ var ScriptPack = scriptpack.ScriptPack{
 	Data: bindata.Data{
 		Asset:    Asset,
 		AssetDir: AssetDir,
+	},
+	Dependencies: []*scriptpack.ScriptPack{
+		&stdlib.ScriptPack,
 	},
 }

@@ -4,6 +4,9 @@ php_install_prepare() {
   # Obvious: we're running non-interactive mode
   export DEBIAN_FRONTEND=noninteractive
 
+  # Update apt once
+  #apt_update_once
+
   # Our PPAs have unicode characters, so we need to set the proper lang.
   if [[ ! $(locale -a) =~ '^en_US\.utf8' ]]; then
       sudo locale-gen en_US.UTF-8
