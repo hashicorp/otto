@@ -15,6 +15,7 @@
 package scriptpack
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/hashicorp/otto/helper/bindata"
@@ -42,6 +43,17 @@ type ScriptPack struct {
 	// which itself has a conflicting named dependency, then the first
 	// one loaded will win. Be careful about this.
 	Dependencies []*ScriptPack
+}
+
+// Env returns the environment variables that should be set for this
+// ScriptPack when it is executed.
+//
+// path is the path to the root of the directory where Write was called
+// to write the ScriptPack output.
+func (s *ScriptPack) Env(path string) map[string]string {
+	result := make(map[string]string)
+	result[fmt.Sprintf("SCRIPTPACK_%s_ROOT", s.Name)] = filepath.Join(path, s.Name)
+	return result
 }
 
 // Write writes the contents of the ScriptPack and any dependencies into

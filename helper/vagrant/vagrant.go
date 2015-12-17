@@ -102,6 +102,7 @@ func (v *Vagrant) Execute(commandRaw ...string) error {
 	// Build our custom UI that we'll use that'll call the registered
 	// callbacks as well as streaming data to the UI.
 	callbacks := make(map[string]OutputCallback)
+	callbacks["invalid"] = v.uiCallback
 	callbacks["ui"] = v.uiCallback
 	for n, cb := range v.Callbacks {
 		callbacks[n] = cb
@@ -142,6 +143,14 @@ func (v *Vagrant) uiCallback(o *Output) {
 		v.Ui = &ui.Logged{Ui: &ui.Null{}}
 	}
 
+	// The output is just the data itself unless it is longer. This means
+	// that there is a type as the first element and we want the second one
+	// for the output.
+	output := o.Data[0]
+	if len(o.Data) > 1 {
+		output = o.Data[1]
+	}
+
 	// Output the things to our own UI!
-	v.Ui.Raw(o.Data[1] + "\n")
+	v.Ui.Raw(output + "\n")
 }

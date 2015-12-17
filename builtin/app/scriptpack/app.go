@@ -1,7 +1,9 @@
 package scriptpackapp
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -78,6 +80,12 @@ func (a *App) Dev(ctx *app.Context) error {
 		HelpText:     strings.TrimSpace(actionRebuildHelp),
 	}
 
+	r.Actions["scriptpack-test"] = &router.SimpleAction{
+		ExecuteFunc:  a.actionTest,
+		SynopsisText: actionTestSyn,
+		HelpText:     strings.TrimSpace(actionTestHelp),
+	}
+
 	return r.Route(ctx)
 }
 
@@ -102,6 +110,61 @@ func (a *App) actionRebuild(rctx router.Context) error {
 	return nil
 }
 
+func (a *App) actionTest(rctx router.Context) error {
+	ctx := rctx.(*app.Context)
+
+	// Verify we have the files
+	dir := filepath.Join(filepath.Dir(ctx.Appfile.Path), "_scriptpack_staging")
+	if _, err := os.Stat(dir); err != nil {
+		return fmt.Errorf(
+			"The directory with the built ScriptPack files doesn't exist!\n" +
+				"Please build this with `otto dev scriptpack-rebuild` prior to\n" +
+				"running tests.")
+	}
+
+	// Get the env vars
+	f, err := os.Open(filepath.Join(dir, "env"))
+	if err != nil {
+		return err
+	}
+	var env map[string]string
+	err = json.NewDecoder(f).Decode(&env)
+	f.Close()
+	if err != nil {
+		return err
+	}
+
+	// Build the command we execute to run the tests
+	cmd := []string{
+		"docker",
+		"run",
+		"-v /vagrant:/devroot",
+	}
+	for k, v := range env {
+		cmd = append(cmd, fmt.Sprintf("-e %s=%s", k, v))
+	}
+	cmd = append(cmd, "hashicorp/otto-scriptpack-test-ubuntu:14.04")
+	cmd = append(cmd, "bats")
+
+	// Determine the test to execute
+	testPath := "test"
+	if args := rctx.RouteArgs(); len(args) > 0 {
+		testPath = args[0]
+	}
+	if !filepath.IsAbs(testPath) {
+		testPath = fmt.Sprintf("/devroot/" + testPath)
+	}
+
+	cmd = append(cmd, testPath)
+
+	// Run the command
+	ctx.Ui.Header(fmt.Sprintf("Executing: %s", strings.Join(cmd, " ")))
+	v := &vagrant.DevOptions{}
+	v.Vagrant(ctx).Execute("ssh", "-c", strings.Join(cmd, " "))
+
+	return nil
+}
+
 const devInstructions = `
 A development environment has been created for testing this ScriptPack.
 
@@ -121,6 +184,7 @@ make a lot of sense.
 
 const (
 	actionRebuildSyn = "Rebuild ScriptPack output for dev and test"
+	actionTestSyn    = "Run ScriptPack tests"
 )
 
 const actionRebuildHelp = `
@@ -131,5 +195,17 @@ Usage: otto dev scriptpack-rebuild
 
   This command must be run before running tests after making any changes
   to the ScriptPack.
+
+`
+
+const actionTestHelp = `
+Usage: otto dev scriptpack-test [path]
+
+  Tests the ScriptPack with a BATS test file with the given path.
+  If no path is specified, the entire "test" directory is used.
+
+  If a path is given, it must be relative to the working directory.
+  If an absolute path is given, it must be convertable to a relative
+  subpath of this directory.
 
 `
