@@ -13,7 +13,7 @@ configuration and a couple simple commands. Now, let's deploy that application.
 
 To deploy an application, Otto has three steps: start an infrastructure,
 build the application, and launch the application. We'll go over each of
-these steps on as a separate page in the getting started guide.
+these steps on a separate page in the getting started guide.
 
 We'll deploy the application to [AWS](http://aws.amazon.com) for
 the getting started guide since it is popular and generally well understood, but
