@@ -52,7 +52,7 @@ oe sudo aptitude update
 oe sudo aptitude install scala
 
 ol "Downloading SBT..."
-wget http://scalasbt.artifactoryonline.com/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.12.4/sbt.deb
+wget https://bintray.com/artifact/download/sbt/debian/sbt-0.13.9.deb
 oe sudo dpkg -i sbt.deb
 oe sudo aptitude update
 oe sudo aptitude install sbt
