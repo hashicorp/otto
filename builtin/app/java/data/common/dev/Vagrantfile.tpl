@@ -50,7 +50,7 @@ oe sudo aptitude install maven -y
 
 ol "Downloading Scala..."
 oe sudo aptitude remove scala-library scala
-sudo wget www.scala-lang.org/files/archive/scala-{{ scala_version }}.deb
+oe sudo wget www.scala-lang.org/files/archive/scala-{{ scala_version }}.deb
 oe sudo dpkg -i scala-{{ scala_version }}.deb
 oe sudo aptitude update
 oe sudo aptitude install scala
