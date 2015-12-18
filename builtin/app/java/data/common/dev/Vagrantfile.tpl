@@ -27,12 +27,16 @@ ol "Upgrading Outdated Apt Packages..."
 oe sudo aptitude update -y
 oe sudo aptitude upgrade -y
 
+#ol "Possible Requirements to add ppa repos"
+#oe sudo aptitude install software-properties-common python-software-properties -y
+#oe sudo aptitude update -y
 ol "Downloading Java 8..."
-oe sudo aptitude install software-properties-common python-software-properties -y
-oe sudo aptitude update -y
 oe sudo add-apt-repository ppa:webupd8team/java -y
 oe sudo aptitude update -y
-oe sudo aptitude install -y --force-yes oracle-java8-installer oracle-java8-set-default
+# see "Auto yes to the License Agreement on sudo apt-get -y install oracle-java7-installer" http://stackoverflow.com/a/19391042
+oe echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+oe echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
+oe sudo aptitude install oracle-java8-installer oracle-java8-set-default -y
 
 ol "Downloading Gradle {{ gradle_version }}..."
 oe sudo add-apt-repository ppa:cwchien/gradle -y
