@@ -56,7 +56,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			Schema: map[string]*schema.FieldSchema{
 				"gradle_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
-					Default:     "2.8",
+					Default:     "2.9",
 					Description: "Java version to install",
 				},
 				"maven_version": &schema.FieldSchema{
