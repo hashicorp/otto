@@ -27,9 +27,9 @@ ol "Upgrading Outdated Apt Packages..."
 oe sudo aptitude update -y
 oe sudo aptitude upgrade -y
 
-#ol "Possible Requirements to add ppa repos"
-#oe sudo aptitude install software-properties-common python-software-properties -y
-#oe sudo aptitude update -y
+ol "Installing requirements to add ppa repositories for Java and Gradle installs."
+oe sudo aptitude install software-properties-common python-software-properties -y
+oe sudo aptitude update -y
 ol "Downloading Java 8..."
 oe sudo add-apt-repository ppa:webupd8team/java -y
 oe sudo aptitude update -y
