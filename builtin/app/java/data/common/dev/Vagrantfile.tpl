@@ -46,13 +46,13 @@ oe sudo aptitude install maven -y
 
 ol "Downloading Scala..."
 oe sudo aptitude remove scala-library scala
-sudo wget www.scala-lang.org/files/archive/scala-2.10.4.deb
-oe sudo dpkg -i scala-2.10.4.deb
+sudo wget www.scala-lang.org/files/archive/scala-{{ scala_version }}.deb
+oe sudo dpkg -i scala-{{ scala_version }}.deb
 oe sudo aptitude update
 oe sudo aptitude install scala
 
 ol "Downloading SBT..."
-wget https://bintray.com/artifact/download/sbt/debian/sbt-0.13.9.deb
+wget https://bintray.com/artifact/download/sbt/debian/sbt-{{ sbt_version }}.deb
 oe sudo dpkg -i sbt.deb
 oe sudo aptitude update
 oe sudo aptitude install sbt

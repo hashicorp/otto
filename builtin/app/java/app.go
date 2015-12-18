@@ -64,6 +64,16 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 					Default:     "3.3.9",
 					Description: "Maven version to install",
 				},
+				"scala_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "2.10.4",
+					Description: "Scala version to install",
+				},
+				"sbt_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "0.13.9",
+					Description: "sbt version to install",
+				},
 			},
 		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
