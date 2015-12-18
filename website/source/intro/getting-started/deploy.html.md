@@ -47,7 +47,7 @@ Otto exposes unified workflow from development to deployment for any
 application type.
 
 As technology improves or best practices changes, these will be
-encoded into Otto and Otto will roll out these change for you. For example,
+encoded into Otto and Otto will roll out these changes for you. For example,
 if cheaper or more optimized hardware becomes available in AWS, then
 Otto can begin to use those instead.
 

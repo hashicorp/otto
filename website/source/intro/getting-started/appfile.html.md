@@ -94,7 +94,7 @@ another Appfile, then Otto will assume you want to deploy to the same
 infrastructure.
 
 There is another section that an Appfile can contain which we haven't
-used yet: **customization**. The customation sections change the behavior
+used yet: **customization**. The customization sections change the behavior
 of Otto. We'll see customizations in use in an upcoming step in the
 getting started guide.
 
