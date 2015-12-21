@@ -37,7 +37,7 @@ echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | su
 oe sudo add-apt-repository ppa:webupd8team/java -y
 oe sudo aptitude update -y
 oe sudo aptitude install oracle-java8-installer -y
-echo "Setting environment variables for Java 8.."
+ol "Setting environment variables for Java 8.."
 oe sudo aptitude install oracle-java8-set-default -y
 
 ol "Downloading Gradle {{ gradle_version }}..."
@@ -58,7 +58,7 @@ oe sudo aptitude update
 oe sudo aptitude install scala
 
 ol "Downloading SBT..."
-wget https://bintray.com/artifact/download/sbt/debian/sbt-{{ sbt_version }}.deb
+oe wget https://bintray.com/artifact/download/sbt/debian/sbt-{{ sbt_version }}.deb
 oe sudo dpkg -i sbt.deb
 oe sudo aptitude update
 oe sudo aptitude install sbt
