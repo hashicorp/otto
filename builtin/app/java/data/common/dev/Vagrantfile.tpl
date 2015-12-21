@@ -4,7 +4,8 @@
   config.vm.provision "shell", inline: $script_app
 {% endblock %}
 
-{% block footer %}
+end
+
 $script_app = <<SCRIPT
 . /otto/scriptpacks/STDLIB/main.sh
 . /otto/scriptpacks/JAVA/main.sh
@@ -26,17 +27,18 @@ export DEBIAN_FRONTEND=noninteractive
 ol "Upgrading Outdated Apt Packages..."
 oe sudo aptitude update -y
 oe sudo aptitude upgrade -y
+oe sudo do-release-upgrade -f DistUpgradeViewNonInteractive
 
 ol "Installing requirements to add ppa repositories for Java and Gradle installs."
 oe sudo aptitude install software-properties-common python-software-properties -y
-oe sudo aptitude update -y
+
 ol "Downloading Java 8..."
+echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 oe sudo add-apt-repository ppa:webupd8team/java -y
 oe sudo aptitude update -y
-# see "Auto yes to the License Agreement on sudo apt-get -y install oracle-java7-installer" http://stackoverflow.com/a/19391042
-oe echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
-oe echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
-oe sudo aptitude install oracle-java8-installer oracle-java8-set-default -y
+oe sudo aptitude install oracle-java8-installer -y
+echo "Setting environment variables for Java 8.."
+oe sudo aptitude install oracle-java8-set-default -y
 
 ol "Downloading Gradle {{ gradle_version }}..."
 oe sudo add-apt-repository ppa:cwchien/gradle -y
