@@ -3,7 +3,7 @@ application {
     type = "docker-external"
 }
 
-customization {
+customization "docker" {
     image = "postgres:9.5"
     run_args = "-p 5432:5432"
 }
