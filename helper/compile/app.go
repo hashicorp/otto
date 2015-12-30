@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/oneline"
+	"github.com/hashicorp/otto/scriptpack"
 )
 
 // AppOptions are the options for compiling an application.
@@ -35,6 +36,14 @@ type AppOptions struct {
 	// Template data should also be set on this. This will be modified with
 	// default template data if those keys are not set.
 	Bindata *bindata.Data
+
+	// ScriptPacks are a list of ScriptPacks that this app wants available
+	// to it. Each of these scriptpacks and all of the dependencies will be
+	// expanded into the compiled directory and the paths to them will be
+	// available in the Bindata context.
+	//
+	// The uploaded ScriptPacks are tar.gzipped.
+	ScriptPacks []*scriptpack.ScriptPack
 
 	// Customization is used to configure the customizations for this
 	// application. See the Customization type docs for more info.
@@ -61,49 +70,9 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 
 	ctx := opts.Ctx
 
-	// Setup the basic templating data. We put this into the "data" local
-	// var just so that it is easier to reference.
-	//
-	// The exact default data put into the context is documented above.
-	data := opts.Bindata
-	if data.Context == nil {
-		data.Context = make(map[string]interface{})
-		opts.Bindata = data
-	}
-
-	data.Context["app_type"] = ctx.Appfile.Application.Type
-	data.Context["name"] = ctx.Appfile.Application.Name
-	data.Context["dev_fragments"] = ctx.DevDepFragments
-	data.Context["dev_ip_address"] = ctx.DevIPAddress
-
-	if data.Context["path"] == nil {
-		data.Context["path"] = make(map[string]string)
-	}
-	pathMap := data.Context["path"].(map[string]string)
-	pathMap["cache"] = ctx.CacheDir
-	pathMap["compiled"] = ctx.Dir
-	pathMap["working"] = filepath.Dir(ctx.Appfile.Path)
-	foundationDirsContext := map[string][]string{
-		"dev":     make([]string, len(ctx.FoundationDirs)),
-		"dev_dep": make([]string, len(ctx.FoundationDirs)),
-		"build":   make([]string, len(ctx.FoundationDirs)),
-		"deploy":  make([]string, len(ctx.FoundationDirs)),
-	}
-	for i, dir := range ctx.FoundationDirs {
-		foundationDirsContext["dev"][i] = filepath.Join(dir, "app-dev")
-		foundationDirsContext["dev_dep"][i] = filepath.Join(dir, "app-dev-dep")
-		foundationDirsContext["build"][i] = filepath.Join(dir, "app-build")
-		foundationDirsContext["deploy"][i] = filepath.Join(dir, "app-deploy")
-	}
-	data.Context["foundation_dirs"] = foundationDirsContext
-
-	// Setup the shared data
-	if data.SharedExtends == nil {
-		data.SharedExtends = make(map[string]*bindata.Data)
-	}
-	data.SharedExtends["compile"] = &bindata.Data{
-		Asset:    Asset,
-		AssetDir: AssetDir,
+	// Prepare bindata context
+	if err := opts.prepareBindata(); err != nil {
+		return nil, err
 	}
 
 	// Process the customizations!
@@ -111,6 +80,11 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 		ctx.Appfile.Customization,
 		opts.Customization)
 	if err != nil {
+		return nil, err
+	}
+
+	// Upload the ScriptPacks
+	if err := opts.compileScriptPacks(); err != nil {
 		return nil, err
 	}
 
@@ -122,7 +96,7 @@ func App(opts *AppOptions) (*app.CompileResult, error) {
 	}
 	for _, dir := range bindirs {
 		// Copy all the common files that exist
-		if err := data.CopyDir(ctx.Dir, dir); err != nil {
+		if err := opts.Bindata.CopyDir(ctx.Dir, dir); err != nil {
 			// Ignore any directories that don't exist
 			if strings.Contains(err.Error(), "not found") {
 				continue
@@ -217,6 +191,91 @@ func appFoundations(opts *AppOptions) error {
 			"data/internal/foundation-layer.Vagrantfile.tpl")
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func (a *AppOptions) prepareBindata() error {
+	ctx := a.Ctx
+
+	// Setup the basic templating data. We put this into the "data" local
+	// var just so that it is easier to reference.
+	data := a.Bindata
+	if data.Context == nil {
+		data.Context = make(map[string]interface{})
+		a.Bindata = data
+	}
+
+	data.Context["app_type"] = ctx.Appfile.Application.Type
+	data.Context["name"] = ctx.Appfile.Application.Name
+	data.Context["dev_fragments"] = ctx.DevDepFragments
+	data.Context["dev_ip_address"] = ctx.DevIPAddress
+
+	if data.Context["path"] == nil {
+		data.Context["path"] = make(map[string]string)
+	}
+	pathMap := data.Context["path"].(map[string]string)
+	pathMap["cache"] = ctx.CacheDir
+	pathMap["compiled"] = ctx.Dir
+	pathMap["working"] = filepath.Dir(ctx.Appfile.Path)
+	foundationDirsContext := map[string][]string{
+		"dev":     make([]string, len(ctx.FoundationDirs)),
+		"dev_dep": make([]string, len(ctx.FoundationDirs)),
+		"build":   make([]string, len(ctx.FoundationDirs)),
+		"deploy":  make([]string, len(ctx.FoundationDirs)),
+	}
+	for i, dir := range ctx.FoundationDirs {
+		foundationDirsContext["dev"][i] = filepath.Join(dir, "app-dev")
+		foundationDirsContext["dev_dep"][i] = filepath.Join(dir, "app-dev-dep")
+		foundationDirsContext["build"][i] = filepath.Join(dir, "app-build")
+		foundationDirsContext["deploy"][i] = filepath.Join(dir, "app-deploy")
+	}
+	data.Context["foundation_dirs"] = foundationDirsContext
+
+	// ScriptPack paths
+	spPaths := make([]map[string]interface{}, len(a.ScriptPacks))
+	for i, sp := range a.ScriptPacks {
+		spPaths[i] = map[string]interface{}{
+			"name": sp.Name,
+			"path": filepath.Join(
+				ctx.Dir, "scriptpacks", fmt.Sprintf("%s.tar.gz", sp.Name)),
+		}
+	}
+	data.Context["scriptpacks"] = spPaths
+
+	// Setup the shared data
+	if data.SharedExtends == nil {
+		data.SharedExtends = make(map[string]*bindata.Data)
+	}
+	data.SharedExtends["compile"] = &bindata.Data{
+		Asset:    Asset,
+		AssetDir: AssetDir,
+	}
+
+	return nil
+}
+
+func (a *AppOptions) compileScriptPacks() error {
+	// Create the directory to hold the scriptpacks
+	root := filepath.Join(a.Ctx.Dir, "scriptpacks")
+	if _, err := os.Stat(root); err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(root, 0755)
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// Go through each and write it out
+	for _, sp := range a.ScriptPacks {
+		path := filepath.Join(root, fmt.Sprintf("%s.tar.gz", sp.Name))
+		if err := sp.WriteArchive(path); err != nil {
+			return fmt.Errorf(
+				"Error writing ScriptPack '%s': %s", sp.Name, err)
 		}
 	}
 

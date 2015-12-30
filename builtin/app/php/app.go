@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
+	phpSP "github.com/hashicorp/otto/builtin/scriptpack/php"
+	stdSP "github.com/hashicorp/otto/builtin/scriptpack/stdlib"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/oneline"
@@ -14,6 +16,7 @@ import (
 	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
+	"github.com/hashicorp/otto/scriptpack"
 )
 
 //go:generate go-bindata -pkg=phpapp -nomemcopy -nometadata ./data/...
@@ -53,6 +56,10 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			Asset:    Asset,
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
+		},
+		ScriptPacks: []*scriptpack.ScriptPack{
+			&stdSP.ScriptPack,
+			&phpSP.ScriptPack,
 		},
 		Customization: (&compile.Customization{
 			Callback: custom.process,

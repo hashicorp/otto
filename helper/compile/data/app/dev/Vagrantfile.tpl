@@ -36,6 +36,14 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "cd #{dir} && bash #{dir}/main.sh"
   {% endfor %}
 
+  # ScriptPacks
+  dir = "/otto/scriptpacks"
+  config.vm.provision "shell", inline: "sudo rm -rf #{dir}; sudo mkdir -p #{dir}; sudo chmod 0777 #{dir}"
+  {% for sp in scriptpacks %}
+  config.vm.provision "file", source: "{{ sp.path }}", destination: "#{dir}/{{ sp.name }}.tar.gz"
+  config.vm.provision "shell", inline: "cd #{dir}; sudo mkdir {{ sp.name }}; sudo tar xzf {{ sp.name }}.tar.gz -C {{ sp.name }}"
+  {% endfor %}
+
   # Load all our fragments here for any dependencies.
   {% for fragment in dev_fragments %}
   {{ fragment|read }}
@@ -62,7 +70,7 @@ Vagrant.configure("2") do |config|
   {% block vagrant_config %}{% endblock %}
 end
 
-{% if dev_extra_vagrantfile != "" %}
+{% if dev_extra_vagrantfile and dev_extra_vagrantfile != "" %}
 # Extra Vagrantfile specified in Appfile manually
 load "{{ dev_extra_vagrantfile }}"
 {% endif %}

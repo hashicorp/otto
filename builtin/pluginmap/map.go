@@ -11,6 +11,7 @@ import (
 	appNode "github.com/hashicorp/otto/builtin/app/node"
 	appPHP "github.com/hashicorp/otto/builtin/app/php"
 	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
+	appScriptPack "github.com/hashicorp/otto/builtin/app/scriptpack"
 )
 
 var Map = map[string]*plugin.ServeOpts{
@@ -20,4 +21,5 @@ var Map = map[string]*plugin.ServeOpts{
 	"app-node":            &plugin.ServeOpts{AppFunc: appNode.AppFactory},
 	"app-php":             &plugin.ServeOpts{AppFunc: appPHP.AppFactory},
 	"app-ruby":            &plugin.ServeOpts{AppFunc: appRuby.AppFactory},
+	"app-scriptpack":      &plugin.ServeOpts{AppFunc: appScriptPack.AppFactory},
 }

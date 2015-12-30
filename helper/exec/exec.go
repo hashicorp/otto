@@ -22,6 +22,7 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 	cmd.Stderr = out_w
 
 	// Copy output to the UI until we can't.
+	output := false
 	uiDone := make(chan struct{})
 	go func() {
 		defer close(uiDone)
@@ -29,6 +30,7 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 		for {
 			n, err := out_r.Read(buf[:])
 			if n > 0 {
+				output = true
 				uiVal.Raw(string(buf[:n]))
 			}
 
@@ -57,8 +59,11 @@ func Run(uiVal ui.Ui, cmd *exec.Cmd) error {
 	out_w.Close()
 	<-uiDone
 
-	// Output one extra newline to separate output from Otto
-	uiVal.Message("")
+	if output {
+		// Output one extra newline to separate output from Otto. We only
+		// do this if there was any output to begin with.
+		uiVal.Message("")
+	}
 
 	// Return the output from the command
 	return err

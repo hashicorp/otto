@@ -86,6 +86,33 @@ func Dev(opts *DevOptions) *router.Router {
 	}
 }
 
+func (opts *DevOptions) Vagrant(ctx *app.Context) *Vagrant {
+	dir := opts.Dir
+	if dir == "" {
+		dir = filepath.Join(ctx.Dir, "dev")
+	}
+	dataDir := opts.DataDir
+	if dataDir == "" {
+		dataDir = filepath.Join(ctx.LocalDir, "vagrant")
+	}
+	result := &Vagrant{
+		Dir:     dir,
+		DataDir: dataDir,
+		Ui:      ctx.Ui,
+	}
+
+	// If we have a layered environment we want to configure every environment
+	// with the layer information so that we can call arbitrary commands.
+	if opts.Layer != nil {
+		if err := opts.Layer.ConfigureEnv(result); err != nil {
+			// This shouldn't fail
+			panic(err)
+		}
+	}
+
+	return result
+}
+
 func (opts *DevOptions) actionAddress(rctx router.Context) error {
 	ctx := rctx.(*app.Context)
 	ctx.Ui.Raw(ctx.DevIPAddress + "\n")
@@ -100,7 +127,7 @@ func (opts *DevOptions) actionDestroy(rctx router.Context) error {
 	}
 
 	ctx.Ui.Header("Destroying the local development environment...")
-	vagrant := opts.vagrant(ctx)
+	vagrant := opts.Vagrant(ctx)
 
 	// If the Vagrant directory doesn't exist, then we're already deleted.
 	// So we just verify here that it exists and then call destroy only
@@ -152,7 +179,7 @@ func (opts *DevOptions) actionHalt(rctx router.Context) error {
 
 	ctx.Ui.Header("Halting the the local development environment...")
 
-	if err := opts.vagrant(ctx).Execute("halt"); err != nil {
+	if err := opts.Vagrant(ctx).Execute("halt"); err != nil {
 		return err
 	}
 
@@ -171,7 +198,7 @@ func (opts *DevOptions) actionRaw(rctx router.Context) error {
 	ctx.Ui.Header(fmt.Sprintf(
 		"Executing: 'vagrant %s'", strings.Join(ctx.ActionArgs, " ")))
 
-	if err := opts.vagrant(ctx).Execute(ctx.ActionArgs...); err != nil {
+	if err := opts.Vagrant(ctx).Execute(ctx.ActionArgs...); err != nil {
 		return err
 	}
 
@@ -247,7 +274,7 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 	}
 
 	// Run it!
-	vagrant := opts.vagrant(ctx)
+	vagrant := opts.Vagrant(ctx)
 	if opts.Layer != nil {
 		if err := opts.Layer.ConfigureEnv(vagrant); err != nil {
 			return fmt.Errorf(
@@ -333,33 +360,6 @@ func (opts *DevOptions) actionLayers(rctx router.Context) error {
 	return nil
 }
 
-func (opts *DevOptions) vagrant(ctx *app.Context) *Vagrant {
-	dir := opts.Dir
-	if dir == "" {
-		dir = filepath.Join(ctx.Dir, "dev")
-	}
-	dataDir := opts.DataDir
-	if dataDir == "" {
-		dataDir = filepath.Join(ctx.LocalDir, "vagrant")
-	}
-	result := &Vagrant{
-		Dir:     dir,
-		DataDir: dataDir,
-		Ui:      ctx.Ui,
-	}
-
-	// If we have a layered environment we want to configure every environment
-	// with the layer information so that we can call arbitrary commands.
-	if opts.Layer != nil {
-		if err := opts.Layer.ConfigureEnv(result); err != nil {
-			// This shouldn't fail
-			panic(err)
-		}
-	}
-
-	return result
-}
-
 func (opts *DevOptions) devLookup(ctx *app.Context) *directory.Dev {
 	return &directory.Dev{Lookup: directory.Lookup{AppID: ctx.Appfile.ID}}
 }
@@ -367,7 +367,7 @@ func (opts *DevOptions) devLookup(ctx *app.Context) *directory.Dev {
 func (opts *DevOptions) sshCache(ctx *app.Context) *SSHCache {
 	return &SSHCache{
 		Path:    filepath.Join(ctx.CacheDir, "dev_ssh_cache"),
-		Vagrant: opts.vagrant(ctx),
+		Vagrant: opts.Vagrant(ctx),
 	}
 }
 
