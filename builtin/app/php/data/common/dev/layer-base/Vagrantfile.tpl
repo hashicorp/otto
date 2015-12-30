@@ -18,7 +18,7 @@ set -e
 otto_init
 
 # Make it so that `vagrant ssh` goes directly to the correct dir
-echo "cd /vagrant" >> /home/vagrant/.bashrc
+vagrant_default_cd "vagrant" "/vagrant"
 
 # Configuring SSH for faster login
 vagrant_config_fast_ssh

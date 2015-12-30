@@ -5,3 +5,10 @@ vagrant_config_fast_ssh() {
     oe sudo service ssh restart
   fi
 }
+
+# vagrant_default_cd sets the default cd directory for the given user
+vagrant_default_cd() {
+  local user=$1
+  local dir=$2
+  echo "cd ${dir}" >> /home/${user}/.bashrc
+}
