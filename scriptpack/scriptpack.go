@@ -16,8 +16,12 @@ package scriptpack
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/otto/helper/bindata"
 )
 
@@ -79,4 +83,41 @@ func (s *ScriptPack) Write(dst string) error {
 	}
 
 	return nil
+}
+
+// WriteArchive writes the contents of the ScriptPack as a tar gzip to the
+// given path.
+func (s *ScriptPack) WriteArchive(dst string) error {
+	// Let's just open the file we're going to write to first to verify
+	// we can write there since everything else is pointless if we can't.
+	f, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	// Create a temporary directory to store the raw ScriptPack data
+	td, err := ioutil.TempDir("", "otto")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(td)
+
+	// Write the ScriptPack
+	if err := s.Write(td); err != nil {
+		return err
+	}
+
+	// Archive this ScriptPack
+	a, err := archive.CreateArchive(td, &archive.ArchiveOpts{
+		VCS: false,
+	})
+	if err != nil {
+		return err
+	}
+	defer a.Close()
+
+	// Write the archive to final path
+	_, err = io.Copy(f, a)
+	return err
 }
