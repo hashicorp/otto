@@ -90,7 +90,10 @@ func (s *ScriptPack) Write(dst string) error {
 	}
 
 	// Write the main file which has the env vars in it
-	f, err := os.Create(filepath.Join(dst, "main.sh"))
+	f, err := os.OpenFile(
+		filepath.Join(dst, "main.sh"),
+		os.O_CREATE|os.O_TRUNC|os.O_WRONLY,
+		0755)
 	if err != nil {
 		return err
 	}
