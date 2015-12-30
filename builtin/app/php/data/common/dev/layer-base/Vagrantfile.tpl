@@ -33,8 +33,6 @@ oe sudo apt-get install -y \
   curl
 
 otto_output "Installing Composer..."
-cd /tmp
-curl -sS https://getcomposer.org/installer | php
-oe sudo mv composer.phar /usr/local/bin/composer
+php_install_composer
 SCRIPT
 {% endblock %}
