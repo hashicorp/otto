@@ -84,20 +84,12 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 // Build ...
 func (a *App) Build(ctx *app.Context) error {
 	return packer.Build(ctx, &packer.BuildOptions{
-		InfraOutputMap: map[string]string{
-			"region": "aws_region",
-		},
 	})
 }
 
 // Deploy ...
 func (a *App) Deploy(ctx *app.Context) error {
 	return terraform.Deploy(&terraform.DeployOptions{
-		InfraOutputMap: map[string]string{
-			"region":         "aws_region",
-			"subnet-private": "private_subnet_id",
-			"subnet-public":  "public_subnet_id",
-		},
 	}).Route(ctx)
 }
 
