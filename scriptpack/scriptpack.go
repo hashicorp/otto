@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"text/template"
 
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/otto/helper/bindata"
@@ -69,6 +70,13 @@ func (s *ScriptPack) Env(path string) map[string]string {
 // Write writes the contents of the ScriptPack and any dependencies into
 // the given directory.
 func (s *ScriptPack) Write(dst string) error {
+	// Build the names of all scriptpacks
+	spNames := make([]string, 1, len(s.Dependencies)+1)
+	spNames[0] = s.Name
+	for _, dep := range s.Dependencies {
+		spNames = append(spNames, dep.Name)
+	}
+
 	// Deps
 	for _, dep := range s.Dependencies {
 		if err := dep.Write(dst); err != nil {
@@ -77,12 +85,20 @@ func (s *ScriptPack) Write(dst string) error {
 	}
 
 	// Our own
-	dst = filepath.Join(dst, s.Name)
-	if err := s.Data.CopyDir(dst, "data"); err != nil {
+	if err := s.Data.CopyDir(filepath.Join(dst, s.Name), "data"); err != nil {
 		return err
 	}
 
-	return nil
+	// Write the main file which has the env vars in it
+	f, err := os.Create(filepath.Join(dst, "main.sh"))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	tpl := template.Must(template.New("root").Parse(mainShTpl))
+	return tpl.Execute(f, map[string]interface{}{
+		"scriptpacks": spNames,
+	})
 }
 
 // WriteArchive writes the contents of the ScriptPack as a tar gzip to the
@@ -121,3 +137,21 @@ func (s *ScriptPack) WriteArchive(dst string) error {
 	_, err = io.Copy(f, a)
 	return err
 }
+
+const mainShTpl = `
+#!/bin/bash
+
+# Determine the directory of this script
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Set the env vars
+{{range .scriptpacks}}
+export SCRIPTPACK_{{ . }}_ROOT="${DIR}/{{ . }}"
+{{end}}
+`

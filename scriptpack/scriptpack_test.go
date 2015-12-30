@@ -63,7 +63,7 @@ func TestScriptPackWriteArchive(t *testing.T) {
 
 	// Verify some files exist
 	files := testArchive(t, archivePath, false)
-	expected := []string{"foo/", "foo/hello.txt"}
+	expected := []string{"foo/", "foo/hello.txt", "main.sh"}
 	if !reflect.DeepEqual(files, expected) {
 		t.Fatalf("bad: %#v", files)
 	}
