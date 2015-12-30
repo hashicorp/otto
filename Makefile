@@ -60,7 +60,7 @@ vet:
 	@go tool vet $(VETARGS) . ; if [ $$? -eq 1 ]; then \
 		echo ""; \
 		echo "Vet found suspicious constructs. Please check the reported constructs"; \
-		echo "and fix them if necessary before submitting the code for reviewal."; \
+		echo "and fix them if necessary before submitting the code for review."; \
 	fi
 
 # generate runs `go generate` to build the dynamically generated
