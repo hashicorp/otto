@@ -5,7 +5,7 @@ php_install_prepare() {
   export DEBIAN_FRONTEND=noninteractive
 
   # Update apt once
-  #apt_update_once
+  apt_update_once
 
   # Our PPAs have unicode characters, so we need to set the proper lang.
   if [[ ! $(locale -a) =~ '^en_US\.utf8' ]]; then
@@ -14,6 +14,29 @@ php_install_prepare() {
   export LANG=en_US.UTF-8
 
   sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
+}
+
+# php_install installs an arbitrary PHP version given in the argument
+php_install() {
+    local version="$1"
+    case $version in
+    7.0)
+        php_install_prepare
+        php_install_7_0
+        ;;
+    5.6)
+        php_install_prepare
+        php_install_5_6
+        ;;
+    5.5)
+        php_install_prepare
+        php_install_5_5
+        ;;
+    *)
+        echo "Unknown PHP version: ${version}"
+        exit 1
+        ;;
+    esac
 }
 
 # php_install_5_5 installs PHP 5.5.x
