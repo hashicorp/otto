@@ -3,3 +3,8 @@
 otto_output() {
     echo "[otto] $@"
 }
+
+# otto_log sends the given output to the syslog
+otto_log() {
+    echo "[otto] $@" | logger -t otto >/dev/null
+}

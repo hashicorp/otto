@@ -100,6 +100,7 @@ func (s *ScriptPack) Write(dst string) error {
 	defer f.Close()
 	tpl := template.Must(template.New("root").Parse(mainShTpl))
 	return tpl.Execute(f, map[string]interface{}{
+		"root":        s.Name,
 		"scriptpacks": spNames,
 	})
 }
@@ -157,4 +158,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 {{range .scriptpacks}}
 export SCRIPTPACK_{{ . }}_ROOT="${DIR}/{{ . }}"
 {{end}}
+
+# Load the main of our entrypoint
+. ${SCRIPTPACK_{{.root}}_ROOT}/main.sh
 `

@@ -8,10 +8,14 @@
 {% block footer %}
 $script_app = <<SCRIPT
 #!/bin/bash
+set -e
 
 # Setup our scriptpacks
 . /otto/scriptpacks/STDLIB/main.sh
 . /otto/scriptpacks/PHP/main.sh
+
+# Initialize
+otto_init
 
 # Make it so that `vagrant ssh` goes directly to the correct dir
 echo "cd /vagrant" >> /home/vagrant/.bashrc
@@ -21,7 +25,7 @@ vagrant_config_fast_ssh
 
 # Install PHP
 otto_output "Installing PHP Version {{php_version}} "
-php_install "{{php_version}}"
+oe php_install "{{php_version}}"
 
 otto_output "Installing supporting packages..."
 oe sudo apt-get install -y \
