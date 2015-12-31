@@ -10,3 +10,9 @@ apt_update_once() {
 apt_update() {
     sudo apt-get update
 }
+
+# apt_install is a helper to install packages silently
+apt_install() {
+    export DEBIAN_FRONTEND=noninteractive
+    oe sudo apt-get install -y $@
+}

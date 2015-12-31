@@ -10,62 +10,36 @@
 
 {% block footer %}
 $script_locale = <<SCRIPT
-  oe() { eval "$@" 2>&1 | logger -t otto > /dev/null; }
-  ol() { echo "[otto] $@"; }
+. /otto/scriptpacks/STDLIB/main.sh
+. /otto/scriptpacks/RUBY/main.sh
 
-  ol "Setting locale to en_US.UTF-8..."
-  oe locale-gen en_US.UTF-8
-  oe update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+otto_init
+otto_init_locale
 SCRIPT
 
 $script_app = <<SCRIPT
-set -o nounset -o errexit -o pipefail -o errtrace
-
-error() {
-   local sourcefile=$1
-   local lineno=$2
-   echo "ERROR at ${sourcefile}:${lineno}; Last logs:"
-   grep otto /var/log/syslog | tail -n 20
-}
-trap 'error "${BASH_SOURCE}" "${LINENO}"' ERR
-
-# otto-exec: execute command with output logged but not displayed
-oe() { eval "$@" 2>&1 | logger -t otto > /dev/null; }
-
-# otto-log: output a prefixed message
-ol() { echo "[otto] $@"; }
+# Load scriptpacks, init
+. /otto/scriptpacks/STDLIB/main.sh
+. /otto/scriptpacks/RUBY/main.sh
+otto_init
 
 # Configuring SSH for faster login
-if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
-  echo "UseDNS no" | sudo tee -a /etc/ssh/sshd_config >/dev/null
-  oe sudo service ssh restart
-fi
+vagrant_config_fast_ssh
 
-export RUBY_INSTALL_VERSION="0.5.0"
+# Some params
 export RUBY_VERSION="{{ ruby_version }}"
 
-ol "Adding apt repositories and updating..."
-oe sudo apt-get update
+ol "Updating apt..."
+apt_update_once
 
 ol "Installing supporting packages..."
-export DEBIAN_FRONTEND=noninteractive
-oe sudo apt-get install -y bzr git mercurial build-essential nodejs
+apt_install bzr git mercurial build-essential nodejs
 
-ol "Installing ruby-install v${RUBY_INSTALL_VERSION}..."
-wget -O ruby-install-${RUBY_INSTALL_VERSION}.tar.gz \
-  https://github.com/postmodern/ruby-install/archive/v${RUBY_INSTALL_VERSION}.tar.gz
-tar -xzvf ruby-install-${RUBY_INSTALL_VERSION}.tar.gz
-cd ruby-install-${RUBY_INSTALL_VERSION}/
-sudo make install
+ol "Installing ruby-install..."
+ruby_install_rubyinstall
 
 ol "Installing Ruby ${RUBY_VERSION}. This can take a few minutes..."
-oe sudo ruby-install ruby ${RUBY_VERSION} -- --disable-install-rdoc
-
-ol "Configuring Ruby environment..."
-echo 'export GEM_HOME=$HOME/.gem' >> $HOME/.ruby_env
-echo "export PATH=\$HOME/.gem/bin:/opt/rubies/ruby-${RUBY_VERSION}/bin:\$PATH" >> $HOME/.ruby_env
-echo 'source $HOME/.ruby_env' >> $HOME/.profile
-source $HOME/.ruby_env
+ruby_install ruby-${RUBY_VERSION}
 
 ol "Installing Bundler..."
 oe gem install bundler --no-document

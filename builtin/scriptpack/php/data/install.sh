@@ -8,10 +8,7 @@ php_install_prepare() {
   apt_update_once
 
   # Our PPAs have unicode characters, so we need to set the proper lang.
-  if [[ ! $(locale -a) =~ '^en_US\.utf8' ]]; then
-      sudo locale-gen en_US.UTF-8
-  fi
-  export LANG=en_US.UTF-8
+  otto_init_locale
 
   sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
 }

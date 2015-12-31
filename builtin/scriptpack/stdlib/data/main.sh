@@ -5,6 +5,9 @@
 . ${SCRIPTPACK_STDLIB_ROOT}/execute.sh
 . ${SCRIPTPACK_STDLIB_ROOT}/error.sh
 . ${SCRIPTPACK_STDLIB_ROOT}/output.sh
+
+# Basics
+. ${SCRIPTPACK_STDLIB_ROOT}/locale.sh
 . ${SCRIPTPACK_STDLIB_ROOT}/vagrant.sh
 
 # Ubuntu
