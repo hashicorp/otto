@@ -102,7 +102,7 @@ func (u *vagrantUi) Raw(msg string) {
 		cb, ok := u.Callbacks[parts[2]]
 		if !ok {
 			// No callback registered for this type, drop it
-			return
+			continue
 		}
 
 		// We have a callback, construct the output!

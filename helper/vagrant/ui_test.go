@@ -170,9 +170,17 @@ func TestVagrantUi(t *testing.T) {
 		},
 
 		"invalid line": {
-			[]string{"ui"},
+			[]string{"invalid", "ui"},
 			[]string{"foo\n1376289459,,ui,say,foo%!(VAGRANT_COMMA)bar"},
 			[]*Output{
+				&Output{
+					Timestamp: "",
+					Target:    "",
+					Type:      "invalid",
+					Data: []string{
+						"foo",
+					},
+				},
 				&Output{
 					Timestamp: "1376289459",
 					Target:    "",
