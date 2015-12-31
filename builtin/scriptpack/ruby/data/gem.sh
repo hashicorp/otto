@@ -3,7 +3,7 @@ ruby_gemfile_contains() {
     local name=$1
 
     if [ -f Gemfile.lock ]; then
-        grep -e " $name \(" Gemfile.lock > /dev/null
+        grep -e " $name (" Gemfile.lock > /dev/null
         return $?
     fi
 
