@@ -16,7 +16,7 @@
 # Function for initializing any scripts. We put this in a function because
 # our BATS tests don't call this (it messes them up).
 otto_init() {
-  set -o nounset -o errexit -o pipefail -o errtrace
+  set -o errexit -o pipefail -o errtrace
 }
 
 # Setup a trap for all errors to be logged

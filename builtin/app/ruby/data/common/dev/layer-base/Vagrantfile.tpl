@@ -29,22 +29,20 @@ vagrant_config_fast_ssh
 # Some params
 export RUBY_VERSION="{{ ruby_version }}"
 
-ol "Updating apt..."
+otto_output "Updating apt..."
 apt_update_once
 
-ol "Installing supporting packages..."
+otto_output "Installing supporting packages..."
 apt_install bzr git mercurial build-essential nodejs
 
-ol "Installing ruby-install..."
-ruby_install_rubyinstall
-
-ol "Installing Ruby ${RUBY_VERSION}. This can take a few minutes..."
+otto_output "Installing Ruby ${RUBY_VERSION}. This can take a few minutes..."
+ruby_install_prepare
 ruby_install ruby-${RUBY_VERSION}
 
-ol "Installing Bundler..."
+otto_output "Installing Bundler..."
 oe gem install bundler --no-document
 
-ol "Configuring Git to use SSH instead of HTTP so we can agent-forward private repo auth..."
+otto_output "Configuring Git to use SSH instead of HTTP so we can agent-forward private repo auth..."
 oe git config --global url."git@github.com:".insteadOf "https://github.com/"
 SCRIPT
 {% endblock %}

@@ -8,7 +8,7 @@ apt_update_once() {
 
 # apt_update updates the apt cache
 apt_update() {
-    sudo apt-get update
+    oe sudo apt-get update
 }
 
 # apt_install is a helper to install packages silently
