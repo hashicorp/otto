@@ -249,6 +249,18 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 	layer := v.Layer
 	path := v.Path
 
+	// Build the Vagrant instance. We use this a bit later
+	vagrant := &Vagrant{
+		Dir:     path,
+		DataDir: filepath.Join(path, ".vagrant"),
+		Ui:      ctx.Ui,
+	}
+	if lastV != nil {
+		vagrant.Env = map[string]string{
+			layerPathEnv: filepath.Join(lastV.Path, "Vagrantfile"),
+		}
+	}
+
 	// Layer isn't ready, so grab the lock on the layer and build it
 	// TODO: multi-process lock
 
@@ -264,13 +276,38 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 		return err
 	}
 	if layerV.State == layerStateReady {
-		log.Printf("[DEBUG] vagrant: layer already ready: %s", v.Layer.ID)
+		log.Printf("[DEBUG] vagrant: layer already ready, will verify: %s", v.Layer.ID)
 
-		// Touch the layer so that it is recently used
-		defer db.Close()
-		return l.updateLayer(db, layer, func(v *layerVertex) {
+		// Touch the layer so that it is recently used, even if its not
+		// actually ready.
+		err = l.updateLayer(db, layer, func(v *layerVertex) {
 			v.Touch()
 		})
+		if err != nil {
+			db.Close()
+			return err
+		}
+
+		// Verify the layer is actually ready! If it isn't, then
+		// we have to recreate it.
+		ctx.Ui.Header(fmt.Sprintf("Verifying created layer: %s", layer.ID))
+		ok, err := l.verifyLayer(vagrant)
+		if ok || err != nil {
+			// It is ready or there is an error.
+			db.Close()
+			return err
+		}
+
+		// Layer is invalid! Delete it from the DB and then recreate it
+		err = l.updateLayer(db, layer, func(v *layerVertex) {
+			v.State = layerStatePending
+		})
+		if err != nil {
+			db.Close()
+			return err
+		}
+
+		// Continue!
 	}
 	db.Close()
 
@@ -297,19 +334,7 @@ func (l *Layered) buildLayer(v *layerVertex, lastV *layerVertex, ctx *context.Sh
 		return err
 	}
 
-	// Build the Vagrant instance. We bring it up, and then immediately
-	// shut it down since we don't need it running. We start by trying to
-	// destroy it in case there is another prior instance here.
-	vagrant := &Vagrant{
-		Dir:     path,
-		DataDir: filepath.Join(path, ".vagrant"),
-		Ui:      ctx.Ui,
-	}
-	if lastV != nil {
-		vagrant.Env = map[string]string{
-			layerPathEnv: filepath.Join(lastV.Path, "Vagrantfile"),
-		}
-	}
+	// Destroy and recreate the machine
 	if err := vagrant.ExecuteSilent("destroy", "-f"); err != nil {
 		return err
 	}
@@ -440,6 +465,28 @@ func (l *Layered) db() (*bolt.DB, error) {
 	}
 
 	return db, nil
+}
+
+// verifyLayer verifies that a layer is valid/ready.
+func (l *Layered) verifyLayer(v *Vagrant) (bool, error) {
+	// The callback for checking the state
+	var ok bool
+	cb := func(o *Output) {
+		if o.Type == "state" && len(o.Data) > 0 {
+			ok = o.Data[0] != "not_created"
+		}
+	}
+
+	// Save the old callbacks
+	oldCb := v.Callbacks
+	defer func() { v.Callbacks = oldCb }()
+
+	// Register a callback for the state
+	v.Callbacks = map[string]OutputCallback{"state": cb}
+
+	// Check it
+	err := v.ExecuteSilent("status")
+	return ok, err
 }
 
 // init initializes the database for this layer setup.

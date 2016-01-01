@@ -1,7 +1,9 @@
 package exec
 
 import (
+	"io"
 	"os/exec"
+	"strings"
 )
 
 // Runner is the function that is called to run a command. This can be
@@ -38,10 +40,19 @@ type MockRunner struct {
 	// that are executed, in the order they're called. If this is empty
 	// or shorter than the command, a nil error is returned.
 	CommandErrs []error
+
+	// This will be written to the stdout when this command runs
+	CommandOutput []string
 }
 
 func (r *MockRunner) Run(cmd *exec.Cmd) error {
 	r.Commands = append(r.Commands, cmd)
+	if len(r.CommandOutput) >= len(r.Commands) {
+		output := strings.NewReader(r.CommandOutput[len(r.Commands)-1])
+		if _, err := io.Copy(cmd.Stdout, output); err != nil {
+			return err
+		}
+	}
 	if len(r.CommandErrs) < len(r.Commands) {
 		return nil
 	}

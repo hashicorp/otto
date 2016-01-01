@@ -42,11 +42,59 @@ func TestLayeredBuild(t *testing.T) {
 		t.Fatalf("bad: %#v", runner.Commands)
 	}
 
+	// Clear the commands so we only count what is next
+	runner.Commands = nil
+
+	// Setup the output
+	okayOutput := "1451607142,default,state,running\n"
+	runner.CommandOutput = []string{okayOutput, okayOutput}
+
 	// Repeat the test since this should be a no-op
 	if err := layer.Build(ctx); err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	if len(runner.Commands) != 2 {
+		t.Fatalf("bad: %#v", runner.Commands)
+	}
+}
+
+func TestLayeredBuild_verify(t *testing.T) {
+	dir := tempDir(t)
+	defer os.RemoveAll(dir)
+
+	runner := new(exec.MockRunner)
+	defer exec.TestChrunner(runner.Run)()
+
+	// Build an environment using foo and bar
+	layer := &Layered{
+		DataDir: dir,
+		Layers: []*Layer{
+			testLayer(t, "foo", dir),
+			testLayer(t, "bar", dir),
+		},
+	}
+
+	ctx := testContextShared(t)
+	if err := layer.Build(ctx); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
 	if len(runner.Commands) != 6 {
+		t.Fatalf("bad: %#v", runner.Commands)
+	}
+
+	// Clear the commands so we only count what is next
+	runner.Commands = nil
+
+	// Setup the output so we recreate the second
+	okayOutput := "1451607142,default,state,running\n"
+	runner.CommandOutput = []string{okayOutput, "bad"}
+
+	// Repeat the test since this should be a no-op
+	if err := layer.Build(ctx); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if len(runner.Commands) != 5 {
 		t.Fatalf("bad: %#v", runner.Commands)
 	}
 }
