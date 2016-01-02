@@ -1,0 +1,40 @@
+<% wrap_layout :inner do %>
+	<% content_for :sidebar do %>
+		<div class="docs-sidebar hidden-print affix-top" role="complementary">
+			<ul class="nav docs-sidenav">
+				<li<%= sidebar_current("docs-home") %>>
+					<a href="/docs/apps/index.html">&laquo; Documentation Home</a>
+				</li>
+
+				<li<%= sidebar_current("docs-python-index") %>>
+					<a href="/docs/apps/python/index.html">Python App Type</a>
+				</li>
+
+				<hr>
+
+				<li<%= sidebar_current("docs-python-detect") %>>
+					<a href="/docs/apps/python/detect.html">Detection</a>
+				</li>
+
+				<li<%= sidebar_current("docs-python-dev") %>>
+					<a href="/docs/apps/python/dev.html">Development</a>
+				</li>
+
+				<li<%= sidebar_current("docs-python-deploy") %>>
+					<a href="/docs/apps/python/deploy/index.html">Build & Deploy</a>
+					<ul class="nav">
+						<li<%= sidebar_current("docs-python-deploy-aws") %>>
+							<a href="/docs/apps/python/deploy/aws.html">AWS</a>
+						</li>
+					</ul>
+				</li>
+
+				<li<%= sidebar_current("docs-python-customization") %>>
+					<a href="/docs/apps/python/customization.html">Customization</a>
+				</li>
+			</ul>
+		</div>
+	<% end %>
+
+	<%= yield %>
+<% end %>
