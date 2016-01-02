@@ -15,6 +15,8 @@ FEATURES:
   * **App Type Plugins**: You can now add custom app types (or even override
     Otto's built-in types) using app type plugins. Want to support a new
     language? A new framework? App type plugins are for you.
+  * **ScriptPacks**: Libraries of pure shell code that app types use to
+    interact with the OS.
 
 IMPROVEMENTS:
 
