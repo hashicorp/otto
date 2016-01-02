@@ -12,12 +12,10 @@ description: |-
 This page documents the [customizations](/docs/appfile/customization.html)
 that are availabile to change the behavior of Python applications with Otto.
 
-## Type: "python"
-
 Flask Example:
 
 ```
-customization "python" {
+customization {
     python_version = "2.6"
     python_entrypoint = "mypackage:app"
 }
@@ -26,7 +24,7 @@ customization "python" {
 Django Example:
 
 ```
-customization "python" {
+customization {
     python_version = "3.4"
     python_entrypoint = "mypackage.wsgi:app"
 }
