@@ -2,16 +2,21 @@ package pythonapp
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
+	pythonSP "github.com/hashicorp/otto/builtin/scriptpack/python"
+	stdSP "github.com/hashicorp/otto/builtin/scriptpack/stdlib"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
+	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/otto/helper/packer"
 	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
+	"github.com/hashicorp/otto/scriptpack"
 )
 
 //go:generate go-bindata -pkg=pythonapp -nomemcopy -nometadata ./data/...
@@ -36,6 +41,10 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			Asset:    Asset,
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
+		},
+		ScriptPacks: []*scriptpack.ScriptPack{
+			&stdSP.ScriptPack,
+			&pythonSP.ScriptPack,
 		},
 		Customization: (&compile.Customization{
 			Callback: custom.process,
@@ -76,8 +85,27 @@ func (a *App) Deploy(ctx *app.Context) error {
 }
 
 func (a *App) Dev(ctx *app.Context) error {
+	// Read the go version, since we use that for our layer
+	version, err := oneline.Read(filepath.Join(ctx.Dir, "dev", "python_version"))
+	if err != nil {
+		return err
+	}
+
+	// Setup layers
+	layered, err := vagrant.DevLayered(ctx, []*vagrant.Layer{
+		&vagrant.Layer{
+			ID:          fmt.Sprintf("python%s", version),
+			Vagrantfile: filepath.Join(ctx.Dir, "dev", "layer-base", "Vagrantfile"),
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Build the actual development environment
 	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
+		Layer:        layered,
 	}).Route(ctx)
 }
 
