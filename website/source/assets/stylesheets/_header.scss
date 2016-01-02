@@ -22,8 +22,8 @@
     .by{
       &:hover{
         svg{
-          line{
-            stroke: $orange;
+          .svg-bg-line{
+            fill: $orange;
           }
         }
       }
