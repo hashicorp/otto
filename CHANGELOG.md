@@ -23,6 +23,7 @@ IMPROVEMENTS:
   * app/ruby: Automatically detect desired Ruby version and install it [GH-293]
   * app/ruby: Install PhantomJS when poltergeist is detected [GH-313]
   * core: Use releases.hashicorp.com to download HashiCorp binaries [GH-353] [GH-359]
+  * foundation/consul: Update to Consul 0.6
 
 BUG FIXES:
 
