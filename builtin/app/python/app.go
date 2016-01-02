@@ -1,10 +1,11 @@
 package pythonapp
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
 	"github.com/hashicorp/otto/helper/packer"
@@ -18,6 +19,14 @@ import (
 // App is an implementation of app.App
 type App struct{}
 
+func (a *App) Meta() (*app.Meta, error) {
+	return Meta, nil
+}
+
+func (a *App) Implicit(ctx *app.Context) (*appfile.File, error) {
+	return nil, nil
+}
+
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 	var opts compile.AppOptions
 	custom := &customizations{Opts: &opts}
@@ -28,24 +37,21 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
 		},
-		Customizations: []*compile.Customization{
-			&compile.Customization{
-				Type:     "python",
-				Callback: custom.processPython,
-				Schema: map[string]*schema.FieldSchema{
-					"python_version": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     "2.7",
-						Description: "Python version to install",
-					},
-					"python_entrypoint": &schema.FieldSchema{
-						Type:        schema.TypeString,
-						Default:     fmt.Sprintf("%s:app", ctx.Appfile.Application.Name),
-						Description: "WSGI entry point",
-					},
+		Customization: (&compile.Customization{
+			Callback: custom.process,
+			Schema: map[string]*schema.FieldSchema{
+				"python_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "2.7",
+					Description: "Python version to install",
+				},
+				"python_entrypoint": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     fmt.Sprintf("%s:app", ctx.Appfile.Application.Name),
+					Description: "WSGI entry point",
 				},
 			},
-		},
+		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
 
 	return compile.App(&opts)

@@ -10,6 +10,7 @@ import (
 	appGo "github.com/hashicorp/otto/builtin/app/go"
 	appNode "github.com/hashicorp/otto/builtin/app/node"
 	appPHP "github.com/hashicorp/otto/builtin/app/php"
+	appPython "github.com/hashicorp/otto/builtin/app/python"
 	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
 	appScriptPack "github.com/hashicorp/otto/builtin/app/scriptpack"
 )
@@ -20,6 +21,7 @@ var Map = map[string]*plugin.ServeOpts{
 	"app-go":              &plugin.ServeOpts{AppFunc: appGo.AppFactory},
 	"app-node":            &plugin.ServeOpts{AppFunc: appNode.AppFactory},
 	"app-php":             &plugin.ServeOpts{AppFunc: appPHP.AppFactory},
+	"app-python":          &plugin.ServeOpts{AppFunc: appPython.AppFactory},
 	"app-ruby":            &plugin.ServeOpts{AppFunc: appRuby.AppFactory},
 	"app-scriptpack":      &plugin.ServeOpts{AppFunc: appScriptPack.AppFactory},
 }

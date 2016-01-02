@@ -4,14 +4,6 @@ import (
 	"os"
 	"os/signal"
 
-	appCustom "github.com/hashicorp/otto/builtin/app/custom"
-	appDockerExt "github.com/hashicorp/otto/builtin/app/docker-external"
-	appGo "github.com/hashicorp/otto/builtin/app/go"
-	appNode "github.com/hashicorp/otto/builtin/app/node"
-	appPHP "github.com/hashicorp/otto/builtin/app/php"
-	appRuby "github.com/hashicorp/otto/builtin/app/ruby"
-	appPython "github.com/hashicorp/otto/builtin/app/python"
-
 	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
 	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
 
@@ -26,28 +18,6 @@ import (
 // Commands is the mapping of all the available Otto commands.
 var Commands map[string]cli.CommandFactory
 var CommandsInclude []string
-var Detectors = []*detect.Detector{
-	&detect.Detector{
-		Type: "go",
-		File: []string{"*.go"},
-	},
-	&detect.Detector{
-		Type: "php",
-		File: []string{"*.php", "composer.json"},
-	},
-	&detect.Detector{
-		Type: "ruby",
-		File: []string{"*.rb", "Gemfile", "config.ru"},
-	},
-	&detect.Detector{
-		Type: "node",
-		File: []string{"package.json"},
-	},
-	&detect.Detector{
-		Type: "python",
-		File: []string{"*.py", "requirements.txt"},
-	},
-}
 
 // Ui is the cli.Ui used for communicating to the outside world.
 var Ui cli.Ui
@@ -71,14 +41,6 @@ func init() {
 			Ui:           &cli.BasicUi{Writer: os.Stdout},
 		},
 	}
-
-	apps := appGo.Tuples.Map(app.StructFactory(new(appGo.App)))
-	apps.Add(appCustom.Tuples.Map(app.StructFactory(new(appCustom.App))))
-	apps.Add(appDockerExt.Tuples.Map(app.StructFactory(new(appDockerExt.App))))
-	apps.Add(appNode.Tuples.Map(app.StructFactory(new(appNode.App))))
-	apps.Add(appPHP.Tuples.Map(app.StructFactory(new(appPHP.App))))
-	apps.Add(appRuby.Tuples.Map(app.StructFactory(new(appRuby.App))))
-	apps.Add(appPython.Tuples.Map(app.StructFactory(new(appPython.App))))
 
 	foundations := foundationConsul.Tuples.Map(foundation.StructFactory(new(foundationConsul.Foundation)))
 
