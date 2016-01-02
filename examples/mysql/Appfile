@@ -3,7 +3,7 @@ application {
     type = "docker-external"
 }
 
-customization {
+customization "docker" {
     image = "mysql:5.7"
     run_args = "-p 3306:3306 -e MYSQL_ROOT_PASSWORD=root"
 }
