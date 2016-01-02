@@ -5,6 +5,8 @@
       "aws_access_key": null,
       "aws_secret_key": null,
       "aws_region": null,
+      "aws_vpc_id": null,
+      "aws_subnet_id": null,
       "slug_path": null
     },
 
@@ -41,6 +43,8 @@
       "access_key": "{% verbatim %}{{ user `aws_access_key` }}{% endverbatim %}",
       "secret_key": "{% verbatim %}{{ user `aws_secret_key` }}{% endverbatim %}",
       "region": "{% verbatim %}{{ user `aws_region` }}{% endverbatim %}",
+      "vpc_id": "{% verbatim %}{{ user `aws_vpc_id` }}{% endverbatim %}",
+      "subnet_id": "{% verbatim %}{{ user `aws_subnet_id` }}{% endverbatim %}",
       "source_ami": "ami-21630d44",
       "instance_type": "c3.large",
       "ssh_username": "ubuntu",

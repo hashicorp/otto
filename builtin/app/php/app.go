@@ -80,6 +80,8 @@ func (a *App) Build(ctx *app.Context) error {
 	return packer.Build(ctx, &packer.BuildOptions{
 		InfraOutputMap: map[string]string{
 			"region": "aws_region",
+			"vpc_id": "aws_vpc_id",
+			"subnet_public":  "aws_subnet_id",
 		},
 	})
 }
