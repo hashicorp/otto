@@ -5,7 +5,7 @@ apt-get install -y unzip
 
 # Download Consul
 cd /tmp
-wget https://releases.hashicorp.com/consul/0.5.2/consul_0.5.2_linux_amd64.zip -O consul.zip
+wget https://releases.hashicorp.com/consul/0.6.0/consul_0.6.0_linux_amd64.zip -O consul.zip
 
 # Install Consul
 unzip consul.zip >/dev/null
