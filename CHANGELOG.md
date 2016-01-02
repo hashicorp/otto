@@ -9,6 +9,7 @@ BACKWARDS INCOMPATIBILITIES:
 
 FEATURES:
 
+  * **New App Type: `python`**: Detect, develop, and deploy Python applications.
   * **Layered Dev Environments**: Dev environments are now layered. Each
     layer is cached. When bringing up a new development environment, cached
     layers are used to speed it up immensely.
