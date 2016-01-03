@@ -38,7 +38,7 @@ func TestAppImplicit(t *testing.T) {
 		var ctx app.Context
 		ctx.Appfile = &appfile.File{Path: filepath.Join("./test-fixtures", tc.Dir, "Appfile")}
 
-		// Test it!
+		// Get the implicit file
 		var a App
 		f, err := a.Implicit(&ctx)
 		if err != nil {
@@ -53,13 +53,11 @@ func TestAppImplicit(t *testing.T) {
 			continue
 		}
 
-		// Test the deps
+		// Build the deps we got and sort them for determinism
 		actual := make([]string, 0, len(f.Application.Dependencies))
 		for _, dep := range f.Application.Dependencies {
 			actual = append(actual, dep.Source)
 		}
-
-		// Sort the deps for determinism
 		sort.Strings(actual)
 		sort.Strings(tc.Deps)
 
