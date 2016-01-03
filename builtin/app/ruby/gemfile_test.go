@@ -35,6 +35,12 @@ func TestHasGem(t *testing.T) {
 			"newp",
 			false,
 		},
+
+		{
+			"hasgem-empty",
+			"newp",
+			false,
+		},
 	}
 
 	for _, tc := range cases {
