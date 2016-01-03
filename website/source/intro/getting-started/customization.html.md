@@ -24,19 +24,18 @@ application and change the Ruby version. In the Appfile we created,
 add a new section:
 
 ```
-customization "ruby" {
+customization {
   ruby_version = "2.1"
 }
 ```
 
-There can be multiple "customization" blocks in an Appfile. The
-name of the block is the component to customize. These are mostly
-depended on the application type and are documented as part of the
-[application types](/docs/apps).
+There can be multiple "customization" blocks in an Appfile. The various
+blocks will be merged together in the order they are seen. The exact options
+available for customization depend on the application type and are documented
+as part of the [application types](/docs/apps).
 
-For Ruby, there is a "ruby_version" configuration in the "ruby"
-customization type. This sets the Ruby version to install, and currently
-defaults to "2.2".
+For Ruby, there is a "ruby_version" configuration. This sets the Ruby version
+to install, and currently defaults to "2.2".
 
 Let's pretend our application doesn't work with Ruby 2.2, and request
 that Otto install Ruby 2.1. This is what we've done in the customization
