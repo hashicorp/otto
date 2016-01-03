@@ -70,6 +70,7 @@ call.
 To assist with compilation, we use the
 [helper/compile](https://github.com/hashicorp/otto/tree/master/helper/compile)
 helper library. This automatically handles file structure, templating,
+[ScriptPack usage](https://ottoproject.io/docs/plugins/scriptpack.html),
 etc. More on this is covered below.
 
 One thing to be very careful about: set a compilation version on the
@@ -121,3 +122,37 @@ the [built-in Ruby application type](https://github.com/hashicorp/otto/tree/mast
 You can use `helper/bindata` directly, which we do in some places, or more
 likely you'll be using the `helper/compile` helper to assist with compilation
 which automatically processes your data directory for templates.
+
+## ScriptPacks
+
+Otto encourages the use of [ScriptPacks](/docs/plugins/scriptpack.html) for
+any logic that isn't running directly on the user's machine, such as in
+a development or deployment environmet.
+
+ScriptPacks are pure standalone shell libraries. By putting complex logic
+within ScriptPacks, we encourage unit testing and reusability for more stable
+app types.
+
+ScriptPacks are integrated directly within the `helper/compile` interface
+for easy use. For example, directly from the Ruby application type, within
+the compilation options for `helper/compile`:
+
+    ScriptPacks: []*scriptpack.ScriptPack{
+        &stdSP.ScriptPack,
+        &rubySP.ScriptPack,
+    },
+
+This tells the compilation helper to automatically compile in the Ruby
+and stdlib ScriptPacks (referenced using their Go package names). Then,
+within the shell scripts used by the app type, you can see ScriptPack usage:
+
+    . /otto/scriptpacks/STDLIB/main.sh
+    . /otto/scriptpacks/RUBY/main.sh
+    otto_init
+
+    otto_output "Installing Ruby ${RUBY_VERSION}. This can take a few minutes..."
+    ruby_install_prepare
+    ruby_install ruby-${RUBY_VERSION}
+
+The application type then uses the high-level functions from the ScriptPack
+directly, which are each well tested on their own.
