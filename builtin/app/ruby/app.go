@@ -2,6 +2,7 @@ package rubyapp
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 	"strings"
 
@@ -29,7 +30,57 @@ func (a *App) Meta() (*app.Meta, error) {
 }
 
 func (a *App) Implicit(ctx *app.Context) (*appfile.File, error) {
-	return nil, nil
+	// depMap is our mapping of gem to dependency URL
+	depMap := map[string]string{
+		"redis": "github.com/hashicorp/otto/examples/redis",
+	}
+
+	// used keeps track of dependencies we've used so we don't
+	// double-up on dependencies
+	used := map[string]struct{}{}
+
+	// Get the path to the working directory
+	dir := filepath.Dir(ctx.Appfile.Path)
+	log.Printf("[DEBUG] app: implicit check path: %s", dir)
+
+	// If we have certain gems, add the dependencies
+	var deps []*appfile.Dependency
+	for k, v := range depMap {
+		// If we already used v, then don't do it
+		if _, ok := used[v]; ok {
+			continue
+		}
+
+		// If we don't have the gem, then nothing to do
+		log.Printf("[DEBUG] app: checking for Gem: %s", k)
+		ok, err := HasGem(dir, k)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			log.Printf("[DEBUG] app: Gem not found: %s", k)
+			continue
+		}
+		log.Printf("[INFO] app: found Gem '%s', adding dep: %s", k, v)
+
+		// We have it! Add the implicit
+		deps = append(deps, &appfile.Dependency{
+			Source: v,
+		})
+		used[v] = struct{}{}
+	}
+
+	// Build an implicit Appfile if we have deps
+	var result *appfile.File
+	if len(deps) > 0 {
+		result = &appfile.File{
+			Application: &appfile.Application{
+				Dependencies: deps,
+			},
+		}
+	}
+
+	return result, nil
 }
 
 func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
@@ -67,9 +118,9 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 func (a *App) Build(ctx *app.Context) error {
 	return packer.Build(ctx, &packer.BuildOptions{
 		InfraOutputMap: map[string]string{
-			"region": "aws_region",
-			"vpc_id": "aws_vpc_id",
-			"subnet_public":  "aws_subnet_id",
+			"region":        "aws_region",
+			"vpc_id":        "aws_vpc_id",
+			"subnet_public": "aws_subnet_id",
 		},
 	})
 }
