@@ -1,0 +1,13 @@
+GIT
+  remote: git://github.com/hashicorp/vault-rails.git
+  revision: cd17f8474a059adcd911b565d46bea4cedadac5b
+  specs:
+    vault-rails (0.1.2)
+      rails (~> 4.0)
+      vault (~> 0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    redcarpet (3.3.3)
+    redis (3.2.2)
