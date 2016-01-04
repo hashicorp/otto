@@ -24,6 +24,20 @@ func TestParse(t *testing.T) {
 			},
 			false,
 		},
+
+		{
+			"priority.hcl",
+			&Config{
+				Detectors: []*Detector{
+					&Detector{
+						Type:     "go",
+						File:     []string{"*.go"},
+						Priority: 50,
+					},
+				},
+			},
+			false,
+		},
 	}
 
 	for _, tc := range cases {

@@ -34,6 +34,15 @@ type Detector struct {
 	// Contents is a content matcher. The key is a filename and the
 	// path is the file contents regular expression.
 	Contents map[string]string
+
+	// Priority is used to break ties when two detectors conflict.
+	// The detector with the higher (larger number) priority wins.
+	// This defaults to 0. Negative numbers can be used to lower
+	// priority and positive numbers can be used to increase it.
+	//
+	// In most cases, a priority never needs to be set. Please set this
+	// with care.
+	Priority int
 }
 
 // Detect will return true if this detector matches within the given
