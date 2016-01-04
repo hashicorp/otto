@@ -24,6 +24,10 @@ var Detectors = []*detect.Detector{
 		Contents: map[string]string{
 			"main.go": `^var ScriptPack =`,
 		},
+
+		// High priority for ScriptPacks since it is a very specific
+		// dev environment type.
+		Priority: 10,
 	},
 }
 

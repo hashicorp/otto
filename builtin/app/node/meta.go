@@ -27,5 +27,10 @@ var Detectors = []*detect.Detector{
 	&detect.Detector{
 		Type: "node",
 		File: []string{"package.json"},
+
+		// Slightly lower priority since many web frameworks can contain
+		// a package.json these days while being written in another
+		// language.
+		Priority: -1,
 	},
 }
