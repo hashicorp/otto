@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/otto/appfile"
@@ -53,6 +54,9 @@ func (c *CompileCommand) Run(args []string) int {
 	for _, p := range pluginMgr.Plugins() {
 		detectors = append(detectors, p.AppMeta.Detectors...)
 	}
+
+	// Sort the detectors so we try highest priority first
+	sort.Sort(detect.DetectorList(detectors))
 
 	// Parse the detectors
 	dataDir, err := c.DataDir()

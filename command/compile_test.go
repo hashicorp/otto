@@ -77,6 +77,44 @@ func TestCompile_appfileDir(t *testing.T) {
 	}
 }
 
+func TestCompile_detectPriority(t *testing.T) {
+	core := otto.TestCoreConfig(t)
+	otto.TestInfra(t, "aws", core)
+	otto.TestFoundation(t, foundation.Tuple{"consul", "aws", "simple"}, core)
+	appImpl := otto.TestApp(t, app.Tuple{"test", "aws", "simple"}, core)
+	ui := new(cli.MockUi)
+	detectors := []*detect.Detector{
+		&detect.Detector{
+			Type: "invalid",
+			File: []string{"test-file"},
+		},
+		&detect.Detector{
+			Type:     "test",
+			File:     []string{"test-file"},
+			Priority: 10,
+		},
+	}
+	c := &CompileCommand{
+		Meta: Meta{
+			CoreConfig: core,
+			Ui:         ui,
+		},
+		Detectors: detectors,
+	}
+
+	dir := fixtureDir("compile-no-appfile")
+	defer os.Remove(filepath.Join(dir, ".ottoid"))
+	defer testChdir(t, dir)()
+
+	args := []string{}
+	if code := c.Run(args); code != 0 {
+		t.Fatalf("bad: %d\n\n%s", code, ui.ErrorWriter.String())
+	}
+
+	if !appImpl.CompileCalled {
+		t.Fatal("Compile should be called")
+	}
+}
 func TestCompile_implicit(t *testing.T) {
 	dir := fixtureDir("compile-implicit")
 	defer os.Remove(filepath.Join(dir, ".ottoid"))
