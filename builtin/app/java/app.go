@@ -5,6 +5,8 @@ import (
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
+	javaSP "github.com/hashicorp/otto/builtin/scriptpack/java"
+	stdSP "github.com/hashicorp/otto/builtin/scriptpack/stdlib"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
@@ -12,6 +14,7 @@ import (
 	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/terraform"
 	"github.com/hashicorp/otto/helper/vagrant"
+	"github.com/hashicorp/otto/scriptpack"
 )
 
 //go:generate go-bindata -pkg=javaapp -nomemcopy -nometadata ./data/...
@@ -43,6 +46,10 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			Asset:    Asset,
 			AssetDir: AssetDir,
 			Context:  map[string]interface{}{},
+		},
+		ScriptPacks: []*scriptpack.ScriptPack{
+			&stdSP.ScriptPack,
+			&javaSP.ScriptPack,
 		},
 		Customization: (&compile.Customization{
 			Callback: custom.processDev,
