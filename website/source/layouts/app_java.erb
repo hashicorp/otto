@@ -1,0 +1,40 @@
+<% wrap_layout :inner do %>
+	<% content_for :sidebar do %>
+		<div class="docs-sidebar hidden-print affix-top" role="complementary">
+			<ul class="nav docs-sidenav">
+				<li<%= sidebar_current("docs-home") %>>
+					<a href="/docs/apps/index.html">&laquo; Documentation Home</a>
+				</li>
+
+				<li<%= sidebar_current("docs-java-index") %>>
+					<a href="/docs/apps/java/index.html">Java App Type</a>
+				</li>
+
+				<hr>
+
+				<li<%= sidebar_current("docs-java-detect") %>>
+					<a href="/docs/apps/java/detect.html">Detection</a>
+				</li>
+
+				<li<%= sidebar_current("docs-java-dev") %>>
+					<a href="/docs/apps/java/dev.html">Development</a>
+				</li>
+
+				<li<%= sidebar_current("docs-java-deploy") %>>
+					<a href="/docs/apps/java/deploy/index.html">Build & Deploy</a>
+					<ul class="nav">
+						<li<%= sidebar_current("docs-java-deploy-aws") %>>
+							<a href="/docs/apps/java/deploy/aws.html">AWS</a>
+						</li>
+					</ul>
+				</li>
+
+				<li<%= sidebar_current("docs-java-customization") %>>
+					<a href="/docs/apps/java/customization.html">Customization</a>
+				</li>
+			</ul>
+		</div>
+	<% end %>
+
+	<%= yield %>
+<% end %>
