@@ -32,6 +32,8 @@ func (a *App) Meta() (*app.Meta, error) {
 func (a *App) Implicit(ctx *app.Context) (*appfile.File, error) {
 	// depMap is our mapping of gem to dependency URL
 	depMap := map[string]string{
+		"dalli": "github.com/hashicorp/otto/examples/memcached",
+		"pg":    "github.com/hashicorp/otto/examples/postgresql",
 		"redis": "github.com/hashicorp/otto/examples/redis",
 	}
 
