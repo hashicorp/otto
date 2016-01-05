@@ -8,6 +8,7 @@ import (
 	appCustom "github.com/hashicorp/otto/builtin/app/custom"
 	appDockerExt "github.com/hashicorp/otto/builtin/app/docker-external"
 	appGo "github.com/hashicorp/otto/builtin/app/go"
+	appJava "github.com/hashicorp/otto/builtin/app/java"
 	appNode "github.com/hashicorp/otto/builtin/app/node"
 	appPHP "github.com/hashicorp/otto/builtin/app/php"
 	appPython "github.com/hashicorp/otto/builtin/app/python"
@@ -19,6 +20,7 @@ var Map = map[string]*plugin.ServeOpts{
 	"app-custom":          &plugin.ServeOpts{AppFunc: appCustom.AppFactory},
 	"app-docker-external": &plugin.ServeOpts{AppFunc: appDockerExt.AppFactory},
 	"app-go":              &plugin.ServeOpts{AppFunc: appGo.AppFactory},
+	"app-java":            &plugin.ServeOpts{AppFunc: appJava.AppFactory},
 	"app-node":            &plugin.ServeOpts{AppFunc: appNode.AppFactory},
 	"app-php":             &plugin.ServeOpts{AppFunc: appPHP.AppFactory},
 	"app-python":          &plugin.ServeOpts{AppFunc: appPython.AppFactory},
