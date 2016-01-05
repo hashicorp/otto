@@ -10,6 +10,7 @@ BACKWARDS INCOMPATIBILITIES:
 FEATURES:
 
   * **New App Type: `python`**: Detect, develop, and deploy Python applications.
+  * **New App Type: `java`**: Detect, develop, and deploy Java applications.
   * **Layered Dev Environments**: Dev environments are now layered. Each
     layer is cached. When bringing up a new development environment, cached
     layers are used to speed it up immensely.
@@ -22,6 +23,8 @@ FEATURES:
 IMPROVEMENTS:
 
   * app/ruby: Automatically detect desired Ruby version and install it [GH-293]
+  * app/ruby: ruby-install and chruby are used for Ruby version management so
+      all major runtimes are now supported
   * app/ruby: Install PhantomJS when poltergeist is detected [GH-313]
   * core: Use releases.hashicorp.com to download HashiCorp binaries [GH-353] [GH-359]
   * foundation/consul: Update to Consul 0.6
