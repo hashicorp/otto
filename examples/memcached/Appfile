@@ -1,0 +1,9 @@
+application {
+    name = "memcached"
+    type = "docker-external"
+}
+
+customization {
+    image = "memcached:1.4"
+    run_args = "-p 11211:11211"
+}
