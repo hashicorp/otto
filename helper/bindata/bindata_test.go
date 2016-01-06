@@ -32,11 +32,11 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"strings"
-	"os"
-	"time"
 	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strings"
+	"time"
 )
 
 func bindataRead(data, name string) ([]byte, error) {
@@ -65,9 +65,9 @@ type asset struct {
 }
 
 type bindataFileInfo struct {
-	name string
-	size int64
-	mode os.FileMode
+	name    string
+	size    int64
+	mode    os.FileMode
 	modTime time.Time
 }
 
@@ -106,7 +106,7 @@ func testDataCopyDirBasicATxt() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic/a.txt", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -126,7 +126,7 @@ func testDataCopyDirBasicBTxt() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic/b.txt", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -146,7 +146,7 @@ func testDataCopyDirBasicDirCTxt() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic/dir/c.txt", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -166,7 +166,7 @@ func testDataCopyDirBasicTTpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic/t.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -186,7 +186,7 @@ func testDataCopyDirBasicExpectedATxt() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic-expected/a.txt", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -206,7 +206,7 @@ func testDataCopyDirBasicExpectedBTxt() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic-expected/b.txt", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -226,7 +226,7 @@ func testDataCopyDirBasicExpectedDirCTxt() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic-expected/dir/c.txt", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -246,7 +246,7 @@ func testDataCopyDirBasicExpectedT() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-basic-expected/t", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -266,7 +266,7 @@ func testDataCopyDirExtendsATpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-extends/a.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -286,7 +286,7 @@ func testDataCopyDirExtendsBase() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-extends/base", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -306,7 +306,7 @@ func testDataCopyDirExtendsBaseTpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-extends/base.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -326,7 +326,7 @@ func testDataCopyDirExtendsExpectedA() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-extends-expected/a", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -346,7 +346,7 @@ func testDataCopyDirExtendsExpectedBase() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-extends-expected/base", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -366,7 +366,7 @@ func testDataCopyDirExtendsVarATpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-extends-var/a.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -386,7 +386,7 @@ func testDataCopyDirExtendsVarBaseTpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-extends-var/base.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -406,7 +406,7 @@ func testDataCopyDirExtendsVarExpectedA() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-extends-var-expected/a", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -426,7 +426,7 @@ func testDataCopyDirExtendsVarExpectedBase() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-extends-var-expected/base", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -446,7 +446,7 @@ func testDataCopyDirIncludeATpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-include/a.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -466,7 +466,7 @@ func testDataCopyDirIncludeB() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-include/b", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -486,7 +486,7 @@ func testDataCopyDirIncludeExpectedA() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-include-expected/a", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -506,7 +506,7 @@ func testDataCopyDirIncludeExpectedB() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-include-expected/b", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -526,7 +526,7 @@ func testDataCopyDirSharedATpl() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-shared/a.tpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -546,7 +546,7 @@ func testDataCopyDirSharedExpectedA() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "test-data/copy-dir-shared-expected/a", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -569,7 +569,7 @@ func Asset(name string) ([]byte, error) {
 // It simplifies safe initialization of global variables.
 func MustAsset(name string) []byte {
 	a, err := Asset(name)
-	if (err != nil) {
+	if err != nil {
 		panic("asset: Asset(" + name + "): " + err.Error())
 	}
 
@@ -663,128 +663,105 @@ func AssetDir(name string) ([]string, error) {
 }
 
 type bintree struct {
-	Func func() (*asset, error)
+	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
 var _bintree = &bintree{nil, map[string]*bintree{
 	"test-data": &bintree{nil, map[string]*bintree{
 		"copy-dir-basic": &bintree{nil, map[string]*bintree{
-			"a.txt": &bintree{testDataCopyDirBasicATxt, map[string]*bintree{
-			}},
-			"b.txt": &bintree{testDataCopyDirBasicBTxt, map[string]*bintree{
-			}},
+			"a.txt": &bintree{testDataCopyDirBasicATxt, map[string]*bintree{}},
+			"b.txt": &bintree{testDataCopyDirBasicBTxt, map[string]*bintree{}},
 			"dir": &bintree{nil, map[string]*bintree{
-				"c.txt": &bintree{testDataCopyDirBasicDirCTxt, map[string]*bintree{
-				}},
+				"c.txt": &bintree{testDataCopyDirBasicDirCTxt, map[string]*bintree{}},
 			}},
-			"t.tpl": &bintree{testDataCopyDirBasicTTpl, map[string]*bintree{
-			}},
+			"t.tpl": &bintree{testDataCopyDirBasicTTpl, map[string]*bintree{}},
 		}},
 		"copy-dir-basic-expected": &bintree{nil, map[string]*bintree{
-			"a.txt": &bintree{testDataCopyDirBasicExpectedATxt, map[string]*bintree{
-			}},
-			"b.txt": &bintree{testDataCopyDirBasicExpectedBTxt, map[string]*bintree{
-			}},
+			"a.txt": &bintree{testDataCopyDirBasicExpectedATxt, map[string]*bintree{}},
+			"b.txt": &bintree{testDataCopyDirBasicExpectedBTxt, map[string]*bintree{}},
 			"dir": &bintree{nil, map[string]*bintree{
-				"c.txt": &bintree{testDataCopyDirBasicExpectedDirCTxt, map[string]*bintree{
-				}},
+				"c.txt": &bintree{testDataCopyDirBasicExpectedDirCTxt, map[string]*bintree{}},
 			}},
-			"t": &bintree{testDataCopyDirBasicExpectedT, map[string]*bintree{
-			}},
+			"t": &bintree{testDataCopyDirBasicExpectedT, map[string]*bintree{}},
 		}},
 		"copy-dir-extends": &bintree{nil, map[string]*bintree{
-			"a.tpl": &bintree{testDataCopyDirExtendsATpl, map[string]*bintree{
-			}},
-			"base": &bintree{testDataCopyDirExtendsBase, map[string]*bintree{
-			}},
-			"base.tpl": &bintree{testDataCopyDirExtendsBaseTpl, map[string]*bintree{
-			}},
+			"a.tpl": &bintree{testDataCopyDirExtendsATpl, map[string]*bintree{}},
+			"base": &bintree{testDataCopyDirExtendsBase, map[string]*bintree{}},
+			"base.tpl": &bintree{testDataCopyDirExtendsBaseTpl, map[string]*bintree{}},
 		}},
 		"copy-dir-extends-expected": &bintree{nil, map[string]*bintree{
-			"a": &bintree{testDataCopyDirExtendsExpectedA, map[string]*bintree{
-			}},
-			"base": &bintree{testDataCopyDirExtendsExpectedBase, map[string]*bintree{
-			}},
+			"a": &bintree{testDataCopyDirExtendsExpectedA, map[string]*bintree{}},
+			"base": &bintree{testDataCopyDirExtendsExpectedBase, map[string]*bintree{}},
 		}},
 		"copy-dir-extends-var": &bintree{nil, map[string]*bintree{
-			"a.tpl": &bintree{testDataCopyDirExtendsVarATpl, map[string]*bintree{
-			}},
-			"base.tpl": &bintree{testDataCopyDirExtendsVarBaseTpl, map[string]*bintree{
-			}},
+			"a.tpl": &bintree{testDataCopyDirExtendsVarATpl, map[string]*bintree{}},
+			"base.tpl": &bintree{testDataCopyDirExtendsVarBaseTpl, map[string]*bintree{}},
 		}},
 		"copy-dir-extends-var-expected": &bintree{nil, map[string]*bintree{
-			"a": &bintree{testDataCopyDirExtendsVarExpectedA, map[string]*bintree{
-			}},
-			"base": &bintree{testDataCopyDirExtendsVarExpectedBase, map[string]*bintree{
-			}},
+			"a": &bintree{testDataCopyDirExtendsVarExpectedA, map[string]*bintree{}},
+			"base": &bintree{testDataCopyDirExtendsVarExpectedBase, map[string]*bintree{}},
 		}},
 		"copy-dir-include": &bintree{nil, map[string]*bintree{
-			"a.tpl": &bintree{testDataCopyDirIncludeATpl, map[string]*bintree{
-			}},
-			"b": &bintree{testDataCopyDirIncludeB, map[string]*bintree{
-			}},
+			"a.tpl": &bintree{testDataCopyDirIncludeATpl, map[string]*bintree{}},
+			"b": &bintree{testDataCopyDirIncludeB, map[string]*bintree{}},
 		}},
 		"copy-dir-include-expected": &bintree{nil, map[string]*bintree{
-			"a": &bintree{testDataCopyDirIncludeExpectedA, map[string]*bintree{
-			}},
-			"b": &bintree{testDataCopyDirIncludeExpectedB, map[string]*bintree{
-			}},
+			"a": &bintree{testDataCopyDirIncludeExpectedA, map[string]*bintree{}},
+			"b": &bintree{testDataCopyDirIncludeExpectedB, map[string]*bintree{}},
 		}},
 		"copy-dir-shared": &bintree{nil, map[string]*bintree{
-			"a.tpl": &bintree{testDataCopyDirSharedATpl, map[string]*bintree{
-			}},
+			"a.tpl": &bintree{testDataCopyDirSharedATpl, map[string]*bintree{}},
 		}},
 		"copy-dir-shared-expected": &bintree{nil, map[string]*bintree{
-			"a": &bintree{testDataCopyDirSharedExpectedA, map[string]*bintree{
-			}},
+			"a": &bintree{testDataCopyDirSharedExpectedA, map[string]*bintree{}},
 		}},
 	}},
 }}
 
 // RestoreAsset restores an asset under the given directory
 func RestoreAsset(dir, name string) error {
-        data, err := Asset(name)
-        if err != nil {
-                return err
-        }
-        info, err := AssetInfo(name)
-        if err != nil {
-                return err
-        }
-        err = os.MkdirAll(_filePath(dir, filepath.Dir(name)), os.FileMode(0755))
-        if err != nil {
-                return err
-        }
-        err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
-        if err != nil {
-                return err
-        }
-        err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
-        if err != nil {
-                return err
-        }
-        return nil
+	data, err := Asset(name)
+	if err != nil {
+		return err
+	}
+	info, err := AssetInfo(name)
+	if err != nil {
+		return err
+	}
+	err = os.MkdirAll(_filePath(dir, filepath.Dir(name)), os.FileMode(0755))
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
+	if err != nil {
+		return err
+	}
+	err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // RestoreAssets restores an asset under the given directory recursively
 func RestoreAssets(dir, name string) error {
-        children, err := AssetDir(name)
-        // File
-        if err != nil {
-                return RestoreAsset(dir, name)
-        }
-        // Dir
-        for _, child := range children {
-                err = RestoreAssets(dir, filepath.Join(name, child))
-                if err != nil {
-                        return err
-                }
-        }
-        return nil
+	children, err := AssetDir(name)
+	// File
+	if err != nil {
+		return RestoreAsset(dir, name)
+	}
+	// Dir
+	for _, child := range children {
+		err = RestoreAssets(dir, filepath.Join(name, child))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func _filePath(dir, name string) string {
-        cannonicalName := strings.Replace(name, "\\", "/", -1)
-        return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
+	cannonicalName := strings.Replace(name, "\\", "/", -1)
+	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
 
