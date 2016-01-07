@@ -41,6 +41,16 @@ func TestFileValidate(t *testing.T) {
 		},
 
 		{
+			"validate-app-version",
+			false,
+		},
+
+		{
+			"validate-app-bad-version",
+			true,
+		},
+
+		{
 			"validate-project-no-name",
 			true,
 		},
