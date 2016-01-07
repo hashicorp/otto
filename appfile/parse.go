@@ -123,7 +123,7 @@ func parseApplication(result *File, list *ast.ObjectList) error {
 	item := list.Items[0]
 
 	// Check for invalid keys
-	valid := []string{"name", "type", "detect", "dependency"}
+	valid := []string{"name", "version", "type", "detect", "dependency"}
 	if err := checkHCLKeys(item.Val, valid); err != nil {
 		return multierror.Prefix(err, "application:")
 	}

@@ -1,0 +1,4 @@
+application {
+  name    = ""
+  version = "1.0"
+}

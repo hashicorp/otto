@@ -19,6 +19,7 @@ func TestFileHCL(t *testing.T) {
 		Input, Output string
 	}{
 		{"basic.hcl", "basic.golden"},
+		{"app-version.hcl", "app-version.golden"},
 	}
 
 	for _, tc := range cases {

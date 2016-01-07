@@ -44,6 +44,7 @@ type File struct {
 // Application is the structure of an application definition.
 type Application struct {
 	Name         string
+	Version      string
 	Type         string
 	Detect       bool
 	Dependencies []*Dependency `mapstructure:"dependency"`

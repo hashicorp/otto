@@ -21,7 +21,9 @@ func (f *File) HCL() *ast.File {
 		items = append(items, imp.HCL())
 	}
 	items = append(items, f.Application.HCL())
-	items = append(items, f.Project.HCL())
+	if f.Project != nil {
+		items = append(items, f.Project.HCL())
+	}
 	for _, infra := range f.Infrastructure {
 		items = append(items, infra.HCL())
 	}
@@ -163,6 +165,26 @@ func (f *Application) HCL() *ast.ObjectItem {
 		},
 		Assign: emptyAssign,
 	})
+	if f.Version != "" {
+		items = append(items, &ast.ObjectItem{
+			Keys: []*ast.ObjectKey{
+				&ast.ObjectKey{
+					Token: token.Token{
+						Type: token.IDENT,
+						Text: "version",
+						Pos:  token.Pos{Line: 2},
+					},
+				},
+			},
+			Val: &ast.LiteralType{
+				Token: token.Token{
+					Type: token.STRING,
+					Text: fmt.Sprintf(`"%s"`, f.Version),
+				},
+			},
+			Assign: emptyAssign,
+		})
+	}
 	if f.Type != "" {
 		items = append(items, &ast.ObjectItem{
 			Keys: []*ast.ObjectKey{
