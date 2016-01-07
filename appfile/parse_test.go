@@ -64,8 +64,8 @@ func TestParse(t *testing.T) {
 			"app-version.hcl",
 			&File{
 				Application: &Application{
-					Version: "1.0",
-					Detect:  true,
+					VersionRaw: "1.0",
+					Detect:     true,
 				},
 			},
 			false,

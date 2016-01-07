@@ -165,7 +165,7 @@ func (f *Application) HCL() *ast.ObjectItem {
 		},
 		Assign: emptyAssign,
 	})
-	if f.Version != "" {
+	if f.VersionRaw != "" {
 		items = append(items, &ast.ObjectItem{
 			Keys: []*ast.ObjectKey{
 				&ast.ObjectKey{
@@ -179,7 +179,7 @@ func (f *Application) HCL() *ast.ObjectItem {
 			Val: &ast.LiteralType{
 				Token: token.Token{
 					Type: token.STRING,
-					Text: fmt.Sprintf(`"%s"`, f.Version),
+					Text: fmt.Sprintf(`"%s"`, f.VersionRaw),
 				},
 			},
 			Assign: emptyAssign,

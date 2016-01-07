@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/otto/helper/uuid"
 )
@@ -44,7 +45,7 @@ type File struct {
 // Application is the structure of an application definition.
 type Application struct {
 	Name         string
-	Version      string
+	VersionRaw   string `mapstructure:"version"`
 	Type         string
 	Detect       bool
 	Dependencies []*Dependency `mapstructure:"dependency"`
@@ -223,6 +224,19 @@ func (appF *File) loadID() error {
 
 	appF.ID = uuid
 	return nil
+}
+
+// Version returns the version for this application.
+//
+// The Appfile itself must be valid (Validate called). If the version
+// is malformed this will panic.
+func (a *Application) Version() *version.Version {
+	vsn, err := version.NewVersion(a.VersionRaw)
+	if err != nil {
+		panic(err)
+	}
+
+	return vsn
 }
 
 //-------------------------------------------------------------------

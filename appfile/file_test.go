@@ -286,3 +286,29 @@ func TestFileDeepCopy(t *testing.T) {
 		t.Fatalf("bad:\n\n%#v\n\n%#v", f, f2)
 	}
 }
+
+func TestApplicationVersion(t *testing.T) {
+	cases := []struct {
+		File   string
+		Result string
+	}{
+		{
+			"app-version.hcl",
+			"1.0.0",
+		},
+	}
+
+	for _, tc := range cases {
+		path := filepath.Join("./test-fixtures", tc.File)
+		actual, err := ParseFile(path)
+		if err != nil {
+			t.Fatalf("file: %s\n\n%s", tc.File, err)
+			continue
+		}
+
+		vsn := actual.Application.Version()
+		if vsn.String() != tc.Result {
+			t.Fatalf("file: %s\n\n%s", tc.File, vsn)
+		}
+	}
+}

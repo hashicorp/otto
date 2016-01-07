@@ -35,8 +35,8 @@ func (f *File) Validate() error {
 			result = multierror.Append(result, fmt.Errorf(
 				"application: type is required"))
 		}
-		if f.Application.Version != "" {
-			if _, err := version.NewVersion(f.Application.Version); err != nil {
+		if f.Application.VersionRaw != "" {
+			if _, err := version.NewVersion(f.Application.VersionRaw); err != nil {
 				result = multierror.Append(result, fmt.Errorf(
 					"application: version is malformed: %s", err))
 			}
