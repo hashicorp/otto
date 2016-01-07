@@ -60,6 +60,17 @@ func TestParse(t *testing.T) {
 			false,
 		},
 
+		{
+			"app-version.hcl",
+			&File{
+				Application: &Application{
+					VersionRaw: "1.0",
+					Detect:     true,
+				},
+			},
+			false,
+		},
+
 		// Customizations
 		{
 			"basic-custom.hcl",

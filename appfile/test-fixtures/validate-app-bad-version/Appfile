@@ -1,0 +1,12 @@
+application {
+    name = "foo"
+    type = "foo"
+    version = "bad"
+}
+
+project {
+    name = "foo"
+    infrastructure = "aws"
+}
+
+infrastructure "aws" {}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-version"
 )
 
 // Validate validates the Appfile
@@ -33,6 +34,12 @@ func (f *File) Validate() error {
 		if f.Application.Type == "" {
 			result = multierror.Append(result, fmt.Errorf(
 				"application: type is required"))
+		}
+		if f.Application.VersionRaw != "" {
+			if _, err := version.NewVersion(f.Application.VersionRaw); err != nil {
+				result = multierror.Append(result, fmt.Errorf(
+					"application: version is malformed: %s", err))
+			}
 		}
 	}
 
