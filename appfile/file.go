@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/otto/helper/uuid"
+	"github.com/mitchellh/hashstructure"
 )
 
 const (
@@ -177,6 +178,40 @@ func (f *File) ActiveInfrastructure() *Infrastructure {
 	}
 
 	return nil
+}
+
+// ConfigHash returns a unique hash for the configuration of this
+// application. This should uniquely recognize this application's
+// configuration.
+//
+// Note that this alone isn't a 100% uniquely identifying factor.
+// But given two of the same applications, you can compare their
+// configurations using this.
+func (f *File) ConfigHash() uint64 {
+	// No customizations is a zero hash
+	if f.Customization == nil {
+		return 0
+	}
+
+	type hashCustomization struct {
+		Type   string
+		Config map[string]interface{}
+	}
+
+	cs := make([]hashCustomization, len(f.Customization.Raw))
+	for i, c := range f.Customization.Raw {
+		cs[i] = hashCustomization{
+			Type:   c.Type,
+			Config: c.Config,
+		}
+	}
+
+	v, err := hashstructure.Hash(cs, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	return v
 }
 
 // resetID deletes the ID associated with this file.

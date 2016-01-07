@@ -287,6 +287,48 @@ func TestFileDeepCopy(t *testing.T) {
 	}
 }
 
+func TestFileConfigHash(t *testing.T) {
+	cases := []struct {
+		One, Two string
+		Match    bool
+	}{
+		{
+			"basic.hcl",
+			"basic.hcl",
+			true,
+		},
+
+		{
+			"basic.hcl",
+			"basic-diff.hcl",
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		path1 := filepath.Join("./test-fixtures/config-hash", tc.One)
+		path2 := filepath.Join("./test-fixtures/config-hash", tc.Two)
+		actual1, err := ParseFile(path1)
+		if err != nil {
+			t.Fatalf("file: %s\n\n%s", path1, err)
+			continue
+		}
+		actual2, err := ParseFile(path2)
+		if err != nil {
+			t.Fatalf("file: %s\n\n%s", path2, err)
+			continue
+		}
+
+		v1, v2 := actual1.ConfigHash(), actual2.ConfigHash()
+		if v1 == 0 {
+			t.Fatalf("file: %s, zero hash", tc.One)
+		}
+		if (v1 == v2) != tc.Match {
+			t.Fatalf("file:\n%s\n%s\n\n%#v", tc.One, tc.Two, tc.Match)
+		}
+	}
+}
+
 func TestApplicationVersion(t *testing.T) {
 	cases := []struct {
 		File   string
