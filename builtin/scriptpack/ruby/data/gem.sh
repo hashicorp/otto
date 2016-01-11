@@ -27,6 +27,7 @@ ruby_gemfile_apt() {
     _ruby_gemfile_check sqlite3 "libsqlite3-dev"
     _ruby_gemfile_check libxml-ruby "libxml2-dev"
     _ruby_gemfile_check paperclip "imagemagick"
+    _ruby_gemfile_check minimagick "imagemagick libmagickcore-dev libmagickwand-dev graphicsmagick"
     _ruby_gemfile_check poltergeist "phantomjs"
 
     if [ -n "${_ruby_gemfile_queue-}" ]; then
