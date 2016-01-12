@@ -49,6 +49,7 @@ if [ -z "$NO_UPLOAD" ]; then
 
   s3cmd \
     --quiet \
+    --delete-removed \
     --guess-mime-type \
     --no-mime-magic \
     --acl-public \
