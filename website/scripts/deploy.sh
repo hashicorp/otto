@@ -31,7 +31,7 @@ fi
 # directory
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
-DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
+DIR="$(cd -P "$( dirname "$SOURCE" )/.." && pwd)"
 
 # Upload the files to S3 - we disable mime-type detection by the python library
 # and just guess from the file extension because it's surprisingly more
@@ -42,8 +42,8 @@ if [ -z "$NO_UPLOAD" ]; then
   echo "Uploading to S3..."
 
   # Check that the site has been built
-  if [ ! -d "$DIR/website/build" ]; then
-    echo "Missing compiled website! Running `make build` to compile!"
+  if [ ! -d "$DIR/build" ]; then
+    echo "Missing compiled website! Run 'make build' to compile!"
     exit 1
   fi
 
@@ -56,7 +56,7 @@ if [ -z "$NO_UPLOAD" ]; then
     --recursive \
     --add-header="Cache-Control: max-age=31536000" \
     --add-header="x-amz-meta-surrogate-key: site-$PROJECT" \
-    put "$DIR/website/build/" "s3://hc-sites/$PROJECT/latest/"
+    put "$DIR/build/" "s3://hc-sites/$PROJECT/latest/"
 fi
 
 # Perform a soft-purge of the surrogate key.
