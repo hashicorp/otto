@@ -13,7 +13,7 @@ built, and deployed. Therefore, you likely already have solutions in place
 to do this and may be wondering why Otto should be used over custom scripts
 and so on.
 
-When we released [Vagrant](https://vagrantup.com) in 2010, we got similar
+When we released [Vagrant](https://www.vagrantup.com) in 2010, we got similar
 questions. Over time, Vagrant has grown to millions of users for a simple
 reason: consistent and powerful workflow while being technology agnostic.
 

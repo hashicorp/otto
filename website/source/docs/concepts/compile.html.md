@@ -70,8 +70,8 @@ $ tree .otto
 24 directories, 41 files
 ```
 
-This folder contains [Vagrant](https://vagrantup.com) files,
-[Packer](https://packer.io) templates, [Terraform](https://terraform.io)
+This folder contains [Vagrant](https://www.vagrantup.com) files,
+[Packer](https://www.packer.io) templates, [Terraform](https://www.terraform.io)
 configurations, and more. Otto uses these tools under the covers to
 manage many aspects of development and deployment. If you're familiar with
 this tooling, you can inspect the files to see exactly what Otto will do.

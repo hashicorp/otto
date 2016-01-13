@@ -79,9 +79,9 @@ The key features of Otto are:
   workflow.
 
 * **Production-hardened tooling**: Otto uses production-hardened tooling to
-  build development environments ([Vagrant](https://vagrantup.com)),
-  launch servers ([Terraform](https://terraform.io)), configure
-  services ([Consul](https://consul.io)), and more. Otto builds on
+  build development environments ([Vagrant](https://www.vagrantup.com)),
+  launch servers ([Terraform](https://www.terraform.io)), configure
+  services ([Consul](https://www.consul.io)), and more. Otto builds on
   tools that power the world's largest websites.
   Otto automatically installs and manages all of this tooling, so you don't
   have to.

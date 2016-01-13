@@ -57,7 +57,7 @@ As you can see with the "custom" application type, the Appfile must specify
 all the lower level configurations that Otto will use for various steps.
 For development, a [Vagrantfile](https://docs.vagrantup.com/v2/vagrantfile/index.html)
 must be specified. For deployment, a
-[Terraform module](https://terraform.io/docs/modules/index.html)
+[Terraform module](https://www.terraform.io/docs/modules/index.html)
 must be specified.
 
 More [customizations](/docs/apps/custom/customization.html) are available

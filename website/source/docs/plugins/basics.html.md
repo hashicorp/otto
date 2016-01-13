@@ -51,7 +51,7 @@ simple and to ensure a common behavior.
 
 Developing a plugin is simple. The only knowledge necessary to write
 a plugin is basic command-line skills and basic knowledge of the
-[Go programming language](http://golang.org).
+[Go programming language](https://golang.org).
 
 -> **Note:** A common pitfall is not properly setting up a
 `$GOPATH`. This can lead to strange errors. You can read more about

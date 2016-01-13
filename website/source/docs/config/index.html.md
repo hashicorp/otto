@@ -73,7 +73,7 @@ For the `backend` section, the supported backends are shown below.
 Vault requires that the backend itself will be responsible for backups,
 durability, etc.
 
-  * `consul` - Store data within [Consul](http://www.consul.io). This
+  * `consul` - Store data within [Consul](https://www.consul.io). This
       backend supports HA. It is the most recommended backend for Vault
       and has been shown to work at high scale under heavy load.
 
@@ -83,7 +83,7 @@ durability, etc.
   * `zookeeper` - Store data within [Zookeeper](https://zookeeper.apache.org/).
       This backend supports HA.
 
-  * `s3` - Store data within an S3 bucket [S3](http://aws.amazon.com/s3/).
+  * `s3` - Store data within an S3 bucket [S3](https://aws.amazon.com/s3/).
       This backend does not support HA.
 
   * `mysql` - Store data within MySQL. This backend does not support HA.

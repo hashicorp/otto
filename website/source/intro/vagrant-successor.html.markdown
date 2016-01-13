@@ -8,7 +8,7 @@ description: |-
 
 # The Successor to Vagrant
 
-Otto is the successor to [Vagrant](https://vagrantup.com).
+Otto is the successor to [Vagrant](https://www.vagrantup.com).
 
 The creators of Otto are also the creators of Vagrant. After working
 on Vagrant for over six years, we've learned a lot and we believe Otto

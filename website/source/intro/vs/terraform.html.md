@@ -8,7 +8,7 @@ description: |-
 
 # Otto vs. Terraform
 
-[Terraform](https://terraform.io) is a tool for launching infrastructure.
+[Terraform](https://www.terraform.io) is a tool for launching infrastructure.
 It is also written by the same people who created Otto. Terraform is often
 used as a deployment tool.
 
