@@ -2,6 +2,7 @@
 set -e
 
 PROJECT="otto"
+PROJECT_URL="www.ottoproject.io"
 FASTLY_SERVICE_ID="7GrxRJP3PVBuqQbyxYQ0MV"
 
 # Ensure the proper AWS environment variables are set
@@ -32,6 +33,9 @@ fi
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 DIR="$(cd -P "$( dirname "$SOURCE" )/.." && pwd)"
+
+# Delete any .DS_Store files for our OS X friends.
+find "$DIR" -type f -name '.DS_Store' -delete
 
 # Upload the files to S3 - we disable mime-type detection by the python library
 # and just guess from the file extension because it's surprisingly more
@@ -71,4 +75,14 @@ if [ -z "$NO_PURGE" ]; then
     --header "Fastly-Key: $FASTLY_API_KEY" \
     --header "Fastly-Soft-Purge: 1" \
     "https://api.fastly.com/service/$FASTLY_SERVICE_ID/purge/site-$PROJECT"
+fi
+
+# Warm the cache with recursive wget.
+if [ -z "$NO_WARM" ]; then
+  echo "Warming Fastly cache..."
+  wget \
+    --recursive \
+    --delete-after \
+    --quiet \
+    "https://$PROJECT_URL/"
 fi

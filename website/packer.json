@@ -28,7 +28,7 @@
       ],
       "inline": [
         "apt-get update",
-        "apt-get install -y build-essential curl git libffi-dev s3cmd",
+        "apt-get install -y build-essential curl git libffi-dev s3cmd wget",
         "cd /app",
 
         "bundle check || bundle install --jobs 7",
