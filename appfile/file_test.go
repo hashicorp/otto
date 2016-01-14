@@ -117,6 +117,25 @@ func TestFileMerge(t *testing.T) {
 			},
 		},
 
+		"Application (version)": {
+			One: &File{
+				Application: &Application{
+					Name: "foo",
+				},
+			},
+			Two: &File{
+				Application: &Application{
+					VersionRaw: "1.2.3",
+				},
+			},
+			Three: &File{
+				Application: &Application{
+					Name:       "foo",
+					VersionRaw: "1.2.3",
+				},
+			},
+		},
+
 		"Infra (no merge)": {
 			One: &File{
 				Infrastructure: []*Infrastructure{

@@ -156,6 +156,9 @@ func (app *Application) Merge(other *Application) {
 	if other.Type != "" {
 		app.Type = other.Type
 	}
+	if other.VersionRaw != "" {
+		app.VersionRaw = other.VersionRaw
+	}
 	if len(other.Dependencies) > 0 {
 		app.Dependencies = other.Dependencies
 	}
