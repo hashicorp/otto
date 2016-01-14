@@ -16,6 +16,34 @@ type Directory struct {
 	Name   string
 }
 
+func (d *Directory) PutApp(l *directory.AppLookup, v *directory.App) error {
+	var resp DirPutAppResponse
+	args := &DirPutAppArgs{Lookup: l, App: v}
+	err := d.Client.Call(d.Name+".PutApp", args, &resp)
+	if err != nil {
+		return err
+	}
+	if resp.Error != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Directory) GetApp(l *directory.AppLookup) (*directory.App, error) {
+	var resp DirGetAppResponse
+	err := d.Client.Call(d.Name+".GetApp", l, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+		return nil, err
+	}
+
+	return resp.Value, nil
+}
+
 func (d *Directory) PutBlob(key string, data *directory.BlobData) error {
 	// Serve the data
 	id := d.Broker.NextId()
@@ -230,8 +258,18 @@ type DirGetBlobArgs struct {
 	Id  uint32
 }
 
+type DirPutAppArgs struct {
+	Lookup *directory.AppLookup
+	App    *directory.App
+}
+
 type DirGetBlobResponse struct {
 	Ok    bool
+	Error *BasicError
+}
+
+type DirGetAppResponse struct {
+	Value *directory.App
 	Error *BasicError
 }
 
@@ -252,6 +290,10 @@ type DirGetBuildResponse struct {
 
 type DirGetDeployResponse struct {
 	Value *directory.Deploy
+	Error *BasicError
+}
+
+type DirPutAppResponse struct {
 	Error *BasicError
 }
 
@@ -345,6 +387,27 @@ func (s *DirectoryServer) GetBlob(
 		}
 	}()
 
+	return nil
+}
+
+func (s *DirectoryServer) PutApp(
+	args *DirPutAppArgs,
+	reply *DirPutAppResponse) error {
+	err := s.Directory.PutApp(args.Lookup, args.App)
+	*reply = DirPutAppResponse{
+		Error: NewBasicError(err),
+	}
+	return nil
+}
+
+func (s *DirectoryServer) GetApp(
+	args *directory.AppLookup,
+	reply *DirGetAppResponse) error {
+	result, err := s.Directory.GetApp(args)
+	*reply = DirGetAppResponse{
+		Value: result,
+		Error: NewBasicError(err),
+	}
 	return nil
 }
 
