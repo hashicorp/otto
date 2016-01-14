@@ -20,6 +20,45 @@ func TestBackend(t *testing.T, b Backend) {
 	// to end properly.
 
 	//---------------------------------------------------------------
+	// App
+	//---------------------------------------------------------------
+
+	{
+		// GetApp (doesn't exist)
+		lookup := AppLookup{AppID: "42", Version: "1.2.3", ConfigHash: 42}
+		app, err := b.GetApp(&lookup)
+		if err != nil {
+			t.Errorf("GetApp error: %s", err)
+			return
+		}
+		if app != nil {
+			t.Errorf("App shouldn't be found: %#v", app)
+			return
+		}
+
+		// PutApp
+		expected := &App{Name: "foo", Type: "bar"}
+		err = b.PutApp(&lookup, expected)
+		if err != nil {
+			t.Errorf("PutApp error: %s", err)
+			return
+		}
+
+		// GetApp (exists)
+		app, err = b.GetApp(&lookup)
+		if err != nil {
+			t.Errorf("GetApp error: %s", err)
+			return
+		}
+		if !reflect.DeepEqual(expected, app) {
+			t.Errorf(
+				"GetApp doesn't match. Expected, then actual:\n\n%#v\n\n%#v",
+				expected, app)
+			return
+		}
+	}
+
+	//---------------------------------------------------------------
 	// Blob
 	//---------------------------------------------------------------
 

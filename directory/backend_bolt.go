@@ -42,6 +42,68 @@ type BoltBackend struct {
 	Dir string
 }
 
+func (b *BoltBackend) PutApp(l *AppLookup, a *App) error {
+	data, err := b.structData(a)
+	if err != nil {
+		return err
+	}
+
+	paths := [][]byte{
+		boltAppsBucket,
+		[]byte(l.AppID),
+		[]byte(l.Version),
+		[]byte(fmt.Sprintf("%d", l.ConfigHash)),
+	}
+
+	return b.withDB(func(db *bolt.DB) error {
+		return db.Update(func(tx *bolt.Tx) error {
+			bucket, err := b.bucket(tx, paths)
+			if err != nil {
+				return err
+			}
+			if bucket == nil {
+				panic("nil bucket")
+			}
+
+			return bucket.Put([]byte("app"), data)
+		})
+	})
+}
+
+func (b *BoltBackend) GetApp(l *AppLookup) (*App, error) {
+	paths := [][]byte{
+		boltAppsBucket,
+		[]byte(l.AppID),
+		[]byte(l.Version),
+		[]byte(fmt.Sprintf("%d", l.ConfigHash)),
+	}
+
+	var result *App
+	err := b.withDB(func(db *bolt.DB) error {
+		return db.View(func(tx *bolt.Tx) error {
+			bucket, err := b.bucket(tx, paths)
+			if err != nil {
+				return err
+			}
+
+			// If the bucket doesn't exist, we haven't written this yet
+			if bucket == nil {
+				return nil
+			}
+
+			// Get the key for this infra
+			data := bucket.Get([]byte("app"))
+			if data == nil {
+				return nil
+			}
+
+			result = &App{}
+			return b.structRead(result, data)
+		})
+	})
+	return result, err
+}
+
 func (b *BoltBackend) GetBlob(k string) (*BlobData, error) {
 	db, err := b.db()
 	if err != nil {
@@ -442,6 +504,48 @@ func (b *BoltBackend) db() (*bolt.DB, error) {
 	}
 
 	return db, nil
+}
+
+func (b *BoltBackend) withDB(f func(db *bolt.DB) error) error {
+	db, err := b.db()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	return f(db)
+}
+
+func (b *BoltBackend) bucket(tx *bolt.Tx, path [][]byte) (result *bolt.Bucket, err error) {
+	// Local interface just so we can treat bolt.Tx and bolt.Bucket the
+	// same for the purpose of creating a bucket.
+	type i interface {
+		Bucket([]byte) *bolt.Bucket
+		CreateBucketIfNotExists([]byte) (*bolt.Bucket, error)
+	}
+
+	// Go through and create/open all of the path
+	var current i = tx
+	for _, p := range path {
+		// If the transaction is writable, then we try to create the bucket
+		// as well. Otherwise, we're just reading.
+		if tx.Writable() {
+			result, err = current.CreateBucketIfNotExists(p)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			result = current.Bucket(p)
+			if result == nil {
+				return nil, nil
+			}
+		}
+
+		current = result
+	}
+
+	// Return the final bucket
+	return result, nil
 }
 
 func (b *BoltBackend) structData(d interface{}) ([]byte, error) {
