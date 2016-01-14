@@ -265,6 +265,23 @@ func (c *Core) Compile() error {
 		return err
 	}
 
+	// Store this application in the directory as compiled
+	root, err := c.appfileCompiled.Graph.Root()
+	if err != nil {
+		panic(err)
+	}
+
+	app, err := directory.NewAppCompiled(c.appfileCompiled, root)
+	if err != nil {
+		return fmt.Errorf(
+			"Error creating app for directory storage: %s", err)
+	}
+
+	if err := c.dir.PutApp(&app.AppLookup, app); err != nil {
+		return fmt.Errorf(
+			"Error storing the application in the directory: %s", err)
+	}
+
 	// We had no compilation errors! Let's save the metadata
 	return c.saveCompileMetadata(&md)
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/directory"
 )
 
 func TestCoreApp(t *testing.T) {
@@ -74,6 +75,38 @@ func TestCoreCompile_customizationFilter(t *testing.T) {
 	expected := []string{"bar", "foo"}
 	if !reflect.DeepEqual(keys, expected) {
 		t.Fatalf("bad: %#v", keys)
+	}
+}
+
+func TestCoreCompile_directory(t *testing.T) {
+	// Make a core that returns a fixed app
+	coreConfig := TestCoreConfig(t)
+	coreConfig.Appfile = TestAppfile(t, testPath("compile-directory", "Appfile"))
+	appMock := TestApp(t, TestAppTuple, coreConfig)
+	core := testCore(t, coreConfig)
+
+	// Compile!
+	if err := core.Compile(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify basic compile behavior
+	if !appMock.CompileCalled {
+		t.Fatal("compile should be called")
+	}
+
+	// Verify we're now in the directory
+	d := coreConfig.Directory
+	app, err := d.GetApp(directory.AppLookupAppfile(coreConfig.Appfile.File))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if app == nil {
+		t.Fatal("app not found")
+	}
+	if app.Name != "foo" {
+		t.Fatalf("bad: %#v", app)
 	}
 }
 
