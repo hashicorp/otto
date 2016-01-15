@@ -44,6 +44,20 @@ func (d *Directory) GetApp(l *directory.AppLookup) (*directory.App, error) {
 	return resp.Value, nil
 }
 
+func (d *Directory) ListApps() ([]*directory.App, error) {
+	var resp DirListAppsResponse
+	err := d.Client.Call(d.Name+".ListApps", new(interface{}), &resp)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+		return nil, err
+	}
+
+	return resp.Value, nil
+}
+
 func (d *Directory) PutBlob(key string, data *directory.BlobData) error {
 	// Serve the data
 	id := d.Broker.NextId()
@@ -273,6 +287,11 @@ type DirGetAppResponse struct {
 	Error *BasicError
 }
 
+type DirListAppsResponse struct {
+	Value []*directory.App
+	Error *BasicError
+}
+
 type DirGetInfraResponse struct {
 	Value *directory.Infra
 	Error *BasicError
@@ -405,6 +424,17 @@ func (s *DirectoryServer) GetApp(
 	reply *DirGetAppResponse) error {
 	result, err := s.Directory.GetApp(args)
 	*reply = DirGetAppResponse{
+		Value: result,
+		Error: NewBasicError(err),
+	}
+	return nil
+}
+
+func (s *DirectoryServer) ListApps(
+	args interface{},
+	reply *DirListAppsResponse) error {
+	result, err := s.Directory.ListApps()
+	*reply = DirListAppsResponse{
 		Value: result,
 		Error: NewBasicError(err),
 	}
