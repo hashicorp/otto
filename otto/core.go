@@ -270,21 +270,37 @@ func (c *Core) Compile() error {
 		return err
 	}
 
-	// Store this application in the directory as compiled
-	root, err := c.appfileCompiled.Graph.Root()
-	if err != nil {
-		panic(err)
-	}
+	// Store this and all other applications in the directory as compiled.
+	// To do this, we go for the leaves first and walk upwards.
+	//
+	// First, we find the leaves
+	var leaves []dag.Vertex
+	c.appfileCompiled.Graph.Walk(func(raw dag.Vertex) error {
+		set := c.appfileCompiled.Graph.DownEdges(raw)
+		if set == nil || set.Len() == 0 {
+			leaves = append(leaves, raw)
+		}
 
-	app, err := directory.NewAppCompiled(c.appfileCompiled, root)
-	if err != nil {
-		return fmt.Errorf(
-			"Error creating app for directory storage: %s", err)
-	}
+		return nil
+	})
 
-	if err := c.dir.PutApp(&app.AppLookup, app); err != nil {
-		return fmt.Errorf(
-			"Error storing the application in the directory: %s", err)
+	// Depth-first walk starting from the leaves to store this.
+	err = c.appfileCompiled.Graph.ReverseDepthFirstWalk(leaves, func(raw dag.Vertex, _ int) error {
+		app, err := directory.NewAppCompiled(c.appfileCompiled, raw)
+		if err != nil {
+			return fmt.Errorf(
+				"Error creating app for directory storage: %s", err)
+		}
+
+		if err := c.dir.PutApp(&app.AppLookup, app); err != nil {
+			return fmt.Errorf(
+				"Error storing the application in the directory: %s", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	// We had no compilation errors! Let's save the metadata

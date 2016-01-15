@@ -111,6 +111,10 @@ func (v *CompiledGraphVertex) Name() string {
 	return v.NameValue
 }
 
+func (v *CompiledGraphVertex) GoString() string {
+	return fmt.Sprintf("*%#v", *v)
+}
+
 // CompileOpts are the options for compilation.
 type CompileOpts struct {
 	// Dir is the directory where all the compiled data will be stored.

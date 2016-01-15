@@ -111,6 +111,51 @@ func TestCoreCompile_directory(t *testing.T) {
 	}
 }
 
+func TestCoreCompile_directoryDeps(t *testing.T) {
+	// Make a core that returns a fixed app
+	coreConfig := TestCoreConfig(t)
+	coreConfig.Appfile = appfile.TestAppfile(t, testPath("compile-directory-deps", "Appfile"))
+	appMock := TestApp(t, TestAppTuple, coreConfig)
+	core := testCore(t, coreConfig)
+
+	// Compile!
+	if err := core.Compile(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify basic compile behavior
+	if !appMock.CompileCalled {
+		t.Fatal("compile should be called")
+	}
+
+	// Verify we're now in the directory
+	d := coreConfig.Directory
+	app, err := d.GetApp(directory.AppLookupAppfile(coreConfig.Appfile.File))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if app == nil {
+		t.Fatal("app not found")
+	}
+	if len(app.Dependencies) != 1 {
+		t.Fatalf("bad: %#v", app)
+	}
+
+	// Get the dependency
+	dep, err := d.GetApp(&app.Dependencies[0])
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if dep == nil {
+		t.Fatal("dep not found")
+	}
+	if dep.Name != "bar" {
+		t.Fatalf("bad: %#v", dep)
+	}
+}
+
 func TestCoreDev_compileMetadata(t *testing.T) {
 	// Make a core that returns a fixed app
 	coreConfig := TestCoreConfig(t)
