@@ -32,12 +32,21 @@ func NewAppCompiled(c *appfile.Compiled, root dag.Vertex) (*App, error) {
 		panic(fmt.Sprintf("unknown graph vertex type: %T", root))
 	}
 
-	// TODO: dependencies
+	// Get all the direct dependencies of this app (if any)
+	var deps []AppLookup
+	edges := c.Graph.DownEdges(root)
+	if edges != nil && edges.Len() > 0 {
+		for _, raw := range edges.List() {
+			v := raw.(*appfile.CompiledGraphVertex)
+			deps = append(deps, *AppLookupAppfile(v.File))
+		}
+	}
 
 	return &App{
-		AppLookup: *AppLookupAppfile(gv.File),
-		Name:      gv.File.Application.Name,
-		Type:      gv.File.Application.Type,
+		AppLookup:    *AppLookupAppfile(gv.File),
+		Name:         gv.File.Application.Name,
+		Type:         gv.File.Application.Type,
+		Dependencies: deps,
 	}, nil
 }
 

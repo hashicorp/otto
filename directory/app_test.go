@@ -27,6 +27,26 @@ func TestNewAppCompiled(t *testing.T) {
 				Type: "bar",
 			},
 		},
+
+		{
+			"app-deps",
+			false,
+			&App{
+				AppLookup: AppLookup{
+					AppID:   "65972869-4e36-6344-b2ca-cd34cba1d3f7",
+					Version: "1.0.0",
+				},
+				Name: "foo",
+				Type: "bar",
+
+				Dependencies: []AppLookup{
+					AppLookup{
+						AppID:   "hello",
+						Version: "0.1.0",
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {
