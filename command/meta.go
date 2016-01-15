@@ -161,7 +161,12 @@ func (m *Meta) AppfilePluginsPath(f *appfile.Compiled) (string, error) {
 
 // DataDir returns the user-local data directory for Otto.
 func (m *Meta) DataDir() (string, error) {
-	return homedir.Expand(DefaultLocalDataDir)
+	expand := DefaultLocalDataDir
+	if m.CoreConfig != nil && m.CoreConfig.DataDir != "" {
+		expand = m.CoreConfig.DataDir
+	}
+
+	return homedir.Expand(expand)
 }
 
 // RootDir finds the "root" directory. This is the working directory of
