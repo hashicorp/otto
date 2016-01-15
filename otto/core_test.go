@@ -6,13 +6,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
 )
 
 func TestCoreApp(t *testing.T) {
 	// Make a core that returns a fixed app
 	coreConfig := TestCoreConfig(t)
-	coreConfig.Appfile = TestAppfile(t, testPath("basic", "Appfile"))
+	coreConfig.Appfile = appfile.TestAppfile(t, testPath("basic", "Appfile"))
 	appMock := TestApp(t, TestAppTuple, coreConfig)
 	core := testCore(t, coreConfig)
 
@@ -30,7 +31,7 @@ func TestCoreApp(t *testing.T) {
 func TestCoreCompile_close(t *testing.T) {
 	// Make a core that returns a fixed app
 	coreConfig := TestCoreConfig(t)
-	coreConfig.Appfile = TestAppfile(t, testPath("basic", "Appfile"))
+	coreConfig.Appfile = appfile.TestAppfile(t, testPath("basic", "Appfile"))
 	appMock := TestApp(t, TestAppTuple, coreConfig)
 	core := testCore(t, coreConfig)
 
@@ -50,7 +51,7 @@ func TestCoreCompile_close(t *testing.T) {
 func TestCoreCompile_customizationFilter(t *testing.T) {
 	// Make a core that returns a fixed app
 	coreConfig := TestCoreConfig(t)
-	coreConfig.Appfile = TestAppfile(t, testPath("customization-app-filter", "Appfile"))
+	coreConfig.Appfile = appfile.TestAppfile(t, testPath("customization-app-filter", "Appfile"))
 	appMock := TestApp(t, TestAppTuple, coreConfig)
 	core := testCore(t, coreConfig)
 
@@ -81,7 +82,7 @@ func TestCoreCompile_customizationFilter(t *testing.T) {
 func TestCoreCompile_directory(t *testing.T) {
 	// Make a core that returns a fixed app
 	coreConfig := TestCoreConfig(t)
-	coreConfig.Appfile = TestAppfile(t, testPath("compile-directory", "Appfile"))
+	coreConfig.Appfile = appfile.TestAppfile(t, testPath("compile-directory", "Appfile"))
 	appMock := TestApp(t, TestAppTuple, coreConfig)
 	core := testCore(t, coreConfig)
 
@@ -113,7 +114,7 @@ func TestCoreCompile_directory(t *testing.T) {
 func TestCoreDev_compileMetadata(t *testing.T) {
 	// Make a core that returns a fixed app
 	coreConfig := TestCoreConfig(t)
-	coreConfig.Appfile = TestAppfile(t, testPath("basic", "Appfile"))
+	coreConfig.Appfile = appfile.TestAppfile(t, testPath("basic", "Appfile"))
 	appMock := TestApp(t, TestAppTuple, coreConfig)
 	core := testCore(t, coreConfig)
 
