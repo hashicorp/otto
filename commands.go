@@ -56,6 +56,7 @@ func init() {
 	}
 
 	CommandsInclude = []string{
+		"apps",
 		"compile",
 		"build",
 		"deploy",
@@ -66,6 +67,12 @@ func init() {
 	}
 
 	Commands = map[string]cli.CommandFactory{
+		"apps": func() (cli.Command, error) {
+			return &command.AppsCommand{
+				Meta: meta,
+			}, nil
+		},
+
 		"compile": func() (cli.Command, error) {
 			return &command.CompileCommand{
 				Meta: meta,

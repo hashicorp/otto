@@ -116,6 +116,11 @@ func (c *Core) App() (app.App, *app.Context, error) {
 	return rootApp, rootCtx, nil
 }
 
+// Directory is the configured directory backend for this core.
+func (c *Core) Directory() directory.Backend {
+	return c.dir
+}
+
 // Compile takes the Appfile and compiles all the resulting data.
 func (c *Core) Compile() error {
 	// md stores the metadata about the compilation. This is only written

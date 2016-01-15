@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 
 	"github.com/boltdb/bolt"
@@ -156,6 +157,7 @@ func (b *BoltBackend) ListApps() ([]*App, error) {
 		})
 	})
 
+	sort.Sort(AppSlice(result))
 	return result, err
 }
 

@@ -223,6 +223,9 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	}()
 	f.SetOutput(errW)
 
+	// Set the default usage command to empty
+	f.Usage = func() {}
+
 	return f
 }
 
