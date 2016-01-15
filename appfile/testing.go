@@ -27,6 +27,11 @@ func TestAppfile(t TestT, path string) *Compiled {
 			return nil, err
 		}
 
+		// Default type should be "test"
+		fDef.Infrastructure[0].Type = "test"
+		fDef.Infrastructure[0].Flavor = "test"
+		fDef.Infrastructure[0].Foundations = nil
+
 		var merged File
 		if err := merged.Merge(fDef); err != nil {
 			return nil, err
