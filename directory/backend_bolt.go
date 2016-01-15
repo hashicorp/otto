@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/boltdb/bolt"
 )
@@ -101,6 +102,60 @@ func (b *BoltBackend) GetApp(l *AppLookup) (*App, error) {
 			return b.structRead(result, data)
 		})
 	})
+	return result, err
+}
+
+func (b *BoltBackend) ListApps() ([]*App, error) {
+	paths := [][]byte{
+		boltAppsBucket,
+	}
+
+	var result []*App
+	err := b.withDB(func(db *bolt.DB) error {
+		return db.View(func(tx *bolt.Tx) error {
+			bucket, err := b.bucket(tx, paths)
+			if err != nil {
+				return err
+			}
+
+			// If the bucket doesn't exist, we have nothing
+			if bucket == nil {
+				return nil
+			}
+
+			// Traverse it!
+			return b.traverse(bucket, 3, func(path [][]byte, bucket *bolt.Bucket) error {
+				// Decode some of the lookup info
+				configHash, err := strconv.ParseUint(string(path[2]), 10, 64)
+				if err != nil {
+					return err
+				}
+
+				// Get the key for this infra
+				data := bucket.Get([]byte("app"))
+				if data == nil {
+					return nil
+				}
+
+				// Decode the App
+				app := &App{}
+				if err := b.structRead(app, data); err != nil {
+					return err
+				}
+
+				// Populate the lookup data from the path
+				app.AppLookup = AppLookup{
+					AppID:      string(path[0]),
+					Version:    string(path[1]),
+					ConfigHash: uint64(configHash),
+				}
+
+				result = append(result, app)
+				return nil
+			})
+		})
+	})
+
 	return result, err
 }
 
@@ -546,6 +601,45 @@ func (b *BoltBackend) bucket(tx *bolt.Tx, path [][]byte) (result *bolt.Bucket, e
 
 	// Return the final bucket
 	return result, nil
+}
+
+func (b *BoltBackend) traverse(
+	bucket *bolt.Bucket,
+	levels int,
+	f func([][]byte, *bolt.Bucket) error) error {
+	// acc is the accumulator for the path that we call into f
+	acc := make([][]byte, 0, levels)
+
+	// This function works by defining an inner "internal" function
+	// that we recurse. We recurse for each sub-bucket we hit up to "levels"
+	// and when we reach the base case (levels == 0) we call the callback.
+	var internal func(bucket *bolt.Bucket, levels int) error
+	internal = func(bucket *bolt.Bucket, levels int) error {
+		// If we've reached the final level then we want to call the callback
+		if levels == 0 {
+			return f(acc, bucket)
+		}
+
+		// Traverse one level of buckets and recurse
+		return bucket.ForEach(func(k, v []byte) error {
+			// Get the next bucket level
+			b2 := bucket.Bucket(k)
+			if b2 == nil {
+				return nil
+			}
+
+			// Build the accumulator. We have to reset it after we return
+			// so that we preserve it for future calls.
+			acc = append(acc, k)
+			defer func() { acc = acc[:len(acc)-1] }()
+
+			// Recurse into this
+			return internal(b2, levels-1)
+		})
+	}
+
+	// First iteration
+	return internal(bucket, levels)
 }
 
 func (b *BoltBackend) structData(d interface{}) ([]byte, error) {

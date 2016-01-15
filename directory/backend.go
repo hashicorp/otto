@@ -22,8 +22,12 @@ type Backend interface {
 	//
 	// GetApp finds an exact application using some lookup values. If the
 	// app is not found, nil is returned.
+	//
+	// ListApps returns the list of Apps that are available in the directory.
+	// These will be sorted according to AppSlice.
 	PutApp(*AppLookup, *App) error
 	GetApp(*AppLookup) (*App, error)
+	ListApps() ([]*App, error)
 
 	//--------------------------------------------------------------------
 	// Legacy

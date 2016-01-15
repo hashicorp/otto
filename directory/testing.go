@@ -56,6 +56,24 @@ func TestBackend(t *testing.T, b Backend) {
 				expected, app)
 			return
 		}
+
+		// ListApps
+		expected.AppLookup = lookup
+		apps, err := b.ListApps()
+		if err != nil {
+			t.Errorf("ListApps error: %s", err)
+			return
+		}
+		if len(apps) != 1 {
+			t.Errorf("ListApps length should be 1: %d", len(apps))
+			return
+		}
+		if !reflect.DeepEqual(expected, apps[0]) {
+			t.Errorf(
+				"ListApps doesn't match. Expected, then actual:\n\n%#v\n\n%#v",
+				expected, apps[0])
+			return
+		}
 	}
 
 	//---------------------------------------------------------------

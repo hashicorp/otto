@@ -3,6 +3,7 @@ package directory
 import (
 	"path/filepath"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/hashicorp/otto/appfile"
@@ -42,6 +43,196 @@ func TestNewAppCompiled(t *testing.T) {
 		}
 		if !reflect.DeepEqual(actual, tc.Expected) {
 			t.Fatalf("%s: bad: %#v", tc.Input, actual)
+		}
+	}
+}
+
+func TestAppSlice_impl(t *testing.T) {
+	var _ sort.Interface = new(AppSlice)
+}
+
+func TestAppSlice_sort(t *testing.T) {
+	cases := []struct {
+		Desc     string
+		Input    []*App
+		Expected []*App
+	}{
+		{
+			"basic, name only",
+			[]*App{
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "foo",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "bar",
+				},
+			},
+
+			[]*App{
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "bar",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "foo",
+				},
+			},
+		},
+
+		{
+			"name, then ID",
+			[]*App{
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "b",
+						Version: "1.0.0",
+					},
+
+					Name: "foo",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "foo",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "bar",
+				},
+			},
+
+			[]*App{
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "bar",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "foo",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "b",
+						Version: "1.0.0",
+					},
+
+					Name: "foo",
+				},
+			},
+		},
+
+		{
+			"name, then ID, then version",
+			[]*App{
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "b",
+						Version: "1.2.3",
+					},
+
+					Name: "foo",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "b",
+						Version: "1.10.0",
+					},
+
+					Name: "foo",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "foo",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "bar",
+				},
+			},
+
+			[]*App{
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "bar",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "a",
+						Version: "1.0.0",
+					},
+
+					Name: "foo",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "b",
+						Version: "1.2.3",
+					},
+
+					Name: "foo",
+				},
+				&App{
+					AppLookup: AppLookup{
+						AppID:   "b",
+						Version: "1.10.0",
+					},
+
+					Name: "foo",
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		sort.Sort(AppSlice(tc.Input))
+		if !reflect.DeepEqual(tc.Expected, tc.Input) {
+			t.Fatalf("%s bad: %#v", tc.Desc, tc.Input)
 		}
 	}
 }
