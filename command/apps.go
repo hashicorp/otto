@@ -52,7 +52,7 @@ func (c *AppsCommand) Run(args []string) int {
 	}
 
 	if len(apps) == 0 {
-		c.Ui.Output("FOO")
+		c.Ui.Output(strings.TrimSpace(outputNoApps))
 		return 1
 	}
 
@@ -90,3 +90,11 @@ Usage: otto apps [id]
 
 	return strings.TrimSpace(helpText)
 }
+
+const outputNoApps = `
+There are currently no apps managed by Otto!
+
+You must "otto compile" an app for Otto to know about it. See "otto apps -h"
+for more information about where this information is stored and what the
+purpose of this command is.
+`
