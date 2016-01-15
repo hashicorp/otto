@@ -11,22 +11,34 @@ import (
 // defaults for detectors and such so it is up to you to use a fairly
 // complete Appfile.
 func TestAppfile(t TestT, path string) *Compiled {
-	def, err := Default(filepath.Dir(path), &detect.Config{
+	detector := &detect.Config{
 		Detectors: []*detect.Detector{
 			&detect.Detector{
 				Type: "test",
 				File: []string{"Appfile"},
 			},
 		},
-	})
-	if err != nil {
-		t.Fatal("err: ", err)
 	}
 
-	// Default type should be "test"
-	def.Infrastructure[0].Type = "test"
-	def.Infrastructure[0].Flavor = "test"
-	def.Infrastructure[0].Foundations = nil
+	// Create a loader that sets up defaults
+	loader := func(f *File, dir string) (*File, error) {
+		fDef, err := Default(dir, detector)
+		if err != nil {
+			return nil, err
+		}
+
+		var merged File
+		if err := merged.Merge(fDef); err != nil {
+			return nil, err
+		}
+		if f != nil {
+			if err := merged.Merge(f); err != nil {
+				return nil, err
+			}
+		}
+
+		return &merged, nil
+	}
 
 	// Parse the raw file
 	f, err := ParseFile(path)
@@ -34,11 +46,11 @@ func TestAppfile(t TestT, path string) *Compiled {
 		t.Fatal("err: ", err)
 	}
 
-	// Merge
-	if err := def.Merge(f); err != nil {
+	// Call the loader for this Appfile
+	f, err = loader(f, filepath.Dir(f.Path))
+	if err != nil {
 		t.Fatal("err: ", err)
 	}
-	f = def
 
 	// Create a temporary directory for the compilation data. We don't
 	// delete this now in case we're using any of that data, but the
@@ -48,13 +60,16 @@ func TestAppfile(t TestT, path string) *Compiled {
 		t.Fatal("err: ", err)
 	}
 
-	// Compile it!
+	// Create the compiler
 	compiler, err := NewCompiler(&CompileOpts{
-		Dir: td,
+		Dir:    td,
+		Loader: loader,
 	})
 	if err != nil {
 		t.Fatal("err: ", err)
 	}
+
+	// Compile
 	result, err := compiler.Compile(f)
 	if err != nil {
 		t.Fatal("err: ", err)
