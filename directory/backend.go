@@ -11,6 +11,28 @@ import (
 // a value add on top of the Appfile (but not part of that format) that Otto
 // uses for global state.
 type Backend interface {
+	//--------------------------------------------------------------------
+	// App-related
+	//--------------------------------------------------------------------
+
+	// PutApp stores the application in the backend. This denotes that
+	// an application exists but may not yet be deployed, and codifies
+	// the configuration that is in use. If the application already exists,
+	// this will overwrite it.
+	//
+	// GetApp finds an exact application using some lookup values. If the
+	// app is not found, nil is returned.
+	//
+	// ListApps returns the list of Apps that are available in the directory.
+	// These will be sorted according to AppSlice.
+	PutApp(*AppLookup, *App) error
+	GetApp(*AppLookup) (*App, error)
+	ListApps() ([]*App, error)
+
+	//--------------------------------------------------------------------
+	// Legacy
+	//--------------------------------------------------------------------
+
 	// PutBlob writes binary data for a given project/infra/app.
 	//
 	// GetBlob reads that data back out.

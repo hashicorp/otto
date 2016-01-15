@@ -116,6 +116,11 @@ func (c *Core) App() (app.App, *app.Context, error) {
 	return rootApp, rootCtx, nil
 }
 
+// Directory is the configured directory backend for this core.
+func (c *Core) Directory() directory.Backend {
+	return c.dir
+}
+
 // Compile takes the Appfile and compiles all the resulting data.
 func (c *Core) Compile() error {
 	// md stores the metadata about the compilation. This is only written
@@ -257,6 +262,39 @@ func (c *Core) Compile() error {
 			if result != nil {
 				md.AppDeps[ctx.Appfile.ID] = result
 			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// Store this and all other applications in the directory as compiled.
+	// To do this, we go for the leaves first and walk upwards.
+	//
+	// First, we find the leaves
+	var leaves []dag.Vertex
+	c.appfileCompiled.Graph.Walk(func(raw dag.Vertex) error {
+		set := c.appfileCompiled.Graph.DownEdges(raw)
+		if set == nil || set.Len() == 0 {
+			leaves = append(leaves, raw)
+		}
+
+		return nil
+	})
+
+	// Depth-first walk starting from the leaves to store this.
+	err = c.appfileCompiled.Graph.ReverseDepthFirstWalk(leaves, func(raw dag.Vertex, _ int) error {
+		app, err := directory.NewAppCompiled(c.appfileCompiled, raw)
+		if err != nil {
+			return fmt.Errorf(
+				"Error creating app for directory storage: %s", err)
+		}
+
+		if err := c.dir.PutApp(&app.AppLookup, app); err != nil {
+			return fmt.Errorf(
+				"Error storing the application in the directory: %s", err)
 		}
 
 		return nil

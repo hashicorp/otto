@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 
 	"github.com/boltdb/bolt"
 )
@@ -40,6 +42,123 @@ type BoltBackend struct {
 	// Directory where data will be written. This directory will be
 	// created if it doesn't exist.
 	Dir string
+}
+
+func (b *BoltBackend) PutApp(l *AppLookup, a *App) error {
+	data, err := b.structData(a)
+	if err != nil {
+		return err
+	}
+
+	paths := [][]byte{
+		boltAppsBucket,
+		[]byte(l.AppID),
+		[]byte(l.Version),
+		[]byte(fmt.Sprintf("%d", l.ConfigHash)),
+	}
+
+	return b.withDB(func(db *bolt.DB) error {
+		return db.Update(func(tx *bolt.Tx) error {
+			bucket, err := b.bucket(tx, paths)
+			if err != nil {
+				return err
+			}
+			if bucket == nil {
+				panic("nil bucket")
+			}
+
+			return bucket.Put([]byte("app"), data)
+		})
+	})
+}
+
+func (b *BoltBackend) GetApp(l *AppLookup) (*App, error) {
+	paths := [][]byte{
+		boltAppsBucket,
+		[]byte(l.AppID),
+		[]byte(l.Version),
+		[]byte(fmt.Sprintf("%d", l.ConfigHash)),
+	}
+
+	var result *App
+	err := b.withDB(func(db *bolt.DB) error {
+		return db.View(func(tx *bolt.Tx) error {
+			bucket, err := b.bucket(tx, paths)
+			if err != nil {
+				return err
+			}
+
+			// If the bucket doesn't exist, we haven't written this yet
+			if bucket == nil {
+				return nil
+			}
+
+			// Get the key for this infra
+			data := bucket.Get([]byte("app"))
+			if data == nil {
+				return nil
+			}
+
+			result = &App{}
+			return b.structRead(result, data)
+		})
+	})
+	return result, err
+}
+
+func (b *BoltBackend) ListApps() ([]*App, error) {
+	paths := [][]byte{
+		boltAppsBucket,
+	}
+
+	var result []*App
+	err := b.withDB(func(db *bolt.DB) error {
+		return db.View(func(tx *bolt.Tx) error {
+			bucket, err := b.bucket(tx, paths)
+			if err != nil {
+				return err
+			}
+
+			// If the bucket doesn't exist, we have nothing
+			if bucket == nil {
+				return nil
+			}
+
+			// Traverse it!
+			return b.traverse(bucket, 3, func(path [][]byte, bucket *bolt.Bucket) error {
+				// Decode some of the lookup info
+				configHash, err := strconv.ParseUint(string(path[2]), 10, 64)
+				if err != nil {
+					return err
+				}
+
+				// Get the key for this infra
+				data := bucket.Get([]byte("app"))
+				if data == nil {
+					return nil
+				}
+
+				// Decode the App
+				app := &App{}
+				if err := b.structRead(app, data); err != nil {
+					return err
+				}
+
+				// Populate the lookup data from the path
+				app.AppLookup = AppLookup{
+					AppID:      string(path[0]),
+					Version:    string(path[1]),
+					ConfigHash: uint64(configHash),
+				}
+
+				result = append(result, app)
+				return nil
+			})
+		})
+	})
+
+	sort.Sort(AppSlice(result))
+	return result, err
 }
 
 func (b *BoltBackend) GetBlob(k string) (*BlobData, error) {
@@ -442,6 +561,87 @@ func (b *BoltBackend) db() (*bolt.DB, error) {
 	}
 
 	return db, nil
+}
+
+func (b *BoltBackend) withDB(f func(db *bolt.DB) error) error {
+	db, err := b.db()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	return f(db)
+}
+
+func (b *BoltBackend) bucket(tx *bolt.Tx, path [][]byte) (result *bolt.Bucket, err error) {
+	// Local interface just so we can treat bolt.Tx and bolt.Bucket the
+	// same for the purpose of creating a bucket.
+	type i interface {
+		Bucket([]byte) *bolt.Bucket
+		CreateBucketIfNotExists([]byte) (*bolt.Bucket, error)
+	}
+
+	// Go through and create/open all of the path
+	var current i = tx
+	for _, p := range path {
+		// If the transaction is writable, then we try to create the bucket
+		// as well. Otherwise, we're just reading.
+		if tx.Writable() {
+			result, err = current.CreateBucketIfNotExists(p)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			result = current.Bucket(p)
+			if result == nil {
+				return nil, nil
+			}
+		}
+
+		current = result
+	}
+
+	// Return the final bucket
+	return result, nil
+}
+
+func (b *BoltBackend) traverse(
+	bucket *bolt.Bucket,
+	levels int,
+	f func([][]byte, *bolt.Bucket) error) error {
+	// acc is the accumulator for the path that we call into f
+	acc := make([][]byte, 0, levels)
+
+	// This function works by defining an inner "internal" function
+	// that we recurse. We recurse for each sub-bucket we hit up to "levels"
+	// and when we reach the base case (levels == 0) we call the callback.
+	var internal func(bucket *bolt.Bucket, levels int) error
+	internal = func(bucket *bolt.Bucket, levels int) error {
+		// If we've reached the final level then we want to call the callback
+		if levels == 0 {
+			return f(acc, bucket)
+		}
+
+		// Traverse one level of buckets and recurse
+		return bucket.ForEach(func(k, v []byte) error {
+			// Get the next bucket level
+			b2 := bucket.Bucket(k)
+			if b2 == nil {
+				return nil
+			}
+
+			// Build the accumulator. We have to reset it after we return
+			// so that we preserve it for future calls.
+			acc = append(acc, k)
+			defer func() { acc = acc[:len(acc)-1] }()
+
+			// Recurse into this
+			return internal(b2, levels-1)
+		})
+	}
+
+	// First iteration
+	return internal(bucket, levels)
 }
 
 func (b *BoltBackend) structData(d interface{}) ([]byte, error) {

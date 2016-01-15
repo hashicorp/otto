@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/otto/app"
+	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/ui"
 )
@@ -32,7 +33,7 @@ func TestCore(t TestT, config *TestCoreOpts) *Core {
 	// If a config is set, then use that to do things
 	if config != nil {
 		if config.Path != "" {
-			coreConfig.Appfile = TestAppfile(t, config.Path)
+			coreConfig.Appfile = appfile.TestAppfile(t, config.Path)
 		}
 
 		if config.App != nil {
