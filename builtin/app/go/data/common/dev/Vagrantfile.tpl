@@ -9,8 +9,7 @@
   config.vm.synced_folder '{{ path.working }}', "{{ shared_folder_path }}",
     owner: "vagrant", group: "vagrant"
   config.vm.provision "shell", inline:
-    "fstype=$(find /opt/gopath -mindepth 0 -maxdepth 0 -type d -printf '%F')
-    find /opt/gopath -fstype ${fstype} -print0 | sudo xargs -0 -n 100 chown vagrant:vagrant"
+    "find /opt/gopath -mount -print0 | sudo xargs -0 -n 100 chown vagrant:vagrant"
 {% endblock %}
 
 {% block vagrant_config %}
