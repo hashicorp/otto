@@ -5,6 +5,12 @@ if command -v apt-get >/dev/null 2>&1; then
 fi
 SCRIPT
 
+# http://foo-o-rama.com/vagrant--stdin-is-not-a-tty--fix.html
+config.vm.provision "fix-no-tty", type: "shell" do |s|
+    s.privileged = false
+    s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+end
+
 config.vm.provision "shell", inline: $preshell
 config.vm.provision "docker" do |d|
   d.run "{{ name }}", args: "{{ run_args }}", image: "{{ docker_image }}"
@@ -19,4 +25,3 @@ dir = "/otto/foundation-{{ name }}-{{ forloop.Counter }}"
 config.vm.synced_folder '{{ dir }}', dir
 config.vm.provision "shell", inline: "cd #{dir} && bash #{dir}/main.sh"
 {% endfor %}
-
