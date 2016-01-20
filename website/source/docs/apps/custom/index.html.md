@@ -45,7 +45,7 @@ application {
 }
 
 customization "dev" {
-    vagrantfile = "./Vagrantfile"
+    vagrantfile = "./Vagrantfile.tpl"
 }
 
 customization "deploy" {
