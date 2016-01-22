@@ -36,5 +36,28 @@ java_gradle_install() {
 
 # java_maven_install installs Maven. Eventually this will take an argument.
 java_maven_install() {
-  apt_install maven
+  local version="$1"
+
+  if hash mvn 2>/dev/null;
+      then
+      echo "Maven is already Installed"
+      mvn --version | grep "Apache Maven"
+  else
+      maven_home="/usr/lib/apache/maven/${version}"
+      #   provision the classpath
+      oe sudo sh -c 'echo "export MAVEN_HOME=' + ${maven_home} + '" >> /etc/environment'
+      oe sudo sh -c 'echo "PATH=\"$PATH:$MAVEN_HOME/bin\"" >> /etc/environment'
+      oe sudo sh -c 'echo "export PATH" >> /etc/environment'
+      #   create the directories
+      oe sudo mkdir -p ${maven_home}
+      #   download and extract the files
+      cd ${maven_home}
+      oe sudo wget http://mirrors.koehn.com/apache/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.tar.gz
+      oe sudo tar -zxvf apache-maven-${version}-bin.tar.gz
+      #   massage the directory structure and cleanup
+      oe sudo rm apache-maven-${version}-bin.tar.gz
+      oe sudo mv apache-maven-${version}/* .
+      oe sudo rm -rf apache-maven-${version}/
+      oe source /etc/environment
+  fi
 }
