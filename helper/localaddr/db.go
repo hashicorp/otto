@@ -18,14 +18,14 @@ import (
 
 var (
 	boltLocalAddrBucket = []byte("localaddr")
-	boltBuckets         = [][]byte{
+	boltBuckets = [][]byte{
 		boltLocalAddrBucket,
 	}
 
-	boltVersionKey  = []byte("version")
-	boltAddrMapKey  = []byte("addr_map")
+	boltVersionKey = []byte("version")
+	boltAddrMapKey = []byte("addr_map")
 	boltAddrHeapKey = []byte("addr_heap")
-	boltSubnetKey   = []byte("subnet")
+	boltSubnetKey = []byte("subnet")
 )
 
 var (
@@ -100,6 +100,8 @@ func (this *DB) Next() (net.IP, error) {
 		if err != nil {
 			return err
 		}
+		// Calculate the Broadcast and Network Address based on IP and IPNet
+		ipb, ipn := calcBroadcastNetworkAddress(ip, ipnet)
 		ip = ip.To4()
 
 		// Generate a random IP in our subnet and try to use it
@@ -110,6 +112,11 @@ func (this *DB) Next() (net.IP, error) {
 			binary.LittleEndian.PutUint32(ipRaw, rand.Uint32())
 			for i, v := range ipRaw {
 				ip[i] = ip[i] + (v &^ ipnet.Mask[i])
+			}
+
+			// If Broadcast or Network Address; then try again
+			if (ip.String() == ipb || ip.String() == ipn) {
+				continue
 			}
 
 			// If this IP exists, then try again
@@ -167,7 +174,7 @@ func (this *DB) Release(ip net.IP) error {
 
 		// Delete and save
 		delete(addrMap, ip.String())
-		addrQ, addrQ[len(addrQ)-1] = append(addrQ[:idx], addrQ[idx+1:]...), nil
+		addrQ, addrQ[len(addrQ) - 1] = append(addrQ[:idx], addrQ[idx + 1:]...), nil
 		heap.Init(&addrQ)
 
 		return this.putData(bucket, addrMap, addrQ)
@@ -257,11 +264,11 @@ func (this *DB) db() (*bolt.DB, error) {
 
 	if version > boltDataVersion {
 		return nil, fmt.Errorf(
-			"IP data version is higher than this version of Otto knows how\n"+
-				"to handle! This version of Otto can read up to version %d,\n"+
-				"but version %d data file found.\n\n"+
-				"This means that a newer version of Otto touched this data,\n"+
-				"or the data was corrupted in some other way.",
+			"IP data version is higher than this version of Otto knows how\n" +
+			"to handle! This version of Otto can read up to version %d,\n" +
+			"but version %d data file found.\n\n" +
+			"This means that a newer version of Otto touched this data,\n" +
+			"or the data was corrupted in some other way.",
 			boltDataVersion, version)
 	}
 
@@ -271,12 +278,12 @@ func (this *DB) db() (*bolt.DB, error) {
 	}
 	for version < boltDataVersion {
 		log.Printf(
-			"[INFO] upgrading lease DB from v%d to v%d", version, version+1)
+			"[INFO] upgrading lease DB from v%d to v%d", version, version + 1)
 		err := updateMap[version](db)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Error upgrading data from v%d to v%d: %s",
-				version, version+1, err)
+				version, version + 1, err)
 		}
 
 		version++
@@ -318,9 +325,9 @@ func (this *DB) v1_to_v2(db *bolt.DB) error {
 }
 
 func (this *DB) putData(
-	bucket *bolt.Bucket,
-	addrMap map[string]int,
-	addrQ ipQueue) error {
+bucket *bolt.Bucket,
+addrMap map[string]int,
+addrQ ipQueue) error {
 	var buf, buf2 bytes.Buffer
 	if err := gob.NewEncoder(&buf).Encode(addrMap); err != nil {
 		return err
@@ -363,4 +370,22 @@ func (this *DB) getData(bucket *bolt.Bucket) (map[string]int, ipQueue, error) {
 	}
 
 	return addrMap, addrQ, nil
+}
+
+func calcBroadcastNetworkAddress(ipo net.IP, ipnet *net.IPNet) (string, string) {
+	// Calculate the Broadcast and Network address based on
+	// IP Address and the Subnet
+	// Assumes IPv4
+	ip := ipo.To4()
+	ipb := make(net.IP, net.IPv4len)
+	copy(ipb, ip)
+	ipn := make(net.IP, net.IPv4len)
+	copy(ipn, ip)
+
+	for i, v := range ip {
+		ipn[i] = ip[i] & ipnet.Mask[i]
+		ipb[i] = v | ^ ipnet.Mask[i]
+	}
+
+	return ipb.String(), ipn.String()
 }
