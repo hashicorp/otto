@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/context"
+	"github.com/hashicorp/otto/plan"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -21,9 +22,15 @@ type Infrastructure interface {
 	// continuing to perform any operations.
 	VerifyCreds(*Context) error
 
-	Execute(*Context) error
+	// Compile is called to generate any files that we need.
 	Compile(*Context) (*CompileResult, error)
-	Flavors() []string
+
+	// Plan is called to plan any changes that are necessary for this
+	// infrastructure. This method is expected to potentially make network
+	// calls, check for drift, and do whatever is necessary to create the
+	// plans. This method should not, however, modify infrastructure
+	// in any way.
+	Plan(*Context) ([]*plan.Plan, error)
 }
 
 // Context is the context for operations on infrastructures. Some of
