@@ -990,6 +990,22 @@ func (c *Core) app(ctx *app.Context) (app.App, error) {
 }
 
 func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, error) {
+	// Get the compilation metadata if it exists
+	md, err := c.compileMetadata()
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"Error loading compilation metadata: %s", err)
+	}
+
+	// If we have compilation metadata, then set the data
+	var compileExtra map[string]interface{}
+	if md != nil && md.Infra != nil {
+		compileExtra = md.Infra.Extra
+	}
+	if compileExtra == nil {
+		compileExtra = make(map[string]interface{})
+	}
+
 	// Get the infrastructure configuration
 	config := c.appfile.ActiveInfrastructure()
 	if config == nil {
@@ -1018,8 +1034,9 @@ func (c *Core) infra() (infrastructure.Infrastructure, *infrastructure.Context, 
 
 	// Build the context
 	return infra, &infrastructure.Context{
-		Dir:   outputDir,
-		Infra: config,
+		CompileExtra: compileExtra,
+		Dir:          outputDir,
+		Infra:        config,
 		Shared: context.Shared{
 			Appfile:    c.appfile,
 			InstallDir: filepath.Join(c.dataDir, "binaries"),

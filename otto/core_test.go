@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/infrastructure"
 )
 
 func TestCoreApp(t *testing.T) {
@@ -153,6 +154,34 @@ func TestCoreCompile_directoryDeps(t *testing.T) {
 	}
 	if dep.Name != "bar" {
 		t.Fatalf("bad: %#v", dep)
+	}
+}
+
+func TestCoreCompile_infraExtra(t *testing.T) {
+	// Make a core that returns a fixed app
+	coreConfig := TestCoreConfig(t)
+	coreConfig.Appfile = appfile.TestAppfile(t, testPath("basic", "Appfile"))
+	infraMock := TestInfra(t, "test", coreConfig)
+	core := testCore(t, coreConfig)
+
+	// Set the compilation result
+	infraMock.CompileResult = &infrastructure.CompileResult{
+		Extra: map[string]interface{}{"foo": "bar"},
+	}
+
+	// Compile!
+	if err := core.Compile(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Call internal method infra to get the infra and verify our default
+	// context has the extra data.
+	_, ctx, err := core.infra()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if !reflect.DeepEqual(ctx.CompileExtra, infraMock.CompileResult.Extra) {
+		t.Fatalf("bad: %#v", ctx.CompileExtra)
 	}
 }
 

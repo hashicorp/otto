@@ -38,6 +38,11 @@ type Infrastructure interface {
 type Context struct {
 	context.Shared
 
+	// CompileExtra is the extra data returned as part of CompileResult.
+	// This is nil on Compile, but will be instantiated (promised non-nil)
+	// for every other call.
+	CompileExtra map[string]interface{}
+
 	// Action is the sub-action to take when being executed.
 	//
 	// ActionArgs is the list of arguments for this action.
@@ -72,4 +77,10 @@ func (c *Context) UI() ui.Ui {
 }
 
 // CompileResult is the structure containing compilation result values.
-type CompileResult struct{}
+type CompileResult struct {
+	// Extra is extra data that is available in Context after a compilation.
+	// The values in this map must be Go primitives (including maps, slices).
+	// Otto core will handle serializing and deserializing this back for
+	// other calls.
+	Extra map[string]interface{}
+}
