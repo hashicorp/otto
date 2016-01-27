@@ -1,0 +1,8 @@
+{
+  "name": "module-name",
+  "version": "0.0.1",
+  "engines" : { "node" : "0.10.3" },
+  "dependencies": {
+    "express": "4.2.x"
+  }
+}

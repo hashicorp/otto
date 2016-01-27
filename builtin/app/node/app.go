@@ -47,7 +47,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			Schema: map[string]*schema.FieldSchema{
 				"node_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
-					Default:     "4.1.0",
+					Default:     "detect",
 					Description: "Node version to install",
 				},
 			},
