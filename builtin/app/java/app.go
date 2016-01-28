@@ -54,10 +54,15 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 		Customization: (&compile.Customization{
 			Callback: custom.processDev,
 			Schema: map[string]*schema.FieldSchema{
+				"java_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "1.8",
+					Description: "Java version installed",
+				},
 				"gradle_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
 					Default:     "2.10",
-					Description: "Java version to install",
+					Description: "Gradle version to install",
 				},
 				"maven_version": &schema.FieldSchema{
 					Type:        schema.TypeString,

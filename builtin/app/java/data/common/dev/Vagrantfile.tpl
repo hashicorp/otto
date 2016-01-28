@@ -7,8 +7,14 @@
 end
 
 $script_app = <<SCRIPT
+#!/bin/bash
+set -e
+
+# Setup our scriptpacks
 . /otto/scriptpacks/STDLIB/main.sh
 . /otto/scriptpacks/JAVA/main.sh
+
+# Initialize
 otto_init
 
 oe() { $@ 2>&1 | logger -t otto > /dev/null; }

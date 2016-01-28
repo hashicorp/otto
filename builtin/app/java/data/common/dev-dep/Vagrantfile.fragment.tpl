@@ -12,9 +12,6 @@ config.vm.provision "fix-no-tty", type: "shell" do |s|
 end
 
 config.vm.provision "shell", inline: $preshell
-config.vm.provision "docker" do |d|
-  d.run "{{ name }}", args: "{{ run_args }}", image: "{{ docker_image }}"
-end
 
 # Sync our own dep folder in there
 config.vm.synced_folder '{{ path.working }}', "{{ path.guest_working }}"

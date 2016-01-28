@@ -19,4 +19,9 @@
   # Install Leiningen
   java_lein_install
   [[ $(./lein -v) =~ "Leiningen 2.5.3" ]]
+
+  # Install sbt
+  java_sbt_install
+  @[[ $(sbt -v) =~ "sbt 0.13.9" ]]
+
 }

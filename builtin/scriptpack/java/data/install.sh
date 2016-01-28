@@ -37,42 +37,24 @@ java_gradle_install() {
 # java_maven_install installs the specified Maven version.
 java_maven_install() {
   local version="$1"
-
-  if hash mvn 2>/dev/null;
-      then
-      echo "Maven is already Installed"
-      mvn --version | grep "Apache Maven"
-  else
-      maven_home="/usr/lib/apache/maven/${version}"
-      #   provision the classpath
-      oe sudo sh -c 'echo "export MAVEN_HOME=' + ${maven_home} + '" >> /etc/environment'
-      oe sudo sh -c 'echo "PATH=\"$PATH:$MAVEN_HOME/bin\"" >> /etc/environment'
-      oe sudo sh -c 'echo "export PATH" >> /etc/environment'
-      #   create the directories
-      oe sudo mkdir -p ${maven_home}
-      #   download and extract the files
-      cd ${maven_home}
-      oe sudo wget http://mirrors.koehn.com/apache/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.tar.gz
-      oe sudo tar -zxvf apache-maven-${version}-bin.tar.gz
-      #   massage the directory structure and cleanup
-      oe sudo rm apache-maven-${version}-bin.tar.gz
-      oe sudo mv apache-maven-${version}/* .
-      oe sudo rm -rf apache-maven-${version}/
-      oe source /etc/environment
-  fi
+  oe sudo curl "http://mirrors.koehn.com/apache/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.tar.gz" --create-dirs -o "/opt/apache-maven-${version}-bin.tar.gz"
+  oe sudo tar -zxvf "/opt/apache-maven-${version}-bin.tar.gz"
+  oe sudo rm "/opt/apache-maven-${version}-bin.tar.gz" -C /opt
+  oe sudo export "PATH=/opt/apache-maven-${version}/bin:$PATH"
 }
 
 # java_lein_install installs the specified Leiningen version.
 java_lein_install() {
   local version="$1"
+  oe sudo curl "https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/lein" --create-dirs -o ~/bin/lein
+  oe sudo chmod a+x ~/bin/lein
+}
 
-  if hash ./lein 2>/dev/null;
-      then
-      echo "Leiningen is already Installed"
-      ./lein -v | grep "Leiningen"
-  else
-      oe sudo curl https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/lein --create-dirs -o ~/bin/lein
-      oe sudo chmod a+x ~/bin/lein
-  fi
-
+# java_sbt_install installs the specified sbt version.
+java_sbt_install() {
+  local version="$1"
+  oe echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+  oe sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
+  oe sudo apt-get update
+  oe sudo apt-get install -y "sbt=${version}"
 }
