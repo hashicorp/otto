@@ -34,7 +34,7 @@ java_gradle_install() {
   apt_install "gradle-${version}"
 }
 
-# java_maven_install installs Maven. Eventually this will take an argument.
+# java_maven_install installs the specified Maven version.
 java_maven_install() {
   local version="$1"
 
