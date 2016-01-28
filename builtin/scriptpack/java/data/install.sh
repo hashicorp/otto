@@ -61,3 +61,18 @@ java_maven_install() {
       oe source /etc/environment
   fi
 }
+
+# java_lein_install installs the specified Leiningen version.
+java_lein_install() {
+  local version="$1"
+
+  if hash ./lein 2>/dev/null;
+      then
+      echo "Leiningen is already Installed"
+      ./lein -v | grep "Leiningen"
+  else
+      oe sudo curl https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/lein --create-dirs -o ~/bin/lein
+      oe sudo chmod a+x ~/bin/lein
+  fi
+
+}

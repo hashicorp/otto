@@ -74,6 +74,11 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 					Default:     "0.13.9",
 					Description: "sbt version to install",
 				},
+				"lein_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "2.5.3",
+					Description: "Leiningen version to install",
+				},
 			},
 		}).Merge(compile.VagrantCustomizations(&opts)),
 	}
