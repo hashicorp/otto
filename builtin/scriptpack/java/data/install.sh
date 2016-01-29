@@ -46,8 +46,9 @@ java_maven_install() {
 # java_lein_install installs the specified Leiningen version.
 java_lein_install() {
   local version="$1"
-  oe sudo curl "https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/lein" --create-dirs -o ~/bin/lein
-  oe sudo chmod a+x ~/bin/lein
+  oe sudo curl "https://raw.githubusercontent.com/technomancy/leiningen/${version}/bin/lein" --create-dirs -o "/opt/leiningen-${version}/bin/lein"
+  oe sudo chmod a+x "/opt/leiningen-${version}/bin/lein"
+  export PATH="/opt/leiningen-${version}/bin:$PATH"
 }
 
 # java_scala_install installs the specified Scala version.
