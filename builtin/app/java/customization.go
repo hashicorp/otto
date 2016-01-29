@@ -9,7 +9,8 @@ type customizations struct {
 	Opts *compile.AppOptions
 }
 
-func (c *customizations) processDev(d *schema.FieldData) error {
+func (c *customizations) process(d *schema.FieldData) error {
+	c.Opts.Bindata.Context["dev_java_version"] = d.Get("java_version")
 	c.Opts.Bindata.Context["gradle_version"] = d.Get("gradle_version")
 	c.Opts.Bindata.Context["maven_version"] = d.Get("maven_version")
 	c.Opts.Bindata.Context["scala_version"] = d.Get("scala_version")

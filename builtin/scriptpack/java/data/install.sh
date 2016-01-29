@@ -10,7 +10,7 @@ java_install_prepare() {
   otto_init_locale
 
   # Install stuff we need
-  oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
+  oe sudo apt-get install -y python-software-properties software-properties-common apt-transport-https curl wget
 }
 
 # java_install_8 installs Java 8
@@ -38,9 +38,9 @@ java_gradle_install() {
 java_maven_install() {
   local version="$1"
   oe sudo curl "http://mirrors.koehn.com/apache/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.tar.gz" --create-dirs -o "/opt/apache-maven-${version}-bin.tar.gz"
-  oe sudo tar -zxvf "/opt/apache-maven-${version}-bin.tar.gz"
-  oe sudo rm "/opt/apache-maven-${version}-bin.tar.gz" -C /opt
-  oe sudo export "PATH=/opt/apache-maven-${version}/bin:$PATH"
+  oe sudo tar -zxvf "/opt/apache-maven-${version}-bin.tar.gz" -C /opt
+  oe sudo rm "/opt/apache-maven-${version}-bin.tar.gz"
+  oe export "PATH=/opt/apache-maven-${version}/bin:$PATH"
 }
 
 # java_lein_install installs the specified Leiningen version.
@@ -50,11 +50,23 @@ java_lein_install() {
   oe sudo chmod a+x ~/bin/lein
 }
 
+# java_scala_install installs the specified Scala version.
+java_scala_install() {
+  local version="$1"
+  oe sudo apt-get update
+  oe sudo apt-get remove scala-library scala
+  oe sudo wget "http://scala-lang.org/files/archive/scala-${version}.deb"
+  oe sudo apt-get -f install
+  oe sudo dpkg -i "scala-${version}.deb"
+  oe sudo apt-get update
+  oe rm "scala-${version}.deb"
+}
+
 # java_sbt_install installs the specified sbt version.
 java_sbt_install() {
   local version="$1"
-  oe echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
-  oe sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
+  oe wget "http://dl.bintray.com/sbt/debian/sbt-${version}.deb"
   oe sudo apt-get update
-  oe sudo apt-get install -y "sbt=${version}"
+  oe sudo dpkg -i "sbt-${version}.deb"
+  oe rm "sbt-${version}.deb"
 }

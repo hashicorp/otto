@@ -1,6 +1,8 @@
 package javaapp
 
 import (
+	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/otto/app"
@@ -10,6 +12,7 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
+	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/otto/helper/packer"
 	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/terraform"
@@ -52,7 +55,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			&javaSP.ScriptPack,
 		},
 		Customization: (&compile.Customization{
-			Callback: custom.processDev,
+			Callback: custom.process,
 			Schema: map[string]*schema.FieldSchema{
 				"java_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
@@ -71,7 +74,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 				"scala_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
-					Default:     "2.10.4",
+					Default:     "2.11.7",
 					Description: "Scala version to install",
 				},
 				"sbt_version": &schema.FieldSchema{
@@ -105,8 +108,34 @@ func (a *App) Deploy(ctx *app.Context) error {
 
 // Dev ...
 func (a *App) Dev(ctx *app.Context) error {
+	var layered *vagrant.Layered
+
+	// We only setup a layered environment if we've recompiled since
+	// version 0. If we're still at version 0 then we have to use the
+	// non-layered dev environment.
+	if ctx.CompileResult.Version > 0 {
+		// Read the go version, since we use that for our layer
+		javaVersion, err := oneline.Read(filepath.Join(ctx.Dir, "dev", "java_version"))
+		if err != nil {
+			return err
+		}
+
+		// Setup layers
+		layered, err = vagrant.DevLayered(ctx, []*vagrant.Layer{
+			&vagrant.Layer{
+				ID:          fmt.Sprintf("java%s", javaVersion),
+				Vagrantfile: filepath.Join(ctx.Dir, "dev", "layer-base", "Vagrantfile"),
+			},
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	// Build the actual development environment
 	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
+		Layer:        layered,
 	}).Route(ctx)
 }
 
