@@ -144,7 +144,7 @@ multiple times. Otto will only create infrastructure resources that don't exist.
 In this step, you learned about how Otto manages infrastructures
 and built a simple infrastructure that we can deploy applications to.
 
-The goal of Otto is build real, production quality infrastructures
+The goal of Otto is to build real, production quality infrastructures
 for hobbyists or professionals. Otto codifies industry best practices
 and brings them to you in a single command.
 
