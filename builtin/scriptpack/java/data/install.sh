@@ -56,9 +56,7 @@ java_scala_install() {
   oe sudo apt-get update
   oe sudo apt-get remove scala-library scala
   oe sudo wget "http://scala-lang.org/files/archive/scala-${version}.deb"
-  oe sudo apt-get -f install
   oe sudo dpkg -i "scala-${version}.deb"
-  oe sudo apt-get update
   oe rm "scala-${version}.deb"
 }
 
