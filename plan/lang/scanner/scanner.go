@@ -159,6 +159,9 @@ func (s *Scanner) Scan() token.Token {
 		switch ch {
 		case eof:
 			tok = token.EOF
+		case '$':
+			tok = token.REF
+			s.scanIdentifier()
 		case '"':
 			tok = token.STRING
 			s.scanString()
@@ -188,6 +191,8 @@ func (s *Scanner) Scan() token.Token {
 			tok = token.LBRACE
 		case '}':
 			tok = token.RBRACE
+		case ',':
+			tok = token.COMMA
 		default:
 			s.err("illegal char")
 		}

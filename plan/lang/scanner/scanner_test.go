@@ -37,6 +37,7 @@ var tokenLists = map[string][]tokenPair{
 		{token.COLON, ":"},
 		{token.LBRACE, "{"},
 		{token.RBRACE, "}"},
+		{token.COMMA, ","},
 	},
 	"bool": []tokenPair{
 		{token.BOOL, "true"},
@@ -60,6 +61,10 @@ var tokenLists = map[string][]tokenPair{
 		{token.IDENT, "a۰۱۸"},
 		{token.IDENT, "foo६४"},
 		{token.IDENT, "bar９８７６"},
+	},
+	"ref": []tokenPair{
+		{token.REF, "$foo"},
+		{token.REF, "$result.Bar"},
 	},
 	"string": []tokenPair{
 		{token.STRING, `" "`},
@@ -270,99 +275,63 @@ func TestTokenList(t *testing.T) {
 	}
 }
 
-/*
 func TestRealExample(t *testing.T) {
-	complexHCL := `// This comes from Terraform, as a test
-	variable "foo" {
-	    default = "bar"
-	    description = "bar"
-	}
+	text := `// Just a test
+Plan {
+	.desc = ""
 
-	provider "aws" {
-	  access_key = "foo"
-	  secret_key = "bar"
-	}
-
-	resource "aws_security_group" "firewall" {
-	    count = 5
-	}
-
-	resource aws_instance "web" {
-	    ami = "${var.foo}"
-	    security_groups = [
-	        "foo",
-	        "${aws_security_group.firewall.foo}"
-	    ]
-
-	    network_interface {
-	        device_index = 0
-	        description = <<EOF
-Main interface
-EOF
-	    }
-	}`
+	// Foo
+	label:
+		Terraform.Apply pwd:"/foo"
+			.desc = ""
+			.detailedDesc = ""
+		Store "foo", $result.State
+}
+	`
 
 	literals := []struct {
 		tokenType token.Type
 		literal   string
 	}{
-		{token.COMMENT, `// This comes from Terraform, as a test`},
-		{token.IDENT, `variable`},
-		{token.STRING, `"foo"`},
+		{token.COMMENT, `// Just a test`},
+		{token.IDENT, `Plan`},
 		{token.LBRACE, `{`},
-		{token.IDENT, `default`},
+
+		{token.PERIOD, `.`},
+		{token.IDENT, `desc`},
 		{token.ASSIGN, `=`},
-		{token.STRING, `"bar"`},
-		{token.IDENT, `description`},
+		{token.STRING, `""`},
+
+		{token.COMMENT, `// Foo`},
+		{token.IDENT, `label`},
+		{token.COLON, `:`},
+
+		{token.IDENT, `Terraform.Apply`},
+		{token.IDENT, `pwd`},
+		{token.COLON, `:`},
+		{token.STRING, `"/foo"`},
+
+		{token.PERIOD, `.`},
+		{token.IDENT, `desc`},
 		{token.ASSIGN, `=`},
-		{token.STRING, `"bar"`},
-		{token.RBRACE, `}`},
-		{token.IDENT, `provider`},
-		{token.STRING, `"aws"`},
-		{token.LBRACE, `{`},
-		{token.IDENT, `access_key`},
+		{token.STRING, `""`},
+
+		{token.PERIOD, `.`},
+		{token.IDENT, `detailedDesc`},
 		{token.ASSIGN, `=`},
-		{token.STRING, `"foo"`},
-		{token.IDENT, `secret_key`},
-		{token.ASSIGN, `=`},
-		{token.STRING, `"bar"`},
-		{token.RBRACE, `}`},
-		{token.IDENT, `resource`},
-		{token.STRING, `"aws_security_group"`},
-		{token.STRING, `"firewall"`},
-		{token.LBRACE, `{`},
-		{token.IDENT, `count`},
-		{token.ASSIGN, `=`},
-		{token.NUMBER, `5`},
-		{token.RBRACE, `}`},
-		{token.IDENT, `resource`},
-		{token.IDENT, `aws_instance`},
-		{token.STRING, `"web"`},
-		{token.LBRACE, `{`},
-		{token.IDENT, `ami`},
-		{token.ASSIGN, `=`},
-		{token.STRING, `"${var.foo}"`},
-		{token.IDENT, `security_groups`},
-		{token.ASSIGN, `=`},
-		{token.LBRACK, `[`},
+		{token.STRING, `""`},
+
+		{token.IDENT, `Store`},
 		{token.STRING, `"foo"`},
 		{token.COMMA, `,`},
-		{token.STRING, `"${aws_security_group.firewall.foo}"`},
-		{token.RBRACK, `]`},
-		{token.IDENT, `network_interface`},
-		{token.LBRACE, `{`},
-		{token.IDENT, `device_index`},
-		{token.ASSIGN, `=`},
-		{token.NUMBER, `0`},
-		{token.IDENT, `description`},
-		{token.ASSIGN, `=`},
-		{token.HEREDOC, "<<EOF\nMain interface\nEOF\n"},
+		{token.REF, `$result.State`},
+
 		{token.RBRACE, `}`},
-		{token.RBRACE, `}`},
+
 		{token.EOF, ``},
 	}
 
-	s := New([]byte(complexHCL))
+	s := New([]byte(text))
 	for _, l := range literals {
 		tok := s.Scan()
 		if l.tokenType != tok.Type {
@@ -375,7 +344,6 @@ EOF
 	}
 
 }
-*/
 
 func TestError(t *testing.T) {
 	//testError(t, "\x80", "1:1", "illegal UTF-8 encoding", token.ILLEGAL)
