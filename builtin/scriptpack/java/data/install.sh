@@ -40,7 +40,7 @@ java_maven_install() {
   oe sudo curl "http://mirrors.koehn.com/apache/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.tar.gz" --create-dirs -o "/opt/apache-maven-${version}-bin.tar.gz"
   oe sudo tar -zxvf "/opt/apache-maven-${version}-bin.tar.gz" -C /opt
   oe sudo rm "/opt/apache-maven-${version}-bin.tar.gz"
-  oe export "PATH=/opt/apache-maven-${version}/bin:$PATH"
+  export PATH="/opt/apache-maven-${version}/bin:$PATH"
 }
 
 # java_lein_install installs the specified Leiningen version.
