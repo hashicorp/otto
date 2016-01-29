@@ -5,12 +5,16 @@
 {% endblock %}
 
 {% block vagrant_config %}
-  {% if import_path != "" %}
-  # Disable the default synced folder
-  config.vm.synced_folder ".", "/vagrant", disabled: true
-  {% endif %}
+  config.vm.provision "shell", inline: $script_app
+{% endblock %}
 
-  # Make it so that `vagrant ssh` goes directly to the correct dir
-  config.vm.provision "shell", inline:
-    %Q[echo "cd {{ shared_folder_path }}" >> /home/vagrant/.profile]
+{% block footer %}
+$script_app = <<SCRIPT
+set -e
+# Configuring SSH for faster login
+if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
+  echo "UseDNS no" | sudo tee -a /etc/ssh/sshd_config >/dev/null
+  oe sudo service ssh restart
+fi
+SCRIPT
 {% endblock %}
