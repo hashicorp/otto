@@ -60,7 +60,7 @@ an internal representation that is used by all the Otto subcommands,
 such as `otto dev`.
 
 For people writing Appfiles, the important concept to understand here is
-that modifying an Appfile has no affect on the behavior of Otto until
+that modifying an Appfile has no effect on the behavior of Otto until
 that Appfile is compiled.
 
 This is a very useful feature, since modifications to an Appfile that
