@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-
 	"github.com/hashicorp/otto/helper/oneline"
+	"strings"
 )
 
 var rubyVersionGemfileRegexp = regexp.MustCompile(`ruby\s+['"]([.\d]+)['"]`)
@@ -51,6 +51,13 @@ func detectRubyVersionFile(dir string) (result string, err error) {
 
 	// Read the first line of the file
 	result, err = oneline.Read(path)
+	ruby_version := strings.Split(result, ".")
+	// Example: 2.3.0 ==> 2.3
+	// Example: 2.3.5 ==> 2.3.5
+	// Example: 2.0 ==> 2.0
+	if (len(ruby_version) >= 3 && ruby_version[len(ruby_version) - 1] == "0") {
+		result = strings.Join(ruby_version[:len(ruby_version) - 1], ".")
+	}
 	log.Printf("[DEBUG] ruby: .ruby-version detected Ruby: %q", result)
 	return
 }
@@ -90,7 +97,7 @@ func detectRubyVersionGemfile(dir string) (result string, err error) {
 		return
 	}
 
-	resultBytes := make([]byte, idx[3]-idx[2])
+	resultBytes := make([]byte, idx[3] - idx[2])
 	n, err := f.Read(resultBytes)
 	if err != nil {
 		return
@@ -101,6 +108,13 @@ func detectRubyVersionGemfile(dir string) (result string, err error) {
 	}
 
 	result = string(resultBytes)
+	ruby_version := strings.Split(result, ".")
+	// Example: 2.3.0 ==> 2.3
+	// Example: 2.3.5 ==> 2.3.5
+	// Example: 2.0 ==> 2.0
+	if (len(ruby_version) >= 3 && ruby_version[len(ruby_version) - 1] == "0") {
+		result = strings.Join(ruby_version[:len(ruby_version) - 1], ".")
+	}
 	log.Printf("[DEBUG] ruby: Gemfile detected Ruby: %q", result)
 	return
 }
