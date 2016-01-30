@@ -1,0 +1,3 @@
+plan {
+    description = "foo"
+}
