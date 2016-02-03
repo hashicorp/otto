@@ -5,10 +5,10 @@ package plan
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/hashicorp/hil"
 	"github.com/hashicorp/hil/ast"
-	"github.com/hashicorp/otto/context"
 )
 
 // Plan is an executable object that represents a goal and the
@@ -43,15 +43,6 @@ type TaskArg struct {
 // option of richer functions and struct members later.
 type TaskResult struct {
 	Value interface{}
-}
-
-// TaskExecutor is the interface that must be implemented to execute a
-// task. The mapping of task "Type" to TaskExecutor is passed to Plan to
-// execute.
-type TaskExecutor interface {
-	// Execute is called to run a task. It is given access to a populated
-	// shared context and the map of arguments.
-	Execute(ctx *context.Shared, args map[string]*TaskArg) (map[string]*TaskResult, error)
 }
 
 //-------------------------------------------------------------------
@@ -90,6 +81,7 @@ func (t *TaskArg) Refs() []string {
 		result = append(result, k)
 	}
 
+	sort.Strings(result)
 	return result
 }
 
