@@ -1,5 +1,8 @@
 package plan
 
+// StoreTask is a built-in type of task that is used to store value
+// in the "memory" of plan execution. These can then be referenced
+// directly with $foo where "foo" is the name of the variable.
 type StoreTask struct{}
 
 func (t *StoreTask) Validate(args *ExecArgs) (*ExecResult, error) {

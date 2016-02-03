@@ -38,7 +38,8 @@ func TestExecutorValidate(t *testing.T) {
 	}
 
 	testTaskMap := map[string]TaskExecutor{
-		"store": &StoreTask{},
+		"delete": &DeleteTask{},
+		"store":  &StoreTask{},
 
 		"test-1": &MockTaskExecutor{
 			ValidateResult: &ExecResult{

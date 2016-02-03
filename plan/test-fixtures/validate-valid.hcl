@@ -16,4 +16,8 @@ plan {
         description = "desc foo"
         foo = "${foo}"
     }
+
+    task "delete" {
+        key = "foo"
+    }
 }
