@@ -33,6 +33,12 @@ type ExecArgs struct {
 type ExecResult struct {
 	// Values are the resulting named values from the execution.
 	Values map[string]*TaskResult
+
+	// Store can be used to put values into storage. This shouldn't be used
+	// publicly. It is exposed in case it MUST be used but this is meant
+	// to only be used by the "Store" task type. If *TaskResult is nil, then
+	// it will be deleted from the store.
+	Store map[string]*TaskResult
 }
 
 // Executor is the struct used to execute a plan.
@@ -67,13 +73,16 @@ func (e *Executor) Validate(p *Plan, ctx *context.Shared) error {
 	// Now go through all the tasks and validate the arg keys and the
 	// variable access. The varMap below wil keep track of the variables
 	// we'll have.
-	//varMap := make(map[string]struct{}{})
+	varMap := make(map[string]struct{})
 	resultMap := make(map[string]struct{})
 	for i, t := range p.Tasks {
 		// Create the full map of available vars
 		fullMap := make(map[string]struct{})
 		for k, v := range resultMap {
 			fullMap[fmt.Sprintf("result.%s", k)] = v
+		}
+		for k, v := range varMap {
+			fullMap[k] = v
 		}
 
 		// Validate the vars in the args
@@ -100,6 +109,15 @@ func (e *Executor) Validate(p *Plan, ctx *context.Shared) error {
 		resultMap = make(map[string]struct{})
 		for k, _ := range result.Values {
 			resultMap[k] = struct{}{}
+		}
+
+		// Keep track of storage
+		for k, v := range result.Store {
+			if v == nil {
+				delete(varMap, k)
+			} else {
+				varMap[k] = struct{}{}
+			}
 		}
 	}
 

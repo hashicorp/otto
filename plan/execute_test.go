@@ -30,9 +30,16 @@ func TestExecutorValidate(t *testing.T) {
 			"validate-invalid-result-ref.hcl",
 			true,
 		},
+
+		{
+			"validate-invalid-store-ref.hcl",
+			true,
+		},
 	}
 
 	testTaskMap := map[string]TaskExecutor{
+		"store": &StoreTask{},
+
 		"test-1": &MockTaskExecutor{
 			ValidateResult: &ExecResult{
 				Values: map[string]*TaskResult{

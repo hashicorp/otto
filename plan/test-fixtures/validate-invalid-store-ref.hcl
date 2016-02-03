@@ -8,12 +8,8 @@ plan {
         foo = "${result.Result}"
     }
 
-    task "store" {
-        foo = "${result.Result}"
-    }
-
     task "test-1" {
         description = "desc foo"
-        foo = "${foo}"
+        foo = "${bar}"
     }
 }
