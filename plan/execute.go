@@ -70,14 +70,29 @@ func (e *Executor) Validate(p *Plan, ctx *context.Shared) error {
 		return err
 	}
 
-	// Now go through all the tasks and validate the arg keys and the
-	// variable access. The varMap below wil keep track of the variables
-	// we'll have.
-	varMap := make(map[string]struct{})
-	resultMap := make(map[string]struct{})
+	// Call "exec" in validation mode
+	return e.exec(true, p, ctx)
+}
+
+// Execute is called to execute a plan.
+//
+// The configured Callback mechanism can be used to get regular progress
+// events and control the execution. This function will block.
+func (e *Executor) Execute(p *Plan, ctx *context.Shared) error {
+	return e.exec(false, p, ctx)
+}
+
+func (e *Executor) exec(validate bool, p *Plan, ctx *context.Shared) error {
+	var err error
+
+	// These are the maps that store the variables and storage for execution
+	varMap := make(map[string]*TaskResult)
+	resultMap := make(map[string]*TaskResult)
+
+	// Go through each task in serial
 	for i, t := range p.Tasks {
 		// Create the full map of available vars
-		fullMap := make(map[string]struct{})
+		fullMap := make(map[string]*TaskResult)
 		for k, v := range resultMap {
 			fullMap[fmt.Sprintf("result.%s", k)] = v
 		}
@@ -85,7 +100,8 @@ func (e *Executor) Validate(p *Plan, ctx *context.Shared) error {
 			fullMap[k] = v
 		}
 
-		// Validate the vars in the args
+		// Validate the refs in the args to verify they match up properly.
+		// We do this even if we're executing as an additional safety check
 		for _, a := range t.Args {
 			for _, ref := range a.Refs() {
 				if _, ok := fullMap[ref]; !ok {
@@ -95,50 +111,68 @@ func (e *Executor) Validate(p *Plan, ctx *context.Shared) error {
 			}
 		}
 
-		// Call Validate to validate the args
+		// Interpolate the args if we're not validating
+		args := t.Args
+		if !validate {
+			args = make(map[string]*TaskArg)
+			for k, raw := range t.Args {
+				println(fmt.Sprintf("%#v", fullMap))
+				arg, ierr := raw.Interpolate(fullMap)
+				if ierr != nil {
+					err = multierror.Append(err, fmt.Errorf(
+						"Task %d (%s), arg %s: %s", i+1, t.Type, k, ierr))
+					continue
+				}
+
+				args[k] = arg
+			}
+			if len(args) != len(t.Args) {
+				// There was an error during interpolation
+				break
+			}
+		}
+
+		// Call Execute or Validate
 		te := e.TaskMap[t.Type]
-		args := &ExecArgs{Ctx: ctx, Args: t.Args}
-		result, verr := te.Validate(args)
+		var f func(*ExecArgs) (*ExecResult, error) = te.Execute
+		if validate {
+			f = te.Validate
+		}
+		result, verr := f(&ExecArgs{Ctx: ctx, Args: args})
 		if verr != nil {
 			err = multierror.Append(err, multierror.Prefix(
 				verr, fmt.Sprintf("Task %d (%s): ", i+1, t.Type)))
 			break
 		}
 
-		// Keep track of the result types
-		resultMap = make(map[string]struct{})
-		for k, _ := range result.Values {
-			resultMap[k] = struct{}{}
-		}
+		// Clear out the result map after every execute
+		resultMap = make(map[string]*TaskResult)
 
-		// Keep track of storage
-		for k, v := range result.Store {
-			if v == nil {
-				delete(varMap, k)
-			} else {
-				varMap[k] = struct{}{}
+		// If we have a result, build any new result values as well as
+		// storage changes.
+		if result != nil {
+			// Keep track of the result types
+			for k, v := range result.Values {
+				resultMap[k] = v
+
+				// In execution mode we can't have nil values
+				if !validate && v == nil {
+					delete(resultMap, k)
+				}
+			}
+
+			// Keep track of storage
+			for k, v := range result.Store {
+				if v == nil {
+					delete(varMap, k)
+				} else {
+					varMap[k] = v
+				}
 			}
 		}
 	}
 
 	return err
-}
-
-// Execute is called to execute a plan.
-//
-// The configured Callback mechanism can be used to get regular progress
-// events and control the execution. This function will block.
-func (e *Executor) Execute(p *Plan, ctx *context.Shared) error {
-	// Execute the tasks in serial
-	for _, t := range p.Tasks {
-		te := e.TaskMap[t.Type]
-		args := &ExecArgs{Ctx: ctx, Args: t.Args}
-		if _, err := te.Execute(args); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // ExecuteEvent is an event that a callback can receive during execution.

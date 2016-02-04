@@ -49,20 +49,57 @@ type TaskResult struct {
 // Methods on structs
 //-------------------------------------------------------------------
 
+// Interpolate does the interpolation on the value and returns a new
+// TaskArg copy that has the interpolated value. If the value is not
+// interpolated, the arg returned is not a copy.
+func (t *TaskArg) Interpolate(vs map[string]*TaskResult) (*TaskArg, error) {
+	// Parse
+	root, err := t.hil()
+	if err != nil {
+		return nil, err
+	}
+	if root == nil {
+		return t, nil
+	}
+
+	// Build the variables
+	varMap := make(map[string]ast.Variable)
+	for k, raw := range vs {
+		v, err := ast.NewVariable(raw.Value)
+		if err != nil {
+			return nil, fmt.Errorf("var %s: %s", k, err)
+		}
+
+		varMap[k] = v
+	}
+
+	// Eval
+	v, _, err := hil.Eval(root, &hil.EvalConfig{
+		GlobalScope: &ast.BasicScope{
+			VarMap: varMap,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Return new arg
+	return &TaskArg{
+		Value: v,
+	}, nil
+}
+
 // Refs returns the references to other variables found within the
 // argument.
 func (t *TaskArg) Refs() []string {
-	s, ok := t.Value.(string)
-	if !ok {
-		// If it isn't a string it can't reference any other vars
-		return nil
-	}
-
 	// Parse the value as HIL
-	root, err := hil.Parse(s)
+	root, err := t.hil()
 	if err != nil {
 		// Panic, this should've been validated earlier
 		panic(err)
+	}
+	if root == nil {
+		return nil
 	}
 
 	// Walk the AST and find all variable access
@@ -83,6 +120,17 @@ func (t *TaskArg) Refs() []string {
 
 	sort.Strings(result)
 	return result
+}
+
+func (t *TaskArg) hil() (ast.Node, error) {
+	s, ok := t.Value.(string)
+	if !ok {
+		// If it isn't a string it can't reference any other vars
+		return nil, nil
+	}
+
+	// Parse the value as HIL
+	return hil.Parse(s)
 }
 
 //-------------------------------------------------------------------

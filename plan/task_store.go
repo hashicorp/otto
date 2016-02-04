@@ -15,6 +15,12 @@ func (t *StoreTask) Validate(args *ExecArgs) (*ExecResult, error) {
 }
 
 func (t *StoreTask) Execute(args *ExecArgs) (*ExecResult, error) {
-	// TODO
-	return nil, nil
+	store := make(map[string]*TaskResult)
+	for k, a := range args.Args {
+		store[k] = &TaskResult{
+			Value: a.Value.(string),
+		}
+	}
+
+	return &ExecResult{Store: store}, nil
 }
