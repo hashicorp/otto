@@ -57,7 +57,8 @@ type Executor struct {
 func (e *Executor) Validate(p *Plan, ctx *context.Shared) error {
 	var err error
 
-	// First verify all the task types are valid
+	// First verify the task types are valid and that the args
+	// are well formed.
 	for _, t := range p.Tasks {
 		if _, ok := e.TaskMap[t.Type]; !ok {
 			err = multierror.Append(err, fmt.Errorf("Unknown task type: %s", t.Type))

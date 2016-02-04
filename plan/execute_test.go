@@ -17,6 +17,11 @@ func TestExecutorValidate(t *testing.T) {
 		},
 
 		{
+			"validate-invalid-interp.hcl",
+			true,
+		},
+
+		{
 			"validate-invalid-type.hcl",
 			true,
 		},
