@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/context"
@@ -18,10 +19,18 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/localaddr"
 	"github.com/hashicorp/otto/infrastructure"
+	"github.com/hashicorp/otto/plan"
 	"github.com/hashicorp/otto/ui"
 	"github.com/hashicorp/terraform/dag"
 	"github.com/mitchellh/copystructure"
 )
+
+// Core struct methods are spread out between multiple files:
+//
+//   - core.go
+//   - context.go
+//   - plan.go
+//
 
 // Core is the main struct to use to interact with Otto as a library.
 type Core struct {
@@ -357,6 +366,35 @@ func (c *Core) walk(f func(app.App, *app.Context, bool) error) error {
 	})
 }
 
+// Plan creates a deployment plan.
+//
+// This might make network calls, create files, etc. but is not supposed to
+// modify real infrastructure. This is dependent on the plugins being well
+// behaved. Core Otto plugins will never modify infrastructure during this
+// step.
+func (c *Core) Plan() (*Plan, error) {
+	// Get the infra implementation
+	infra, infraCtx, err := c.infra()
+	if err != nil {
+		return nil, err
+	}
+	/*
+		if err := c.creds(infra, infraCtx); err != nil {
+			return nil, err
+		}
+	*/
+	defer maybeClose(infra)
+
+	// Ask the infra to plan
+	p, err := infra.Plan(infraCtx)
+	if err != nil {
+		return nil, errwrap.Wrapf("Error planning infrastructure: {{err}}", err)
+	}
+
+	// Return the complete plan
+	return &Plan{Infra: p}, nil
+}
+
 // Build builds the deployable artifact for the currently compiled
 // Appfile.
 func (c *Core) Build() error {
@@ -574,9 +612,12 @@ func (c *Core) Infra(action string, args []string) error {
 	// If we're doing anything other than destroying, then
 	// run the execution now.
 	if action != "destroy" {
-		if err := infra.Execute(infraCtx); err != nil {
-			return err
-		}
+		panic("TODO")
+		/*
+			if err := infra.Execute(infraCtx); err != nil {
+				return err
+			}
+		*/
 	}
 
 	// If we have any foundations, we now run their infra deployment.
@@ -613,9 +654,12 @@ func (c *Core) Infra(action string, args []string) error {
 	// we need to first destroy all applications and foundations that
 	// are using this infra.
 	if action == "destroy" {
-		if err := infra.Execute(infraCtx); err != nil {
-			return err
-		}
+		panic("DESTROY TODO")
+		/*
+			if err := infra.Execute(infraCtx); err != nil {
+				return err
+			}
+		*/
 	}
 
 	// Output the right thing
