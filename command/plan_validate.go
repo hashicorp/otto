@@ -17,8 +17,8 @@ type PlanValidateCommand struct {
 
 func (c *PlanValidateCommand) Run(args []string) int {
 	fs := c.FlagSet("plan", FlagSetNone)
-	args, _, _ = flag.FilterArgs(fs, args)
-	if err := fs.Parse(args); err != nil {
+	incArgs, _, args := flag.FilterArgs(fs, args)
+	if err := fs.Parse(incArgs); err != nil {
 		return cli.RunResultHelp
 	}
 
@@ -58,6 +58,7 @@ func (c *PlanValidateCommand) Run(args []string) int {
 		return 1
 	}
 
+	c.Ui.Output("Plan validated successfully.")
 	return 0
 }
 
