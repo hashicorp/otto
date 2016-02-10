@@ -50,12 +50,12 @@ func (c *PlanCommand) Run(args []string) int {
 	}
 
 	// Output the plan
-	if len(plan.Infra) > 0 {
+	if len(plan.Plans) > 0 {
 		c.Ui.Output("Infrastructure:\n")
-		for _, p := range plan.Infra {
+		for _, p := range plan.Plans {
 			c.Ui.Output(fmt.Sprintf("  Plan: %s", p.Description))
 			for _, t := range p.Tasks {
-				c.Ui.Output(fmt.Sprintf("    Task: %s (%s)", t.Name, t.Type))
+				c.Ui.Output(fmt.Sprintf("    Task: %s", t.Type))
 				c.Ui.Output(fmt.Sprintf("      Desc: %s", t.Description))
 			}
 		}

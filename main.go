@@ -120,11 +120,19 @@ func wrappedMain() int {
 		}
 	}
 
+	// Determine the commands we're including
+	include := make([]string, 0, len(Commands))
+	for k, _ := range Commands {
+		if _, ok := CommandsExclude[k]; !ok {
+			include = append(include, k)
+		}
+	}
+
 	cli := &cli.CLI{
 		Args:     args,
 		Commands: Commands,
 		HelpFunc: cli.FilteredHelpFunc(
-			CommandsInclude, cli.BasicHelpFunc("otto")),
+			include, cli.BasicHelpFunc("otto")),
 		HelpWriter: os.Stdout,
 	}
 

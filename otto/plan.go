@@ -6,8 +6,8 @@ import (
 
 // Plan is a deployment plan for Otto.
 type Plan struct {
-	// Infra is the list of low-level plans the infra has
-	Infra []*plan.Plan
+	// Plans is the list of low-level plans the infra has
+	Plans []*plan.Plan
 }
 
 // PlanOpts are options for plan execution.
@@ -21,7 +21,7 @@ type PlanOpts struct {
 
 // TODO: test
 func (p *Plan) Empty() bool {
-	return p != nil && len(p.Infra) == 0
+	return p != nil && len(p.Plans) == 0
 }
 
 // Execute will execute the plan. Depending on the PlanOpts, different
@@ -51,7 +51,7 @@ func (p *Plan) Execute(c *Core, opts *PlanOpts) error {
 	}
 
 	// Go through the plans in the proper order: infra, foundation, app
-	for _, p := range p.Infra {
+	for _, p := range p.Plans {
 		if err := f(p); err != nil {
 			return err
 		}

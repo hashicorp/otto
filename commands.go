@@ -17,7 +17,7 @@ import (
 
 // Commands is the mapping of all the available Otto commands.
 var Commands map[string]cli.CommandFactory
-var CommandsInclude []string
+var CommandsExclude map[string]struct{}
 
 // Ui is the cli.Ui used for communicating to the outside world.
 var Ui cli.Ui
@@ -55,15 +55,9 @@ func init() {
 		PluginMap: pluginmap.Map,
 	}
 
-	CommandsInclude = []string{
-		"apps",
-		"compile",
-		"build",
-		"deploy",
-		"dev",
-		"infra",
-		"status",
-		"version",
+	CommandsExclude = map[string]struct{}{
+		"help":           struct{}{},
+		"plugin-builtin": struct{}{},
 	}
 
 	Commands = map[string]cli.CommandFactory{
@@ -105,6 +99,12 @@ func init() {
 
 		"plan": func() (cli.Command, error) {
 			return &command.PlanCommand{
+				Meta: meta,
+			}, nil
+		},
+
+		"plan validate": func() (cli.Command, error) {
+			return &command.PlanValidateCommand{
 				Meta: meta,
 			}, nil
 		},

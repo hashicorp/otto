@@ -39,7 +39,7 @@ func (i *Infra) Plan(*infrastructure.Context) ([]*plan.Plan, error) {
 			Description: "Creating base infrastructure",
 			Tasks: []*plan.Task{
 				&plan.Task{
-					Name:        "Terraform.Apply",
+					Type:        "Terraform.Apply",
 					Description: "Run Terraform to create the base infrastructure.",
 					Args: map[string]*plan.TaskArg{
 						"pwd": &plan.TaskArg{
@@ -49,7 +49,7 @@ func (i *Infra) Plan(*infrastructure.Context) ([]*plan.Plan, error) {
 				},
 
 				&plan.Task{
-					Name:        "Otto.PutInfra",
+					Type:        "Otto.PutInfra",
 					Description: "Update the deployment version",
 					Args: map[string]*plan.TaskArg{
 						"deploy_version": &plan.TaskArg{

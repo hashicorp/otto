@@ -391,7 +391,7 @@ func (c *Core) Plan() (*Plan, error) {
 	}
 
 	// Return the complete plan
-	return &Plan{Infra: p}, nil
+	return &Plan{Plans: p}, nil
 }
 
 // Build builds the deployable artifact for the currently compiled
