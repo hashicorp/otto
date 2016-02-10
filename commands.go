@@ -103,6 +103,12 @@ func init() {
 			}, nil
 		},
 
+		"plan execute": func() (cli.Command, error) {
+			return &command.PlanExecuteCommand{
+				Meta: meta,
+			}, nil
+		},
+
 		"plan validate": func() (cli.Command, error) {
 			return &command.PlanValidateCommand{
 				Meta: meta,
