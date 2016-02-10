@@ -1,14 +1,15 @@
 package plan
 
-type MockTaskExecutor struct {
-	ValidateResult *ExecResult
-	ValidateErr    error
-}
+import (
+	"testing"
+)
 
-func (e *MockTaskExecutor) Validate(*ExecArgs) (*ExecResult, error) {
-	return e.ValidateResult, e.ValidateErr
-}
+// TestPlan parses a set of plans and fails the test if they do not parse.
+func TestPlan(t *testing.T, path string) []*Plan {
+	result, err := ParseFile(path)
+	if err != nil {
+		t.Fatalf("Error parsing plans in %s: %s", path, err)
+	}
 
-func (e *MockTaskExecutor) Execute(*ExecArgs) (*ExecResult, error) {
-	return nil, nil
+	return result
 }
