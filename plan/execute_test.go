@@ -70,7 +70,7 @@ func TestExecutorValidate(t *testing.T) {
 
 		exec := &Executor{TaskMap: testTaskMap}
 		for _, p := range plans {
-			err := exec.Validate(p, nil)
+			err := exec.Validate(p)
 			if (err != nil) != tc.Err {
 				t.Fatalf("%s, err: %s", tc.Name, err)
 			}
@@ -113,7 +113,7 @@ func TestExecutorExecute(t *testing.T) {
 
 		exec := &Executor{TaskMap: testTaskMap}
 		for _, p := range plans {
-			err := exec.Execute(p, nil)
+			err := exec.Execute(p)
 			if (err != nil) != tc.Err {
 				t.Fatalf("%s, err: %s", tc.Name, err)
 			}

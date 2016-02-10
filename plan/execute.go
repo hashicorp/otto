@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/otto/context"
 )
 
 // TaskExecutor is the interface that must be implemented to execute a
@@ -20,13 +19,15 @@ type TaskExecutor interface {
 
 // ExecArgs are the arguments given to a TaskExecutor.
 type ExecArgs struct {
-	// Ctx is the Otto context for this execution
-	Ctx *context.Shared
-
 	// Args is the map of arguments and their value. For validation,
 	// the TaskArg value will be uninterpolated and thus shouldn't be
 	// used. Keys can be used for validation.
 	Args map[string]*TaskArg
+
+	// Extra is arbitrary extra data sent by the executor. The values in
+	// here are dependent on the executor itself. To determine the values
+	// consult the documentation for whatever is executing plans.
+	Extra map[string]interface{}
 }
 
 // ExecResult is the result returned from a TaskExecutor
@@ -50,11 +51,15 @@ type Executor struct {
 
 	// TaskMap is the map of Task types to executors for that task
 	TaskMap map[string]TaskExecutor
+
+	// Extra is extra data that is passed to all tasks. This can be used
+	// for global data. Usage of this is recommended to be limited.
+	Extra map[string]interface{}
 }
 
 // Validate will validate the semantics of the plan. This checks that
 // all variable access will resolve, all task types are valid, etc.
-func (e *Executor) Validate(p *Plan, ctx *context.Shared) error {
+func (e *Executor) Validate(p *Plan) error {
 	var err error
 
 	// First verify the task types are valid and that the args
@@ -72,18 +77,18 @@ func (e *Executor) Validate(p *Plan, ctx *context.Shared) error {
 	}
 
 	// Call "exec" in validation mode
-	return e.exec(true, p, ctx)
+	return e.exec(true, p)
 }
 
 // Execute is called to execute a plan.
 //
 // The configured Callback mechanism can be used to get regular progress
 // events and control the execution. This function will block.
-func (e *Executor) Execute(p *Plan, ctx *context.Shared) error {
-	return e.exec(false, p, ctx)
+func (e *Executor) Execute(p *Plan) error {
+	return e.exec(false, p)
 }
 
-func (e *Executor) exec(validate bool, p *Plan, ctx *context.Shared) error {
+func (e *Executor) exec(validate bool, p *Plan) error {
 	var err error
 
 	// These are the maps that store the variables and storage for execution
@@ -139,7 +144,7 @@ func (e *Executor) exec(validate bool, p *Plan, ctx *context.Shared) error {
 		if validate {
 			f = te.Validate
 		}
-		result, verr := f(&ExecArgs{Ctx: ctx, Args: args})
+		result, verr := f(&ExecArgs{Args: args, Extra: e.Extra})
 		if verr != nil {
 			err = multierror.Append(err, multierror.Prefix(
 				verr, fmt.Sprintf("Task %d (%s): ", i+1, t.Type)))
