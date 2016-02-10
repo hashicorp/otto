@@ -2,6 +2,7 @@ package otto
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/hashicorp/otto/app"
@@ -60,8 +61,18 @@ func TestCoreConfig(t TestT) *CoreConfig {
 		t.Fatal("err: ", err)
 	}
 
+	// Temporary file for default Appfile
+	tf, err := ioutil.TempFile("", "otto")
+	if err != nil {
+		t.Fatal("err: ", err)
+	}
+	tf.Write([]byte(testAppfileDefault))
+	tf.Close()
+	defer os.Remove(tf.Name())
+
 	// Basic config
 	config := &CoreConfig{
+		Appfile:    appfile.TestAppfile(t, tf.Name()),
 		DataDir:    filepath.Join(td, "data"),
 		LocalDir:   filepath.Join(td, "local"),
 		CompileDir: filepath.Join(td, "compile"),
@@ -75,3 +86,9 @@ func TestCoreConfig(t TestT) *CoreConfig {
 
 	return config
 }
+
+const testAppfileDefault = `
+application {
+	type = "test"
+}
+`

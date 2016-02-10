@@ -32,7 +32,7 @@ func (p *Plan) Execute(c *Core, opts *PlanOpts) error {
 	if err != nil {
 		return err
 	}
-	for k, v := range p.extraTasks {
+	for k, v := range opts.extraTasks {
 		taskMap[k] = v
 	}
 

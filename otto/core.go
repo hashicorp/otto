@@ -19,7 +19,6 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/localaddr"
 	"github.com/hashicorp/otto/infrastructure"
-	"github.com/hashicorp/otto/plan"
 	"github.com/hashicorp/otto/ui"
 	"github.com/hashicorp/terraform/dag"
 	"github.com/mitchellh/copystructure"
