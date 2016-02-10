@@ -24,3 +24,6 @@ _scriptpack_staging/
 /.ottoid
 otto-data/
 test-output
+
+# For tests
+!command/test-fixtures/rootdir-dototto/.otto
