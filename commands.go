@@ -5,7 +5,7 @@ import (
 	"os/signal"
 
 	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
-	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
+	infraAws2 "github.com/hashicorp/otto/builtin/infra/aws2"
 
 	"github.com/hashicorp/otto/builtin/pluginmap"
 	"github.com/hashicorp/otto/command"
@@ -48,7 +48,7 @@ func init() {
 		CoreConfig: &otto.CoreConfig{
 			Foundations: foundations,
 			Infrastructures: map[string]infrastructure.Factory{
-				"aws": infraAws.Infra,
+				"aws": infraAws2.Factory,
 			},
 		},
 		Ui:        Ui,
@@ -99,6 +99,12 @@ func init() {
 
 		"infra": func() (cli.Command, error) {
 			return &command.InfraCommand{
+				Meta: meta,
+			}, nil
+		},
+
+		"plan": func() (cli.Command, error) {
+			return &command.PlanCommand{
 				Meta: meta,
 			}, nil
 		},
