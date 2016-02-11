@@ -1,6 +1,8 @@
 package otto
 
 import (
+	"io"
+
 	"github.com/hashicorp/otto/plan"
 )
 
@@ -41,8 +43,13 @@ func (p *Plan) Execute(c *Core, opts *PlanOpts) error {
 		defer maybeClose(t)
 	}
 
+	// Start the UI mirror
+	outputDone := make(chan struct{})
+	out_r, out_w := io.Pipe()
+	go readerToUI(c.ui, out_r, outputDone)
+
 	// Instantiate the plan executor
-	e := &plan.Executor{TaskMap: taskMap}
+	e := &plan.Executor{Output: out_w, TaskMap: taskMap}
 
 	// Get the function we need to call
 	var f func(*plan.Plan) error = e.Validate
@@ -56,6 +63,10 @@ func (p *Plan) Execute(c *Core, opts *PlanOpts) error {
 			return err
 		}
 	}
+
+	// Close the writer and wait for the output to complete
+	out_w.Close()
+	<-outputDone
 
 	return nil
 }
