@@ -126,6 +126,35 @@ func TestExecutorExecute(t *testing.T) {
 	}
 }
 
+func TestExecutorInputs(t *testing.T) {
+	task := &testTask{}
+	testTaskMap := map[string]TaskExecutor{
+		"test": task,
+	}
+
+	path := filepath.Join("./test-fixtures", "execute-input.hcl")
+	plans, err := ParseFile(path)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	plans[0].Inputs = map[string]interface{}{
+		"foo": "bar",
+	}
+
+	exec := &Executor{TaskMap: testTaskMap}
+	for _, p := range plans {
+		err := exec.Execute(p)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		if task.Result != "bar" {
+			t.Fatalf("bad: %s", task.Result)
+		}
+	}
+}
+
 func TestExecutorOutput(t *testing.T) {
 	buf := new(bytes.Buffer)
 	fn := func(args *ExecArgs) (*ExecResult, error) {

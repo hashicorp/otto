@@ -14,8 +14,12 @@ import (
 // Plan is an executable object that represents a goal and the
 // steps to take (tasks) to achieve that goal.
 type Plan struct {
-	Description string
-	Tasks       []*Task
+	Description string  // Description of what the plan does
+	Tasks       []*Task // Serial order of tasks to execute
+
+	// Inputs is a map of variables to set as inputs to the plan.
+	// These are available as "input.NAME" within the tasks.
+	Inputs map[string]interface{}
 }
 
 // Task is a single executable unit for a Plan. Tasks are meant to remain

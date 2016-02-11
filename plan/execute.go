@@ -112,6 +112,11 @@ func (e *Executor) exec(validate bool, p *Plan) error {
 	varMap := make(map[string]*TaskResult)
 	resultMap := make(map[string]*TaskResult)
 
+	// Set the inputs
+	for k, v := range p.Inputs {
+		varMap["input."+k] = &TaskResult{Value: v}
+	}
+
 	// Go through each task in serial
 	for i, t := range p.Tasks {
 		// Create the full map of available vars
