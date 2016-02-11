@@ -50,6 +50,28 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+
+		{
+			"basic-inputs.hcl",
+			false,
+			[]*Plan{
+				&Plan{
+					Inputs: map[string]interface{}{
+						"foo": "bar",
+					},
+
+					Tasks: []*Task{
+						&Task{
+							Type:        "foo",
+							Description: "desc foo",
+							Args: map[string]*TaskArg{
+								"foo": &TaskArg{Value: "bar"},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -63,7 +85,7 @@ func TestParse(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(actual, tc.Expected) {
-			t.Fatalf("%s: bad: %#v", tc.Name, actual)
+			t.Fatalf("%s: bad:\n%#v\n%#v", tc.Name, actual, tc.Expected)
 		}
 	}
 }

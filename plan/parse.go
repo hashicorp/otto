@@ -64,7 +64,7 @@ func parsePlans(list *ast.ObjectList) ([]*Plan, error) {
 	result := make([]*Plan, 0, len(list.Items))
 	for i, item := range list.Items {
 		// Check for invalid keys
-		valid := []string{"description", "task"}
+		valid := []string{"description", "inputs", "task"}
 		if err := checkHCLKeys(item.Val, valid); err != nil {
 			return nil, multierror.Prefix(err, fmt.Sprintf("plan %d:", i+1))
 		}
