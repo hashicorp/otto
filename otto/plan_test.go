@@ -15,7 +15,7 @@ func TestPlanExecute_validate(t *testing.T) {
 		},
 	}
 
-	p := &Plan{Infra: plan.TestPlan(t, testPath("plan-basic", "infra.hcl"))}
+	p := &Plan{Plans: plan.TestPlan(t, testPath("plan-basic", "infra.hcl"))}
 	err := p.Execute(TestCore(t, nil), opts)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -37,7 +37,7 @@ func TestPlanExecute_execute(t *testing.T) {
 		},
 	}
 
-	p := &Plan{Infra: plan.TestPlan(t, testPath("plan-basic", "infra.hcl"))}
+	p := &Plan{Plans: plan.TestPlan(t, testPath("plan-basic", "infra.hcl"))}
 	err := p.Execute(TestCore(t, nil), opts)
 	if err != nil {
 		t.Fatalf("err: %s", err)
