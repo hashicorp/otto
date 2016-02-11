@@ -1,6 +1,7 @@
 package plan
 
 import (
+	"bytes"
 	"errors"
 	"path/filepath"
 	"testing"
@@ -121,6 +122,50 @@ func TestExecutorExecute(t *testing.T) {
 			if task.Result != tc.Result {
 				t.Fatalf("%s, bad: %s", tc.Name, task.Result)
 			}
+		}
+	}
+}
+
+func TestExecutorOutput(t *testing.T) {
+	buf := new(bytes.Buffer)
+	fn := func(args *ExecArgs) (*ExecResult, error) {
+		args.Println("HELLO!")
+		return nil, nil
+	}
+
+	task := &MockTask{ValidateFn: fn, ExecuteFn: fn}
+	testTaskMap := map[string]TaskExecutor{
+		"test": task,
+	}
+
+	path := filepath.Join("./test-fixtures", "execute-output.hcl")
+	plans, err := ParseFile(path)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	exec := &Executor{Output: buf, TaskMap: testTaskMap}
+	for _, p := range plans {
+		err := exec.Validate(p)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		// Should not have output
+		if buf.Len() > 0 {
+			t.Fatalf("bad: %s", buf.String())
+		}
+	}
+
+	for _, p := range plans {
+		err := exec.Execute(p)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		// Should have output
+		if buf.Len() == 0 {
+			t.Fatalf("bad: %s", buf.String())
 		}
 	}
 }

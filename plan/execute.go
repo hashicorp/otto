@@ -2,6 +2,8 @@ package plan
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 
 	"github.com/hashicorp/go-multierror"
 )
@@ -19,6 +21,11 @@ type TaskExecutor interface {
 
 // ExecArgs are the arguments given to a TaskExecutor.
 type ExecArgs struct {
+	// Output is where any output should be written. This is guaranteed
+	// to be non-nil on Execute. You can also use the helpers on ExecArgs
+	// such as Print, Println, and Printf to make working with this easier.
+	Output io.Writer
+
 	// Args is the map of arguments and their value. For validation,
 	// the TaskArg value will be uninterpolated and thus shouldn't be
 	// used. Keys can be used for validation.
@@ -44,13 +51,17 @@ type ExecResult struct {
 
 // Executor is the struct used to execute a plan.
 type Executor struct {
+	// TaskMap is the map of Task types to executors for that task
+	TaskMap map[string]TaskExecutor
+
+	// Output is where any task output will be sent to. If this is
+	// nil, then all output will go to ioutil.Discard.
+	Output io.Writer
+
 	// Callback, if non-nil, will be called for various events during
 	// execution. You can use this to get information and control the
 	// execution.
 	Callback func(ExecuteEvent)
-
-	// TaskMap is the map of Task types to executors for that task
-	TaskMap map[string]TaskExecutor
 
 	// Extra is extra data that is passed to all tasks. This can be used
 	// for global data. Usage of this is recommended to be limited.
@@ -90,6 +101,12 @@ func (e *Executor) Execute(p *Plan) error {
 
 func (e *Executor) exec(validate bool, p *Plan) error {
 	var err error
+
+	// Determine where the output will go
+	output := ioutil.Discard
+	if !validate && e.Output != nil {
+		output = e.Output
+	}
 
 	// These are the maps that store the variables and storage for execution
 	varMap := make(map[string]*TaskResult)
@@ -144,7 +161,11 @@ func (e *Executor) exec(validate bool, p *Plan) error {
 		if validate {
 			f = te.Validate
 		}
-		result, verr := f(&ExecArgs{Args: args, Extra: e.Extra})
+		result, verr := f(&ExecArgs{
+			Args:   args,
+			Extra:  e.Extra,
+			Output: output,
+		})
 		if verr != nil {
 			err = multierror.Append(err, multierror.Prefix(
 				verr, fmt.Sprintf("Task %d (%s): ", i+1, t.Type)))
@@ -179,6 +200,21 @@ func (e *Executor) exec(validate bool, p *Plan) error {
 	}
 
 	return err
+}
+
+// Print is equivalent to fmt.Print but writes to the Output writer
+func (e *ExecArgs) Print(a ...interface{}) (int, error) {
+	return fmt.Fprint(e.Output, a...)
+}
+
+// Printf is equivalent to fmt.Printf but writes to the Output writer
+func (e *ExecArgs) Printf(format string, a ...interface{}) (int, error) {
+	return fmt.Fprintf(e.Output, format, a...)
+}
+
+// Println is equivalent to fmt.Println but writes to the Output writer
+func (e *ExecArgs) Println(a ...interface{}) (int, error) {
+	return fmt.Fprintln(e.Output, a...)
 }
 
 // ExecuteEvent is an event that a callback can receive during execution.
