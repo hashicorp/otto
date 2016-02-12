@@ -62,6 +62,7 @@ func (c *PlanCommand) Run(args []string) int {
 		}
 
 		err = printer.Fprint(w, plan.EncodeHCL(p.Plans))
+		w.Write([]byte("\n"))
 		if c, ok := w.(io.Closer); ok {
 			c.Close()
 		}
