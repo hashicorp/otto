@@ -2,6 +2,8 @@ package command
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/hashicorp/otto/helper/flag"
@@ -29,8 +31,23 @@ func (c *PlanExecuteCommand) Run(args []string) int {
 		return cli.RunResultHelp
 	}
 
+	// Determine if we're getting the plan from stdin or a file
+	var r io.Reader = os.Stdin
+	if args[0] != "-" {
+		f, err := os.Open(args[0])
+		if err != nil {
+			c.Ui.Error(err.Error())
+			return 1
+		}
+
+		r = f
+	}
+
 	// Parse the plan
-	raw, err := plan.ParseFile(args[0])
+	raw, err := plan.Parse(r)
+	if c, ok := r.(io.Closer); ok {
+		c.Close()
+	}
 	if err != nil {
 		c.Ui.Error(err.Error())
 		return 1
@@ -73,6 +90,8 @@ Usage: otto plan execute [options] PATH
 
   This can only execute plans created for this Appfile. Arbitrary plans
   from other projects may result in unexpected behavior.
+
+  If the PATH argument is "-" then this will read from stdin.
 
 `
 
