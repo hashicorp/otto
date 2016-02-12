@@ -57,8 +57,8 @@ func (p *Plan) HCL() *ast.ObjectItem {
 				Keys: []*ast.ObjectKey{
 					&ast.ObjectKey{
 						Token: token.Token{
-							Type: token.IDENT,
-							Text: k,
+							Type: token.STRING,
+							Text: fmt.Sprintf(`"%s"`, k),
 							Pos:  token.Pos{Line: len(inputs)},
 						},
 					},
