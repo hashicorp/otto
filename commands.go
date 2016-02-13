@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/signal"
 
-	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
 	infraAws2 "github.com/hashicorp/otto/builtin/infra/aws2"
 
 	"github.com/hashicorp/otto/builtin/pluginmap"
@@ -42,11 +41,8 @@ func init() {
 		},
 	}
 
-	foundations := foundationConsul.Tuples.Map(foundation.StructFactory(new(foundationConsul.Foundation)))
-
 	meta := command.Meta{
 		CoreConfig: &otto.CoreConfig{
-			Foundations: foundations,
 			Infrastructures: map[string]infrastructure.Factory{
 				"aws": infraAws2.Factory,
 			},
