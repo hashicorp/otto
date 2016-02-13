@@ -26,6 +26,11 @@ under the covers. In this case, it may have also installed
 [VirtualBox](http://www.virtualbox.org) as well as a fairly
 large (~350 MB) base image for your environment. This is a one time cost.
 
+**Note:** If you're using [Vmware Fusion](https://www.vmware.com/products/fusion), then you need to specify the vagrant provide as an environment variable. For e.g.:
+```
+$ VAGRANT_DEFAULT_PROVIDER=vmware_fusion otto dev
+```
+
 ## Layers
 
 The whole process to go from nothing to development environment probably
