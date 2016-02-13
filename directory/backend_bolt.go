@@ -44,6 +44,10 @@ type BoltBackend struct {
 	Dir string
 }
 
+//-------------------------------------------------------------------
+// Apps
+//-------------------------------------------------------------------
+
 func (b *BoltBackend) PutApp(l *AppLookup, a *App) error {
 	data, err := b.structData(a)
 	if err != nil {
@@ -161,6 +165,69 @@ func (b *BoltBackend) ListApps() ([]*App, error) {
 	return result, err
 }
 
+//-------------------------------------------------------------------
+// Infra
+//-------------------------------------------------------------------
+
+func (b *BoltBackend) PutInfra(l *InfraLookup, infra *Infra) error {
+	data, err := b.structData(infra)
+	if err != nil {
+		return err
+	}
+
+	paths := [][]byte{
+		boltInfraBucket,
+		[]byte(l.Name),
+	}
+
+	return b.withDB(func(db *bolt.DB) error {
+		return db.Update(func(tx *bolt.Tx) error {
+			bucket, err := b.bucket(tx, paths)
+			if err != nil {
+				return err
+			}
+			if bucket == nil {
+				panic("nil bucket")
+			}
+
+			return bucket.Put([]byte("infra"), data)
+		})
+	})
+}
+
+func (b *BoltBackend) GetInfra(l *InfraLookup) (*Infra, error) {
+	paths := [][]byte{
+		boltInfraBucket,
+		[]byte(l.Name),
+	}
+
+	var result *Infra
+	err := b.withDB(func(db *bolt.DB) error {
+		return db.View(func(tx *bolt.Tx) error {
+			bucket, err := b.bucket(tx, paths)
+			if err != nil {
+				return err
+			}
+
+			// If the bucket doesn't exist, we haven't written this yet
+			if bucket == nil {
+				return nil
+			}
+
+			// Get the key for this infra
+			data := bucket.Get([]byte("infra"))
+			if data == nil {
+				return nil
+			}
+
+			result = &Infra{}
+			return b.structRead(result, data)
+		})
+	})
+
+	return result, err
+}
+
 func (b *BoltBackend) GetBlob(k string) (*BlobData, error) {
 	db, err := b.db()
 	if err != nil {
@@ -205,67 +272,6 @@ func (b *BoltBackend) PutBlob(k string, d *BlobData) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(boltBlobBucket)
 		return bucket.Put([]byte(k), buf.Bytes())
-	})
-}
-
-func (b *BoltBackend) GetInfra(infra *Infra) (*Infra, error) {
-	db, err := b.db()
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
-
-	var result *Infra
-	err = db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(boltInfraBucket).Bucket([]byte(
-			infra.Lookup.Infra))
-
-		// If the bucket doesn't exist, we haven't written this yet
-		if bucket == nil {
-			return nil
-		}
-
-		// Get the key for this infra
-		data := bucket.Get([]byte(b.infraKey(infra)))
-		if data == nil {
-			return nil
-		}
-
-		result = &Infra{}
-		return b.structRead(result, data)
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func (b *BoltBackend) PutInfra(infra *Infra) error {
-	if infra.ID == "" {
-		infra.setId()
-	}
-
-	db, err := b.db()
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	return db.Update(func(tx *bolt.Tx) error {
-		data, err := b.structData(infra)
-		if err != nil {
-			return err
-		}
-
-		bucket := tx.Bucket(boltInfraBucket)
-		bucket, err = bucket.CreateBucketIfNotExists([]byte(
-			infra.Lookup.Infra))
-		if err != nil {
-			return err
-		}
-
-		return bucket.Put([]byte(b.infraKey(infra)), data)
 	})
 }
 
@@ -494,15 +500,6 @@ func (b *BoltBackend) PutDeploy(deploy *Deploy) error {
 
 		return bucket.Put([]byte("deploy"), data)
 	})
-}
-
-func (b *BoltBackend) infraKey(infra *Infra) string {
-	key := "root"
-	if infra.Lookup.Foundation != "" {
-		key = fmt.Sprintf("foundation-%s", infra.Lookup.Foundation)
-	}
-
-	return key
 }
 
 // db returns the database handle, and sets up the DB if it has never

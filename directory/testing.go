@@ -77,6 +77,45 @@ func TestBackend(t *testing.T, b Backend) {
 	}
 
 	//---------------------------------------------------------------
+	// Infra
+	//---------------------------------------------------------------
+
+	{
+		// GetInfra (doesn't exist)
+		lookup := &InfraLookup{Name: "foo"}
+		infra, err := b.GetInfra(lookup)
+		if err != nil {
+			t.Errorf("GetInfra (non-exist) error: %s", err)
+			return
+		}
+		if infra != nil {
+			t.Error("GetInfra (non-exist): infra should be nil")
+			return
+		}
+
+		// PutInfra (doesn't exist)
+		expected := &Infra{Name: "foo", Type: "bar"}
+		err = b.PutInfra(lookup, expected)
+		if err != nil {
+			t.Errorf("PutInfra error: %s", err)
+			return
+		}
+
+		// GetInfra (exists)
+		infra, err = b.GetInfra(lookup)
+		if err != nil {
+			t.Errorf("GetInfra error: %s", err)
+			return
+		}
+		if !reflect.DeepEqual(expected, infra) {
+			t.Errorf(
+				"GetInfra doesn't match. Expected, then actual:\n\n%#v\n\n%#v",
+				expected, infra)
+			return
+		}
+	}
+
+	//---------------------------------------------------------------
 	// Blob
 	//---------------------------------------------------------------
 
@@ -113,86 +152,6 @@ func TestBackend(t *testing.T, b Backend) {
 	}
 	if buf.String() != "bar" {
 		t.Errorf("GetBlob bad data: %s", buf.String())
-		return
-	}
-
-	//---------------------------------------------------------------
-	// Infra
-	//---------------------------------------------------------------
-
-	// GetInfra (doesn't exist)
-	infra := &Infra{Lookup: Lookup{Infra: "foo"}}
-	actualInfra, err := b.GetInfra(infra)
-	if err != nil {
-		t.Errorf("GetInfra (non-exist) error: %s", err)
-		return
-	}
-	if actualInfra != nil {
-		t.Error("GetInfra (non-exist): infra should be nil")
-		return
-	}
-
-	// PutInfra (doesn't exist)
-	infra.Outputs = map[string]string{"foo": "bar"}
-	if infra.ID != "" {
-		t.Errorf("PutInfra: ID should be empty before set")
-		return
-	}
-	if err := b.PutInfra(infra); err != nil {
-		t.Errorf("PutInfra err: %s", err)
-		return
-	}
-	if infra.ID == "" {
-		t.Errorf("PutInfra: infra ID not set")
-		return
-	}
-
-	// GetInfra (exists)
-	actualInfra, err = b.GetInfra(infra)
-	if err != nil {
-		t.Errorf("GetInfra (exist) error: %s", err)
-		return
-	}
-	if !reflect.DeepEqual(actualInfra, infra) {
-		t.Errorf("GetInfra (exist) bad: %#v", actualInfra)
-		return
-	}
-
-	// GetInfra with foundation (doesn't exist)
-	infra = &Infra{Lookup: Lookup{Infra: "foo", Foundation: "bar"}}
-	actualInfra, err = b.GetInfra(infra)
-	if err != nil {
-		t.Errorf("GetInfra (non-exist) error: %s", err)
-		return
-	}
-	if actualInfra != nil {
-		t.Error("GetInfra (non-exist): infra should be nil")
-		return
-	}
-
-	// PutInfra with foundation (doesn't exist)
-	infra.Outputs = map[string]string{"foo": "bar"}
-	if infra.ID != "" {
-		t.Errorf("PutInfra: ID should be empty before set")
-		return
-	}
-	if err := b.PutInfra(infra); err != nil {
-		t.Errorf("PutInfra err: %s", err)
-		return
-	}
-	if infra.ID == "" {
-		t.Errorf("PutInfra: infra ID not set")
-		return
-	}
-
-	// GetInfra with foundation (exists)
-	actualInfra, err = b.GetInfra(infra)
-	if err != nil {
-		t.Errorf("GetInfra (exist) error: %s", err)
-		return
-	}
-	if !reflect.DeepEqual(actualInfra, infra) {
-		t.Errorf("GetInfra (exist) bad: %#v", actualInfra)
 		return
 	}
 

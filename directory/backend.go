@@ -30,6 +30,17 @@ type Backend interface {
 	ListApps() ([]*App, error)
 
 	//--------------------------------------------------------------------
+	// Infra-related
+	//--------------------------------------------------------------------
+
+	// PutInfra stores the state of an infrastructure.
+	//
+	// GetInfra finds an exact Infra matching the lookup values. If the
+	// infra is not found, nil is returned.
+	PutInfra(*InfraLookup, *Infra) error
+	GetInfra(*InfraLookup) (*Infra, error)
+
+	//--------------------------------------------------------------------
 	// Legacy
 	//--------------------------------------------------------------------
 
@@ -40,11 +51,6 @@ type Backend interface {
 	// ListBlob lists the binary data stored.
 	PutBlob(string, *BlobData) error
 	GetBlob(string) (*BlobData, error)
-
-	// PutInfra and GetInfra are the functions used to store and retrieve
-	// data about infrastructures.
-	PutInfra(*Infra) error
-	GetInfra(*Infra) (*Infra, error)
 
 	// PutDev stores the result of a dev.
 	//
