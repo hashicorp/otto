@@ -715,12 +715,15 @@ func (c *Core) Status() error {
 	} else if status.Deploy.IsFailed() {
 		deployStatus = "[reset]DEPLOY FAILED"
 	}
-	infraStatus := "[reset]NOT CREATED"
-	if status.Infra.IsReady() {
-		infraStatus = "[green]READY"
-	} else if status.Infra.IsPartial() {
-		infraStatus = "[yellow]PARTIAL"
-	}
+	infraStatus := "[reset]TODO"
+	/*
+		TODO
+		if status.Infra.IsReady() {
+			infraStatus = "[green]READY"
+		} else if status.Infra.IsPartial() {
+			infraStatus = "[yellow]PARTIAL"
+		}
+	*/
 
 	// Get the active infra
 	infra := c.appfile.ActiveInfrastructure()

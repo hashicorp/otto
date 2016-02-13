@@ -255,14 +255,13 @@ func (opts *DeployOptions) actionInfo(rctx router.Context) error {
 // not been created successfully yet.
 func (opts *DeployOptions) lookupInfraVars(
 	ctx *app.Context) (*directory.Infra, map[string]string, error) {
-	infra, err := ctx.Directory.GetInfra(&directory.Infra{
-		Lookup: directory.Lookup{
-			Infra: ctx.Appfile.ActiveInfrastructure().Name}})
+	infra, err := ctx.Directory.GetInfra(&directory.InfraLookup{
+		Name: ctx.Appfile.ActiveInfrastructure().Name})
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if !infra.IsReady() {
+	if infra == nil || infra.State != directory.InfraStateReady {
 		return nil, nil, nil
 	}
 

@@ -54,8 +54,8 @@ func (c *Core) statusInfo(resultCh chan<- *statusInfo) {
 	}
 
 	// Infra
-	result.Infra, err = c.dir.GetInfra(&directory.Infra{Lookup: directory.Lookup{
-		Infra: infra.Name}})
+	result.Infra, err = c.dir.GetInfra(&directory.InfraLookup{
+		Name: infra.Name})
 	if err != nil {
 		result.Err = multierror.Append(result.Err, fmt.Errorf(
 			"Error loading infra status: %s", err))
