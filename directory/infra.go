@@ -24,6 +24,11 @@ type Infra struct {
 	// type. Please refer to docs of a specific infra to learn more about
 	// what values are here.
 	Outputs map[string]string `json:"outputs"`
+
+	// Opaque is extra data associated with this infrastructure. Anything
+	// can be stored here but it should be minimal, if possible since the
+	// directory backends aren't meant to be large binary storage.
+	Opaque []byte
 }
 
 // InfraLookup is the structure used to look up or store infras.
