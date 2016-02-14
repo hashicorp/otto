@@ -67,4 +67,7 @@ func TestApply(t *testing.T) {
 	if len(infra.Opaque) <= 0 {
 		t.Fatal("should have state")
 	}
+	if infra.State != directory.InfraStateReady {
+		t.Fatal("state should be ready")
+	}
 }
