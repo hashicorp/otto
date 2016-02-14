@@ -375,11 +375,9 @@ func (c *Core) Plan() (*Plan, error) {
 	if err != nil {
 		return nil, err
 	}
-	/*
-		if err := c.creds(infra, infraCtx); err != nil {
-			return nil, err
-		}
-	*/
+	if err := c.infraCreds(infra, infraCtx); err != nil {
+		return nil, err
+	}
 	defer maybeClose(infra)
 
 	// Ask the infra to plan

@@ -11,6 +11,11 @@ type Mock struct {
 	CompileResult  *CompileResult
 	CompileErr     error
 
+	CredsCalled bool
+	CredsCtx    *Context
+	CredsResult map[string]string
+	CredsErr    error
+
 	PlanCalled  bool
 	PlanContext *Context
 	PlanResult  []*plan.Plan
@@ -18,7 +23,9 @@ type Mock struct {
 }
 
 func (m *Mock) Creds(ctx *Context) (map[string]string, error) {
-	return nil, nil
+	m.CredsCalled = true
+	m.CredsCtx = ctx
+	return m.CredsResult, m.CredsErr
 }
 
 func (m *Mock) VerifyCreds(ctx *Context) error {
