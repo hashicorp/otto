@@ -97,6 +97,7 @@ func (i *Infra) Plan(ctx *infrastructure.Context) ([]*plan.Plan, error) {
 	// Set common variables on all the plans
 	inputs := map[string]interface{}{
 		"context.compile_dir": ctx.Dir,
+		"context.infra.name":  ctx.Infra.Name,
 	}
 	for _, p := range plans {
 		if p.Inputs == nil {

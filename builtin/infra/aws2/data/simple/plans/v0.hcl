@@ -5,7 +5,6 @@ plan {
         description = "Create the AWS infrastructure"
 
         pwd = "${input.context.compile_dir}/v0"
-        state = "${input.state}"
-        state_out = "${input.state_out}"
+        infra = "${input.context.infra.name}"
     }
 }
