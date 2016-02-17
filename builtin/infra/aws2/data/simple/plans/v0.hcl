@@ -1,6 +1,13 @@
 plan {
     description = "Create the base infrastructure: VPC, subnets, etc."
 
+    task "otto.infra.deploy_version" {
+        description = "Update our deployment version to v0"
+
+        infra = "${input.context.infra.name}"
+        deploy_version = "0.0.0"
+    }
+
     task "terraform.apply" {
         description = "Create the AWS infrastructure"
 
