@@ -83,7 +83,9 @@ func (c *Core) planTaskMap() (map[string]plan.TaskExecutor, error) {
 	result["store"] = &plan.StoreTask{}
 
 	// From plugins
-	// TODO
+	for k, v := range c.tasks {
+		result[k] = v
+	}
 
 	return result, nil
 }

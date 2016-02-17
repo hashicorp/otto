@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/localaddr"
 	"github.com/hashicorp/otto/infrastructure"
+	"github.com/hashicorp/otto/plan"
 	"github.com/hashicorp/otto/ui"
 	"github.com/hashicorp/terraform/dag"
 	"github.com/mitchellh/copystructure"
@@ -37,6 +38,7 @@ type Core struct {
 	dir             directory.Backend
 	infras          map[string]infrastructure.Factory
 	foundationMap   map[foundation.Tuple]foundation.Factory
+	tasks           map[string]plan.TaskExecutor
 	dataDir         string
 	localDir        string
 	compileDir      string
@@ -77,6 +79,9 @@ type CoreConfig struct {
 	// value is a factory that can create the impl.
 	Foundations map[foundation.Tuple]foundation.Factory
 
+	// Tasks is a map of of the available tasks for plan execution.
+	Tasks map[string]plan.TaskExecutor
+
 	// Ui is the Ui that will be used to communicate with the user.
 	Ui ui.Ui
 }
@@ -93,6 +98,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		dir:             c.Directory,
 		infras:          c.Infrastructures,
 		foundationMap:   c.Foundations,
+		tasks:           c.Tasks,
 		dataDir:         c.DataDir,
 		localDir:        c.LocalDir,
 		compileDir:      c.CompileDir,

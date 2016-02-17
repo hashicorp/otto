@@ -7,11 +7,15 @@ import (
 	foundationHC "github.com/hashicorp/otto/builtin/foundation/hashicorp"
 	infraAws2 "github.com/hashicorp/otto/builtin/infra/aws2"
 
+	taskOttoInfra "github.com/hashicorp/otto/builtin/task/otto-infra"
+	taskTF "github.com/hashicorp/otto/builtin/task/terraform"
+
 	"github.com/hashicorp/otto/builtin/pluginmap"
 	"github.com/hashicorp/otto/command"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/otto"
+	"github.com/hashicorp/otto/plan"
 	"github.com/mitchellh/cli"
 )
 
@@ -49,6 +53,10 @@ func init() {
 			Foundations: foundations,
 			Infrastructures: map[string]infrastructure.Factory{
 				"aws": infraAws2.Factory,
+			},
+			Tasks: map[string]plan.TaskExecutor{
+				"otto.infra.deploy_version": &taskOttoInfra.DeployVersionTask{},
+				"terraform.apply":           &taskTF.ApplyTask{},
 			},
 		},
 		Ui:        Ui,
