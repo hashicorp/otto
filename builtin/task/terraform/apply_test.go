@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/otto/context"
@@ -69,5 +70,12 @@ func TestApply(t *testing.T) {
 	}
 	if infra.State != directory.InfraStateReady {
 		t.Fatal("state should be ready")
+	}
+
+	{
+		expected := map[string]string{"foo": "bar"}
+		if !reflect.DeepEqual(infra.Outputs, expected) {
+			t.Fatalf("bad: %#v", infra.Outputs)
+		}
 	}
 }

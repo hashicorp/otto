@@ -117,6 +117,11 @@ func (t *ApplyTask) Execute(args *plan.ExecArgs) (*plan.ExecResult, error) {
 		if err != nil {
 			return nil, fmt.Errorf(errStateSaveFailed)
 		}
+
+		infra.Outputs, err = Outputs(stateOut)
+		if err != nil {
+			return nil, fmt.Errorf(errStateSaveFailed)
+		}
 	}
 
 	// Update the infra
