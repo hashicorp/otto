@@ -69,7 +69,13 @@ func (c *PlanExecuteCommand) Run(args []string) int {
 		return 1
 	}
 
-	opts := &otto.PlanOpts{Validate: false}
+	opts := &otto.PlanOpts{Validate: true}
+	if err := plan.Execute(core, opts); err != nil {
+		c.Ui.Error(err.Error())
+		return 1
+	}
+
+	opts.Validate = false
 	if err := plan.Execute(core, opts); err != nil {
 		c.Ui.Error(err.Error())
 		return 1
