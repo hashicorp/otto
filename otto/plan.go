@@ -29,6 +29,12 @@ func (p *Plan) Empty() bool {
 // Execute will execute the plan. Depending on the PlanOpts, different
 // parts of the plan may be executed.
 func (p *Plan) Execute(c *Core, opts *PlanOpts) error {
+	// Get the shared context that we'll pass in to all tasks
+	shared, err := c.contextShared(nil)
+	if err != nil {
+		return err
+	}
+
 	// Get the task map from our core
 	taskMap, err := c.planTaskMap()
 	if err != nil {
@@ -49,7 +55,11 @@ func (p *Plan) Execute(c *Core, opts *PlanOpts) error {
 	go readerToUI(c.ui, out_r, outputDone)
 
 	// Instantiate the plan executor
-	e := &plan.Executor{Output: out_w, TaskMap: taskMap}
+	e := &plan.Executor{
+		Output:  out_w,
+		TaskMap: taskMap,
+		Extra:   map[string]interface{}{"context": shared},
+	}
 
 	// Get the function we need to call
 	var f func(*plan.Plan) error = e.Validate

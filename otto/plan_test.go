@@ -3,6 +3,7 @@ package otto
 import (
 	"testing"
 
+	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/plan"
 	"github.com/hashicorp/otto/ui"
 )
@@ -28,6 +29,18 @@ func TestPlanExecute_validate(t *testing.T) {
 	if mock.ExecuteCalled {
 		t.Fatal("should not call execute")
 	}
+
+	{
+		args := mock.ValidateArgs
+		raw, ok := args.Extra["context"]
+		if !ok {
+			t.Fatal("should have 'context' in extra")
+		}
+
+		if _, ok := raw.(*context.Shared); !ok {
+			t.Fatalf("bad: %#v", raw)
+		}
+	}
 }
 
 func TestPlanExecute_execute(t *testing.T) {
@@ -49,6 +62,18 @@ func TestPlanExecute_execute(t *testing.T) {
 	}
 	if !mock.ExecuteCalled {
 		t.Fatal("should not call execute")
+	}
+
+	{
+		args := mock.ExecuteArgs
+		raw, ok := args.Extra["context"]
+		if !ok {
+			t.Fatal("should have 'context' in extra")
+		}
+
+		if _, ok := raw.(*context.Shared); !ok {
+			t.Fatalf("bad: %#v", raw)
+		}
 	}
 }
 
