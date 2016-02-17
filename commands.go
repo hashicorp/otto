@@ -4,10 +4,12 @@ import (
 	"os"
 	"os/signal"
 
+	foundationHC "github.com/hashicorp/otto/builtin/foundation/hashicorp"
 	infraAws2 "github.com/hashicorp/otto/builtin/infra/aws2"
 
 	"github.com/hashicorp/otto/builtin/pluginmap"
 	"github.com/hashicorp/otto/command"
+	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/otto"
 	"github.com/mitchellh/cli"
@@ -40,8 +42,11 @@ func init() {
 		},
 	}
 
+	foundations := foundationHC.Tuples.Map(foundation.StructFactory(new(foundationHC.Foundation)))
+
 	meta := command.Meta{
 		CoreConfig: &otto.CoreConfig{
+			Foundations: foundations,
 			Infrastructures: map[string]infrastructure.Factory{
 				"aws": infraAws2.Factory,
 			},

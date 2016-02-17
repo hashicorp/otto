@@ -45,7 +45,7 @@ func Default(dir string, det *detect.Config) (*File, error) {
 
 				Foundations: []*Foundation{
 					&Foundation{
-						Name: "consul",
+						Name: "hashicorp",
 					},
 				},
 			},
