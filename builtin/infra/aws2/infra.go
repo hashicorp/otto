@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/hashicorp/otto/directory"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/plan"
@@ -88,6 +89,21 @@ func (i *Infra) Compile(ctx *infrastructure.Context) (*infrastructure.CompileRes
 }
 
 func (i *Infra) Plan(ctx *infrastructure.Context) ([]*plan.Plan, error) {
+	// TODO: Eventually we'll inspect the version and decide based on that.
+	// For now we just init at v0.
+	lookup := &directory.InfraLookup{Name: ctx.Infra.Name}
+	infra, err := ctx.Directory.GetInfra(lookup)
+	if err != nil {
+		return nil, err
+	}
+	if infra == nil {
+		// Initialize the infrastructure
+		infra = directory.NewInfra(ctx.Infra)
+		if err := ctx.Directory.PutInfra(lookup, infra); err != nil {
+			return nil, err
+		}
+	}
+
 	// Parse the plans
 	plans, err := plan.ParseFile(filepath.Join(ctx.Dir, "plans", "v0.hcl"))
 	if err != nil {

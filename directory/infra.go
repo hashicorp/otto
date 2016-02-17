@@ -1,5 +1,9 @@
 package directory
 
+import (
+	"github.com/hashicorp/otto/appfile"
+)
+
 // Infra represents the data stored in the directory service about
 // Infrastructures.
 type Infra struct {
@@ -34,4 +38,14 @@ type Infra struct {
 // InfraLookup is the structure used to look up or store infras.
 type InfraLookup struct {
 	Name string // Name of the infrastructure
+}
+
+// NewInfra creates a new Infra from an Appfile configuration.
+func NewInfra(c *appfile.Infrastructure) *Infra {
+	return &Infra{
+		InfraLookup: InfraLookup{Name: c.Name},
+		Name:        c.Name,
+		Type:        c.Type,
+		Flavor:      c.Flavor,
+	}
 }
