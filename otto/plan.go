@@ -68,9 +68,10 @@ func (p *Plan) Execute(c *Core, opts *PlanOpts) error {
 	}
 
 	// Go through the plans in the proper order: infra, foundation, app
+	err = nil
 	for _, p := range p.Plans {
-		if err := f(p); err != nil {
-			return err
+		if err = f(p); err != nil {
+			break
 		}
 	}
 
@@ -78,7 +79,7 @@ func (p *Plan) Execute(c *Core, opts *PlanOpts) error {
 	out_w.Close()
 	<-outputDone
 
-	return nil
+	return err
 }
 
 //--------------------------------------------------------------------
