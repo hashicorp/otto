@@ -8,6 +8,10 @@ plan {
         deploy_version = "0.0.0"
     }
 
+    task "otto.infra.creds" {
+        description = "Load AWS credentials"
+    }
+
     task "terraform.apply" {
         description = "Create the AWS infrastructure"
 

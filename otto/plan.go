@@ -92,6 +92,7 @@ func (c *Core) planTaskMap() (map[string]plan.TaskExecutor, error) {
 	// Static built-ins
 	result["delete"] = &plan.DeleteTask{}
 	result["store"] = &plan.StoreTask{}
+	result["otto.infra.creds"] = &TaskInfraCreds{C: c}
 
 	// From plugins
 	for k, v := range c.tasks {
