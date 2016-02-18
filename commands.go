@@ -99,12 +99,6 @@ func init() {
 			}, nil
 		},
 
-		"infra": func() (cli.Command, error) {
-			return &command.InfraCommand{
-				Meta: meta,
-			}, nil
-		},
-
 		"plan": func() (cli.Command, error) {
 			return &command.PlanCommand{
 				Meta: meta,
