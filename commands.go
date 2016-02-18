@@ -69,12 +69,6 @@ func init() {
 	}
 
 	Commands = map[string]cli.CommandFactory{
-		"apps": func() (cli.Command, error) {
-			return &command.AppsCommand{
-				Meta: meta,
-			}, nil
-		},
-
 		"compile": func() (cli.Command, error) {
 			return &command.CompileCommand{
 				Meta: meta,
@@ -133,7 +127,19 @@ func init() {
 			}, nil
 		},
 
+		//-----------------------------------------------------------
+		// Directory helpers
+		//-----------------------------------------------------------
+
+		"infras": func() (cli.Command, error) {
+			return &command.InfrasCommand{
+				Meta: meta,
+			}, nil
+		},
+
+		//-----------------------------------------------------------
 		// Internal or not shown to users directly
+		//-----------------------------------------------------------
 
 		"plugin-builtin": func() (cli.Command, error) {
 			return &command.PluginBuiltinCommand{

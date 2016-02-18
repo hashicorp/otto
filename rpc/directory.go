@@ -87,6 +87,20 @@ func (d *Directory) GetInfra(l *directory.InfraLookup) (*directory.Infra, error)
 	return resp.Value, nil
 }
 
+func (d *Directory) ListInfra() ([]*directory.Infra, error) {
+	var resp DirListInfraResponse
+	err := d.Client.Call(d.Name+".ListInfra", new(interface{}), &resp)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+		return nil, err
+	}
+
+	return resp.Value, nil
+}
+
 func (d *Directory) PutBlob(key string, data *directory.BlobData) error {
 	// Serve the data
 	id := d.Broker.NextId()
@@ -302,6 +316,11 @@ type DirGetInfraResponse struct {
 	Error *BasicError
 }
 
+type DirListInfraResponse struct {
+	Value []*directory.Infra
+	Error *BasicError
+}
+
 type DirGetDevResponse struct {
 	Value *directory.Dev
 	Error *BasicError
@@ -460,6 +479,17 @@ func (s *DirectoryServer) GetInfra(
 	reply *DirGetInfraResponse) error {
 	result, err := s.Directory.GetInfra(args)
 	*reply = DirGetInfraResponse{
+		Value: result,
+		Error: NewBasicError(err),
+	}
+	return nil
+}
+
+func (s *DirectoryServer) ListInfra(
+	args interface{},
+	reply *DirListInfraResponse) error {
+	result, err := s.Directory.ListInfra()
+	*reply = DirListInfraResponse{
 		Value: result,
 		Error: NewBasicError(err),
 	}
