@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/context"
+	"github.com/hashicorp/otto/plan"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -21,15 +22,26 @@ type Infrastructure interface {
 	// continuing to perform any operations.
 	VerifyCreds(*Context) error
 
-	Execute(*Context) error
+	// Compile is called to generate any files that we need.
 	Compile(*Context) (*CompileResult, error)
-	Flavors() []string
+
+	// Plan is called to plan any changes that are necessary for this
+	// infrastructure. This method is expected to potentially make network
+	// calls, check for drift, and do whatever is necessary to create the
+	// plans. This method should not, however, modify infrastructure
+	// in any way.
+	Plan(*Context) ([]*plan.Plan, error)
 }
 
 // Context is the context for operations on infrastructures. Some of
 // the fields in this struct are only available for certain operations.
 type Context struct {
 	context.Shared
+
+	// CompileExtra is the extra data returned as part of CompileResult.
+	// This is nil on Compile, but will be instantiated (promised non-nil)
+	// for every other call.
+	CompileExtra map[string]interface{}
 
 	// Action is the sub-action to take when being executed.
 	//
@@ -65,4 +77,10 @@ func (c *Context) UI() ui.Ui {
 }
 
 // CompileResult is the structure containing compilation result values.
-type CompileResult struct{}
+type CompileResult struct {
+	// Extra is extra data that is available in Context after a compilation.
+	// The values in this map must be Go primitives (including maps, slices).
+	// Otto core will handle serializing and deserializing this back for
+	// other calls.
+	Extra map[string]interface{}
+}

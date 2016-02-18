@@ -1,15 +1,31 @@
 package infrastructure
 
+import (
+	"github.com/hashicorp/otto/plan"
+)
+
 // Mock is a mock implementation of the Infrastructure interface.
 type Mock struct {
 	CompileCalled  bool
 	CompileContext *Context
 	CompileResult  *CompileResult
 	CompileErr     error
+
+	CredsCalled bool
+	CredsCtx    *Context
+	CredsResult map[string]string
+	CredsErr    error
+
+	PlanCalled  bool
+	PlanContext *Context
+	PlanResult  []*plan.Plan
+	PlanErr     error
 }
 
 func (m *Mock) Creds(ctx *Context) (map[string]string, error) {
-	return nil, nil
+	m.CredsCalled = true
+	m.CredsCtx = ctx
+	return m.CredsResult, m.CredsErr
 }
 
 func (m *Mock) VerifyCreds(ctx *Context) error {
@@ -26,6 +42,8 @@ func (m *Mock) Compile(ctx *Context) (*CompileResult, error) {
 	return m.CompileResult, m.CompileErr
 }
 
-func (m *Mock) Flavors() []string {
-	return nil
+func (m *Mock) Plan(ctx *Context) ([]*plan.Plan, error) {
+	m.PlanCalled = true
+	m.PlanContext = ctx
+	return m.PlanResult, m.PlanErr
 }

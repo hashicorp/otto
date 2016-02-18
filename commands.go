@@ -4,20 +4,24 @@ import (
 	"os"
 	"os/signal"
 
-	foundationConsul "github.com/hashicorp/otto/builtin/foundation/consul"
-	infraAws "github.com/hashicorp/otto/builtin/infra/aws"
+	foundationHC "github.com/hashicorp/otto/builtin/foundation/hashicorp"
+	infraAws2 "github.com/hashicorp/otto/builtin/infra/aws2"
+
+	taskOttoInfra "github.com/hashicorp/otto/builtin/task/otto-infra"
+	taskTF "github.com/hashicorp/otto/builtin/task/terraform"
 
 	"github.com/hashicorp/otto/builtin/pluginmap"
 	"github.com/hashicorp/otto/command"
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/otto"
+	"github.com/hashicorp/otto/plan"
 	"github.com/mitchellh/cli"
 )
 
 // Commands is the mapping of all the available Otto commands.
 var Commands map[string]cli.CommandFactory
-var CommandsInclude []string
+var CommandsExclude map[string]struct{}
 
 // Ui is the cli.Ui used for communicating to the outside world.
 var Ui cli.Ui
@@ -42,28 +46,26 @@ func init() {
 		},
 	}
 
-	foundations := foundationConsul.Tuples.Map(foundation.StructFactory(new(foundationConsul.Foundation)))
+	foundations := foundationHC.Tuples.Map(foundation.StructFactory(new(foundationHC.Foundation)))
 
 	meta := command.Meta{
 		CoreConfig: &otto.CoreConfig{
 			Foundations: foundations,
 			Infrastructures: map[string]infrastructure.Factory{
-				"aws": infraAws.Infra,
+				"aws": infraAws2.Factory,
+			},
+			Tasks: map[string]plan.TaskExecutor{
+				"otto.infra.deploy_version": &taskOttoInfra.DeployVersionTask{},
+				"terraform.apply":           &taskTF.ApplyTask{},
 			},
 		},
 		Ui:        Ui,
 		PluginMap: pluginmap.Map,
 	}
 
-	CommandsInclude = []string{
-		"apps",
-		"compile",
-		"build",
-		"deploy",
-		"dev",
-		"infra",
-		"status",
-		"version",
+	CommandsExclude = map[string]struct{}{
+		"help":           struct{}{},
+		"plugin-builtin": struct{}{},
 	}
 
 	Commands = map[string]cli.CommandFactory{
@@ -99,6 +101,24 @@ func init() {
 
 		"infra": func() (cli.Command, error) {
 			return &command.InfraCommand{
+				Meta: meta,
+			}, nil
+		},
+
+		"plan": func() (cli.Command, error) {
+			return &command.PlanCommand{
+				Meta: meta,
+			}, nil
+		},
+
+		"plan execute": func() (cli.Command, error) {
+			return &command.PlanExecuteCommand{
+				Meta: meta,
+			}, nil
+		},
+
+		"plan validate": func() (cli.Command, error) {
+			return &command.PlanValidateCommand{
 				Meta: meta,
 			}, nil
 		},

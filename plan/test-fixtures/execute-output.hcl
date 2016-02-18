@@ -1,0 +1,3 @@
+plan {
+    task "test" {}
+}

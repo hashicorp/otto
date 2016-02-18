@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -174,6 +175,7 @@ func (m *Meta) DataDir() (string, error) {
 // upwards until we find the ".otto" directory and assume that is where
 // it is.
 func (m *Meta) RootDir(startDir string) (string, error) {
+	log.Printf("[DEBUG] Looking for root dir starting from: %s", startDir)
 	current := startDir
 
 	// Traverse upwards until we find the directory. We also protect this
@@ -181,9 +183,21 @@ func (m *Meta) RootDir(startDir string) (string, error) {
 	i := 0
 	prev := ""
 	for prev != current && i < 1000 {
+		log.Printf("[TRACE] Checking root dir: %s", current)
+
+		// Check for .otto
 		if _, err := os.Stat(filepath.Join(current, DefaultOutputDir)); err == nil {
 			// Found it
+			log.Printf("[INFO] Root dir (output dir found): %s", current)
 			return current, nil
+		}
+
+		// Check for the Appfile. This means that we have an Appfile that
+		// hasn't been compiled yet.
+		if _, err := os.Stat(filepath.Join(current, DefaultAppfile)); err == nil {
+			// If we find a non-compiled Appfile, exit
+			log.Printf("[INFO] Root dir appfile found, non-compiled: %s", current)
+			break
 		}
 
 		prev = current

@@ -58,6 +58,35 @@ func (d *Directory) ListApps() ([]*directory.App, error) {
 	return resp.Value, nil
 }
 
+func (d *Directory) PutInfra(l *directory.InfraLookup, infra *directory.Infra) error {
+	var resp DirPutInfraResponse
+	args := &DirPutInfraArgs{Lookup: l, Infra: infra}
+	err := d.Client.Call(d.Name+".PutInfra", args, &resp)
+	if err != nil {
+		return err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+		return err
+	}
+
+	return nil
+}
+
+func (d *Directory) GetInfra(l *directory.InfraLookup) (*directory.Infra, error) {
+	var resp DirGetInfraResponse
+	err := d.Client.Call(d.Name+".GetInfra", l, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+		return nil, err
+	}
+
+	return resp.Value, nil
+}
+
 func (d *Directory) PutBlob(key string, data *directory.BlobData) error {
 	// Serve the data
 	id := d.Broker.NextId()
@@ -130,35 +159,6 @@ func (d *Directory) GetBlob(key string) (*directory.BlobData, error) {
 	// until it is exausted.
 
 	return result, nil
-}
-
-func (d *Directory) PutInfra(v *directory.Infra) error {
-	var resp DirPutInfraResponse
-	err := d.Client.Call(d.Name+".PutInfra", v, &resp)
-	if err != nil {
-		return err
-	}
-	if resp.Error != nil {
-		err = resp.Error
-		return err
-	}
-
-	*v = *resp.Value
-	return nil
-}
-
-func (d *Directory) GetInfra(v *directory.Infra) (*directory.Infra, error) {
-	var resp DirGetInfraResponse
-	err := d.Client.Call(d.Name+".GetInfra", v, &resp)
-	if err != nil {
-		return nil, err
-	}
-	if resp.Error != nil {
-		err = resp.Error
-		return nil, err
-	}
-
-	return resp.Value, nil
 }
 
 func (d *Directory) PutDev(v *directory.Dev) error {
@@ -292,6 +292,11 @@ type DirListAppsResponse struct {
 	Error *BasicError
 }
 
+type DirPutInfraArgs struct {
+	Lookup *directory.InfraLookup
+	Infra  *directory.Infra
+}
+
 type DirGetInfraResponse struct {
 	Value *directory.Infra
 	Error *BasicError
@@ -317,7 +322,6 @@ type DirPutAppResponse struct {
 }
 
 type DirPutInfraResponse struct {
-	Value *directory.Infra
 	Error *BasicError
 }
 
@@ -442,18 +446,17 @@ func (s *DirectoryServer) ListApps(
 }
 
 func (s *DirectoryServer) PutInfra(
-	args *directory.Infra,
+	args *DirPutInfraArgs,
 	reply *DirPutInfraResponse) error {
-	err := s.Directory.PutInfra(args)
+	err := s.Directory.PutInfra(args.Lookup, args.Infra)
 	*reply = DirPutInfraResponse{
-		Value: args,
 		Error: NewBasicError(err),
 	}
 	return nil
 }
 
 func (s *DirectoryServer) GetInfra(
-	args *directory.Infra,
+	args *directory.InfraLookup,
 	reply *DirGetInfraResponse) error {
 	result, err := s.Directory.GetInfra(args)
 	*reply = DirGetInfraResponse{

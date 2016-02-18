@@ -48,9 +48,8 @@ func Build(ctx *app.Context, opts *BuildOptions) error {
 	// Get the infrastructure, since it needs to be ready for building
 	// to occur. We'll copy the outputs and the credentials as variables
 	// to Packer.
-	infra, err := ctx.Directory.GetInfra(&directory.Infra{
-		Lookup: directory.Lookup{
-			Infra: ctx.Appfile.ActiveInfrastructure().Name}})
+	infra, err := ctx.Directory.GetInfra(&directory.InfraLookup{
+		Name: ctx.Appfile.ActiveInfrastructure().Name})
 	if err != nil {
 		return err
 	}

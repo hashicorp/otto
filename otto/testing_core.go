@@ -2,11 +2,13 @@ package otto
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -22,6 +24,9 @@ type TestCoreOpts struct {
 
 	// App to register with the TestAppTuple as a fixed result
 	App app.App
+
+	// Infra to register as a fixed result for the "test" infra
+	Infra infrastructure.Infrastructure
 }
 
 // TestCore returns a *Core for testing. If TestCoreOpts is nil then
@@ -39,6 +44,12 @@ func TestCore(t TestT, config *TestCoreOpts) *Core {
 		if config.App != nil {
 			coreConfig.Apps[TestAppTuple] = func() (app.App, error) {
 				return config.App, nil
+			}
+		}
+
+		if config.Infra != nil {
+			coreConfig.Infrastructures["test"] = func() (infrastructure.Infrastructure, error) {
+				return config.Infra, nil
 			}
 		}
 	}
@@ -60,8 +71,18 @@ func TestCoreConfig(t TestT) *CoreConfig {
 		t.Fatal("err: ", err)
 	}
 
+	// Temporary file for default Appfile
+	tf, err := ioutil.TempFile("", "otto")
+	if err != nil {
+		t.Fatal("err: ", err)
+	}
+	tf.Write([]byte(testAppfileDefault))
+	tf.Close()
+	defer os.Remove(tf.Name())
+
 	// Basic config
 	config := &CoreConfig{
+		Appfile:    appfile.TestAppfile(t, tf.Name()),
 		DataDir:    filepath.Join(td, "data"),
 		LocalDir:   filepath.Join(td, "local"),
 		CompileDir: filepath.Join(td, "compile"),
@@ -75,3 +96,9 @@ func TestCoreConfig(t TestT) *CoreConfig {
 
 	return config
 }
+
+const testAppfileDefault = `
+application {
+	type = "test"
+}
+`
