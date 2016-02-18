@@ -186,3 +186,56 @@ func TestApply_partial(t *testing.T) {
 		t.Fatal("state should be ready")
 	}
 }
+
+// Test that Apply passes in the configured vars
+func TestApply_vars(t *testing.T) {
+	if !hasTF {
+		t.Skip("Terraform not found")
+	}
+
+	var task ApplyTask
+
+	// Build the args
+	infraName := "foo"
+	ctx := context.TestShared(t)
+	pwd := filepath.Join("./test-fixtures", "apply-vars")
+	args := &plan.ExecArgs{
+		Output: ioutil.Discard,
+		Extra:  map[string]interface{}{"context": ctx},
+		Args: map[string]*plan.TaskArg{
+			"pwd":     &plan.TaskArg{Value: pwd},
+			"infra":   &plan.TaskArg{Value: infraName},
+			"var.foo": &plan.TaskArg{Value: "baz"},
+		},
+	}
+
+	// Initialize the infra
+	lookup := &directory.InfraLookup{Name: infraName}
+	infra := &directory.Infra{Name: infraName}
+	if err := ctx.Directory.PutInfra(lookup, infra); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Validate
+	if _, err := task.Validate(args); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Execute
+	if _, err := task.Execute(args); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// Verify the state was updated
+	infra, err := ctx.Directory.GetInfra(lookup)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	{
+		expected := map[string]string{"output": "baz!"}
+		if !reflect.DeepEqual(infra.Outputs, expected) {
+			t.Fatalf("bad: %#v", infra.Outputs)
+		}
+	}
+}

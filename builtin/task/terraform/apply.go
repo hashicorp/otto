@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/otto/context"
 	"github.com/hashicorp/otto/directory"
@@ -78,9 +79,17 @@ func (t *ApplyTask) Execute(args *plan.ExecArgs) (*plan.ExecResult, error) {
 		}
 	}
 
+	// If we have custom args coming through from the parameters, add that
+	for k, v := range args.Args {
+		if strings.HasPrefix(k, "var.") {
+			vars[k[4:]] = v.Value.(string)
+		}
+	}
+
 	// Build the execArgs for Terraform here
 	execArgs := make([]string, 0, 50)
 	execArgs = append(execArgs, "apply")
+	execArgs = append(execArgs, "-input=false")
 	execArgs = append(execArgs, "-state", state)
 	execArgs = append(execArgs, "-state-out", stateOut)
 	for k, v := range vars {
