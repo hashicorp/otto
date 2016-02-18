@@ -17,5 +17,6 @@ plan {
 
         pwd = "${input.context.compile_dir}/v0"
         infra = "${input.context.infra.name}"
+        "var.aws_region" = "us-east-1"
     }
 }
