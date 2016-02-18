@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/otto/app"
 	"github.com/hashicorp/otto/appfile"
 	"github.com/hashicorp/otto/directory"
+	"github.com/hashicorp/otto/infrastructure"
 	"github.com/hashicorp/otto/ui"
 )
 
@@ -23,6 +24,9 @@ type TestCoreOpts struct {
 
 	// App to register with the TestAppTuple as a fixed result
 	App app.App
+
+	// Infra to register as a fixed result for the "test" infra
+	Infra infrastructure.Infrastructure
 }
 
 // TestCore returns a *Core for testing. If TestCoreOpts is nil then
@@ -40,6 +44,12 @@ func TestCore(t TestT, config *TestCoreOpts) *Core {
 		if config.App != nil {
 			coreConfig.Apps[TestAppTuple] = func() (app.App, error) {
 				return config.App, nil
+			}
+		}
+
+		if config.Infra != nil {
+			coreConfig.Infrastructures["test"] = func() (infrastructure.Infrastructure, error) {
+				return config.Infra, nil
 			}
 		}
 	}
