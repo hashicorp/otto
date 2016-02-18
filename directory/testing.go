@@ -113,6 +113,24 @@ func TestBackend(t *testing.T, b Backend) {
 				expected, infra)
 			return
 		}
+
+		// ListInfra
+		expected.InfraLookup = *lookup
+		infras, err := b.ListInfra()
+		if err != nil {
+			t.Errorf("ListInfra error: %s", err)
+			return
+		}
+		if len(infras) != 1 {
+			t.Errorf("ListInfra length should be 1: %d", len(infras))
+			return
+		}
+		if !reflect.DeepEqual(expected, infras[0]) {
+			t.Errorf(
+				"ListInfra doesn't match. Expected, then actual:\n\n%#v\n\n%#v",
+				expected, infras[0])
+			return
+		}
 	}
 
 	//---------------------------------------------------------------

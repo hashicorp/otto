@@ -228,6 +228,51 @@ func (b *BoltBackend) GetInfra(l *InfraLookup) (*Infra, error) {
 	return result, err
 }
 
+func (b *BoltBackend) ListInfra() ([]*Infra, error) {
+	paths := [][]byte{
+		boltInfraBucket,
+	}
+
+	var result []*Infra
+	err := b.withDB(func(db *bolt.DB) error {
+		return db.View(func(tx *bolt.Tx) error {
+			bucket, err := b.bucket(tx, paths)
+			if err != nil {
+				return err
+			}
+
+			// If the bucket doesn't exist, we have nothing
+			if bucket == nil {
+				return nil
+			}
+
+			// Traverse it!
+			return b.traverse(bucket, 1, func(path [][]byte, bucket *bolt.Bucket) error {
+				// Get the key for this infra
+				data := bucket.Get([]byte("infra"))
+				if data == nil {
+					return nil
+				}
+
+				// Decode the Infra
+				infra := &Infra{}
+				if err := b.structRead(infra, data); err != nil {
+					return err
+				}
+
+				// Populate the lookup data from the path
+				infra.InfraLookup = InfraLookup{Name: string(path[0])}
+
+				result = append(result, infra)
+				return nil
+			})
+		})
+	})
+
+	sort.Sort(InfraSlice(result))
+	return result, err
+}
+
 func (b *BoltBackend) GetBlob(k string) (*BlobData, error) {
 	db, err := b.db()
 	if err != nil {

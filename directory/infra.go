@@ -49,3 +49,20 @@ func NewInfra(c *appfile.Infrastructure) *Infra {
 		Flavor:      c.Flavor,
 	}
 }
+
+// InfraSlice is a wrapper around []*Infra that implements sort.Interface.
+// The sorting order is standard sorting for the tuple:
+// (app name, app ID, version)
+type InfraSlice []*Infra
+
+func (a InfraSlice) Len() int {
+	return len(a)
+}
+
+func (a InfraSlice) Less(i, j int) bool {
+	return a[i].Name < a[j].Name
+}
+
+func (a InfraSlice) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}

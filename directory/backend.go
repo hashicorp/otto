@@ -37,8 +37,12 @@ type Backend interface {
 	//
 	// GetInfra finds an exact Infra matching the lookup values. If the
 	// infra is not found, nil is returned.
+	//
+	// ListInfra returns the list of infrastructures that are availabile
+	// in the directory. This will be sorted according to InfraSlice.
 	PutInfra(*InfraLookup, *Infra) error
 	GetInfra(*InfraLookup) (*Infra, error)
+	ListInfra() ([]*Infra, error)
 
 	//--------------------------------------------------------------------
 	// Legacy
