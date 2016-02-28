@@ -29,7 +29,7 @@ application {
     type = "docker-external"
 }
 
-customization "docker" {
+customization {
     image = "mongo:3.0"
     run_args = "-p 27017:27017"
 }
