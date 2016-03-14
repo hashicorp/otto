@@ -2,7 +2,7 @@
 
 
 
-## 0.2.0 (January 6, 2015)
+## 0.2.0 (January 6, 2016)
 
 BACKWARDS INCOMPATIBILITIES:
 
