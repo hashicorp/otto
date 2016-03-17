@@ -59,7 +59,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			Schema: map[string]*schema.FieldSchema{
 				"java_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
-					Default:     "1.8.0_72",
+					Default:     "1.8.0_74",
 					Description: "Java version installed",
 				},
 				"gradle_version": &schema.FieldSchema{
