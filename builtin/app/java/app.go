@@ -74,7 +74,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 				"scala_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
-					Default:     "2.11.7",
+					Default:     "2.11.8",
 					Description: "Scala version to install",
 				},
 				"sbt_version": &schema.FieldSchema{
