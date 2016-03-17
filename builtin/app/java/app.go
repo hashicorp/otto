@@ -79,7 +79,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 				"sbt_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
-					Default:     "0.13.9",
+					Default:     "0.13.11",
 					Description: "sbt version to install",
 				},
 				"lein_version": &schema.FieldSchema{
