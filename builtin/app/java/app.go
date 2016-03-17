@@ -84,7 +84,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 				"lein_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
-					Default:     "2.5.3",
+					Default:     "2.6.1",
 					Description: "Leiningen version to install",
 				},
 			},
