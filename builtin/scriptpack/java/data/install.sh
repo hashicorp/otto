@@ -37,10 +37,12 @@ java_gradle_install() {
 # java_maven_install installs the specified Maven version.
 java_maven_install() {
   local version="$1"
-  oe sudo curl "http://mirrors.koehn.com/apache/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.tar.gz" --create-dirs -o "/opt/apache-maven-${version}-bin.tar.gz"
-  oe sudo tar -zxvf "/opt/apache-maven-${version}-bin.tar.gz" -C /opt
-  oe sudo rm "/opt/apache-maven-${version}-bin.tar.gz"
-  export PATH="/opt/apache-maven-${version}/bin:$PATH"
+  oe sudo wget "http://www.gtlib.gatech.edu/pub/apache/maven/binaries/apache-maven-${version}-bin.tar.gz"
+  oe sudo tar -zxf "apache-maven-${version}-bin.tar.gz"
+  oe sudo cp -R "apache-maven-${version}" /usr/local
+  oe sudo ln -s "/usr/local/apache-maven-${version}/bin/mvn" /usr/bin/mvn
+  oe sudo rm -rf "apache-maven-${version}"
+  oe sudo rm "apache-maven-${version}-bin.tar.gz"
 }
 
 # java_lein_install installs the specified Leiningen version.
