@@ -64,7 +64,7 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 				},
 				"gradle_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
-					Default:     "2.10",
+					Default:     "2.12",
 					Description: "Gradle version to install",
 				},
 				"maven_version": &schema.FieldSchema{
