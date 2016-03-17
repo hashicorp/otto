@@ -37,7 +37,7 @@ java_gradle_install() {
 # java_maven_install installs the specified Maven version.
 java_maven_install() {
   local version="$1"
-  oe sudo wget "http://www.gtlib.gatech.edu/pub/apache/maven/binaries/apache-maven-${version}-bin.tar.gz"
+  oe sudo wget "http://shinyfeather.com/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.tar.gz"
   oe sudo tar -zxf "apache-maven-${version}-bin.tar.gz"
   oe sudo cp -R "apache-maven-${version}" /usr/local
   oe sudo ln -s "/usr/local/apache-maven-${version}/bin/mvn" /usr/bin/mvn
@@ -70,4 +70,5 @@ java_sbt_install() {
   oe sudo apt-get update
   oe sudo dpkg -i "sbt-${version}.deb"
   oe rm "sbt-${version}.deb"
+  oe sbt about
 }
