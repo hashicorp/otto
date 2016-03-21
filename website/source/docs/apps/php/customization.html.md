@@ -19,7 +19,8 @@ Example:
 ```
 customization "php" {
   php_version="5.5"
-}```
+}
+```
 
 Available options
 
