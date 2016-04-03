@@ -43,6 +43,12 @@ python_install() {
     3.3)
         _python_install_raw "3.3"
         ;;
+    3.4)
+        _python_install_raw "3.4"
+        ;;
+    3.5)
+        _python_install_raw "3.5"
+        ;;
     *)
         echo "Unknown Python version: ${version}" >&2
         exit 1
