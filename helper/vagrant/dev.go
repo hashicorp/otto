@@ -249,7 +249,7 @@ func (opts *DevOptions) actionUp(rctx router.Context) error {
 				"Otto uses layers to speed up building development environments.\n" +
 					"Each layer only needs to be built once. We've detected that the\n" +
 					"layers below aren't created yet. These will be built this time.\n" +
-					"Future development envirionments will use the cached versions\n" +
+					"Future development environments will use the cached versions\n" +
 					"to be much, much faster.")
 		}
 
