@@ -28,6 +28,7 @@ ruby_gemfile_apt() {
     _ruby_gemfile_check libxml-ruby "libxml2-dev"
     _ruby_gemfile_check paperclip "imagemagick"
     _ruby_gemfile_check poltergeist "phantomjs"
+    _ruby_gemfile_check mini_magick "libmagickwand-dev"
 
     if [ -n "${_ruby_gemfile_queue-}" ]; then
         otto_output "Installing native gem system dependencies..."
