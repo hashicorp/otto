@@ -25,7 +25,10 @@ var Killed = false
 
 // This is a slice of the "managed" clients which are cleaned up when
 // calling Cleanup
-var managedClients = make([]*Client, 0, 5)
+var (
+	managedClients     = make([]*Client, 0, 5)
+	managedClientsLock sync.Mutex
+)
 
 // Client handles the lifecycle of a plugin application, determining its
 // RPC address, and returning various types of interface implementations
@@ -133,7 +136,9 @@ func NewClient(config *ClientConfig) (c *Client) {
 
 	c = &Client{config: config}
 	if config.Managed {
+		managedClientsLock.Lock()
 		managedClients = append(managedClients, c)
+		managedClientsLock.Unlock()
 	}
 
 	return
