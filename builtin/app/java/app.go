@@ -1,6 +1,8 @@
 package javaapp
 
 import (
+	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/otto/app"
@@ -10,6 +12,7 @@ import (
 	"github.com/hashicorp/otto/foundation"
 	"github.com/hashicorp/otto/helper/bindata"
 	"github.com/hashicorp/otto/helper/compile"
+	"github.com/hashicorp/otto/helper/oneline"
 	"github.com/hashicorp/otto/helper/packer"
 	"github.com/hashicorp/otto/helper/schema"
 	"github.com/hashicorp/otto/helper/terraform"
@@ -52,17 +55,37 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 			&javaSP.ScriptPack,
 		},
 		Customization: (&compile.Customization{
-			Callback: custom.processDev,
+			Callback: custom.process,
 			Schema: map[string]*schema.FieldSchema{
+				"java_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "1.8.0_74",
+					Description: "Java version installed",
+				},
 				"gradle_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
-					Default:     "2.8",
-					Description: "Java version to install",
+					Default:     "2.12",
+					Description: "Gradle version to install",
 				},
 				"maven_version": &schema.FieldSchema{
 					Type:        schema.TypeString,
 					Default:     "3.3.9",
 					Description: "Maven version to install",
+				},
+				"scala_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "2.11.8",
+					Description: "Scala version to install",
+				},
+				"sbt_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "0.13.11",
+					Description: "sbt version to install",
+				},
+				"lein_version": &schema.FieldSchema{
+					Type:        schema.TypeString,
+					Default:     "2.6.1",
+					Description: "Leiningen version to install",
 				},
 			},
 		}).Merge(compile.VagrantCustomizations(&opts)),
@@ -74,27 +97,45 @@ func (a *App) Compile(ctx *app.Context) (*app.CompileResult, error) {
 // Build ...
 func (a *App) Build(ctx *app.Context) error {
 	return packer.Build(ctx, &packer.BuildOptions{
-		InfraOutputMap: map[string]string{
-			"region": "aws_region",
-		},
 	})
 }
 
 // Deploy ...
 func (a *App) Deploy(ctx *app.Context) error {
 	return terraform.Deploy(&terraform.DeployOptions{
-		InfraOutputMap: map[string]string{
-			"region":         "aws_region",
-			"subnet-private": "private_subnet_id",
-			"subnet-public":  "public_subnet_id",
-		},
 	}).Route(ctx)
 }
 
 // Dev ...
 func (a *App) Dev(ctx *app.Context) error {
+	var layered *vagrant.Layered
+
+	// We only setup a layered environment if we've recompiled since
+	// version 0. If we're still at version 0 then we have to use the
+	// non-layered dev environment.
+	if ctx.CompileResult.Version > 0 {
+		// Read the go version, since we use that for our layer
+		javaVersion, err := oneline.Read(filepath.Join(ctx.Dir, "dev", "java_version"))
+		if err != nil {
+			return err
+		}
+
+		// Setup layers
+		layered, err = vagrant.DevLayered(ctx, []*vagrant.Layer{
+			&vagrant.Layer{
+				ID:          fmt.Sprintf("java%s", javaVersion),
+				Vagrantfile: filepath.Join(ctx.Dir, "dev", "layer-base", "Vagrantfile"),
+			},
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	// Build the actual development environment
 	return vagrant.Dev(&vagrant.DevOptions{
 		Instructions: strings.TrimSpace(devInstructions),
+		Layer:        layered,
 	}).Route(ctx)
 }
 
@@ -111,7 +152,8 @@ machine. The file changes will be synced to the development environment.
 
 When you're ready to build or test your project, run 'otto dev ssh'
 to enter the development environment. You'll be placed directly into the
-working directory where you can run "gradle init", "gradle build", etc.
+working directory where you can run "gradle init", "gradle build", "mvn clean",
+"mvn test" etc.
 
 You can access the environment from this machine using the IP address above.
 For example, if your app is running on port 5000, then access it using the

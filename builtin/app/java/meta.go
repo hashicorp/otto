@@ -26,6 +26,6 @@ var Tuples = app.TupleSlice([]app.Tuple{
 var Detectors = []*detect.Detector{
 	&detect.Detector{
 		Type: "java",
-		File: []string{"build.gradle", "pom.xml"},
+		File: []string{"build.gradle", "pom.xml", "*.sbt", "project/*.scala", "project.clj", "build.boot"},
 	},
 }

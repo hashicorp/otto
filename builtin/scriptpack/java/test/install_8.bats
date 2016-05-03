@@ -9,10 +9,19 @@
   [[ $(java -version) =~ "java version \"1.8." ]]
 
   # Install Gradle
-  java_gradle_install "2.7"
-  [[ $(gradle -version) =~ "Gradle 2.7" ]]
+  java_gradle_install "2.10"
+  [[ $(gradle -version) =~ "Gradle 2.10" ]]
 
   # Install Maven
   java_maven_install
-  [[ $(mvn --version) =~ "Maven 3.0.5" ]]
+  [[ $(mvn --version) =~ "Maven 3.3.9" ]]
+
+  # Install Leiningen
+  java_lein_install
+  [[ $(./lein -v) =~ "Leiningen 2.5.3" ]]
+
+  # Install sbt
+  java_sbt_install
+  @[[ $(sbt -v) =~ "sbt 0.13.9" ]]
+
 }
