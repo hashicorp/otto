@@ -28,7 +28,7 @@ but it shouldn't be more than a few dollars at most.
 ~> **Warning!** If you're not using an account that qualifies under the AWS
 free-tier, you may be charged to run these examples. The most you should be
 charged should only be a few dollars, but we're not responsible for any
-charges that may incur.
+charges that you may incur.
 
 ## Infrastructure
 
