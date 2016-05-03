@@ -14,7 +14,7 @@ echo "cd /vagrant" >> /home/vagrant/.profile
 # Configuring SSH for faster login
 if ! grep "UseDNS no" /etc/ssh/sshd_config >/dev/null; then
   echo "UseDNS no" | sudo tee -a /etc/ssh/sshd_config >/dev/null
-  oe sudo service ssh restart
+  sudo service ssh restart
 fi
 
 SCRIPT
