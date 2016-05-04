@@ -8,6 +8,8 @@
   # Setup a synced folder from our working directory to /vagrant
   config.vm.synced_folder '{{ path.working }}', "{{ shared_folder_path }}",
     owner: "vagrant", group: "vagrant"
+  config.vm.provision "shell", inline:
+    "find /opt/gopath -mount -print0 | sudo xargs -0 -n 100 chown vagrant:vagrant"
 {% endblock %}
 
 {% block vagrant_config %}
