@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
   {% endblock %}
 
   # Host only network
-  config.vm.network "private_network", ip: "{{ dev_ip_address }}"
+  config.vm.network "private_network", ip: "{{ dev_ip_address }}", netmask: "255.192.0.0"
 
   {% block default_shared_folder %}
   # Setup a synced folder from our working directory to /vagrant
