@@ -31,4 +31,4 @@ page for a list of behavior that can be changed.
 
   * If a `composer.json` file is detected, then Otto installs Composer
     and runs `composer install --no-dev` during the build process to get all
-    the dependencies for your applicaiton.
+    the dependencies for your application.
