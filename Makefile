@@ -66,6 +66,7 @@ vet:
 # generate runs `go generate` to build the dynamically generated
 # source files.
 generate:
+	@go-bindata -version > /dev/null 2>&1 || go get -u github.com/jteeuwen/go-bindata/...
 	find . -type f -name '.DS_Store' -delete
 	go generate ./...
 
