@@ -9,10 +9,10 @@ Vagrant.configure("2") do |config|
   if ENV["OTTO_VAGRANT_LAYER_PATH"]
     config.vm.clone = ENV["OTTO_VAGRANT_LAYER_PATH"]
   else
-    config.vm.box = "hashicorp/precise64"
+    config.vm.box = "bento/ubuntu-14.04"
     config.vm.box_check_update = false
     config.vm.provider :parallels do |p, o|
-      o.vm.box = "parallels/ubuntu-12.04"
+      o.vm.box = "parallels/ubuntu-14.04"
     end
   end
   {% endblock %}
