@@ -47,7 +47,7 @@ sudo virtualenv --python=/usr/bin/python$PYTHON_VERSION /srv/otto-app/virtualenv
 
 ol "Install gunicorn..."
 # we install using pip to support alternate python versions
-oe sudo /srv/otto-app/virtualenv/bin/pip -H install gunicorn
+oe sudo -H /srv/otto-app/virtualenv/bin/pip install gunicorn
 
 ol "Extracting app..."
 sudo mkdir -p /srv/otto-app/src
