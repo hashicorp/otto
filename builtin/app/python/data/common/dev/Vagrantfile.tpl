@@ -27,6 +27,7 @@ vagrant_default_cd "vagrant" "/vagrant"
 cd /vagrant
 
 if [ -f requirements.txt ]; then
+  python_pip_apt
   # Activate environment
   otto_output "Activating VirtualEnv..."
   . /home/vagrant/virtualenv/bin/activate
