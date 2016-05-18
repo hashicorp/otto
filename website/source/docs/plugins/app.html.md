@@ -70,7 +70,7 @@ call.
 To assist with compilation, we use the
 [helper/compile](https://github.com/hashicorp/otto/tree/master/helper/compile)
 helper library. This automatically handles file structure, templating,
-[ScriptPack usage](https://ottoproject.io/docs/plugins/scriptpack.html),
+[ScriptPack usage](/docs/plugins/scriptpack.html),
 etc. More on this is covered below.
 
 One thing to be very careful about: set a compilation version on the

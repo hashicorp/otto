@@ -8,7 +8,7 @@ description: |-
 
 # Otto vs. Vagrant
 
-[Vagrant](https://vagrantup.com) is a popular development
+[Vagrant](https://www.vagrantup.com) is a popular development
 tool built by the [same people](/community.html) who built Otto.
 Because of the close ties, there is a
 [dedicated top-level section](/intro/vagrant-successor.html)

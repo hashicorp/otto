@@ -18,7 +18,7 @@ For our simple example, Otto will create an AMI to launch.
 To build the application, run `otto build`.
 
 This step is likely going to ask you for permission to install
-[Packer](https://packer.io). Otto uses Packer under the covers
+[Packer](https://www.packer.io). Otto uses Packer under the covers
 to build deployable artifacts. If you say yes, Otto will install
 this for you. If you already have the latest version of Packer
 installed, you won't be asked.
@@ -89,7 +89,7 @@ $ otto status
 
 The granularity of a build is currently at the machine level and
 creates an AMI (for AWS). In the very near future, the build step will
-build a container that is deployed using [Nomad](https://nomadproject.io).
+build a container that is deployed using [Nomad](https://www.nomadproject.io).
 
 When this change comes, the build and deploy steps should become much
 faster, creating a much tighter feedback loop to deploying applications.

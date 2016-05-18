@@ -15,13 +15,13 @@ To deploy an application, Otto has three steps: start an infrastructure,
 build the application, and launch the application. We'll go over each of
 these steps on a separate page in the getting started guide.
 
-We'll deploy the application to [AWS](http://aws.amazon.com) for
+We'll deploy the application to [AWS](https://aws.amazon.com) for
 the getting started guide since it is popular and generally well understood, but
 Otto can deploy to many different infrastructure providers.
 
-If you don't have an AWS account, [create one now](http://aws.amazon.com/free/).
+If you don't have an AWS account, [create one now](https://aws.amazon.com/free/).
 For the getting started guide, we'll only be using resources which qualify
-under the AWS [free-tier](http://aws.amazon.com/free/), meaning it will be free.
+under the AWS [free-tier](https://aws.amazon.com/free/), meaning it will be free.
 If you already have an AWS account, you may be charged some amount of money,
 but it shouldn't be more than a few dollars at most.
 
@@ -60,7 +60,7 @@ infrastructures and flavors in the [documentation](/docs).
 To launch the infrastructure, run `otto infra`.
 
 This step is likely going to ask you for permission to install
-[Terraform](https://terraform.io). Otto uses Terraform under the covers
+[Terraform](https://www.terraform.io). Otto uses Terraform under the covers
 to build and manage the infrastructure. If you say yes, Otto will install
 this for you. If you already have the latest version of Terraform installed,
 you won't be asked.

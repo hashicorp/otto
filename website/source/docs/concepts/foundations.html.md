@@ -41,7 +41,7 @@ to access a dependency, you use DNS the same way.
 In the future, Otto will add more foundations to enable more features:
 
 **Security**. Otto will install, bootstrap, and configure
-[Vault](https://vaultproject.io) automatically. Otto will automatically
+[Vault](https://www.vaultproject.io) automatically. Otto will automatically
 configure authentication for all applications so they can store and
 access secrets. Any required credentials (such as for databases) will be
 automatically requested from Vault and passed in to applications.
@@ -50,7 +50,7 @@ The learning curve for this is usually very high, but with Otto, we can
 do it all automatically.
 
 **Scheduling**. Otto will install, bootstrap, configure, and scale
-[Nomad](https://nomadproject.io) to enable much faster deploys,
+[Nomad](https://www.nomadproject.io) to enable much faster deploys,
 auto-scaling, application failover, and more. This will happen transparently:
 you'll update your Otto version, update the infrastructure, run
 `otto deploy`, and notice that everything happened MUCH faster.

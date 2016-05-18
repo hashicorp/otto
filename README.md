@@ -42,9 +42,9 @@ The key features of Otto are:
   workflow.
 
 * **Production-hardened tooling**: Otto uses production-hardened tooling to
-  build development environments ([Vagrant](https://vagrantup.com)),
-  launch servers ([Terraform](https://terraform.io)), configure
-  services ([Consul](https://consul.io)), and more. Otto builds on
+  build development environments ([Vagrant](https://www.vagrantup.com)),
+  launch servers ([Terraform](https://www.terraform.io)), configure
+  services ([Consul](https://www.consul.io)), and more. Otto builds on
   tools that powers the world's largest websites.
   Otto automatically installs and manages all of this tooling, so you don't
   have to.
@@ -96,7 +96,7 @@ $ make test TEST=./otto
 ### Acceptance Tests
 
 Otto also has a comprehensive
-[acceptance test](http://en.wikipedia.org/wiki/Acceptance_testing)
+[acceptance test](https://en.wikipedia.org/wiki/Acceptance_testing)
 suite covering most of the major features of the built-in app types.
 
 If you're working on a feature of an app type and want to verify it is
