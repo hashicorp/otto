@@ -17,7 +17,7 @@ Example:
 
 ```
 customization {
-    dev_vagrantfile = "./Vagrantfile"
+    dev_vagrantfile = "./Vagrantfile.tpl"
     terraform       = "./terraform"
 }
 ```
@@ -26,7 +26,8 @@ Available options:
 
   * `dev_vagrantfile` (string) - Path to a Vagrantfile to use for development.
     If this isn't specified, `otto dev` will not work for this application.
-    This Vagrantfile will be rendered as a [template](/docs/apps/custom/template.html).
+    This Vagrantfile will be rendered as a [template](/docs/apps/custom/template.html)
+    if the path ends with `.tpl`.
 
   * `dep_vagrantfile` (string) - Path to a Vagrantfile to use as a fragment
     that is embedded in other application's Vagrantfiles when this application

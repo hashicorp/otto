@@ -25,14 +25,16 @@ application {
 }
 
 customization "dev" {
-    vagrantfile = "./Vagrantfile"
+    vagrantfile = "./Vagrantfile.tpl"
 }
 ```
 
 For the Appfile above, running `otto dev` will run Vagrant in the directory
 of the Appfile against the given Vagrantfile.
 
-The Vagrantfile is rendered as [a template](/docs/apps/custom/template.html).
+The Vagrantfile is rendered as [a template](/docs/apps/custom/template.html)
+if the path ends with `.tpl`.
+
 It is important at the very least to specify the Vagrant shared folder
 should be the working directory. An example Vagrantfile config is shown
 below to do this:
