@@ -23,14 +23,16 @@ ol "Adding apt repositories and updating..."
 export DEBIAN_FRONTEND=noninteractive
 oe sudo apt-get update -y
 oe sudo apt-get install -y software-properties-common
-oe sudo add-apt-repository -y ppa:ondrej/php5-{{ php_version }}
+oe sudo add-apt-repository -y ppa:ondrej/php
 # Seems to be required to prevent "unauthenticated packages"
 # errors out of apt-get install.
 oe sudo apt-key update
 oe sudo apt-get update -y
 
 ol "Installing PHP VCSs, Apache, and other packages..."
-oe sudo apt-get install -y apache2 php5 libapache2-mod-php5 \
+# What are the packages for 5.5, 5.6, 7.0; what is the name; need to search and compare ..
+# TODO: Find out what name is; update for Ubuntu 14.04
+oe sudo apt-get install -y apache2 php{{ php_version }} libapache2-mod-php5 \
   bzr git mercurial build-essential \
   curl \
   php5-mcrypt php5-mysql php5-fpm php5-gd php5-readline php5-pgsql

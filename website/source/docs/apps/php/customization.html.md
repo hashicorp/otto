@@ -24,6 +24,6 @@ customization "php" {
 Available options
 
   * `php_version` (string) - The PHP version to install for development
-    and deployment.  The currently supported versions for Otto are 5.4, 5.5 and
-    5.6.  Support for PHP is provided by the PPA repositories created by
+    and deployment.  The currently supported versions for Otto are 5.5, 5.6 and
+    7.0.  Support for PHP is provided by the PPA repositories created by
     [Ondřej Surý](https://launchpad.net/~ondrej). 

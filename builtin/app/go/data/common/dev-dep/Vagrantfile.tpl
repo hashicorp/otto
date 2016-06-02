@@ -6,7 +6,7 @@
 # Do not hand-edit this file. To modify this, use the Appfile.
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "hashicorp/precise64"
+  config.vm.box = "bento/ubuntu-14.04"
 
   # Setup a synced folder from our working directory to /vagrant
   config.vm.synced_folder '{{ path.working }}', "{{ shared_folder_path }}",
@@ -30,8 +30,8 @@ Vagrant.configure("2") do |config|
   # Install Go build environment
   config.vm.provision "shell", inline: $script_golang
 
-  config.vm.provider :parallels do |p, o|
-    o.vm.box = "parallels/ubuntu-12.04"
+  config.vm.provider "vmware_fusion" do |p, o|
+    o.vm.box = "puphpet/ubuntu1404-x64"
   end
 end
 
