@@ -11,6 +11,8 @@ php_install_prepare() {
   otto_init_locale
 
   sudo apt-get install -y python-software-properties software-properties-common apt-transport-https
+
+  add-apt-repository -y ppa:ondrej/php
 }
 
 # php_install installs an arbitrary PHP version given in the argument
@@ -38,21 +40,18 @@ php_install() {
 
 # php_install_5_5 installs PHP 5.5.x
 php_install_5_5() {
-  add-apt-repository -y ppa:ondrej/php5
   apt-get update
-  sudo apt-get install -y php5
+  sudo apt-get install -y php5.5
 }
 
 # php_install_5_6 installs PHP 5.6.x
 php_install_5_6() {
-  add-apt-repository -y ppa:ondrej/php5-5.6
   apt-get update
-  sudo apt-get install -y php5
+  sudo apt-get install -y php5.6
 }
 
 # php_install_7_0 installs PHP 7.0.x
 php_install_7_0() {
-  add-apt-repository -y ppa:ondrej/php-7.0
   apt-get update
   sudo apt-get install -y php7.0
 }
