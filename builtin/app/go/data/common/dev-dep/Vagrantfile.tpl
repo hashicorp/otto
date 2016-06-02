@@ -30,8 +30,8 @@ Vagrant.configure("2") do |config|
   # Install Go build environment
   config.vm.provision "shell", inline: $script_golang
 
-  config.vm.provider :parallels do |p, o|
-    o.vm.box = "parallels/ubuntu-14.04"
+  config.vm.provider "vmware_fusion" do |p, o|
+    o.vm.box = "puphpet/ubuntu1404-x64"
   end
 end
 
