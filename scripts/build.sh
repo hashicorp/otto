@@ -49,6 +49,8 @@ gox \
 # Move all the compiled things to the $GOPATH/bin
 GOPATH=${GOPATH:-$(go env GOPATH)}
 case $(uname) in
+    MSYS*)
+        ;&
     CYGWIN*)
         GOPATH="$(cygpath $GOPATH)"
         ;;
