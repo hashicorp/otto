@@ -1,4 +1,4 @@
-TEST?=./...
+TEST?=$$(go list ./... | grep -v '/vendor/')
 VETARGS?=-asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -printf -rangeloops -shift -structtags -unsafeptr
 
 default: test
@@ -33,6 +33,7 @@ testacc: generate
 # updatedeps installs all the dependencies that Otto needs to run
 # and build.
 updatedeps:
+	go get -u github.com/kardianos/govendor
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
 	go get -u github.com/jteeuwen/go-bindata/...
@@ -57,7 +58,7 @@ vet:
 		go get golang.org/x/tools/cmd/vet; \
 	fi
 	@echo "go tool vet $(VETARGS) ."
-	@go tool vet $(VETARGS) . ; if [ $$? -eq 1 ]; then \
+	@go tool vet $(VETARGS) $$(ls -d */ | grep -v vendor) ; if [ $$? -eq 1 ]; then \
 		echo ""; \
 		echo "Vet found suspicious constructs. Please check the reported constructs"; \
 		echo "and fix them if necessary before submitting the code for review."; \
@@ -67,6 +68,9 @@ vet:
 # source files.
 generate:
 	find . -type f -name '.DS_Store' -delete
-	go generate ./...
+	@which stringer ; if [ $$? -ne 0 ]; then \
+		go get -u golang.org/x/tools/cmd/stringer; \
+	fi
+	go generate $$(go list ./... | grep -v /vendor/)
 
 .PHONY: bin default generate test updatedeps vet
