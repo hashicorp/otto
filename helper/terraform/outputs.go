@@ -19,7 +19,14 @@ func Outputs(path string) (map[string]string, error) {
 	}
 
 	// Return the outputs
-	return state.RootModule().Outputs, nil
+	rtv := make(map[string]string, 0)
+	for k, v := range state.RootModule().Outputs {
+		rtv[k] = v.String()
+	}
+	if len(rtv) == 0 {
+		return nil, nil
+	}
+	return rtv, nil
 }
 
 func readState(path string) (*terraform.State, error) {

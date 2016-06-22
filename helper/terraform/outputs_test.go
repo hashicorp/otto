@@ -32,7 +32,7 @@ func TestOutputs(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(result, tc.Result) {
-			t.Fatalf("bad: %#v", result)
+			t.Fatalf("bad: %#v, %#v", result, tc.Result)
 		}
 	}
 }
