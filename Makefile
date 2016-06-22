@@ -38,11 +38,6 @@ updatedeps:
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
 	go get -u github.com/jteeuwen/go-bindata/...
-	go list ./... \
-		| xargs go list -f '{{join .Deps "\n"}}' \
-		| grep -v github.com/hashicorp/otto \
-		| sort -u \
-		| xargs go get -f -u -v
 
 cover:
 	@go tool cover 2>/dev/null; if [ $$? -eq 3 ]; then \
