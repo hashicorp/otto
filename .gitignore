@@ -5,7 +5,6 @@ bin/
 images/packer_cache
 pkg/
 scratch/
-vendor/
 bindata.go
 example.appfile
 website/.bundle

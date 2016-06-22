@@ -1,25 +1,26 @@
-TEST?=./...
+TEST?=$$($(VENDOR) go list ./... | grep -v '/vendor/')
 VETARGS?=-asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -printf -rangeloops -shift -structtags -unsafeptr
+VENDOR=GO15VENDOREXPERIMENT=1
 
 default: test
 
 # bin generates the releaseable binaries for Otto
 bin: generate
-	@sh -c "'$(CURDIR)/scripts/build.sh'"
+	@$(VENDOR) sh -c "'$(CURDIR)/scripts/build.sh'"
 
 # dev creates binaries for testing Otto locally. These are put
 # into ./bin/ as well as $GOPATH/bin
 dev: generate
-	@OTTO_DEV=1 sh -c "'$(CURDIR)/scripts/build.sh'"
+	@$(VENDOR) OTTO_DEV=1 sh -c "'$(CURDIR)/scripts/build.sh'"
 
 # test runs the unit tests and vets the code
 test: generate
-	go test $(TEST) $(TESTARGS) -timeout=30s -parallel=4
+	$(VENDOR) go test $(TEST) $(TESTARGS) -timeout=30s -parallel=4
 	@$(MAKE) vet
 
 # testrace runs the race checker
 testrace: generate
-	go test -race $(TEST) $(TESTARGS)
+	$(VENDOR) go test -race $(TEST) $(TESTARGS)
 
 # testacc runs acceptance tests
 testacc: generate
@@ -28,26 +29,22 @@ testacc: generate
 		echo "  make testacc TEST=./builtin/app/go"; \
 		exit 1; \
 	fi
-	OTTO_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 90m
+	$(VENDOR) OTTO_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 90m
 
 # updatedeps installs all the dependencies that Otto needs to run
 # and build.
 updatedeps:
+	go get -u github.com/kardianos/govendor
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
 	go get -u github.com/jteeuwen/go-bindata/...
-	go list ./... \
-		| xargs go list -f '{{join .Deps "\n"}}' \
-		| grep -v github.com/hashicorp/otto \
-		| sort -u \
-		| xargs go get -f -u -v
 
 cover:
 	@go tool cover 2>/dev/null; if [ $$? -eq 3 ]; then \
 		go get -u golang.org/x/tools/cmd/cover; \
 	fi
-	go test $(TEST) -coverprofile=coverage.out
-	go tool cover -html=coverage.out
+	$(VENDOR) go test $(TEST) -coverprofile=coverage.out
+	$(VENDOR) go tool cover -html=coverage.out
 	rm coverage.out
 
 # vet runs the Go source code static analysis tool `vet` to find
@@ -56,8 +53,8 @@ vet:
 	@go tool vet 2>/dev/null ; if [ $$? -eq 3 ]; then \
 		go get golang.org/x/tools/cmd/vet; \
 	fi
-	@echo "go tool vet $(VETARGS) ."
-	@go tool vet $(VETARGS) . ; if [ $$? -eq 1 ]; then \
+	@echo "$(VENDOR) go tool vet $(VETARGS) ."
+	@$(VENDOR) go tool vet $(VETARGS) $$(ls -d */ | grep -v vendor) ; if [ $$? -eq 1 ]; then \
 		echo ""; \
 		echo "Vet found suspicious constructs. Please check the reported constructs"; \
 		echo "and fix them if necessary before submitting the code for review."; \
@@ -67,6 +64,9 @@ vet:
 # source files.
 generate:
 	find . -type f -name '.DS_Store' -delete
-	go generate ./...
+	@which stringer ; if [ $$? -ne 0 ]; then \
+		go get -u golang.org/x/tools/cmd/stringer; \
+	fi
+	$(VENDOR) go generate $$($(VENDOR) go list ./... | grep -v /vendor/)
 
 .PHONY: bin default generate test updatedeps vet
