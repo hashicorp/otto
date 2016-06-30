@@ -44,12 +44,9 @@ application {
     type = "custom"
 }
 
-customization "dev" {
-    vagrantfile = "./Vagrantfile"
-}
-
-customization "deploy" {
-    terraform = "./terraform-module"
+customization {
+    dev_vagrantfile = "./Vagrantfile"
+    terraform = "./terraform"
 }
 ```
 
