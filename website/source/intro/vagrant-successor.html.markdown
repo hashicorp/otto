@@ -3,7 +3,7 @@ layout: "intro"
 page_title: "The Successor to Vagrant"
 sidebar_current: "vagrant"
 description: |-
-  TODO
+  Otto is the successor to Vagrant.
 ---
 
 # The Successor to Vagrant
