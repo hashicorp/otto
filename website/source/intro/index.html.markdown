@@ -3,7 +3,9 @@ layout: "intro"
 page_title: "Introduction"
 sidebar_current: "what"
 description: |-
-  TODO
+  Otto knows how to develop and deploy any application on any cloud
+  platform, all controlled with a single consistent workflow to maximize
+  the productivity of you and your team.
 ---
 
 # What is Otto?
