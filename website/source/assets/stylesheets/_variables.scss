@@ -24,6 +24,7 @@ $green-faint:           #E3F5E3;
 $blue-dark:             #596D6F;
 $blue-light:            #89999A;
 $blue:                  #00BFE0;
+$hashicorp-blue:        #127EFF;
 $blue-faint:            #C0C9CA;
 $light-black:           #242424;
 $orange:                #FF6D38;
@@ -38,7 +39,14 @@ $purple:                #822ff7;
 $light-purple:          #f7f3f9;
 $btn-color:             #4592C5;
 
-//C0C9CA
+$atlas-color: $blue;
+$vagrant-color: #48b4fb;
+$packer-color: #7bc6b1;
+$serf-color: #E14B55;
+$consul-color: #B9283F;
+$terraform-color: #822ff7;
+$vault-color: #00D8FE; //#00a9c7;
+$nomad-color: #9bdb9c;
 
 // Scaffolding
 // -------------------------

@@ -3,593 +3,197 @@
 // --------------------------------------------------
 
 #hero{
-  text-align: center;
-  padding-bottom: 60px;
+  position: relative;
+  padding-top: 50px;
 
-  #hero-graphic{
-    position: relative;
-    display: inline-block;
-    width: 1016px;
-    height: 357px;
-    margin: 0 auto 10px;
-    //@include translate3d(30px, 0, 0);
-    background: image-url('../images/graphic-hero.png') 6px 0 no-repeat;
-    @include img-retina("../images/graphic-hero.png", "../images/graphic-hero@2x.png", 1010px, 357px);
+  &:before{
+    display: block;
+    content: '';
+    position: absolute;
+    left: -1858px;
+    bottom: -50px;
+    width: 2000px;
+    height: 10px;
+    background: image-url('../images/arm-segment.jpg') 6px 0 no-repeat;
+    @include img-retina("../images/arm-segment.jpg", "../images/arm-segment@2x.jpg", 5px, 10px);
+    background-repeat: repeat-x;
+  }
+
+  &:after{
+    display: block;
+    content: '';
+    position: absolute;
+    right: -1938px;
+    bottom: 56px;
+    width: 2000px;
+    height: 10px;
+    background: image-url('../images/arm-segment.jpg') 6px 0 no-repeat;
+    @include img-retina("../images/arm-segment.jpg", "../images/arm-segment@2x.jpg", 5px, 10px);
+    background-repeat: repeat-x;
   }
 
   #hero-text{
     position: relative;
-    text: center;
-    margin-top: 60px;
+    z-index: 1;
 
     h1{
-      margin-bottom: 8px;
-      color: $black;
-      font-size: $font-size-l;
-    }
-
-    h3{
-      margin-top: 6px;
-      color: $blue-dark;
-      font-size: 19px;
-      font-weight: $font-weight-light;
-      line-height: 34px;
-      //text-transform: uppercase;
-
-      span{
-        display: inline-block;
-        width: 122px;
-        height: 33px;
-        margin-bottom: -11px;
-        margin-left: 4px;
-        text-indent: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        background: image-url('../images/vagrant-logo.png') 0 0 no-repeat;
-        @include img-retina("../images/vagrant-logo.png", "../images/vagrant-logo@2x.png", 122px, 33px);
-      }
-    }
-
-    #hero-btns{
-      margin-top: 26px;
-      a{
-
-      }
-    }
-  }
-
-  #tag-line{
-    margin: 15px 0 20px 0;
-    font-size: 24px;
-    font-weight: 300;
-  }
-
-  p{
-    margin-top: 60px;
-    text-align: left;
-    font-size: 18px;
-    font-weight: 300;
-    line-height: 2em;
-
-    .strong{
-      font-size: 20px;
+      font-size: 28px;
       font-weight: 500;
     }
-  }
-}
-
-#subhero-banner{
-  .otto-lrg-white{
-    margin-top: $small-pad;
-    width: 235px;
-    height: 191px;
-    background: image-url('../images/otto-subhero.png') 0 0 no-repeat;
-    @include img-retina("../images/otto-subhero.png", "../images/otto-subhero@2x.png", 235px, 191px);
-  }
-
-  h2,p{
-    text-align: left;
-  }
-
-  h2{
-    margin-bottom: $xsmall-pad;
-  }
-
-  p{
-    //color: $blue-faint;
-    opacity: .8;
-    font-size: $font-size-reg;
-    font-weight: $font-weight-light;
-    line-height: $font-size-reg + $line-height-factor;
-    margin-bottom: $small-pad;
-  }
-
-  a{
-    float: left;
-  }
-}
-
-#features-split{
-  border-top: 3px solid $black;
-  display: flex;
-
-  .r50{
-    text-align: center;
-    flex: 1;
-
-    .feature-graphic{
-      display: inline-block;
-      height: 279px;
-      margin-bottom: $small-pad;
-    }
 
     p{
-      opacity: .8;
-    }
-  }
-}
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 2em;
 
-.feature{
-  .feature-header{
-    text-align: center;
+      a{
+        display: inline-block;
+        position: relative;
+        color: $black;
 
-    h3{
-      margin-bottom: $xsmall-pad;
-      font-size: $font-size-m;
-      line-height: $font-size-m + 6;
-    }
+        &:hover{
+          text-decoration: none;
 
-    p{
-      margin-bottom: $small-pad;
-    }
-  }
-
-  .feature-footer{
-    text-align: center;
-  }
-
-  &#automate{
-    .feature-graphic{
-      width: 307px;
-      height: 307px;
-      background: image-url('../images/graphic-automate.png') 0 0 no-repeat;
-      @include img-retina("../images/graphic-automate.png", "../images/graphic-automate@2x.png", 305px, 307px);
-    }
-
-    .feature-content{
-      margin-top: $med-pad;
-    }
-
-    .feature-terminal{
-      text-align: center;
-      margin-top: $large-pad;
-
-      .terminal-graphic{
-        margin-bottom: $xsmall-pad;
-
-        a{
-          display: inline-block;
-          margin: 0 auto;
-          width: 165px;
-          height: 135px;
-          background: image-url('../images/graphic-terminal-play.png') 0 0 no-repeat;
-          @include img-retina("../images/graphic-terminal-play.png", "../images/graphic-terminal-play@2x.png",  165px, 135px);
-        }
-      }
-
-      p{
-        font-size: $font-size-sm;
-        padding: 0 $small-pad;
-      }
-
-      .h-btn.minimal{
-        font-size: $font-size-m;
-        margin-bottom: $xsmall-pad;
-
-        .mono-block{
-          position: relative;
-          top: -5px;
-          margin-left: 10px;
+          &::before{
+            @include transition(all 200ms ease-in);
+            opacity: 1;
+          }
         }
 
-        span.h-caret{
-          position: relative;
-          top: -4px;
+        &::before{
+          position: absolute;
+          display: block;
+          content: "";
+          bottom: 4px;
+          left: 0;
+          width: 106%;
+          margin-left: -3%;
+          height: 3px;
+          opacity: .5;
+          @include transition(all 200ms ease-in);
+//          background-color: #f6f6f6 !important;
+        }
+
+        &.packer{
+          &::before{
+            background-color: $packer-color;
+          }
+        }
+
+        &.terraform{
+          &::before{
+            background-color: $terraform-color;
+          }
+        }
+
+        &.consul{
+          &::before{
+            background-color: $consul-color;
+          }
+        }
+
+        &.nomad{
+          &::before{
+            background-color: $nomad-color;
+          }
+        }
+
+        &.vault{
+          &::before{
+            background-color: $vault-color;
+          }
         }
       }
     }
   }
 
-  &#focus{
-    .feature-graphic{
-      width: 290px;
-      background: image-url('../images/graphic-focus.png') 0 0 no-repeat;
-      @include img-retina("../images/graphic-focus.png", "../images/graphic-focus@2x.png", 290px, 261px);
-    }
+  #hero-graphic{
+    position: absolute;
+    bottom: -60px;
+    left: 0;
+    display: inline-block;
+    width: 1170px;
+    height: 389px;
+    margin: 0 auto 10px;
+    background: image-url('../images/graphic-hero.jpg') 6px 0 no-repeat;
+    @include img-retina("../images/graphic-hero.jpg", "../images/graphic-hero@2x.jpg", 1170px, 389px);
+    background-position: 88px 0;
+    z-index: 0;
   }
 
-  &#deployment{
-    .feature-graphic{
-      width: 346px;
-      background: image-url('../images/graphic-deploy.png') 0 0 no-repeat;
-      @include img-retina("../images/graphic-deploy.png", "../images/graphic-deploy@2x.png", 346px, 279px);
-    }
-  }
-
-  &#microservices{
-    border-top: 3px solid $black;
-
-    .container{
-      position: relative;
-      height: 507px;
-
-      .feature-content{
-        border: 3px solid $black;
-        padding: 20px;
-        border-radius: 5px;
-        text-align: center;
-
-        .micro-docker{
-          display: inline-block;
-          width: 249px;
-          height: 65px;
-          margin-bottom: $small-pad;
-          background: image-url('../images/graphic-micro-docker.png') 0 0 no-repeat;
-          @include img-retina("../images/graphic-micro-docker.png", "../images/graphic-micro-docker@2x.png", 249px, 65px);
-        }
-
-        p{
-          opacity: .8;
-        }
-      }
-
-      .feature-graphic{
-        position: absolute;
-        top: 0;
-        right: 40%;
-        width: 665px;
-        height: 507px;
-        background: image-url('../images/graphic-micro-2.jpg') 0 0 no-repeat;
-        @include img-retina("../images/graphic-micro-2.jpg", "../images/graphic-micro-2@2x.jpg", 665px, 507px);
-        background-position: 0 0;
-      }
-    }
-  }
-}
-
-#cta-banner{
-  text-align: center;
-  padding: 80px 0;
-  background-color: $orange;
-  color: $white;
-
-  p{
-    margin-bottom: $xsmall-pad;
-  }
-}
-
-#use-cases{
-
-  .r50 {
-    padding-top: $small-pad;
-  }
-
-  >h2{
-    background-color: $black;
-    color: $white;
-    padding: $med-pad;
-    margin-bottom: 0;
-  }
-
-  #use-case-nav{
-    background-color: $black;
-
+  #hero-btns{
+    position: relative;
+    z-index: 1;
+    margin-top: 26px;
     a{
-      color: $white;
-      opacity: .4;
-      border-radius: 0;
-      border: none;
-
-      &:hover{
-        background-color: $black;
-        opacity: .1;
-        color: $white;
-      }
-    }
-
-    > li.active > a{
-      color: $orange;
-      opacity: 1;
-      background-color: $black;
-      border-bottom: 3px solid $orange;
-    }
-  }
-
-  .use-case{
-    @include clearfix();
-
-    .use-overview{
-      h2{
-        margin-bottom: $small-pad;
-      }
-      .use-subtitle{
-        font-weight: $font-weight-light;
-        color: $orange;
-      }
-
-      .use-icons{
-        margin-bottom: $xsmall-pad;
-
-        ul{
-          list-style-type: none;
-        }
-
-        li{
-          display: inline-block;
-          height: 58px;
-          margin-right: 12px;
-        }
-
-        .icon{
-          display: inline-block;
-          height: 100%;
-          text-indent: 100%;
-          white-space: nowrap;
-          overflow: hidden;
-
-          &.rails{
-            width: 47px;
-            background: image-url('../images/icon-rails.png') center center no-repeat;
-            @include img-retina("../images/icon-rails.png", "../images/icon-rails@2x.png", 47px, 58px);
-          }
-          &.aws{
-            width: 112px;
-            background: image-url('../images/icon-aws.png') center center no-repeat;
-            @include img-retina("../images/icon-aws.png", "../images/icon-aws@2x.png", 112px, 44px);
-          }
-        }
-      }
-    }
-
-    .use-steps{
-      .use-step{
-        margin-bottom: $small-pad;
-
-        h3{
-          color: $orange;
-          margin-bottom: $small-pad;
-
-          .use-count{
-            border-bottom: 3px solid $orange;
-          }
-        }
-
-        p{
-          margin-bottom: $xsmall-pad;
-        }
-
-        .prettyprint{
-          margin-bottom: $xsmall-pad;
-          font-family: $font-family-bitstream;
-        }
+      &.download{
+        margin-left: 10px;
       }
     }
   }
 }
-
-@media (min-width: 1200px) {
-
-}
-
 
 @media (max-width: 1200px) {
   #hero{
     #hero-graphic{
-      //@include translate3d(-30px, 0, 0);
-      width: 900px;
-      height: 319px;
-      background: image-url('../images/graphic-hero.png') 6px 0 no-repeat;
-      @include img-retina("../images/graphic-hero.png", "../images/graphic-hero@2x.png", 900px, 319px);
+      background-position: 0 0;
     }
   }
 }
 
-// @media (min-width: 992px) and (max-width:1200px) {
-// 	#cta a {
-// 		margin-top: 15px;
-// 		font-size: 18px;
-// 	}
-// }
-//
-// @media (min-width: 768px) and (max-width:992px) {
-// 	#cta a {
-// 		margin-top: 10px;
-// 	}
-// }
-
 @media (max-width: 992px) {
-
-  .section.section-50{
-    flex-direction: column;
-    .r50{
-      width: 100%;
-      //padding-bottom: 120px;
-    }
-  }
-
   #hero{
+    padding-top: $small-pad;
+
+    &:before{
+      display: none;
+    }
+
+    &:after{
+      display: none;
+    }
+
     #hero-graphic{
-      //@include translate3d(-30px, 0, 0);
-      width: 700px;
-      height: 249px;
-      background: image-url('../images/graphic-hero.png') 6px 0 no-repeat;
-      @include img-retina("../images/graphic-hero.png", "../images/graphic-hero@2x.png", 700px, 249px);
-    }
-  }
-
-  #subhero-banner{
-    text-align: center;
-
-    h2, p{
-      text-align: center;
-    }
-
-    a{
-      float: none;
-    }
-
-    .otto-lrg-white{
-      margin: $small-pad 0 $med-pad;
-      width: 100%;
-      height: 147px;
-      background: image-url('../images/otto-subhero.png') center 0 no-repeat;
-      @include img-retina("../images/otto-subhero.png", "../images/otto-subhero@2x.png", 180px, 147px);
-    }
-  }
-
-  .feature{
-    &#microservices{
-      .container{
-        height: 450px + 300px; //?
-
-        .feature-graphic{
-          position: absolute;
-          margin-top: 300px;
-          right: 5%;
-        }
-      }
+      position: relative;
+      bottom: auto;
+      left: auto;
+      width: 177px;
+      height: 178px;
+      background: image-url('../images/otto-grey.jpg') center 0 no-repeat;
+      @include img-retina("../images/otto-grey.jpg", "../images/otto-grey@2x.jpg", 177px, 178px);
+      background-position: 0 0;
     }
   }
 }
 
 @media (max-width: 768px) {
 
-  #hero{
-    #hero-graphic{
-      //@include translate3d(-30px, 0, 0);
-      margin: $small-pad 0;
-      width: 100%;
-      height: 420px;
-      background: image-url('../images/graphic-hero-mobile.png') center 0 no-repeat;
-      @include img-retina("../images/graphic-hero-mobile.png", "../images/graphic-hero-mobile@2x.png", 291px, 420px);
-    }
 
-    #hero-text{
-      position: relative;
-      text: center;
-      margin-top: 60px;
-
-      h1{
-        margin-bottom: 8px;
-        color: $black;
-        font-size: $font-size-l;
-      }
-
-      h3{
-        margin-top: 6px;
-        color: $blue-dark;
-        font-size: $font-size-reg;
-
-      }
-    }
-  }
-
-  .feature{
-    // .feature-header{
-    // 	text-align: center;
-    //
-    // 	h3{
-    // 		margin-bottom: $xsmall-pad;
-    // 		font-size: $font-size-m;
-    // 		line-height: $font-size-m + 6;
-    // 	}
-    //
-    // 	p{
-    // 		margin-bottom: $small-pad;
-    // 	}
-    // }
-    //
-    // .feature-footer{
-    // 	text-align: center;
-    // }
-
-    &#automate{
-      .feature-graphic{
-        width: 100%;
-        height: 280px;
-        background: image-url('../images/graphic-automate.png') center 0 no-repeat;
-        @include img-retina("../images/graphic-automate.png", "../images/graphic-automate@2x.png", 280px, 280px);
-      }
-    }
-
-    &#focus{
-      .feature-graphic{
-        width: 100%;
-        height: 232px;
-        background: image-url('../images/graphic-focus.png') center 0 no-repeat;
-        @include img-retina("../images/graphic-focus.png", "../images/graphic-focus@2x.png", 248px, 232px);
-      }
-    }
-
-    &#deployment{
-      .feature-graphic{
-        width: 100%;
-        height: 236px;
-        background: image-url('../images/graphic-deploy.png') center 0 no-repeat;
-        @include img-retina("../images/graphic-deploy.png", "../images/graphic-deploy@2x.png", 280px, 236px);
-      }
-    }
-
-    &#microservices{
-      .container{
-        height: auto;
-
-        .feature-graphic{
-          position: relative;
-          margin-top: 30px;
-          right: auto;
-          width: 100%;
-          height: 450px;
-          background: image-url('../images/graphic-micro-2.jpg') center center no-repeat;
-          @include img-retina("../images/graphic-micro-2.jpg", "../images/graphic-micro-2@2x.jpg", 450px, 343px);
-          background-size: 824px 525px;
-        }
-      }
-    }
-  }
-  // #cta{
-  // 	.intro{
-  // 		text-align: center;
-  // 		p{
-  // 			text-align: center;
-  // 			margin-bottom: 15px;
-  // 		}
-  // 	}
-  // }
 }
 
 
 @media (max-width: 480px) {
-  .feature-footer{
-    text-align: center;
-    a{
-      margin-bottom: 15px;
-      margin-left: 0 !important;
+  #hero{
+    padding-top: $small-pad;
+
+    #hero-graphic{
+      width: 100%;
+      background-position: center 0;
     }
-  }
 
-  .feature{
-    &#microservices{
-      .container{
-        .feature-content{
-          border: none;
-        }
+    #hero-btns,
+    #hero-text{
+      text-align: center;
+    }
 
-        .feature-graphic{
-          height: 213px;
-          background: image-url('../images/graphic-micro-2.jpg') center center no-repeat;
-          @include img-retina("../images/graphic-micro-2.jpg", "../images/graphic-micro-2@2x.jpg", 280px, 213px);
-        }
+    #hero-btns{
+      .h-btn{
+        width: 100%;
+        text-align: left;
+        margin-bottom: 18px;
+        margin-left: 0 !important;
+        font-size: 13px;
       }
     }
   }
@@ -597,8 +201,5 @@
 
 
 @media (max-width: 320px) {
-  #cta a {
-    font-size: 14px;
-    font-weight: 400;
-  }
+
 }

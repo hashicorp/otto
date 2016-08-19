@@ -14,8 +14,12 @@ body {
   font-size: $font-size-reg;;
   font-family: $font-family-roboto;
   font-weight: $font-weight-reg;
+  overflow-x: hidden;
 }
 
+a{
+  color: $hashicorp-blue;
+}
 
 h1, h2, h3, h4, h5 {
   -webkit-font-smoothing: antialiased;

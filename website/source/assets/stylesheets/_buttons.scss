@@ -8,43 +8,29 @@
   color: $black;
   @include transition(color .3s ease-in-out);
   font-family: $font-family-roboto;
-  font-weight: $font-weight-md;
+  font-weight: $font-weight-sb;
   text-transform: uppercase;
   border-radius: 3px;
+
+  span.h-download{
+    display: inline-block;
+    margin-left: 8px;
+    margin-bottom: -2px;
+    width: 14px;
+    height: 14px;
+  }
 
   span.h-caret{
     display: inline-block;
     width: 11px;
     height: 9px;
-    margin-left: 12px;
+    margin-left: 8px;
     @include transition(all 300ms ease-in);
-  }
-
-  &.minimal{
-    text-transform: none;
-    background-color: transparent !important;
-    padding: 0 !important;
-
-    &.orange{
-      color: $orange;
-
-      // &:hover{
-      // 	color: $white;
-      // }
-    }
-
-    &.light{
-      color: $white;
-
-      // &:hover{
-      // 	color: $orange;
-      // }
-    }
   }
 
   &.lrg{
     font-size: 13px;
-    padding: 12px 36px;
+    padding: 10px 24px;
   }
 
   &.sml{
@@ -78,8 +64,10 @@
     background-color: $orange;
     color: $black;
 
-    &.has-border{
-      border: 3px solid $black;
+    &.outline{
+      border: 3px solid $orange;
+      color: $orange;
+      background-color: $white;
     }
 
     span.h-caret{
@@ -92,13 +80,20 @@
     color: $white;
     background-color: $black;
 
-    &.border{
-      border: 2px solid $green-dark;
+    &.outline{
+      border: 3px solid $black;
+      color: $black;
+      background-color: $white;
     }
 
     span.h-caret{
       background: image-url('../images/arrow-light.png') 0 0 no-repeat;
       @include img-retina("../images/arrow-light.png", "../images/arrow-light@2x.png", 11px, 9px);
+    }
+
+    span.h-download{
+      background: image-url('../images/download-icon-dark.jpg') 0 0 no-repeat;
+      @include img-retina("../images/download-icon-dark.jpg", "../images/download-icon-dark@2x.jpg", 14px, 14px);
     }
   }
 
