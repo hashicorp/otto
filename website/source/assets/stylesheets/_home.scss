@@ -6,30 +6,34 @@
   position: relative;
   padding-top: 50px;
 
-  &:before{
-    display: block;
-    content: '';
-    position: absolute;
-    left: -1858px;
-    bottom: -50px;
-    width: 2000px;
-    height: 10px;
-    background: image-url('../images/arm-segment.jpg') 6px 0 no-repeat;
-    @include img-retina("../images/arm-segment.jpg", "../images/arm-segment@2x.jpg", 5px, 10px);
-    background-repeat: repeat-x;
-  }
+  >.container{
+    position: relative;
 
-  &:after{
-    display: block;
-    content: '';
-    position: absolute;
-    right: -1938px;
-    bottom: 56px;
-    width: 2000px;
-    height: 10px;
-    background: image-url('../images/arm-segment.jpg') 6px 0 no-repeat;
-    @include img-retina("../images/arm-segment.jpg", "../images/arm-segment@2x.jpg", 5px, 10px);
-    background-repeat: repeat-x;
+    &:before{
+      display: block;
+      content: '';
+      position: absolute;
+      right: 1080px;
+      bottom: -50px;
+      width: 3000px;
+      height: 10px;
+      background: image-url('../images/arm-segment.jpg') 6px 0 no-repeat;
+      @include img-retina("../images/arm-segment.jpg", "../images/arm-segment@2x.jpg", 5px, 10px);
+      background-repeat: repeat-x;
+    }
+
+    &:after{
+      display: block;
+      content: '';
+      position: absolute;
+      left: 1140px;
+      bottom: 56px;
+      width: 2000px;
+      height: 10px;
+      background: image-url('../images/arm-segment.jpg') 6px 0 no-repeat;
+      @include img-retina("../images/arm-segment.jpg", "../images/arm-segment@2x.jpg", 5px, 10px);
+      background-repeat: repeat-x;
+    }
   }
 
   #hero-text{
@@ -136,6 +140,11 @@
 
 @media (max-width: 1200px) {
   #hero{
+    >.container{
+      &:before{
+        right: 900px;
+      }
+    }
     #hero-graphic{
       background-position: 0 0;
     }
@@ -146,12 +155,14 @@
   #hero{
     padding-top: $small-pad;
 
-    &:before{
-      display: none;
-    }
+    >.container{
+      &:before{
+        display: none;
+      }
 
-    &:after{
-      display: none;
+      &:after{
+        display: none;
+      }
     }
 
     #hero-graphic{
