@@ -4,13 +4,13 @@
 
 #hero{
   position: relative;
-  padding-top: $med-pad;
+  padding-top: 50px;
 
   &:before{
     display: block;
     content: '';
     position: absolute;
-    left: -1938px;
+    left: -1858px;
     bottom: -50px;
     width: 2000px;
     height: 10px;
@@ -46,6 +46,65 @@
       font-size: 16px;
       font-weight: 400;
       line-height: 2em;
+
+      a{
+        display: inline-block;
+        position: relative;
+        color: $black;
+
+        &:hover{
+          text-decoration: none;
+
+          &::before{
+            @include transition(all 200ms ease-in);
+            opacity: 1;
+          }
+        }
+
+        &::before{
+          position: absolute;
+          display: block;
+          content: "";
+          bottom: 4px;
+          left: 0;
+          width: 106%;
+          margin-left: -3%;
+          height: 3px;
+          opacity: .5;
+          @include transition(all 200ms ease-in);
+//          background-color: #f6f6f6 !important;
+        }
+
+        &.packer{
+          &::before{
+            background-color: $packer-color;
+          }
+        }
+
+        &.terraform{
+          &::before{
+            background-color: $terraform-color;
+          }
+        }
+
+        &.consul{
+          &::before{
+            background-color: $consul-color;
+          }
+        }
+
+        &.nomad{
+          &::before{
+            background-color: $nomad-color;
+          }
+        }
+
+        &.vault{
+          &::before{
+            background-color: $vault-color;
+          }
+        }
+      }
     }
   }
 
@@ -55,10 +114,11 @@
     left: 0;
     display: inline-block;
     width: 1170px;
-    height: 319px;
+    height: 389px;
     margin: 0 auto 10px;
     background: image-url('../images/graphic-hero.jpg') 6px 0 no-repeat;
-    @include img-retina("../images/graphic-hero.jpg", "../images/graphic-hero@2x.jpg", 1170px, 319px);
+    @include img-retina("../images/graphic-hero.jpg", "../images/graphic-hero@2x.jpg", 1170px, 389px);
+    background-position: 88px 0;
     z-index: 0;
   }
 
@@ -70,6 +130,14 @@
       &.download{
         margin-left: 10px;
       }
+    }
+  }
+}
+
+@media (max-width: 1200px) {
+  #hero{
+    #hero-graphic{
+      background-position: 0 0;
     }
   }
 }
@@ -94,6 +162,7 @@
       height: 178px;
       background: image-url('../images/otto-grey.jpg') center 0 no-repeat;
       @include img-retina("../images/otto-grey.jpg", "../images/otto-grey@2x.jpg", 177px, 178px);
+      background-position: 0 0;
     }
   }
 }
@@ -112,10 +181,20 @@
       width: 100%;
       background-position: center 0;
     }
-    
+
     #hero-btns,
     #hero-text{
       text-align: center;
+    }
+
+    #hero-btns{
+      .h-btn{
+        width: 100%;
+        text-align: left;
+        margin-bottom: 18px;
+        margin-left: 0 !important;
+        font-size: 13px;
+      }
     }
   }
 }
