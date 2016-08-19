@@ -1,35 +1,7 @@
-body.page-sub{
-  #footer{
-    padding: 0 0 40px 0;
-    .col-md-5{
-      padding-top: 40px;
-      border-top: 1px solid $faint-gray;
-    }
-  }
-}
-
 #footer{
   position: relative;
   padding: $large-pad 0 $med-pad;
   color: $black;
-
-  > .container{
-    position: relative;
-  }
-
-  .footer-links{
-    li{
-      a{
-        @include hashi-a-style();
-        @include project-a-style;
-        line-height: 30px;
-      }
-    }
-  }
-
-  .pull-right{
-    padding-right: 15px;
-  }
 
   .footer-hashi{
     font-size: 14px;
@@ -106,51 +78,14 @@ body.page-sub{
   }
 }
 
-.edit-page-link{
-  position: absolute;
-  top: -70px;
-  right: 30px;;
-
-  a{
-    text-transform: uppercase;
-    color: $black;
-    font-size: 13px;
+@media (max-width: 992px) {
+  #footer{
+    padding: $med-pad 0;
   }
 }
 
-@media (max-width: 992px) {
-
-}
-
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   #footer{
     text-align: center;
-
-    .footer-links{
-      float: none;
-      display: inline-block;
-      margin-bottom: 36px;
-    }
-
-    .footer-hashi {
-      float: none;
-      display: inline-block;
-
-      .pull-right{
-        float: none !important;
-        padding-right: 0;
-      }
-    }
-  }
-}
-
-@media (max-width: 414px) {
-  #footer{
-    .footer-links{
-      li{
-        display: block;
-        float: none;
-      }
-    }
   }
 }
