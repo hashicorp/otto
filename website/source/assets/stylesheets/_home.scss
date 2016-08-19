@@ -76,7 +76,13 @@
           height: 3px;
           opacity: .5;
           @include transition(all 200ms ease-in);
-//          background-color: #f6f6f6 !important;
+//          background-coldfgdfgdfgor: #f6f6f6 !important;
+        }
+
+        &.vagrant{
+          &::before{
+            background-color: $hashicorp-blue;
+          }
         }
 
         &.packer{
