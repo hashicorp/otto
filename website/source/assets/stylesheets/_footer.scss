@@ -10,7 +10,7 @@ body.page-sub{
 
 #footer{
   position: relative;
-  padding: 64px 0;
+  padding: $large-pad 0 $med-pad;
   color: $black;
 
   > .container{
@@ -100,7 +100,7 @@ body.page-sub{
           &:hover{
             @include transition(all 300ms ease-in);
           }
-        }        
+        }
       }
     }
   }

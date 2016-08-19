@@ -3,202 +3,21 @@
 <div id="hero">
 	<div class="container">
 		<div class="row">
-			<div class="col-md-12">
-				<div id="hero-text">
-					<h1>Development and Deployment Made Easy</h1>
-					<h3>Meet the Successor to <span class="vagrant-logo">Vagrant</span></h3>
-				</div>
-				<div id="hero-graphic">
-				</div>
-				<div id="hero-btns">
-					<a class="h-btn orange has-border lrg intro" href="/intro">Learn More</a>
-				</div>
-			</div>
+			<div class="col-offset-md-1 col-md-7">
+        <div id="hero-content">
+  				<div id="hero-text">
+  					<h1>Otto is a HashiCorp Research Project</h1>
+            <p>
+              Otto was created to provide a high level abstraction to developers looking to develop and deploy applications. It used other tools made by HashiCorp, including [Vagrant]() to build development environments and [Nomad]() to deploy applications. However, we felt that the current incarnation of Otto did not live up to it’s goal, and have decided to close source the project so that we can rethink its design and implementation as part of HashiCorp Research. The most current source code is still available for download but is no longer actively maintained or supported.
+            </p>
+  				</div>
+          <div id="hero-btns">
+            <a class="h-btn orange outline lrg read" href="https://www.hashicorp.com/blog/incubating-otto.html">Read More <span class="h-caret"></span></a>
+            <a class="h-btn dark outline lrg download" href="#">Download<span class="h-download"></span></a>
+          </div>
+          <div id="hero-graphic"></div>
+  			</div>
+      </div>
 		</div>
 	</div>
-</div>
-
-<div id="subhero-banner" class="section bg-black">
-	<div class="container">
-		<div class="row">
-			<div class="col col-md-offset-1 col-md-4">
-				<div class="otto-lrg-white">
-				</div>
-			</div>
-			<div class="col col-md-7">
-				<h2>Why Otto?</h2>
-				<p>
-				Developers want to focus on building scalable, secure applications.
-				But it is overwhelming and time consuming to learn all the tooling required to develop
-				locally, provision infrastructure,
-				deploy the application, and secure the application. Otto abstracts away
-				this complexity into one tool to handle all the
-				aspects of development and deployment to any cloud platform. Maximize
-				developer productivity, follow best practices, and automate
-				operations with Otto.
-				</p>
-				<a class="h-btn minimal light lrg" href="/intro">Read more<span class="h-caret"></span></a>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div id="automate" class="feature section bg-light-orange">
-	<div class="container">
-		<div class="row">
-			<div class=" col-md-4">
-				<div class="feature-graphic"></div>
-			</div> <!-- .col -->
-			<div class=" col-md-4">
-				<div class="feature-content">
-					<div class="feature-header">
-						<h3>Automated<br>Development Environments</h3>
-						<p>Otto detects your application type and builds a development environment tailored specifically for that application, with zero or minimal configuration.</p>
-					</div>
-					<div class="feature-footer">
-						<a class="h-btn minimal orange lrg" href="/intro">Read more<span class="h-caret"></span></a>
-					</div>
-				</div>
-			</div> <!-- .col -->
-			<div class=" col-md-4">
-				<div class="feature-terminal">
-					<div class="terminal-graphic"><a href="#"></a></div>
-					<a class="h-btn minimal orange lrg" href="#">Watch<span class="mono-block">$ otto dev</span><span class="h-caret"></span></a>
-					<p>Video coming soon.</p>
-				</div>
-			</div> <!-- .col -->
-		</div> <!-- .row -->
-	</div> <!-- /container -->
-</div> <!-- #automate -->
-
-<div id="features-split" class="section section-50">
-	<div id="focus" class="feature r50 bg-black">
-		<div class="col-lg-offset-2 col-md-offset-2 col-sm-offset-3 col-lg-8 col-md-8 col-sm-6 col-xs-12">
-			<div class="feature-graphic"></div>
-			<div class="feature-header">
-				<h3>Focus on your Application, Automate the Rest</h3>
-				<p>Don't worry about what you need to build a development environment or how to deploy your application, Otto does this for you.</p>
-			</div>
-			<div class="feature-footer">
-				<a class="h-btn minimal orange lrg" href="/intro">Read more<span class="h-caret"></span></a>
-			</div>
-		</div>
-	</div><!-- #focus -->
-
-	<div id="deployment" class="feature r50 bg-orange">
-		<div class="col-lg-offset-2 col-md-offset-2 col-sm-offset-3 col-lg-8 col-md-8 col-sm-6 col-xs-12">
-			<div class="feature-graphic"></div>
-			<div class="feature-header">
-				<h3>Deployment</h3>
-				<p>Otto manages your infrastructure and deploys your application to any cloud platform.</p>
-			</div>
-			<div class="feature-footer">
-				<a class="h-btn minimal light lrg" href="/intro">Read more<span class="h-caret"></span></a>
-			</div>
-		</div>
-	</div><!-- #deployment -->
-</div>
-
-
-<div id="microservices" class="feature section">
-	<div class="container">
-		<div class="row">
-			<div class="col-md-offset-8 col-md-4">
-				<div class="feature-content">
-					<div class="feature-header">
-						<h3>Microservices<br>Made Simple</h3>
-						<p>
-						Otto automatically fetches dependencies, detects conflicts, and installs and configures
-						these dependencies for development and deployment.
-						</p>
-						<div class="micro-docker"></div>
-					</div>
-					<div class="feature-footer">
-						<a class="h-btn minimal orange lrg" href="/intro">Read more<span class="h-caret"></span></a>
-					</div>
-				</div>
-			</div> <!-- .col -->
-		</div> <!-- .row -->
-		<div class="feature-graphic"></div>
-	</div> <!-- /container -->
-</div> <!-- #microservices -->
-
-<div id="use-cases" class="section section-50">
-    <h2>Use Case</h2>
-
-    <div class="tab-content">
-        <div id="case-1" class="use-case tab-pane active" role="tabpanel">
-            <div class="use-overview r50">
-                <div class="col-lg-offset-1 col-md-offset-2 col-sm-offset-3 col-lg-10 col-md-8 col-sm-6 col-xs-12">
-                    <h2>Otto Use Case: <span class="use-subtitle">Rails on AWS</span></h2>
-                    <div class="use-icons">
-                        <ul>
-                            <li><span class="rails icon">rails</span></li>
-                            <li><span class="aws icon">aws</span></li>
-                        </ul>
-                    </div>
-                    <p>A story of the development and deployment of a fully functional Rails application onto
-                        AWS with Otto.</p>
-                </div><!-- .col -->
-            </div><!-- .use-overview .r50-->
-
-            <div class="use-steps r50 bg-gray">
-                <div class="col-lg-offset-1 col-md-offset-2 col-sm-offset-3 col-lg-10 col-md-8 col-sm-6 col-xs-12">
-
-                    <div class="use-step">
-                        <h3><span class="use-count">01.</span> Start your Rails project</h3>
-                        <p>Initialize a new Rails application with out-of-the-box
-                            defaults.</p>
-                        <pre class="prettyprint">$ rails new</pre>
-                    </div><!-- .use-step -->
-
-                    <div class="use-step">
-                        <h3><span class="use-count">02.</span> Run Otto Compile</h3>
-                        <p>Otto's compile step automatically detects the type
-                            of application as Rails and prepares Otto to manage
-                            your app's lifecycle. (You can also customize nearly every
-                            aspect of Otto's behavior by writing an Appfile.)</p>
-                        <pre class="prettyprint">$ otto compile</pre>
-                    </div><!-- .use-step -->
-                    <div class="use-step">
-                        <h3><span class="use-count">03.</span> Develop Locally</h3>
-                        <p>Otto builds and runs a local development
-                            environment, so you can easily test and make changes
-                            to your application.</p>
-                        <pre class="prettyprint">$ otto dev</pre>
-                    </div><!-- .use-step -->
-                    <div class="use-step">
-                        <h3><span class="use-count">04.</span> Construct Infrastructure</h3>
-                        <p>Otto creates a base infrastructure according to
-                            industry best practices.</p>
-                        <pre class="prettyprint">$ otto infra</pre>
-                    </div><!-- .use-step -->
-                    <div class="use-step">
-                        <h3><span class="use-count">05.</span> Build Your Application</h3>
-                        <p>Otto packages your application and prepares it
-                            for deployment onto your infrastructure.</p>
-                        <pre class="prettyprint">$ otto build</pre>
-                    </div><!-- .use-step -->
-                    <div class="use-step">
-                        <h3><span class="use-count">06.</span> Deploy</h3>
-                        <p>Your Rails application is converted to running
-                            infrastructure. Your app is now available
-                            to the world!</p>
-                        <pre class="prettyprint">$ otto deploy</pre>
-                    </div><!-- .use-step -->
-
-                </div><!-- .col -->
-            </div><!-- .use-steps .r50 -->
-        </div><!-- .use-case -->
-    </div><!-- .tab-content -->
-</div><!-- #use-cases -->
-<div id="cta-banner" class="banner dark-banner">
-	<div class="container">
-		<div class="row">
-			<div class="col col-md-12">
-				<p>Completely free and open source.</p>
-				<a class="blog-btn h-btn dark lrg fill" href="/intro">Get Started<span class="h-caret"></span></a>
-			</div>
-		</div> <!-- .row -->
-	</div> <!-- .container -->
 </div>
