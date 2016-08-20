@@ -1,4 +1,0 @@
-Hello
-
-{% include "b" %}
-Foo

@@ -1,3 +1,0 @@
-detect "ruby" {
-    file = ["*.rb"]
-}

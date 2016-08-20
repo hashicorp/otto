@@ -1,1 +1,0 @@
-../../aws-simple/build/template.json.tpl

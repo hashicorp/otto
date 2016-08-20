@@ -1,3 +1,0 @@
-detect "go" {
-    file = ["*.go"]
-}

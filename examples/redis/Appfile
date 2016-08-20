@@ -1,9 +1,0 @@
-application {
-    name = "redis"
-    type = "docker-external"
-}
-
-customization {
-    image = "redis:3"
-    run_args = "-p 6379:6379"
-}

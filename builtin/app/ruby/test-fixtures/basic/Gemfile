@@ -1,3 +1,0 @@
-source "https://rubygems.org"
-
-gem "ben_string", "~> 1.2"

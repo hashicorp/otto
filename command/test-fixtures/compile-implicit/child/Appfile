@@ -1,4 +1,0 @@
-application {
-    name = "child"
-    type = "child"
-}

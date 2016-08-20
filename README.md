@@ -7,3 +7,6 @@ Otto is no longer actively developed or maintained. Please see the
 [announcement](https://www.hashicorp.com/blog/decommissioning-otto.html) for
 more details.
 
+A tarball of the source is [available here](https://s3.amazonaws.com/hc-public/tools/otto-master.tbz2),
+and the Git history is still accessible as well.
+
