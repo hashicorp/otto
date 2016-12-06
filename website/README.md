@@ -15,7 +15,7 @@ like any normal GitHub project, and we will merge it in.
 
 Running the site locally is simple.
 
-1. Install [Otto](https://www.ottoproject.io/download.html)
+1. Install [Otto](https://www.ottoproject.io/downloads.html)
 1. Clone this repo to your local machine
 1. Change into the `website` directory
 1. Run:
